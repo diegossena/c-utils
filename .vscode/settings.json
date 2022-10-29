@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    ".htaccess": "ruby",
+    "string_t.h": "c"
+  }
+}
