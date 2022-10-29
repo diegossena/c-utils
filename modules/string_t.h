@@ -1,3 +1,5 @@
+// https://github.com/maxim2266/str
+
 #pragma once
 
 #include <stdio.h>
