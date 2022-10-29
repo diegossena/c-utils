@@ -6,35 +6,62 @@
 #include <stdlib.h>
 #include <string.h>
 
+const char* const _c_empty_string = "";
+
 // string type
 
-typedef struct string_t
-{
+typedef struct String {
 	const char* ptr;
 	size_t length;
-} _string_t;
+} _String;
 
-#define string_null ((string_t){ 0, 0 })
-#define string_empty ((string_t){ "", 0 })
+#define string_empty ((_String){ 0, 0 })
 
 // string properties //
 
-size_t string_length(const _string_t str) { return str.length; }
-const char* string_ptr(const _string_t str) { return str.ptr; }
+size_t string_length(const _String str) { return str.length; }
+const char* string_ptr(const _String str) { return str.ptr ? str.ptr : _c_empty_string; }
 
 // string memory control //
 
-void _string_free(const _string_t* str) {
+void _string_free(const _String* str) {
 	printf("str_free");
 	if (str->length)
 		free((void*)str->ptr);
 }
+#define String	_String __attribute__((cleanup(_string_free)))
 
-#define string_t	_string_t __attribute__((cleanup(_string_free)))
+// string constructors //
 
+_String _cstr_string_new(const char* str) {
+	size_t str_length = strlen(str);
 
-// concatenate strings
-int _string_cat_range(_string_t* const dest, const _string_t* src, size_t count) {
+	if (!str_length)
+		return string_empty;
+
+	size_t size = str_length + 1;
+	_String __str = {
+		.ptr = (char*)memcpy(malloc(size), str, size),
+		.length = str_length
+	};
+
+	return __str;
+}
+
+_String _string_new(_String str) {
+	return str;
+}
+
+#define string_new(str)	\
+	_Generic((str),	\
+		char*:	_cstr_string_new,				\
+		const char*:	_cstr_string_new,	\
+		_String:				_string_new				\
+	)(str)
+
+// concatenate strings //
+
+int _string_cat_range(_String* const dest, const _String* src, size_t count) {
 	printf("_string_cat_range");
 	// if (!src)
 	// {
