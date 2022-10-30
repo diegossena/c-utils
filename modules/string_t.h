@@ -33,9 +33,9 @@ void _string_free(const _String* str) {
 
 // string constructors //
 
-_String _cstr_string_new(const char* str) {
-	size_t str_length = strlen(str);
+#define string_ref(str)	((_String){ str, strlen(str) })
 
+_String _cstr_copy(const char* str, size_t str_length) {
 	if (!str_length)
 		return string_empty;
 
@@ -48,58 +48,59 @@ _String _cstr_string_new(const char* str) {
 	return __str;
 }
 
-_String _string_new(_String str) {
-	return str;
+_String _cstr_string_new(const char* str) {
+	size_t str_length = strlen(str);
+	return _cstr_copy(str, str_length);
 }
 
-#define string_new(str)	\
-	_Generic((str),	\
-		char*:	_cstr_string_new,				\
-		const char*:	_cstr_string_new,	\
-		_String:				_string_new				\
-	)(str)
+_String _string_new(_String str) {
+	return _cstr_copy(str.ptr, str.length);
+}
+
+#define string_new(str)	_Generic((str),	\
+	char*:				_cstr_string_new,				\
+	const char*:	_cstr_string_new,				\
+	_String:			_string_new							\
+)(str)
+
+// string composition //
+
+size_t _strings_length_sum(const _String* src, size_t count) {
+	size_t sum = 0;
+
+	for (; count > 0; --count)
+		sum += (*src++).length;
+
+	return sum;
+}
 
 // concatenate strings //
 
-int _string_cat_range(_String* const dest, const _String* src, size_t count) {
-	printf("_string_cat_range");
-	// if (!src)
-	// {
-	// 	str_clear(dest);
-	// 	return 0;
-	// }
+int _string_append_range(_String* const dest, const _String* src_strings, size_t count) {
+	const size_t total_length = _strings_length_sum(src_strings, count) + dest->length;
+	if (!total_length)
+		return 0;
 
-	// // calculate total length
-	// const size_t num = total_length(src, count);
+	dest->ptr = (char*)realloc((void*)dest->ptr, total_length + 1);
+	char* ptr = (char*)(dest->ptr + dest->length);
+	for (; count > 0; --count) {
+		const _String* src_string = src_strings++;
+		memcpy(ptr, src_string->ptr, src_string->length);
+		ptr += src_string->length;
+	}
+	*ptr = '\0';
 
-	// if (num == 0)
-	// {
-	// 	str_clear(dest);
-	// 	return 0;
-	// }
+	dest->length = total_length;
 
-	// // allocate
-	// char* const buff = ALLOC(num + 1);
-
-	// // copy bytes
-	// char* p = buff;
-
-	// for (; count > 0; --count)
-	// 	p = append_str(p, *src++);
-
-	// // null-terminate and assign
-	// *p = 0;
-	// str_assign(dest, str_acquire_chars(buff, num));
 	return 0;
 }
 
-#define string_cat_range(dest, src, count)	\
+#define string_append_range(dest, src, count)	\
 	_Generic((dest),	\
-		str*:	_string_cat_range	\
+		_String*:	_string_append_range	\
 	)((dest), (src), (count))
 
-#define string_cat(dest, ...)	\
-({	\
-	const str args[] = { __VA_ARGS__ };	\
-	string_cat_range((dest), args, sizeof(args)/sizeof(args[0]));	\
+#define string_append(dest, ...) ({	\
+	const _String args[] = { __VA_ARGS__ };	\
+	string_append_range((dest), args, sizeof(args)/sizeof(args[0]));	\
 })

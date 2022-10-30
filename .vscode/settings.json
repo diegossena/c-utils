@@ -8,6 +8,7 @@
     "initializer_list": "c",
     "ranges": "c",
     "utility": "c",
-    "stdexcept": "c"
+    "stdexcept": "c",
+    "stdio.h": "c"
   }
 }
