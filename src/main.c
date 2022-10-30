@@ -3,12 +3,12 @@
 #include "Window.h"
 
 int main() {
-  Window window = window_new();
+  Window* window = window_new();
 
   window_show(window);
 
   while (window_run()) {
-    //
+    printf("width %d\n", window->width);
   }
   printf("closed");
   return 0;

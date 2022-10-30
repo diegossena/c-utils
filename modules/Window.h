@@ -12,7 +12,17 @@ typedef struct Widget {
 
 typedef struct Window {
   HWND id;
-} Window;
+  unsigned int width;
+  unsigned int height;
+} _Window;
+
+// memory control //
+
+void _window_free(const _Window* window) {
+  if (window)
+    free((void*)window);
+}
+#define Window  _Window __attribute__((cleanup(_window_free)))
 
 // handlers //
 
@@ -20,7 +30,7 @@ LRESULT CALLBACK windowCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 {
   if (message == WM_CREATE) {
     LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
-    Window* window = (Window*)pcs->lpCreateParams;
+    _Window* window = (_Window*)pcs->lpCreateParams;
     SetWindowLongPtrA(
       hWnd,
       GWLP_USERDATA,
@@ -28,7 +38,7 @@ LRESULT CALLBACK windowCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     );
     return 1;
   }
-  Window* window = (Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+  _Window* window = (_Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
 
   if (window) {
     switch (message) {
@@ -39,8 +49,8 @@ LRESULT CALLBACK windowCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
       // window->hasFocus_ = false;
       break;
     case WM_SIZE: {
-      // window->width_ = LOWORD(lParam);
-      // window->height_ = HIWORD(lParam);
+      window->width = LOWORD(lParam);
+      window->height = HIWORD(lParam);
       //window->onResize(width, height);
       break;
     }
@@ -54,8 +64,7 @@ LRESULT CALLBACK windowCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 // constructors //
 
-Window window_new() {
-  Window window;
+_Window* window_new() {
   WNDCLASSEXA wc = {};
 
   wc.cbSize = sizeof(WNDCLASSEXA);
@@ -67,9 +76,13 @@ Window window_new() {
 
   RegisterClassExA(&wc);
 
-  RECT wr = { 0, 0, 800, 600 };
+  _Window* window = malloc(sizeof(_Window));
+  window->width = 800;
+  window->height = 600;
+  RECT wr = { 0, 0, window->width, window->height };
   AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
-  window.id = CreateWindowExA(
+
+  window->id = CreateWindowExA(
     0,                   // extended window style
     wc.lpszClassName,    // pointer to registered class name
     wc.lpszClassName,    // pointer to window name
@@ -81,12 +94,13 @@ Window window_new() {
     0,                   // handle to parent or owner window
     0,                   // handle to menu, or child-window identifier
     wc.hInstance,        // handle to application instance
-    (void*)&window               // pointer to window-creation data
+    window               // pointer to window-creation data
   );
   return window;
 }
 
 // methods //
+
 bool window_run() {
   MSG msg;
   while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
@@ -97,11 +111,11 @@ bool window_run() {
   }
   return true;
 }
-void window_show(Window window) {
-  ShowWindow(window.id, SW_SHOWDEFAULT);
+void window_show(_Window* window) {
+  ShowWindow(window->id, SW_SHOWDEFAULT);
 }
-void window_hide(Window window) {
-  ShowWindow(window.id, SW_HIDE);
+void window_hide(_Window* window) {
+  ShowWindow(window->id, SW_HIDE);
 }
 void window_close() {}
 void window_destroy() {}

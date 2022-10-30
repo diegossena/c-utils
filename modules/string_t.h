@@ -25,7 +25,6 @@ const char* string_ptr(const _String str) { return str.ptr ? str.ptr : _c_empty_
 // string memory control //
 
 void _string_free(const _String* str) {
-	printf("str_free");
 	if (str->length)
 		free((void*)str->ptr);
 }
