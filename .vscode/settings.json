@@ -9,6 +9,8 @@
     "ranges": "c",
     "utility": "c",
     "stdexcept": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "smart_ptr.h": "c",
+    "window.h": "c"
   }
 }

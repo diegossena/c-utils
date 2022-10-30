@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "smart_ptr.h"
 
 const char* const _c_empty_string = "";
 

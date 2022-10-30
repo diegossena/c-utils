@@ -1,8 +1,10 @@
 #pragma once
+
 #include <tchar.h>
 #include <windows.h>
 #include <stdbool.h> 
 #include "String_t.h"
+#include "smart_ptr.h"
 
 // type //
 
@@ -21,7 +23,7 @@ typedef struct Window {
 void _window_free(const _Window* window) {
   free(*(void**)window);
 }
-#define Window  _Window __attribute__((cleanup(_window_free)))
+#define Window smart _Window
 
 // handlers //
 
