@@ -10,6 +10,5 @@ int main() {
   while (window_run()) {
     printf("width %d\n", window->width);
   }
-  printf("closed");
   return 0;
 }

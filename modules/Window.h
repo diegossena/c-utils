@@ -19,8 +19,7 @@ typedef struct Window {
 // memory control //
 
 void _window_free(const _Window* window) {
-  if (window)
-    free((void*)window);
+  free(*(void**)window);
 }
 #define Window  _Window __attribute__((cleanup(_window_free)))
 
@@ -76,7 +75,7 @@ _Window* window_new() {
 
   RegisterClassExA(&wc);
 
-  _Window* window = malloc(sizeof(_Window));
+  _Window* window = (_Window*)malloc(sizeof(_Window));
   window->width = 800;
   window->height = 600;
   RECT wr = { 0, 0, window->width, window->height };
