@@ -8,7 +8,7 @@
 
 const char* const _c_empty_string = "";
 
-// string type
+// string type //
 
 typedef struct String {
 	const char* ptr;
