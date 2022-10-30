@@ -3,13 +3,13 @@
 #include "Window.h"
 
 int main() {
-  String test = string_new("Hello World");
-
   Window window = window_new();
+
   window_show(window);
+
   while (window_run()) {
-
+    //
   }
-
+  printf("closed");
   return 0;
 }
