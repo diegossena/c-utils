@@ -1,4 +1,4 @@
-// inspirated in https://github.com/maxim2266/str
+// https://github.com/maxim2266/str
 
 #pragma once
 
