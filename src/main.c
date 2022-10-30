@@ -8,7 +8,7 @@ int main() {
   window_show(window);
 
   while (window_run()) {
-    printf("width %d\n", window->width);
+
   }
   return 0;
 }
