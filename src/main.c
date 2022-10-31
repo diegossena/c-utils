@@ -3,12 +3,14 @@
 #include "Window.h"
 
 int main() {
-  Window* window = window_new();
-
-  window_show(window);
-
+  printf("start\n");
+  Window* window = window_new(
+    "Test",
+    WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
+    800, 600,
+    WINDOW_FULLSCREEN
+  );
   while (window_run()) {
-
   }
   return 0;
 }

@@ -6,11 +6,24 @@
 #include "String_t.h"
 #include "smart_ptr.h"
 
+// definitions //
+
+#define WINDOWPOS_CENTERED_MASK    0x2FFF0000u
+#define WINDOWPOS_CENTERED_DISPLAY(X)  (WINDOWPOS_CENTERED_MASK|(X))
+#define WINDOWPOS_CENTERED         WINDOWPOS_CENTERED_DISPLAY(0)
+
+typedef enum WindowFlags {
+  WINDOW_SHOWN = 1,
+  WINDOW_RESIZABLE,
+  WINDOW_FULLSCREEN
+} WindowFlags;
+
+// WS_OVERLAPPED
+// WS_CAPTION
+// WS_SYSMENU
+// WS_MINIMIZEBOX
+
 // type //
-
-typedef struct Widget {
-
-} Widget;
 
 typedef struct Window {
   HWND id;
@@ -27,8 +40,12 @@ void _window_free(const _Window* window) {
 
 // handlers //
 
-LRESULT CALLBACK windowCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
+LRESULT CALLBACK windowCallback(
+  HWND hWnd,
+  UINT message,
+  WPARAM wParam,
+  LPARAM lParam
+) {
   if (message == WM_CREATE) {
     LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
     _Window* window = (_Window*)pcs->lpCreateParams;
@@ -65,33 +82,51 @@ LRESULT CALLBACK windowCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 // constructors //
 
-_Window* window_new() {
-  WNDCLASSEXA wc = {};
+_Window* window_new(
+  const char* title,
+  unsigned int x, unsigned int y,
+  unsigned int width, unsigned int height,
+  WindowFlags flags
+) {
+  size_t dwExStyle = 0;
+  size_t dwStyle = 0;
+  if (flags & WINDOW_FULLSCREEN) {
 
-  wc.cbSize = sizeof(WNDCLASSEXA);
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  wc.lpfnWndProc = windowCallback;
-  wc.hInstance = GetModuleHandle(NULL);
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.lpszClassName = "simple";
+  }
+  else {
+    dwStyle = WS_OVERLAPPED
+      | WS_CAPTION
+      | WS_SYSMENU
+      | WS_MINIMIZEBOX;
+    if (flags & WINDOW_SHOWN)
+      dwStyle |= WS_VISIBLE;
+    if (flags & WINDOW_RESIZABLE)
+      dwStyle |= WS_THICKFRAME;
+    if (x == WINDOWPOS_CENTERED)
+      x = (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2);
+    if (y == WINDOWPOS_CENTERED)
+      y = (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2);
+  }
 
-  RegisterClassExA(&wc);
-
+  WNDCLASSEX wc = {
+    .cbSize = sizeof(WNDCLASSEX),
+    .lpfnWndProc = windowCallback,
+    .lpszClassName = title,
+    .hCursor = LoadCursor(0, IDC_ARROW),
+  };
+  RegisterClassEx(&wc);
   _Window* window = (_Window*)malloc(sizeof(_Window));
-  window->width = 800;
-  window->height = 600;
-  RECT wr = { 0, 0, window->width, window->height };
-  AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
-
-  window->id = CreateWindowExA(
-    0,                   // extended window style
+  window->width = width;
+  window->height = height;
+  window->id = CreateWindowEx(
+    dwExStyle,           // extended window style
     wc.lpszClassName,    // pointer to registered class name
     wc.lpszClassName,    // pointer to window name
-    WS_OVERLAPPEDWINDOW, // window style
-    CW_USEDEFAULT,       // horizontal position of window
-    CW_USEDEFAULT,       // vertical position of window
-    wr.right - wr.left,  // window width
-    wr.bottom - wr.top,  // window height
+    dwStyle,             // window style
+    x,                   // horizontal position of window
+    y,                   // vertical position of window
+    window->width,       // window width
+    window->height,      // window height
     0,                   // handle to parent or owner window
     0,                   // handle to menu, or child-window identifier
     wc.hInstance,        // handle to application instance
@@ -104,21 +139,16 @@ _Window* window_new() {
 
 bool window_run() {
   MSG msg;
-  while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
+  while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
     TranslateMessage(&msg);
-    DispatchMessageA(&msg);
+    DispatchMessage(&msg);
     if (msg.message == WM_QUIT)
       return false;
   }
   return true;
 }
-void window_show(_Window* window) {
-  ShowWindow(window->id, SW_SHOWDEFAULT);
-}
-void window_hide(_Window* window) {
-  ShowWindow(window->id, SW_HIDE);
-}
-void window_close() {}
-void window_destroy() {}
-void window_fullscreen() {}
-void window_set_title() {}
+void window_show(_Window* window) { ShowWindow(window->id, SW_SHOWDEFAULT); }
+void window_hide(_Window* window) { ShowWindow(window->id, SW_HIDE); }
+void window_set_caption(_Window* window, const char* title) { SetWindowText(window->id, title); }
+void window_close(_Window* window) { CloseWindow(window->id); }
+void window_destroy(_Window* window) { DestroyWindow(window->id); }
