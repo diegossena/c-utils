@@ -3,27 +3,7 @@
 #include "Window.h"
 
 void windowCallback(Window* window) {
-  switch (window->message) {
-
-  case WINDOW_QUIT:
-    printf("WINDOW_QUIT\n");
-    break;
-
-  case WINDOW_UNDEFINED:
-    printf("WINDOW_UNDEFINED\n");
-    break;
-
-  case WINDOW_FOCUS:
-    printf("WINDOW_FOCUS\n");
-    break;
-
-  case WINDOW_BLUR:
-    printf("WINDOW_BLUR\n");
-    break;
-
-  case WINDOW_RESIZE:
-    printf("WINDOW_RESIZE\n");
-    break;
+  switch (window_event_get(window)) {
 
   case WINDOW_MOUSE_MOVE: {
     int xPos = LOWORD(window->lParam);

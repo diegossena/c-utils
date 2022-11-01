@@ -27,7 +27,7 @@ typedef enum WindowEvent {
 
 typedef struct Window {
   HWND id;
-  UINT message;
+  WindowEvent event;
   LPARAM lParam;
 } Window;
 typedef void (*WindowCallback)(Window* window);
@@ -69,7 +69,7 @@ LRESULT CALLBACK wndProc(
   if (callback) {
     Window window = {
       .id = hWnd,
-      .message = message,
+      .event = message,
       .lParam = lParam
     };
     callback(&window);
@@ -151,11 +151,12 @@ void windows_run() {
   }
 }
 
-void window_show(Window window) { ShowWindow(window.id, SW_SHOWDEFAULT); }
-void window_hide(Window window) { ShowWindow(window.id, SW_HIDE); }
-void window_set_caption(Window window, const char* title) { SetWindowText(window.id, title); }
-void window_close(Window window) { CloseWindow(window.id); }
-void window_destroy(Window window) { DestroyWindow(window.id); }
+WindowEvent window_event_get(Window* window) { return window->event; }
+void window_show(Window* window) { ShowWindow(window->id, SW_SHOWDEFAULT); }
+void window_hide(Window* window) { ShowWindow(window->id, SW_HIDE); }
+void window_set_caption(Window* window, const char* title) { SetWindowText(window->id, title); }
+void window_close(Window* window) { CloseWindow(window->id); }
+void window_destroy(Window* window) { DestroyWindow(window->id); }
 
 int screen_get_width() { return GetSystemMetrics(SM_CXSCREEN); }
 int screen_get_height() { return GetSystemMetrics(SM_CYSCREEN); }
