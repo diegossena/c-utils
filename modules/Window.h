@@ -2,9 +2,8 @@
 
 #include <tchar.h>
 #include <windows.h>
-#include <stdbool.h> 
-#include "String_t.h"
-#include "smart_ptr.h"
+#include <stdbool.h>
+#include "Window/Keyboard.h"
 
 // definitions //
 
@@ -61,47 +60,41 @@ LRESULT CALLBACK wndProc(
   WPARAM wParam,
   LPARAM lParam
 ) {
-
   switch (message) {
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      break;
 
-
-  case WM_DESTROY:
-    PostQuitMessage(0);
-    break;
-
-  case WM_CREATE: {
-    LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
-    WindowCallback callback = (WindowCallback)pcs->lpCreateParams;
-    SetWindowLongPtrA(
-      hWnd,
-      GWLP_USERDATA,
-      (LONG_PTR)callback
-    );
-    break;
-
-    // ignored
-  case WM_NCHITTEST:
-  case WM_SETCURSOR:
-  case WM_CONTEXTMENU:
-    break;
-
-  case WM_CLOSE:
-    DestroyWindow(hWnd);
-  default: {
-    WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
-    if (callback) {
-      Window window = {
-        .id = hWnd,
-        .event = message,
-        .wParam = 'wParam',
-        .lParam = lParam
-      };
-      callback(&window);
+    case WM_CREATE: {
+      LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
+      WindowCallback callback = (WindowCallback)pcs->lpCreateParams;
+      SetWindowLongPtrA(
+        hWnd,
+        GWLP_USERDATA,
+        (LONG_PTR)callback
+      );
+      break;
     }
-  }
 
-  }
+    case WM_NCHITTEST:
+    case WM_SETCURSOR:
+    case WM_CONTEXTMENU:
+      break;
 
+    case WM_CLOSE:
+      DestroyWindow(hWnd);
+    default: {
+      WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+      if (callback) {
+        Window window = {
+          .id = hWnd,
+          .event = message,
+          .wParam = wParam,
+          .lParam = lParam
+        };
+        callback(&window);
+      }
+    }
   }
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
@@ -131,18 +124,18 @@ void window_new(
   };
   RegisterClassEx(&wc);
   HWND hWnd = CreateWindowEx(
-    0, // extended window style
+    0,                // extended window style
     wc.lpszClassName, // pointer to registered class name
     wc.lpszClassName, // pointer to window name
-    dwStyle, // window style
-    x, // horizontal position of window
-    y, // vertical position of window
-    width, // window width
-    height, // window height
-    0, // handle to parent or owner window
-    0, // handle to menu, or child-window identifier
-    wc.hInstance, // handle to application instance
-    window_callback // pointer to window-creation data
+    dwStyle,          // window style
+    x,                // horizontal position of window
+    y,                // vertical position of window
+    width,            // window width
+    height,           // window height
+    0,                // handle to parent or owner window
+    0,                // handle to menu, or child-window identifier
+    wc.hInstance,     // handle to application instance
+    window_callback   // pointer to window-creation data
   );
   SetTimer(hWnd, 0, USER_TIMER_MINIMUM, NULL);
 }
@@ -150,20 +143,17 @@ void window_new_centered(
   WindowCallback callback,
   const char* title,
   unsigned int width, unsigned int height,
-  WindowFlags flags
-) {
+  WindowFlags flags) {
   window_new(
     callback, title,
     (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2), (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2),
     width, height,
-    flags
-  );
+    flags);
 }
 void window_new_fullscreen(WindowCallback callback, const char* title, WindowFlags flags) {
   window_new(
     callback, title, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
-    flags | WINDOW_BORDERLESS
-  );
+    flags | WINDOW_BORDERLESS);
 }
 
 // methods //
