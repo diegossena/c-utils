@@ -103,7 +103,7 @@ Window window_new(
   return hWnd;
 }
 Window window_new_centered(
-  WindowCallback* callback,
+  WindowCallback callback,
   const char* title,
   unsigned int width, unsigned int height,
   WindowFlags flags
@@ -115,7 +115,7 @@ Window window_new_centered(
     flags
   );
 }
-Window window_new_fullscreen(WindowCallback* callback, const char* title, WindowFlags flags) {
+Window window_new_fullscreen(WindowCallback callback, const char* title, WindowFlags flags) {
   return window_new(
     callback, title, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
     flags | WINDOW_BORDERLESS
@@ -127,7 +127,7 @@ Window window_new_fullscreen(WindowCallback* callback, const char* title, Window
 void windows_run() {
   MSG msg;
   while (true) {
-    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
+    while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT)
