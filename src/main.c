@@ -2,7 +2,7 @@
 #include "String_t.h"
 #include "Window.h"
 
-void window_Callback(Window* window) {
+void window_callback(Window* window) {
   switch (window_event_get(window)) {
 
   case WINDOW_QUIT:
@@ -36,7 +36,7 @@ void window_Callback(Window* window) {
 
 int main() {
 
-  window_new_centered(window_Callback, "test1", 800, 600, WINDOW_RESIZABLE);
+  window_new_centered(window_callback, "test1", 800, 600, WINDOW_RESIZABLE);
 
   windows_run();
 
