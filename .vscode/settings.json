@@ -12,6 +12,7 @@
     "stdio.h": "c",
     "smart_ptr.h": "c",
     "window.h": "c",
-    "system_error": "c"
+    "system_error": "c",
+    "stdbool.h": "c"
   }
 }

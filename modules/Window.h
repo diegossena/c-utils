@@ -15,14 +15,22 @@ typedef enum WindowFlags {
 } WindowFlags;
 
 typedef enum WindowEvent {
-  WINDOW_QUIT = 0,
-  WINDOW_UNDEFINED
+  WINDOW_QUIT = WM_QUIT,
+  WINDOW_UNDEFINED = WM_TIMER,
+  WINDOW_FOCUS = WM_SETFOCUS,
+  WINDOW_BLUR = WM_KILLFOCUS,
+  WINDOW_RESIZE = WM_SIZE,
+  WINDOW_MOUSE_MOVE = WM_MOUSEMOVE
 } WindowEvent;
 
 // type //
 
-#define Window HWND
-typedef void (*WindowCallback)(Window, UINT, WPARAM, LPARAM);
+typedef struct Window {
+  HWND id;
+  UINT message;
+  LPARAM lParam;
+} Window;
+typedef void (*WindowCallback)(Window* window);
 
 // handlers //
 
@@ -37,11 +45,11 @@ LRESULT CALLBACK wndProc(
 
   case WM_CLOSE:
     DestroyWindow(hWnd);
-    return 0;
+    break;
 
   case WM_DESTROY:
     PostQuitMessage(0);
-    return 0;
+    break;
 
   case WM_CREATE: {
     LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
@@ -51,20 +59,28 @@ LRESULT CALLBACK wndProc(
       GWLP_USERDATA,
       (LONG_PTR)callback
     );
-    return 0;
+    break;
+
   }
 
   }
+
   WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
-  if (callback)
-    callback(hWnd, message, wParam, lParam);
+  if (callback) {
+    Window window = {
+      .id = hWnd,
+      .message = message,
+      .lParam = lParam
+    };
+    callback(&window);
+  }
 
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 // constructors //
 
-Window window_new(
+void window_new(
   WindowCallback window_callback,
   const char* title,
   unsigned int x, unsigned int y,
@@ -100,23 +116,22 @@ Window window_new(
     window_callback // pointer to window-creation data
   );
   SetTimer(hWnd, 0, USER_TIMER_MINIMUM, NULL);
-  return hWnd;
 }
-Window window_new_centered(
+void window_new_centered(
   WindowCallback callback,
   const char* title,
   unsigned int width, unsigned int height,
   WindowFlags flags
 ) {
-  return window_new(
+  window_new(
     callback, title,
     (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2), (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2),
     width, height,
     flags
   );
 }
-Window window_new_fullscreen(WindowCallback callback, const char* title, WindowFlags flags) {
-  return window_new(
+void window_new_fullscreen(WindowCallback callback, const char* title, WindowFlags flags) {
+  window_new(
     callback, title, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
     flags | WINDOW_BORDERLESS
   );
@@ -136,8 +151,11 @@ void windows_run() {
   }
 }
 
-void window_show(Window window) { ShowWindow(window, SW_SHOWDEFAULT); }
-void window_hide(Window window) { ShowWindow(window, SW_HIDE); }
-void window_set_caption(Window window, const char* title) { SetWindowText(window, title); }
-void window_close(Window window) { CloseWindow(window); }
-void window_destroy(Window window) { DestroyWindow(window); }
+void window_show(Window window) { ShowWindow(window.id, SW_SHOWDEFAULT); }
+void window_hide(Window window) { ShowWindow(window.id, SW_HIDE); }
+void window_set_caption(Window window, const char* title) { SetWindowText(window.id, title); }
+void window_close(Window window) { CloseWindow(window.id); }
+void window_destroy(Window window) { DestroyWindow(window.id); }
+
+int screen_get_width() { return GetSystemMetrics(SM_CXSCREEN); }
+int screen_get_height() { return GetSystemMetrics(SM_CYSCREEN); }
