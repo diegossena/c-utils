@@ -4,8 +4,10 @@
 
 int main() {
   printf("start\n");
-  Window* window = window_new_centered("test", 800, 600, WINDOW_RESIZABLE);
-  while (window_run()) {
+  Window window = window_new_centered("test1", 800, 600, WINDOW_RESIZABLE);
+  for (WindowEvent event = WINDOW_UNDEFINED; event; event = window_event_get()) {
+    printf("%x\n", event);
   }
+  printf("QUIT");
   return 0;
 }
