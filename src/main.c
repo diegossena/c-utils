@@ -4,12 +4,7 @@
 
 int main() {
   printf("start\n");
-  Window* window = window_new(
-    "Test",
-    WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
-    800, 600,
-    WINDOW_FULLSCREEN
-  );
+  Window* window = window_new_centered("test", 800, 600, WINDOW_RESIZABLE);
   while (window_run()) {
   }
   return 0;

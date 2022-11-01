@@ -8,20 +8,11 @@
 
 // definitions //
 
-#define WINDOWPOS_CENTERED_MASK    0x2FFF0000u
-#define WINDOWPOS_CENTERED_DISPLAY(X)  (WINDOWPOS_CENTERED_MASK|(X))
-#define WINDOWPOS_CENTERED         WINDOWPOS_CENTERED_DISPLAY(0)
-
 typedef enum WindowFlags {
-  WINDOW_SHOWN = 1,
-  WINDOW_RESIZABLE,
-  WINDOW_FULLSCREEN
+  WINDOW_HIDDEN = 0x1,
+  WINDOW_RESIZABLE = 0x2,
+  WINDOW_BORDERLESS = 0x4,
 } WindowFlags;
-
-// WS_OVERLAPPED
-// WS_CAPTION
-// WS_SYSMENU
-// WS_MINIMIZEBOX
 
 // type //
 
@@ -57,9 +48,18 @@ LRESULT CALLBACK windowCallback(
     return 1;
   }
   _Window* window = (_Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
-
   if (window) {
     switch (message) {
+    case WM_PAINT: {
+      PAINTSTRUCT ps;
+      HDC hdc = BeginPaint(hWnd, &ps);
+
+      // All painting occurs here, between BeginPaint and EndPaint.
+
+      FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+      EndPaint(hWnd, &ps);
+    }
     case WM_SETFOCUS:
       // window->hasFocus_ = true;
       break;
@@ -88,26 +88,13 @@ _Window* window_new(
   unsigned int width, unsigned int height,
   WindowFlags flags
 ) {
-  size_t dwExStyle = 0;
-  size_t dwStyle = 0;
-  if (flags & WINDOW_FULLSCREEN) {
-
-  }
-  else {
-    dwStyle = WS_OVERLAPPED
-      | WS_CAPTION
-      | WS_SYSMENU
-      | WS_MINIMIZEBOX;
-    if (flags & WINDOW_SHOWN)
-      dwStyle |= WS_VISIBLE;
-    if (flags & WINDOW_RESIZABLE)
-      dwStyle |= WS_THICKFRAME;
-    if (x == WINDOWPOS_CENTERED)
-      x = (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2);
-    if (y == WINDOWPOS_CENTERED)
-      y = (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2);
-  }
-
+  size_t dwStyle = flags & WINDOW_BORDERLESS
+    ? WS_POPUP
+    : WS_SYSMENU | WS_MINIMIZEBOX;
+  if (!(flags & WINDOW_HIDDEN))
+    dwStyle |= WS_VISIBLE;
+  if (flags & WINDOW_RESIZABLE)
+    dwStyle |= WS_THICKFRAME | WS_MAXIMIZEBOX;
   WNDCLASSEX wc = {
     .cbSize = sizeof(WNDCLASSEX),
     .lpfnWndProc = windowCallback,
@@ -116,23 +103,39 @@ _Window* window_new(
   };
   RegisterClassEx(&wc);
   _Window* window = (_Window*)malloc(sizeof(_Window));
-  window->width = width;
-  window->height = height;
   window->id = CreateWindowEx(
-    dwExStyle,           // extended window style
-    wc.lpszClassName,    // pointer to registered class name
-    wc.lpszClassName,    // pointer to window name
-    dwStyle,             // window style
-    x,                   // horizontal position of window
-    y,                   // vertical position of window
-    window->width,       // window width
-    window->height,      // window height
-    0,                   // handle to parent or owner window
-    0,                   // handle to menu, or child-window identifier
-    wc.hInstance,        // handle to application instance
-    window               // pointer to window-creation data
+    0, // extended window style
+    wc.lpszClassName, // pointer to registered class name
+    wc.lpszClassName, // pointer to window name
+    dwStyle, // window style
+    x, // horizontal position of window
+    y, // vertical position of window
+    window->width = width, // window width
+    window->height = height, // window height
+    0, // handle to parent or owner window
+    0, // handle to menu, or child-window identifier
+    wc.hInstance, // handle to application instance
+    window // pointer to window-creation data
   );
   return window;
+}
+_Window* window_new_centered(
+  const char* title,
+  unsigned int width, unsigned int height,
+  WindowFlags flags
+) {
+  return window_new(
+    title,
+    (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2), (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2),
+    width, height,
+    flags
+  );
+}
+_Window* window_new_fullscreen(const char* title, WindowFlags flags) {
+  return window_new(
+    title, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
+    WINDOW_BORDERLESS | flags
+  );
 }
 
 // methods //
