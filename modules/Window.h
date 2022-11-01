@@ -38,6 +38,9 @@ typedef enum WindowEvent {
   MOUSE_MIDDLE_DBLCLK = WM_MBUTTONDBLCLK,
 
   MOUSE_SCROLL = WM_MOUSEWHEEL,
+  // Keyboard
+  KEY_DOWN = WM_KEYDOWN,
+  KEY_UP = WM_KEYUP
 } WindowEvent;
 
 // type //
@@ -45,6 +48,7 @@ typedef enum WindowEvent {
 typedef struct Window {
   HWND id;
   WindowEvent event;
+  WPARAM wParam;
   LPARAM lParam;
 } Window;
 typedef void (*WindowCallback)(Window* window);
@@ -89,6 +93,7 @@ LRESULT CALLBACK wndProc(
       Window window = {
         .id = hWnd,
         .event = message,
+        .wParam = 'wParam',
         .lParam = lParam
       };
       callback(&window);
@@ -176,6 +181,7 @@ void windows_run() {
 }
 
 WindowEvent window_event_get(Window* window) { return window->event; }
+WORD window_keypressed(Window* window) { return window->wParam; }
 WORD window_mouse_get_x(Window* window) { return LOWORD(window->lParam); }
 WORD window_mouse_get_y(Window* window) { return HIWORD(window->lParam); }
 void window_show(Window* window) { ShowWindow(window->id, SW_SHOWDEFAULT); }
