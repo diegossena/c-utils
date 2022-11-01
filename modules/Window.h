@@ -15,12 +15,29 @@ typedef enum WindowFlags {
 } WindowFlags;
 
 typedef enum WindowEvent {
-  WINDOW_QUIT = WM_QUIT,
+  // WINDOW
   WINDOW_UNDEFINED = WM_TIMER,
   WINDOW_FOCUS = WM_SETFOCUS,
   WINDOW_BLUR = WM_KILLFOCUS,
   WINDOW_RESIZE = WM_SIZE,
-  WINDOW_MOUSE_MOVE = WM_MOUSEMOVE
+  WINDOW_CLOSE = WM_CLOSE,
+  WINDOW_QUIT = WM_QUIT,
+  // MOUSE
+  MOUSE_MOVE = WM_MOUSEMOVE,
+
+  MOUSE_LEFT_DOWN = WM_LBUTTONDOWN,
+  MOUSE_LEFT_UP = WM_LBUTTONUP,
+  MOUSE_LEFT_DBLCLK = WM_LBUTTONDBLCLK,
+
+  MOUSE_RIGHT_DOWN = WM_RBUTTONDOWN,
+  MOUSE_RIGHT_UP = WM_RBUTTONUP,
+  MOUSE_RIGHT_DBLCLK = WM_RBUTTONDBLCLK,
+
+  MOUSE_MIDDLE_DOWN = WM_MBUTTONDOWN,
+  MOUSE_MIDDLE_UP = WM_MBUTTONUP,
+  MOUSE_MIDDLE_DBLCLK = WM_MBUTTONDBLCLK,
+
+  MOUSE_SCROLL = WM_MOUSEWHEEL,
 } WindowEvent;
 
 // type //
@@ -43,9 +60,6 @@ LRESULT CALLBACK wndProc(
 
   switch (message) {
 
-  case WM_CLOSE:
-    DestroyWindow(hWnd);
-    break;
 
   case WM_DESTROY:
     PostQuitMessage(0);
@@ -61,20 +75,29 @@ LRESULT CALLBACK wndProc(
     );
     break;
 
+    // ignored
+  case WM_NCHITTEST:
+  case WM_SETCURSOR:
+  case WM_CONTEXTMENU:
+    break;
+
+  case WM_CLOSE:
+    DestroyWindow(hWnd);
+  default: {
+    WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+    if (callback) {
+      Window window = {
+        .id = hWnd,
+        .event = message,
+        .lParam = lParam
+      };
+      callback(&window);
+    }
   }
 
   }
 
-  WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
-  if (callback) {
-    Window window = {
-      .id = hWnd,
-      .event = message,
-      .lParam = lParam
-    };
-    callback(&window);
   }
-
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -99,6 +122,7 @@ void window_new(
     .lpfnWndProc = wndProc,
     .lpszClassName = title,
     .hCursor = LoadCursor(0, IDC_ARROW),
+    .style = CS_DBLCLKS
   };
   RegisterClassEx(&wc);
   HWND hWnd = CreateWindowEx(
