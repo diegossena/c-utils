@@ -6,8 +6,8 @@ void windowCallback(Window* window) {
   switch (window_event_get(window)) {
 
   case WINDOW_MOUSE_MOVE: {
-    int xPos = LOWORD(window->lParam);
-    int yPos = HIWORD(window->lParam);
+    int xPos = window_mouse_get_x(window);
+    int yPos = window_mouse_get_y(window);
     printf("WINDOW_MOUSE_MOVE (%d, %d)\n", xPos, yPos);
   }break;
 

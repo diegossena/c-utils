@@ -152,6 +152,8 @@ void windows_run() {
 }
 
 WindowEvent window_event_get(Window* window) { return window->event; }
+unsigned int window_mouse_get_x(Window* window) { return LOWORD(window->lParam); }
+unsigned int window_mouse_get_y(Window* window) { return HIWORD(window->lParam); }
 void window_show(Window* window) { ShowWindow(window->id, SW_SHOWDEFAULT); }
 void window_hide(Window* window) { ShowWindow(window->id, SW_HIDE); }
 void window_set_caption(Window* window, const char* title) { SetWindowText(window->id, title); }
