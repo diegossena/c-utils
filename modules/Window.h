@@ -22,23 +22,50 @@ typedef enum WindowEvent {
 // type //
 
 #define Window HWND
+typedef void (*WindowCallback)(Window, UINT, WPARAM, LPARAM);
 
 // handlers //
 
-LRESULT CALLBACK windowCallback(
+LRESULT CALLBACK wndProc(
   HWND hWnd,
   UINT message,
   WPARAM wParam,
   LPARAM lParam
 ) {
-  if (message == WM_DESTROY)
+
+  switch (message) {
+
+  case WM_CLOSE:
+    DestroyWindow(hWnd);
+    return 0;
+
+  case WM_DESTROY:
     PostQuitMessage(0);
+    return 0;
+
+  case WM_CREATE: {
+    LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
+    WindowCallback callback = (WindowCallback)pcs->lpCreateParams;
+    SetWindowLongPtrA(
+      hWnd,
+      GWLP_USERDATA,
+      (LONG_PTR)callback
+    );
+    return 0;
+  }
+
+  }
+  WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+  if (callback)
+    callback(hWnd, message, wParam, lParam);
+
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 // constructors //
 
 Window window_new(
+  WindowCallback window_callback,
   const char* title,
   unsigned int x, unsigned int y,
   unsigned int width, unsigned int height,
@@ -53,12 +80,12 @@ Window window_new(
     dwStyle |= WS_THICKFRAME | WS_MAXIMIZEBOX;
   WNDCLASSEX wc = {
     .cbSize = sizeof(WNDCLASSEX),
-    .lpfnWndProc = windowCallback,
+    .lpfnWndProc = wndProc,
     .lpszClassName = title,
     .hCursor = LoadCursor(0, IDC_ARROW),
   };
   RegisterClassEx(&wc);
-  return CreateWindowEx(
+  HWND hWnd = CreateWindowEx(
     0, // extended window style
     wc.lpszClassName, // pointer to registered class name
     wc.lpszClassName, // pointer to window name
@@ -70,40 +97,43 @@ Window window_new(
     0, // handle to parent or owner window
     0, // handle to menu, or child-window identifier
     wc.hInstance, // handle to application instance
-    0 // pointer to window-creation data
+    window_callback // pointer to window-creation data
   );
+  SetTimer(hWnd, 0, USER_TIMER_MINIMUM, NULL);
+  return hWnd;
 }
 Window window_new_centered(
+  WindowCallback* callback,
   const char* title,
   unsigned int width, unsigned int height,
   WindowFlags flags
 ) {
   return window_new(
-    title,
+    callback, title,
     (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2), (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2),
     width, height,
     flags
   );
 }
-Window window_new_fullscreen(const char* title, WindowFlags flags) {
+Window window_new_fullscreen(WindowCallback* callback, const char* title, WindowFlags flags) {
   return window_new(
-    title, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
+    callback, title, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
     flags | WINDOW_BORDERLESS
   );
 }
 
 // methods //
 
-MSG msg;
-WindowEvent window_event_get() {
-  PeekMessage(&msg, 0, 0, 0, PM_REMOVE);
-  TranslateMessage(&msg);
-  DispatchMessage(&msg);
-  switch (msg.message) {
-  case WM_QUIT:
-    return WINDOW_QUIT;
+void windows_run() {
+  MSG msg;
+  while (true) {
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessageA(&msg);
+      if (msg.message == WM_QUIT)
+        return;
+    }
   }
-  return msg.message;
 }
 
 void window_show(Window window) { ShowWindow(window, SW_SHOWDEFAULT); }

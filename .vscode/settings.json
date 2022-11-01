@@ -11,6 +11,7 @@
     "stdexcept": "c",
     "stdio.h": "c",
     "smart_ptr.h": "c",
-    "window.h": "c"
+    "window.h": "c",
+    "system_error": "c"
   }
 }
