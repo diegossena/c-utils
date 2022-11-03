@@ -3,8 +3,6 @@
 #include <tchar.h>
 #include <windows.h>
 #include <stdbool.h>
-#include "Window/Keyboard.h"
-
 // definitions //
 
 typedef enum WindowFlags {
@@ -14,14 +12,18 @@ typedef enum WindowFlags {
 } WindowFlags;
 
 typedef enum WindowEvent {
+
   // WINDOW
+
   WINDOW_UNDEFINED = WM_TIMER,
   WINDOW_FOCUS = WM_SETFOCUS,
   WINDOW_BLUR = WM_KILLFOCUS,
   WINDOW_RESIZE = WM_SIZE,
   WINDOW_CLOSE = WM_CLOSE,
   WINDOW_QUIT = WM_QUIT,
+
   // MOUSE
+
   MOUSE_MOVE = WM_MOUSEMOVE,
 
   MOUSE_LEFT_DOWN = WM_LBUTTONDOWN,
@@ -37,9 +39,11 @@ typedef enum WindowEvent {
   MOUSE_MIDDLE_DBLCLK = WM_MBUTTONDBLCLK,
 
   MOUSE_SCROLL = WM_MOUSEWHEEL,
+
   // Keyboard
-  KEY_DOWN = WM_KEYDOWN,
-  KEY_UP = WM_KEYUP
+
+  WINDOW_KEY_DOWN = WM_KEYDOWN,
+  WINDOW_KEY_UP = WM_KEYUP
 } WindowEvent;
 
 // type //
@@ -171,7 +175,6 @@ void windows_run() {
 }
 
 WindowEvent window_event_get(Window* window) { return window->event; }
-WORD window_keypressed(Window* window) { return window->wParam; }
 WORD window_mouse_get_x(Window* window) { return LOWORD(window->lParam); }
 WORD window_mouse_get_y(Window* window) { return HIWORD(window->lParam); }
 void window_show(Window* window) { ShowWindow(window->id, SW_SHOWDEFAULT); }
@@ -180,5 +183,28 @@ void window_set_caption(Window* window, const char* title) { SetWindowText(windo
 void window_close(Window* window) { CloseWindow(window->id); }
 void window_destroy(Window* window) { DestroyWindow(window->id); }
 
+// Screen //
+
 int screen_get_width() { return GetSystemMetrics(SM_CXSCREEN); }
 int screen_get_height() { return GetSystemMetrics(SM_CYSCREEN); }
+
+// Keyboard //
+
+typedef enum Keycode {
+  KEY_BACK = 0x8,
+  KEY_TAB,
+  KEY_ENTER = 0xd,
+  KEY_SHIFT = 0x10,
+  KEY_CTRL,
+  KEY_ALT,
+  KEY_PAUSE,
+  KEY_CAPS,
+  KEY_ESC = 0x1b,
+  KEY_SPACE = 0x20,
+  KEY_LEFT = 0x25,
+  KEY_UP,
+  KEY_RIGHT,
+  KEY_DOWN,
+} Keycode;
+
+WORD window_keycode(Window* window) { return window->wParam; }

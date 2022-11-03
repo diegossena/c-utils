@@ -3,7 +3,8 @@
 #include "Window.h"
 
 void window_callback(Window* window) {
-  switch (window_event_get(window)) {
+  WindowEvent event = window_event_get(window);
+  switch (event) {
     // Window
     case WINDOW_CLOSE:
       // printf("WINDOW_CLOSE\n");
@@ -57,22 +58,33 @@ void window_callback(Window* window) {
       // printf("MOUSE_MIDDLE_DBLCLK\n");
       break;
       // Keyboard
-    case KEY_DOWN: {
-      Keycode key = window_keypressed(window);
-      printf("KEY_DOWN %x\n", key);
+    case WINDOW_KEY_DOWN: {
+      Keycode key = window_keycode(window);
+
+      switch (key) {
+        case KEY_LEFT: printf("KEY_LEFT\n"); break;
+        case KEY_UP: printf("KEY_UP\n"); break;
+        case KEY_RIGHT: printf("KEY_RIGHT\n"); break;
+        case KEY_DOWN: printf("KEY_DOWN\n"); break;
+      }
     } break;
-    case KEY_UP:
+    case WINDOW_KEY_UP:
       // printf("KEY_UP\n");
       break;
     default:
-      printf("%x\n", window_event_get(window));
+      printf("%x\n", event);
       break;
   }
 }
 
 int main() {
 
-  window_new_centered(window_callback, "test1", 800, 600, WINDOW_RESIZABLE);
+  window_new(
+    window_callback, "test1",
+    0, 100,
+    800, 600,
+    WINDOW_RESIZABLE
+  );
 
   windows_run();
 
