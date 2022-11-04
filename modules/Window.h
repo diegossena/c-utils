@@ -1,14 +1,20 @@
 #pragma once
 
 #include <tchar.h>
-#include <windows.h>
 #include <stdbool.h>
+
+#include <windows.h>
+#include <d3d11.h>
+
+#include "smart_ptr.h"
+
 // definitions //
 
 typedef enum WindowFlags {
   WINDOW_HIDDEN = 0x1,
   WINDOW_RESIZABLE = 0x2,
   WINDOW_BORDERLESS = 0x4,
+  WINDOW_DIRECT3D11 = 0x8,
 } WindowFlags;
 
 typedef enum WindowEvent {
@@ -21,6 +27,7 @@ typedef enum WindowEvent {
   WINDOW_RESIZE = WM_SIZE,
   WINDOW_CLOSE = WM_CLOSE,
   WINDOW_QUIT = WM_QUIT,
+  WINDOW_LOAD = WM_CREATE,
 
   // MOUSE
 
@@ -46,15 +53,33 @@ typedef enum WindowEvent {
   WINDOW_KEY_UP = WM_KEYUP
 } WindowEvent;
 
-// type //
+// type
+
+
+
+typedef void WindowCallback(Window* window);
 
 typedef struct Window {
   HWND id;
   WindowEvent event;
   WPARAM wParam;
   LPARAM lParam;
+  WindowCallback* callback;
+  Direct3D11 gfx;
 } Window;
-typedef void (*WindowCallback)(Window* window);
+
+typedef struct Direct3D11 {
+  IDXGISwapChain* swapchain;
+  ID3D11Device* dev;
+  ID3D11DeviceContext* devcon;
+  ID3D11RenderTargetView* backbuffer;
+
+  ID3D11InputLayout* layout;        // the pointer to the input layout
+  ID3D11Buffer* vertexBuffer;       // the pointer to the vertex buffer
+  ID3D11Buffer* indexBuffer;        // the pointer to the index buffer
+
+  D3D11_BUFFER_DESC bufferDesc;
+} Direct3D11;
 
 // handlers //
 
@@ -64,42 +89,38 @@ LRESULT CALLBACK wndProc(
   WPARAM wParam,
   LPARAM lParam
 ) {
+  Window* window = 0;
+  if (message == WM_CREATE) {
+    LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
+    window = (Window*)pcs->lpCreateParams;
+    SetWindowLongPtrA(
+      hWnd,
+      GWLP_USERDATA,
+      (LONG_PTR)window
+    );
+  } else {
+    window = (Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+  }
   switch (message) {
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
 
-    case WM_CREATE: {
-      LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
-      WindowCallback callback = (WindowCallback)pcs->lpCreateParams;
-      SetWindowLongPtrA(
-        hWnd,
-        GWLP_USERDATA,
-        (LONG_PTR)callback
-      );
-      break;
-    }
-
     case WM_NCHITTEST:
     case WM_SETCURSOR:
     case WM_CONTEXTMENU:
       break;
-
     case WM_CLOSE:
+      free(window);
       DestroyWindow(hWnd);
     default: {
-      WindowCallback callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
-      if (callback) {
-        Window window = {
-          .id = hWnd,
-          .event = message,
-          .wParam = wParam,
-          .lParam = lParam
-        };
-        callback(&window);
-      }
+      window->event = message;
+      window->lParam = lParam;
+      window->wParam = wParam;
     }
   }
+  if (window && window->callback)
+    (*window->callback)(window);
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -126,8 +147,54 @@ void window_new(
     .hCursor = LoadCursor(0, IDC_ARROW),
     .style = CS_DBLCLKS
   };
+
+  Window* window = (Window*)malloc(sizeof(Window));
+
+  // d3d11 //
+  window->gfx.bufferDesc.ByteWidth = 0;
+  window->gfx.bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  window->gfx.bufferDesc.BindFlags = 0;
+  window->gfx.bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  window->gfx.bufferDesc.MiscFlags = 0;
+  window->gfx.bufferDesc.StructureByteStride = 0;
+
+  DXGI_SWAP_CHAIN_DESC scd = {
+    .BufferCount = 1, // one back buffer,
+    .BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM, // use 32-bit color,
+    .BufferDesc.Width = width, // set the back buffer width
+    .BufferDesc.Height = height, // set the back buffer height
+    .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT, // how swap chain is to be used
+    .OutputWindow = window->id, // the window to be used
+    .SampleDesc.Count = 4, // how many multisamples
+    .Windowed = TRUE, // windowed/full-screen mode
+    .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH // allow full-screen switching
+  };
+  // create a device, device context and swap chain using the information in the scd struct
+  D3D11CreateDeviceAndSwapChain(
+    0,
+    D3D_DRIVER_TYPE_HARDWARE,
+    0,
+    0,
+    0,
+    0,
+    D3D11_SDK_VERSION,
+    &scd,
+    &window->gfx.swapchain,
+    &window->gfx.dev,
+    0,
+    &window->gfx.devcon
+  );
+  // get the address of the back buffer
+  ID3D11Texture2D* pBackBuffer;
+  GetBuffer(0, __uuidof(), (LPVOID*)&pBackBuffer);
+  CreateRenderTargetView(pBackBuffer, 0, &window->gfx.backbuffer);
+   // InitGraphics
+
+
+   //
+
   RegisterClassEx(&wc);
-  HWND hWnd = CreateWindowEx(
+  window->id = CreateWindowEx(
     0,                // extended window style
     wc.lpszClassName, // pointer to registered class name
     wc.lpszClassName, // pointer to window name
@@ -139,9 +206,9 @@ void window_new(
     0,                // handle to parent or owner window
     0,                // handle to menu, or child-window identifier
     wc.hInstance,     // handle to application instance
-    window_callback   // pointer to window-creation data
+    window // pointer to window-creation data
   );
-  SetTimer(hWnd, 0, USER_TIMER_MINIMUM, NULL);
+  SetTimer(window->id, 0, USER_TIMER_MINIMUM, NULL);
 }
 void window_new_centered(
   WindowCallback callback,
@@ -182,6 +249,7 @@ void window_hide(Window* window) { ShowWindow(window->id, SW_HIDE); }
 void window_set_caption(Window* window, const char* title) { SetWindowText(window->id, title); }
 void window_close(Window* window) { CloseWindow(window->id); }
 void window_destroy(Window* window) { DestroyWindow(window->id); }
+void window_set_renderer(Window* window) {}
 
 // Screen //
 

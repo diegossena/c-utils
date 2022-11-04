@@ -6,6 +6,8 @@ void window_callback(Window* window) {
   WindowEvent event = window_event_get(window);
   switch (event) {
     // Window
+    case WINDOW_LOAD:
+      break;
     case WINDOW_CLOSE:
       // printf("WINDOW_CLOSE\n");
       break;
