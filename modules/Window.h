@@ -76,7 +76,10 @@ typedef struct Window {
   WPARAM wParam;
   LPARAM lParam;
   WindowCallback* callback;
-  int64_t time;
+
+  uint16_t fps;
+  uint16_t frames_count;
+  uint64_t fps_lastCheck;
 
   // Direct3D 11
 
@@ -200,16 +203,22 @@ LRESULT CALLBACK wndProc(
       break;
   }
   if (window) {
-    int64_t now = date_now();
-    int64_t elapsed = now - window->time;
-    printf("elapsed %lld %lld\n", now, elapsed);
-    window->time = now;
+    uint64_t now = date_now();
+
+    int fps_max_seconds = 100;
+    if ((now - window->fps_lastCheck) >= 1000 * fps_max_seconds) {
+      window->fps_lastCheck = now;
+      window->fps = window->frames_count / fps_max_seconds;
+      window->frames_count = 0;
+    }
+    printf("FPS %d\n", window->fps);
     window->event = message;
     window->lParam = lParam;
     window->wParam = wParam;
     ID3D11DeviceContext_ClearRenderTargetView(window->devcon, window->rtView, &window->screen_color);
     (*window->callback)(window);
     IDXGISwapChain_Present(window->swapchain, 0, 0);
+    ++window->frames_count;
   }
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
@@ -240,7 +249,9 @@ void window_new(
 
   Window* window = (Window*)malloc(sizeof(Window));
 
-  window->time = date_now();
+  uint16_t fps = 0;
+  uint16_t frames_count = 0;
+  uint64_t fps_lastCheck = date_now();
 
   // d3d11 //
   window->screen_color[0] = 0.392f;
@@ -272,7 +283,6 @@ void window_new(
     wc.hInstance,     // handle to application instance
     window // pointer to window-creation data
   );
-  // USER_TIMER_MINIMUM
   SetTimer(window->id, 0, USER_TIMER_MINIMUM, NULL);
 }
 void window_new_centered(
