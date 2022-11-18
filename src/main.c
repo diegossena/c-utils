@@ -42,7 +42,7 @@ void window_callback(Window* window) {
       // printf("MOUSE_LEFT_DBLCLK\n");
       break;
     case MOUSE_RIGHT_DOWN:
-      printf("MOUSE_RIGHT_DOWN\n");
+      // printf("MOUSE_RIGHT_DOWN\n");
       break;
     case MOUSE_RIGHT_UP:
       // printf("MOUSE_RIGHT_UP\n");

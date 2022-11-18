@@ -12,7 +12,6 @@ typedef struct Window Window;
 
 #include <windows.h>
 #include <d3d11.h>
-#include <dxgi.h>
 #include <d3dcompiler.h>
 
 #include "smart_ptr.h"
@@ -111,15 +110,20 @@ LRESULT CALLBACK wndProc(
     window = (Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
   }
 
-  if (message == WM_CLOSE) {
-    printf("WM_CLOSE %x %d\n", message, window);
-  }
-
   switch (message) {
     case WM_DESTROY:
       KillTimer(hWnd, 0);
-      free(window);
       PostQuitMessage(0);
+      // d3d11 clear
+      IDXGISwapChain_Release(window->swapchain);
+      ID3D11RenderTargetView_Release(window->rtView);
+      ID3D11Device_Release(window->dev);
+      ID3D11DeviceContext_Release(window->devcon);
+      // ID3D11InputLayout_Release(window->layout);
+      // ID3D11Buffer_Release(window->vertexBuffer);
+      // ID3D11Buffer_Release(window->indexBuffer);
+      // window clear
+      free(window);
       window = 0;
       break;
 
@@ -140,6 +144,7 @@ LRESULT CALLBACK wndProc(
     window->lParam = lParam;
     window->wParam = wParam;
     (*window->callback)(window);
+    IDXGISwapChain_Present(window->swapchain, 0, 0);
   }
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
