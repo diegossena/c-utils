@@ -76,6 +76,8 @@ typedef struct Window {
 
   // Direct3D 11
 
+  float screen_color[4]; // RGBA
+
   IDXGISwapChain* swapchain;
   ID3D11Device* dev;
   ID3D11DeviceContext* devcon;
@@ -97,7 +99,6 @@ LRESULT CALLBACK wndProc(
   LPARAM lParam
 ) {
   Window* window = 0;
-
   if (message == WM_CREATE) {
     LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
     window = (Window*)pcs->lpCreateParams;
@@ -106,6 +107,72 @@ LRESULT CALLBACK wndProc(
       GWLP_USERDATA,
       (LONG_PTR)window
     );
+    // d3d11 //
+    window->screen_color[0] = 0.392f;
+    window->screen_color[1] = 0.584f;
+    window->screen_color[2] = 0.929f;
+    window->screen_color[3] = 1.f;
+
+    window->bufferDesc.ByteWidth = 0;
+    window->bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    window->bufferDesc.BindFlags = 0;
+    window->bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    window->bufferDesc.MiscFlags = 0;
+    window->bufferDesc.StructureByteStride = 0;
+    int
+      width = screen_get_width(),
+      height = screen_get_height();
+    DXGI_SWAP_CHAIN_DESC scd = {
+      .BufferCount = 1, // one back buffer,
+      .BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM, // use 32-bit color,
+      .BufferDesc.Width = width, // set the back buffer width
+      .BufferDesc.Height = height, // set the back buffer height
+      .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT, // how swap chain is to be used
+      .OutputWindow = hWnd, // the window to be used
+      .SampleDesc.Count = 4, // how many multisamples
+      .Windowed = TRUE, // windowed/full-screen mode
+      .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH // allow full-screen switching
+    };
+    // create a device, device context and swap chain using the information in the scd struct
+    D3D11CreateDeviceAndSwapChain(
+      0,
+      D3D_DRIVER_TYPE_HARDWARE,
+      0,
+      0,
+      0,
+      0,
+      D3D11_SDK_VERSION,
+      &scd,
+      &window->swapchain,
+      &window->dev,
+      0,
+      &window->devcon
+    );
+
+    // get the address of the back buffer
+    ID3D11Texture2D* backBuffer_p;
+    IDXGISwapChain_GetBuffer(window->swapchain, 0, &IID_ID3D11Texture2D, (void**)&backBuffer_p);
+
+    // use the back buffer address to create the render target
+    ID3D11Device_CreateRenderTargetView(window->dev, backBuffer_p, 0, &window->rtView);
+    ID3D11Texture2D_Release(backBuffer_p);
+
+    // set the render target as the back buffer
+    ID3D11DeviceContext_OMSetRenderTargets(window->devcon, 1, &window->rtView, 0);
+
+    // Set the viewport
+    D3D11_VIEWPORT viewport = {
+        .TopLeftX = 0,
+        .TopLeftY = 0,
+        .Width = (FLOAT)width,
+        .Height = (FLOAT)height,
+        .MinDepth = 0,
+        .MaxDepth = 1,
+    };
+    ID3D11DeviceContext_RSSetViewports(window->devcon, 1, &viewport);
+
+    // select which primtive type we are using
+    ID3D11DeviceContext_IASetPrimitiveTopology(window->devcon, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   } else {
     window = (Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
   }
@@ -114,7 +181,7 @@ LRESULT CALLBACK wndProc(
     case WM_DESTROY:
       KillTimer(hWnd, 0);
       PostQuitMessage(0);
-      // d3d11 clear
+      // d3d11 clear //
       IDXGISwapChain_Release(window->swapchain);
       ID3D11RenderTargetView_Release(window->rtView);
       ID3D11Device_Release(window->dev);
@@ -122,7 +189,7 @@ LRESULT CALLBACK wndProc(
       // ID3D11InputLayout_Release(window->layout);
       // ID3D11Buffer_Release(window->vertexBuffer);
       // ID3D11Buffer_Release(window->indexBuffer);
-      // window clear
+      // window clear //
       free(window);
       window = 0;
       break;
@@ -143,6 +210,7 @@ LRESULT CALLBACK wndProc(
     window->event = message;
     window->lParam = lParam;
     window->wParam = wParam;
+    ID3D11DeviceContext_ClearRenderTargetView(window->devcon, window->rtView, &window->screen_color);
     (*window->callback)(window);
     IDXGISwapChain_Present(window->swapchain, 0, 0);
   }
@@ -175,68 +243,7 @@ void window_new(
 
   Window* window = (Window*)malloc(sizeof(Window));
 
-  // d3d11 //
-  window->bufferDesc.ByteWidth = 0;
-  window->bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  window->bufferDesc.BindFlags = 0;
-  window->bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  window->bufferDesc.MiscFlags = 0;
-  window->bufferDesc.StructureByteStride = 0;
-
-  DXGI_SWAP_CHAIN_DESC scd = {
-    .BufferCount = 1, // one back buffer,
-    .BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM, // use 32-bit color,
-    .BufferDesc.Width = width, // set the back buffer width
-    .BufferDesc.Height = height, // set the back buffer height
-    .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT, // how swap chain is to be used
-    .OutputWindow = window->id, // the window to be used
-    .SampleDesc.Count = 4, // how many multisamples
-    .Windowed = TRUE, // windowed/full-screen mode
-    .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH // allow full-screen switching
-  };
-  // create a device, device context and swap chain using the information in the scd struct
-  D3D11CreateDeviceAndSwapChain(
-    0,
-    D3D_DRIVER_TYPE_HARDWARE,
-    0,
-    0,
-    0,
-    0,
-    D3D11_SDK_VERSION,
-    &scd,
-    &window->swapchain,
-    &window->dev,
-    0,
-    &window->devcon
-  );
-
-  // get the address of the back buffer
-  ID3D11Texture2D* backBuffer_p;
-  IDXGISwapChain_GetBuffer(window->swapchain, 0, &IID_ID3D11Texture2D, (void**)&backBuffer_p);
-
-  // use the back buffer address to create the render target
-  ID3D11Device_CreateRenderTargetView(window->dev, (ID3D11Resource*)backBuffer_p, 0, &window->rtView);
-  ID3D11Texture2D_Release(backBuffer_p);
-
-  // set the render target as the back buffer
-  ID3D11DeviceContext_OMSetRenderTargets(window->devcon, 1, &window->rtView, 0);
-
-  // Set the viewport
-  D3D11_VIEWPORT viewport = {
-      .TopLeftX = 0,
-      .TopLeftY = 0,
-      .Width = (FLOAT)width,
-      .Height = (FLOAT)height,
-      .MinDepth = 0,
-      .MaxDepth = 1,
-  };
-  ID3D11DeviceContext_RSSetViewports(window->devcon, 1, &viewport);
-
-  // select which primtive type we are using
-  ID3D11DeviceContext_IASetPrimitiveTopology(window->devcon, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
   // window register //
-
   RegisterClassEx(&wc);
   window->callback = window_callback;
   window->id = CreateWindowEx(

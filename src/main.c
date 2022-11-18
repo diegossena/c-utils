@@ -7,6 +7,7 @@ void window_callback(Window* window) {
   switch (event) {
     // Window
     case WINDOW_LOAD:
+      // printf("WINDOW_LOAD\n");
       break;
     case WINDOW_CLOSE:
       // printf("WINDOW_CLOSE\n");
@@ -62,7 +63,6 @@ void window_callback(Window* window) {
       // Keyboard
     case WINDOW_KEY_DOWN: {
       Keycode key = window_keycode(window);
-
       switch (key) {
         case KEY_LEFT: printf("KEY_LEFT\n"); break;
         case KEY_UP: printf("KEY_UP\n"); break;
