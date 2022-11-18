@@ -13,6 +13,12 @@
     "smart_ptr.h": "c",
     "window.h": "c",
     "system_error": "c",
-    "stdbool.h": "c"
+    "stdbool.h": "c",
+    "d3d11.h": "c",
+    "dxgi1_6.h": "c",
+    "dxgi1_2.h": "c",
+    "d3dcompiler.h": "c",
+    "windows.h": "c",
+    "dxgi.h": "c"
   }
 }

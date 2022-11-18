@@ -1,14 +1,28 @@
 #pragma once
 
+// definitions //
+
+#define COBJMACROS
+typedef struct Window Window;
+
+// headers //
+
 #include <tchar.h>
 #include <stdbool.h>
 
 #include <windows.h>
 #include <d3d11.h>
+#include <dxgi.h>
+#include <d3dcompiler.h>
 
 #include "smart_ptr.h"
 
-// definitions //
+// libraries //
+
+#pragma comment (lib, "d3d11.lib")
+#pragma comment (lib, "dxguid.lib")
+
+// type //
 
 typedef enum WindowFlags {
   WINDOW_HIDDEN = 0x1,
@@ -53,33 +67,27 @@ typedef enum WindowEvent {
   WINDOW_KEY_UP = WM_KEYUP
 } WindowEvent;
 
-// type
-
-
-
 typedef void WindowCallback(Window* window);
-
 typedef struct Window {
   HWND id;
   WindowEvent event;
   WPARAM wParam;
   LPARAM lParam;
   WindowCallback* callback;
-  Direct3D11 gfx;
-} Window;
 
-typedef struct Direct3D11 {
+  // Direct3D 11
+
   IDXGISwapChain* swapchain;
   ID3D11Device* dev;
   ID3D11DeviceContext* devcon;
-  ID3D11RenderTargetView* backbuffer;
+  ID3D11RenderTargetView* rtView;
 
   ID3D11InputLayout* layout;        // the pointer to the input layout
   ID3D11Buffer* vertexBuffer;       // the pointer to the vertex buffer
   ID3D11Buffer* indexBuffer;        // the pointer to the index buffer
 
   D3D11_BUFFER_DESC bufferDesc;
-} Direct3D11;
+} Window;
 
 // handlers //
 
@@ -90,6 +98,7 @@ LRESULT CALLBACK wndProc(
   LPARAM lParam
 ) {
   Window* window = 0;
+
   if (message == WM_CREATE) {
     LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
     window = (Window*)pcs->lpCreateParams;
@@ -101,26 +110,37 @@ LRESULT CALLBACK wndProc(
   } else {
     window = (Window*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
   }
+
+  if (message == WM_CLOSE) {
+    printf("WM_CLOSE %x %d\n", message, window);
+  }
+
   switch (message) {
     case WM_DESTROY:
+      KillTimer(hWnd, 0);
+      free(window);
       PostQuitMessage(0);
+      window = 0;
       break;
 
+    case WM_CLOSE:
+      window = 0;
+      DestroyWindow(hWnd);
+      break;
+
+    case WM_NCDESTROY:
     case WM_NCHITTEST:
     case WM_SETCURSOR:
     case WM_CONTEXTMENU:
+      window = 0;
       break;
-    case WM_CLOSE:
-      free(window);
-      DestroyWindow(hWnd);
-    default: {
-      window->event = message;
-      window->lParam = lParam;
-      window->wParam = wParam;
-    }
   }
-  if (window && window->callback)
+  if (window) {
+    window->event = message;
+    window->lParam = lParam;
+    window->wParam = wParam;
     (*window->callback)(window);
+  }
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -151,12 +171,12 @@ void window_new(
   Window* window = (Window*)malloc(sizeof(Window));
 
   // d3d11 //
-  window->gfx.bufferDesc.ByteWidth = 0;
-  window->gfx.bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  window->gfx.bufferDesc.BindFlags = 0;
-  window->gfx.bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  window->gfx.bufferDesc.MiscFlags = 0;
-  window->gfx.bufferDesc.StructureByteStride = 0;
+  window->bufferDesc.ByteWidth = 0;
+  window->bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  window->bufferDesc.BindFlags = 0;
+  window->bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  window->bufferDesc.MiscFlags = 0;
+  window->bufferDesc.StructureByteStride = 0;
 
   DXGI_SWAP_CHAIN_DESC scd = {
     .BufferCount = 1, // one back buffer,
@@ -179,21 +199,41 @@ void window_new(
     0,
     D3D11_SDK_VERSION,
     &scd,
-    &window->gfx.swapchain,
-    &window->gfx.dev,
+    &window->swapchain,
+    &window->dev,
     0,
-    &window->gfx.devcon
+    &window->devcon
   );
+
   // get the address of the back buffer
-  ID3D11Texture2D* pBackBuffer;
-  GetBuffer(0, __uuidof(), (LPVOID*)&pBackBuffer);
-  CreateRenderTargetView(pBackBuffer, 0, &window->gfx.backbuffer);
-   // InitGraphics
+  ID3D11Texture2D* backBuffer_p;
+  IDXGISwapChain_GetBuffer(window->swapchain, 0, &IID_ID3D11Texture2D, (void**)&backBuffer_p);
 
+  // use the back buffer address to create the render target
+  ID3D11Device_CreateRenderTargetView(window->dev, (ID3D11Resource*)backBuffer_p, 0, &window->rtView);
+  ID3D11Texture2D_Release(backBuffer_p);
 
-   //
+  // set the render target as the back buffer
+  ID3D11DeviceContext_OMSetRenderTargets(window->devcon, 1, &window->rtView, 0);
+
+  // Set the viewport
+  D3D11_VIEWPORT viewport = {
+      .TopLeftX = 0,
+      .TopLeftY = 0,
+      .Width = (FLOAT)width,
+      .Height = (FLOAT)height,
+      .MinDepth = 0,
+      .MaxDepth = 1,
+  };
+  ID3D11DeviceContext_RSSetViewports(window->devcon, 1, &viewport);
+
+  // select which primtive type we are using
+  ID3D11DeviceContext_IASetPrimitiveTopology(window->devcon, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+  // window register //
 
   RegisterClassEx(&wc);
+  window->callback = window_callback;
   window->id = CreateWindowEx(
     0,                // extended window style
     wc.lpszClassName, // pointer to registered class name
@@ -249,7 +289,6 @@ void window_hide(Window* window) { ShowWindow(window->id, SW_HIDE); }
 void window_set_caption(Window* window, const char* title) { SetWindowText(window->id, title); }
 void window_close(Window* window) { CloseWindow(window->id); }
 void window_destroy(Window* window) { DestroyWindow(window->id); }
-void window_set_renderer(Window* window) {}
 
 // Screen //
 
@@ -275,4 +314,4 @@ typedef enum Keycode {
   KEY_DOWN,
 } Keycode;
 
-WORD window_keycode(Window* window) { return window->wParam; }
+Keycode window_keycode(Window* window) { return window->wParam; }
