@@ -19,6 +19,7 @@
     "dxgi1_2.h": "c",
     "d3dcompiler.h": "c",
     "windows.h": "c",
-    "dxgi.h": "c"
+    "dxgi.h": "c",
+    "time.h": "c"
   }
 }

@@ -7,14 +7,17 @@ typedef struct Window Window;
 
 // headers //
 
+#include <stdint.h>
 #include <tchar.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include <windows.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
 #include "smart_ptr.h"
+#include "date.h"
 
 // libraries //
 
@@ -73,6 +76,7 @@ typedef struct Window {
   WPARAM wParam;
   LPARAM lParam;
   WindowCallback* callback;
+  int64_t time;
 
   // Direct3D 11
 
@@ -108,17 +112,6 @@ LRESULT CALLBACK wndProc(
       (LONG_PTR)window
     );
     // d3d11 //
-    window->screen_color[0] = 0.392f;
-    window->screen_color[1] = 0.584f;
-    window->screen_color[2] = 0.929f;
-    window->screen_color[3] = 1.f;
-
-    window->bufferDesc.ByteWidth = 0;
-    window->bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    window->bufferDesc.BindFlags = 0;
-    window->bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    window->bufferDesc.MiscFlags = 0;
-    window->bufferDesc.StructureByteStride = 0;
     int
       width = screen_get_width(),
       height = screen_get_height();
@@ -207,6 +200,10 @@ LRESULT CALLBACK wndProc(
       break;
   }
   if (window) {
+    int64_t now = date_now();
+    int64_t elapsed = now - window->time;
+    printf("elapsed %lld %lld\n", now, elapsed);
+    window->time = now;
     window->event = message;
     window->lParam = lParam;
     window->wParam = wParam;
@@ -243,6 +240,21 @@ void window_new(
 
   Window* window = (Window*)malloc(sizeof(Window));
 
+  window->time = date_now();
+
+  // d3d11 //
+  window->screen_color[0] = 0.392f;
+  window->screen_color[1] = 0.584f;
+  window->screen_color[2] = 0.929f;
+  window->screen_color[3] = 1.f;
+
+  window->bufferDesc.ByteWidth = 0;
+  window->bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  window->bufferDesc.BindFlags = 0;
+  window->bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  window->bufferDesc.MiscFlags = 0;
+  window->bufferDesc.StructureByteStride = 0;
+
   // window register //
   RegisterClassEx(&wc);
   window->callback = window_callback;
@@ -260,6 +272,7 @@ void window_new(
     wc.hInstance,     // handle to application instance
     window // pointer to window-creation data
   );
+  // USER_TIMER_MINIMUM
   SetTimer(window->id, 0, USER_TIMER_MINIMUM, NULL);
 }
 void window_new_centered(
