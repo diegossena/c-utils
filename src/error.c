@@ -3,6 +3,8 @@
 
 #include <string.h> // strerror
 
+error_code error_last = ERR_SUCCESS;
+
 const char* error_cstr(i32 code) {
   switch (code) {
     case ERR_OUT_OF_RANGE: return "ERR_OUT_OF_RANGE";

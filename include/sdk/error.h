@@ -2,7 +2,7 @@
 
 #include <sdk/types.h>
 
-#define error(syscall, code) _error(syscall, code);
+#define error(syscall, code) _error(syscall, code); error_last = code;
 
 typedef enum error_code {
   ERR_UNKNOWN = MIN_I16,
@@ -48,5 +48,7 @@ typedef enum error_code {
   ERR_WSAECONNREFUSED = 10061,
   ERR_WSANOTINITIALISED = 10093
 } error_code;
+
+extern error_code error_last;
 
 void _error(const char* message, error_code);
