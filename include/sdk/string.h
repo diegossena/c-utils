@@ -6,7 +6,7 @@
 string str = {}
 
 string str;
-string_constructor(str);
+string_new(str);
 ```
 */
 typedef struct string {
@@ -14,7 +14,7 @@ typedef struct string {
   u64 length;
 } string;
 
-void string_constructor(string*);
+void string_new(string*);
 void string_free(string*);
 
 i16 string_compare(const char*, const char*);

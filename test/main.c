@@ -18,8 +18,24 @@ void string_test() {
   string_free(&str2);
   printf("!STRING\n");
 }
+void array_test() {
+  printf("ARRAY\n");
+  array arr;
+  array_new(&arr, u64);
+  array_push(&arr, (u64)10);
+  array_push(&arr, (u64)11);
+  array_push(&arr, (u64)12);
+  assert(((u64*)arr.data)[0] == 10);
+  assert(((u64*)arr.data)[1] == 11);
+  assert(((u64*)arr.data)[2] == 12);
+  assert(arr.length == 3);
+  assert(arr.capacity == 4);
+  array_free(&arr);
+  printf("!ARRAY\n");
+}
 
 int main() {
-  string_test();
+  // string_test();
+  array_test();
   return 0;
 }

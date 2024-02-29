@@ -10,10 +10,10 @@
 u64 allocated = 0;
 
 void* memory_alloc(u64 size) {
-  return (void*)HeapAlloc(GetProcessHeap(), 0, size);
+  return HeapAlloc(GetProcessHeap(), 0, size);
 }
 void* memory_alloc0(u64 size) {
-  return (void*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
+  return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
 }
 void memory_free(void* block) {
   HeapFree(GetProcessHeap(), 0, block);

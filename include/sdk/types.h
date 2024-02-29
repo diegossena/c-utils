@@ -17,6 +17,8 @@ typedef unsigned long long u64; // 0 ~ 18446744073709551615
 typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
+typedef char byte;
+
 #define MAX_U64 ((u64)-1) / sizeof(u64);
 #define MAX_I64 ((i64)-1) / sizeof(i64);
 #define MAX_I32 2147483647

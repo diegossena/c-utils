@@ -3,4 +3,6 @@
 #include <sdk/assert.h>
 
 #include <sdk/string.h>
+#include <sdk/array.h>
+
 #include <sdk/application.h>

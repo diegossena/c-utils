@@ -5,7 +5,7 @@
 
 #include <stdio.h> // TODO: remove this line
 
-void string_constructor(string* str) {
+void string_new(string* str) {
   str->data = 0;
   str->length = 0;
 }
