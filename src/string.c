@@ -5,7 +5,7 @@
 
 #include <stdio.h> // TODO: remove this line
 
-void string_new(string* str) {
+void string_constructor(string* str) {
   str->data = 0;
   str->length = 0;
 }
@@ -27,6 +27,14 @@ bool string_equal(const char* s1, const char* s2) {
     ++s1; ++s2;
   }
   return true;
+}
+/*
+@returns i32 - written
+*/
+i32 string_format(char* stream, const char* format, void* args) {
+  i32 written = vsnprintf(stream, MAX_BUFSIZ, format, args);
+  stream[written] = '\0';
+  return written;
 }
 
 void string_append_cstr(string* str, const char* cstr) {

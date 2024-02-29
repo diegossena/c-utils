@@ -1,27 +1,31 @@
 #pragma once
 
 #include <sdk/types.h>
+#include <sdk/error.h>
 #include <sdk/string.h>
+
+interface socket_options {
+  const char* host;
+  u16
+    port,
+    timeout;
+} socket_options;
+
+class net_socket {
+  u64 id;
+} net_socket;
+
+error_code socket_startup();
+void socket_shutdown();
 
 /*
 ```
-SocketConstructorOpts options = {
+socket_constructor(
+  &sock, (socket_options) {
   .host = "localhost",
-  .port = 1234,
+  .port = 8080,
   .timeout = 0
-};
+});
 ```
 */
-interface SocketConstructorOpts {
-  string host;
-  u16 port, timeout;
-} SocketConstructorOpts;
-
-class socket {
-  u64 id;
-} socket;
-
-void socket_startup();
-void socket_shutdown();
-
-void socket_new(socket*, SocketConstructorOpts*);
+void socket_constructor(net_socket*, socket_options);

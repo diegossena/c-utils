@@ -9,7 +9,7 @@ bool __resize(array* arr, u64 capacity) {
   arr->capacity = capacity;
 }
 
-void _array_new(array* arr, u64 stride) {
+void _array_constructor(array* arr, u64 stride) {
   arr->capacity = 0;
   arr->length = 0;
   arr->stride = stride;

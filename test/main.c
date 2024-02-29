@@ -1,8 +1,7 @@
 #include <sdk/sdk.h>
-#include <stdio.h> // TODO: remove this line
 
 void string_test() {
-  printf("STRING\n");
+  console_log("STRING");
   string str1 = {};
   string str2 = {};
 
@@ -16,12 +15,12 @@ void string_test() {
 
   string_free(&str1);
   string_free(&str2);
-  printf("!STRING\n");
+  console_log("!STRING");
 }
 void array_test() {
-  printf("ARRAY\n");
+  console_log("ARRAY");
   array arr;
-  array_new(&arr, u64);
+  array_constructor(&arr, u64);
   array_push(&arr, (u64)10);
   array_push(&arr, (u64)11);
   array_push(&arr, (u64)12);
@@ -31,26 +30,29 @@ void array_test() {
   assert(arr.length == 3);
   assert(arr.capacity == 4);
   array_free(&arr);
-  printf("!ARRAY\n");
+  console_log("!ARRAY");
 }
 void socket_test() {
-  printf("SOCKET\n");
-  socket_startup();
-
-  SocketConstructorOpts options = {
+  console_log("SOCKET");
+  error_code error = socket_startup();
+  if (error)
+    return;
+  net_socket sock;
+  socket_constructor(
+    &sock, (socket_options) {
     .host = "localhost",
-    .port = 8080,
-    .timeout = 0
-  };
-  socket sock;
-
-  socket_shutdown();
-  printf("!SOCKET\n");
+      .port = 8080,
+      .timeout = 0
+  });
+  console_log("!SOCKET");
 }
 
 int main() {
+  console_inicialize();
   // string_test();
   // array_test();
   socket_test();
+
+  app_run();
   return 0;
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <sdk/types.h>
+#include <sdk/error.h>
 
 /*
 ```c
@@ -14,11 +15,12 @@ class string {
   u64 length;
 } string;
 
-void string_new(string*);
+void string_constructor(string*);
 void string_free(string*);
 
 i16 string_compare(const char*, const char*);
 bool string_equal(const char*, const char*);
+error_code string_format(char* dest, const char* format, void* va_listp);
 
 void string_append_cstr(string*, const char*);
 void string_append_char(string*, const char);

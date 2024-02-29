@@ -6,5 +6,3 @@ const socket = net.createConnection({
   readable: false,
   writable: false
 })
-
-socket.readable

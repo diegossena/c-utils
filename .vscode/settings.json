@@ -6,6 +6,20 @@
     "type_traits": "c",
     "stdio.h": "c",
     "assert.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "compare": "c",
+    "socket.h": "c",
+    "array.h": "c",
+    "platform.h": "c",
+    "winsock2.h": "c",
+    "application.h": "c",
+    "cstdlib": "c",
+    "logger.h": "c",
+    "console.h": "c",
+    "windows.h": "c",
+    "memory.h": "c",
+    "console.win32.h": "c",
+    "stdarg.h": "c",
+    "error.h": "c"
   }
 }
