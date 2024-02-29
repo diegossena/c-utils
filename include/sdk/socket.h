@@ -30,3 +30,6 @@ socket_constructor(
 */
 error_code socket_constructor(net_socket*, socket_options);
 void socket_free(net_socket*);
+
+error_code socket_write(net_socket*, const byte* chunk, u32 length);
+i32 socket_read(net_socket*, byte* buffer, u32 length, u32* received);

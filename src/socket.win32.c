@@ -3,8 +3,10 @@
 #if PLATFORM_WINDOWS
 
 #include "sdk/socket.h"
-#include "sdk/console.h" // TODO: remove this line
 #include "sdk/assert.h"
+#include "sdk/console.h" // TODO: remove this line
+
+#include "base/memory.h"
 
 #include <winsock2.h>
 
@@ -99,6 +101,25 @@ error_code socket_constructor(net_socket* this, socket_options opt) {
 }
 void socket_free(net_socket* this) {
   closesocket(this->id);
+}
+
+error_code socket_write(net_socket* this, const byte* chunk, u32 length) {
+  error_code code = send(this->id, chunk, length, 0);
+  if (code == SOCKET_ERROR) {
+    code = WSAGetLastError();
+    error("send", code);
+    return code;
+  }
+  return ERR_SUCCESS;
+}
+i32 socket_read(net_socket* this, byte* buffer, u32 length) {
+  i32 received = recv(this->id, buffer, length, 0);
+  if (received == SOCKET_ERROR) {
+    error_code code = WSAGetLastError();
+    error("recv", code);
+    return code;
+  }
+  return received;
 }
 
 #endif
