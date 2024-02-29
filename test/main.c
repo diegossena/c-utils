@@ -1,4 +1,4 @@
-#include <SDK/SDK.h>
+#include <sdk/sdk.h>
 #include <stdio.h> // TODO: remove this line
 
 void string_test() {
@@ -33,9 +33,24 @@ void array_test() {
   array_free(&arr);
   printf("!ARRAY\n");
 }
+void socket_test() {
+  printf("SOCKET\n");
+  socket_startup();
+
+  SocketConstructorOpts options = {
+    .host = "localhost",
+    .port = 8080,
+    .timeout = 0
+  };
+  socket sock;
+
+  socket_shutdown();
+  printf("!SOCKET\n");
+}
 
 int main() {
   // string_test();
-  array_test();
+  // array_test();
+  socket_test();
   return 0;
 }

@@ -9,7 +9,7 @@ string str;
 string_new(str);
 ```
 */
-typedef struct string {
+class string {
   char* data;
   u64 length;
 } string;

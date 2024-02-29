@@ -10,7 +10,7 @@
   _array_new(this, sizeof(type))
 
 
-typedef struct array {
+class array {
   u64 capacity;
   u64 length;
   u64 stride;

@@ -5,4 +5,5 @@
 #include <sdk/string.h>
 #include <sdk/array.h>
 
+#include <sdk/socket.h>
 #include <sdk/application.h>

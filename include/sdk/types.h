@@ -19,6 +19,9 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef char byte;
 
+#define interface typedef struct
+#define class typedef struct
+
 #define MAX_U64 ((u64)-1) / sizeof(u64);
 #define MAX_I64 ((i64)-1) / sizeof(i64);
 #define MAX_I32 2147483647
@@ -26,7 +29,6 @@ typedef char byte;
 #define MAX_I16 32767
 #define MIN_I16 -32768
 
-#define null nullptr
 
 #ifdef SDK_LIB
 #define export __declspec(dllexport)
