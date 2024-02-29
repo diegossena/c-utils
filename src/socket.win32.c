@@ -30,7 +30,7 @@ void socket_shutdown() {
   }
 }
 
-void socket_constructor(net_socket* this, socket_options opt) {
+error_code socket_constructor(net_socket* this, socket_options opt) {
   assert(*opt.host);
   assert(opt.port);
 

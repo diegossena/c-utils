@@ -28,4 +28,4 @@ socket_constructor(
 });
 ```
 */
-void socket_constructor(net_socket*, socket_options);
+error_code socket_constructor(net_socket*, socket_options);
