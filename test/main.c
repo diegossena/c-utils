@@ -44,6 +44,7 @@ void socket_test() {
       .port = 8080,
       .timeout = 0
   });
+  socket_free(&sock);
   console_log("!SOCKET");
 }
 

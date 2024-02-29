@@ -98,7 +98,7 @@ error_code socket_constructor(net_socket* this, socket_options opt) {
   return ERR_SUCCESS;
 }
 void socket_free(net_socket* this) {
-
+  closesocket(this->id);
 }
 
 #endif
