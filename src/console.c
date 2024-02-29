@@ -16,8 +16,7 @@ error_code _console_write(log_level level, const char* message, ...) {
   if (length < 0)
     return length;
   va_end(args);
-  base_console_write(level, out_message, length);
-  return 0;
+  return base_console_write(level, out_message, length);
 }
 
 const char* console_reset = ANSI(0);

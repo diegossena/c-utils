@@ -8,7 +8,7 @@
 #include "base/console.win32.h" // has_ansi
 /*
 GetStdHandle, GetConsoleMode, SetConsoleMode, DWORD, HANDLE, OSVERSIONINFO
-ENABLE_VIRTUAL_TERMINAL_PROCESSING,
+ENABLE_VIRTUAL_TERMINAL_PROCESSING, STD_OUTPUT_HANDLE
 */
 #include <windows.h> // 
 
@@ -16,8 +16,10 @@ error_code console_inicialize() {
   OSVERSIONINFO os_version = { .dwOSVersionInfoSize = sizeof(OSVERSIONINFO) };
   if (GetVersionEx(&os_version) && os_version.dwMajorVersion >= 10) {
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (handle == INVALID_HANDLE_VALUE)
+    if (handle == INVALID_HANDLE_VALUE) {
+      error("GetStdHandle", ERR_INVALID_HANDLE);
       return ERR_INVALID_HANDLE;
+    }
 
     DWORD console_mode;
 
@@ -33,6 +35,7 @@ error_code console_inicialize() {
 
     has_ansi = true;
   }
+  return ERR_SUCCESS;
 }
 
 #endif

@@ -20,6 +20,8 @@
     "memory.h": "c",
     "console.win32.h": "c",
     "stdarg.h": "c",
-    "error.h": "c"
+    "error.h": "c",
+    "limits": "c",
+    "new": "c"
   }
 }

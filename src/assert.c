@@ -1,13 +1,9 @@
 #include "sdk/assert.h"
-
-#include <stdio.h> // TODO: replace this library
+#include "sdk/console.h"
 
 void _assert(const char* expression, const char* file, u64 line) {
-  fprintf(
-    stderr,
+  console_error(
     "AssertionError [%s]: %s\n at %s:%llu\n",
-    expression,
-    file,
-    line
+    expression, file, line
   );
 }

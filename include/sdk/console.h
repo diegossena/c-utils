@@ -30,7 +30,6 @@ typedef enum log_level {
 #define console_error(message, ...) _console_write(LOG_LEVEL_ERROR, message "\n", ##__VA_ARGS__)
 #define console_error_write(message, ...) _console_write(LOG_LEVEL_ERROR, message, ##__VA_ARGS__)
 
-
 error_code console_inicialize();
 
 error_code _console_write(log_level, const char* message, ...);

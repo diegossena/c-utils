@@ -23,8 +23,7 @@ const char* error_cstr(i32 code) {
   }
 }
 
-
-void error(const char* message, error_code code) {
+void _error(const char* message, error_code code) {
   const char* error_str = error_cstr(code);
   console_error("%sError:%s %s %s", console_fore_red, console_reset, error_str, message);
 }

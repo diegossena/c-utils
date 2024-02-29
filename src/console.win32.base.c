@@ -15,8 +15,10 @@ bool has_ansi = false;
 error_code base_console_write(log_level level, const char* message, u64 message_length) {
   DWORD nStdHandle = level < LOG_LEVEL_WARN ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE;
   HANDLE handle = GetStdHandle(nStdHandle);
-  if (handle == INVALID_HANDLE_VALUE)
+  if (handle == INVALID_HANDLE_VALUE) {
+    error("GetStdHandle", ERR_INVALID_HANDLE);
     return ERR_INVALID_HANDLE;
+  }
 
   if (!has_ansi && message[0] == '\033' && message[1] == '[') {
     u8 ansi_code = message[4] == 'm'
@@ -106,6 +108,7 @@ error_code base_console_write(log_level level, const char* message, u64 message_
   }
 
   WriteConsoleA(handle, message, message_length, 0, 0);
+  return ERR_SUCCESS;
 }
 
 #endif

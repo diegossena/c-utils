@@ -34,6 +34,10 @@ bool string_equal(const char* s1, const char* s2) {
 i32 string_format(char* stream, const char* format, void* args) {
   i32 written = vsnprintf(stream, MAX_BUFSIZ, format, args);
   stream[written] = '\0';
+  if (written < 0) {
+    error("vsnprintf", written);
+    return written;
+  }
   return written;
 }
 

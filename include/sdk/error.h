@@ -2,6 +2,8 @@
 
 #include <sdk/types.h>
 
+#define error(syscall, code) _error(syscall, code);
+
 typedef enum error_code {
   ERR_UNKNOWN = MIN_I16,
   ERR_INVALID_URL,
@@ -47,4 +49,4 @@ typedef enum error_code {
   ERR_WSANOTINITIALISED = 10093
 } error_code;
 
-void error(const char* message, error_code);
+void _error(const char* message, error_code);
