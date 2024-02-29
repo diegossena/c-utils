@@ -15,7 +15,6 @@ SET linker_flags=
 SET output_extension=exe
 :: get all c files on the package
 SET cFilenames=
-SET rcFilenames=
 SET source_path=
 :: check if is a library
 IF "%package_name%" == "" (
@@ -23,14 +22,14 @@ IF "%package_name%" == "" (
   SET include_flags=%include_flags%
   SET linker_flags=%linker_flags% 
   :: -lcurl -lz -lssl -lcrypto -lnetsnmp -lcrypt32 -luser32 -lversion -lwldap32 -lws2_32 -lshlwapi -lmingw32 -ld3d11 -ld3dcompiler
-  set defines=%defines% -DCURL_STATICLIB -DSDK_LIB
+  set defines=%defines% -DSDK_LIB
   SET output_extension=dll
   SET compiler_flags=%compiler_flags% -shared -static
-  SET package_name=SDK
+  SET package_name=sdk
 ) ELSE (
   SET source_path=.\%package_name%
   SET include_flags=%include_flags%
-  SET linker_flags=%linker_flags% -Lbin -lSDK
+  SET linker_flags=%linker_flags% -Lbin -lsdk
 )
 :: compile resource files
 FOR /R "%source_path%" %%f IN (*.rc) DO windres "%%f" -o "%%~dpnf.o"
@@ -39,6 +38,10 @@ FOR /R "%source_path%" %%f IN (*.c *.o) DO CALL SET cFilenames=%%cFilenames%% "%
 if EXIST .\bin\%package_name%.%output_extension% DEL .\bin\%package_name%.%output_extension%
 ECHO %package_name% compiling...
 gcc %compiler_flags%%cFilenames% -o ./bin/%package_name%.%output_extension% %defines% %include_flags% %linker_flags%
+IF %ERRORLEVEL% NEQ 0 (
+  ECHO gcc %compiler_flags%%cFilenames% -o ./bin/%package_name%.%output_extension% %defines% %include_flags% %linker_flags%
+  GOTO :EOF
+) 
 :: clean
 FOR /R "%source_path%" %%f IN (*.o) DO del "%%~dpnf.o"
 :: Get elapsed time:

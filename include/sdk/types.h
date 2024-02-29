@@ -1,5 +1,9 @@
 #pragma once
 
+typedef _Bool bool;
+#define true 1
+#define false 0
+
 typedef signed char i8; // -128 ~ 127
 typedef signed short i16; // -32768 ~ 32767
 typedef signed int i32; // -2147483648 ~ 2147483647
