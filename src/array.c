@@ -4,27 +4,27 @@
 
 #include <stdio.h> // TODO: remove this line
 
-bool __resize(array* arr, u64 capacity) {
-  arr->data = memory_realloc(arr->data, capacity * arr->stride);
-  arr->capacity = capacity;
+bool __resize(array* this, u64 capacity) {
+  this->data = memory_realloc(this->data, capacity * this->stride);
+  this->capacity = capacity;
 }
 
-void _array_constructor(array* arr, u64 stride) {
-  arr->capacity = 0;
-  arr->length = 0;
-  arr->stride = stride;
-  arr->data = 0;
+void _array_constructor(array* this, u64 stride) {
+  this->capacity = 0;
+  this->length = 0;
+  this->stride = stride;
+  this->data = 0;
 }
-void array_free(array* arr) {
-  memory_free(arr->data);
+void array_free(array* this) {
+  memory_free(this->data);
 }
 
-void _array_push(array* arr, const void* value) {
-  if (arr->length == arr->capacity) {
-    u64 capacity = math_closest_2pow(arr->capacity + 1);
-    __resize(arr, capacity);
+void _array_push(array* this, const void* value) {
+  if (this->length == this->capacity) {
+    u64 capacity = math_closest_2pow(this->capacity + 1);
+    __resize(this, capacity);
   }
-  void* addr = arr->data + arr->length * arr->stride;
-  memory_copy(addr, value, arr->stride);
-  ++arr->length;
+  void* addr = this->data + this->length * this->stride;
+  memory_copy(addr, value, this->stride);
+  ++this->length;
 }

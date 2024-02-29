@@ -29,3 +29,4 @@ socket_constructor(
 ```
 */
 error_code socket_constructor(net_socket*, socket_options);
+void socket_free(net_socket*);
