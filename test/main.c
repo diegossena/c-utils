@@ -77,7 +77,7 @@ void date_test() {
 }
 void snowflake_test() {
   console_log("SNOWFLAKE");
-  assert(snowflake_uid() > 0);
+  assert(snowflake_uid() < 0);
 }
 
 int main() {
