@@ -16,6 +16,9 @@
 #define console_debug(message, ...) _console_write(LOG_LEVEL_DEBUG, message "\n", ##__VA_ARGS__)
 #define console_trace(message, ...) _console_write(LOG_LEVEL_TRACE, message "\n", ##__VA_ARGS__)
 #define console_log(message, ...) _console_write(LOG_LEVEL_INFO, message "\n", ##__VA_ARGS__)
+#define console_log_str(message, length) { \
+  console_write_str(LOG_LEVEL_INFO, message, length); \
+}
 #define console_log_cstr(message) { \
   const char cstr[] = message "\n"; \
   console_write_str(LOG_LEVEL_INFO, cstr, sizeof(cstr)); \

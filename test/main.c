@@ -1,7 +1,7 @@
 #include <sdk/sdk.h>
 
 void string_test() {
-  console_log("STRING");
+  console_log_cstr(CONSOLE_FORE_BLACK "STRING" CONSOLE_RESET);
   string str1 = {};
   string str2 = {};
 
@@ -19,7 +19,7 @@ void string_test() {
   string_free(&str2);
 }
 void array_test() {
-  console_log("ARRAY");
+  console_log_cstr(CONSOLE_FORE_BLACK "ARRAY" CONSOLE_RESET);
   array arr;
   array_constructor(&arr, u64);
   array_push(&arr, (u64)10);
@@ -33,7 +33,7 @@ void array_test() {
   array_free(&arr);
 }
 void socket_test() {
-  console_log("SOCKET");
+  console_log_cstr(CONSOLE_FORE_BLACK "SOCKET" CONSOLE_RESET);
   error_last = socket_startup();
   if (error_last)
     return;
@@ -67,16 +67,16 @@ void socket_test() {
     buffer_length += received;
   }
   if (!error_last) {
-    console_log("%s", buffer);
+    console_log_str(buffer, buffer_length);
   }
   socket_free(&socket);
 }
 void date_test() {
-  console_log("DATE");
+  console_log_cstr(CONSOLE_FORE_BLACK "DATE" CONSOLE_RESET);
   assert(date_now() > 0);
 }
 void snowflake_test() {
-  console_log("SNOWFLAKE");
+  console_log_cstr(CONSOLE_FORE_BLACK "SNOWFLAKE" CONSOLE_RESET);
   assert(snowflake_uid() < 0);
 }
 
