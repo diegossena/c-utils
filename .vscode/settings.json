@@ -22,6 +22,13 @@
     "stdarg.h": "c",
     "error.h": "c",
     "limits": "c",
-    "new": "c"
+    "new": "c",
+    "errno.h": "c",
+    "err.h": "c",
+    "pthread_time.h": "c",
+    "date.h": "c",
+    "snowflake.h": "c",
+    "math.h": "c",
+    "_mingw.h": "c"
   }
 }

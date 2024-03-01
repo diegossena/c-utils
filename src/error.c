@@ -38,6 +38,6 @@ void _error(const char* message, error_code code) {
   const char* error_str = error_cstr(code);
   console_error(
     "%sError:%s %s %d %s",
-    console_fore_red, console_reset, error_str, code, message
+    CONSOLE_FORE_RED, CONSOLE_RESET, error_str, code, message
   );
 }

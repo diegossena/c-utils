@@ -17,7 +17,6 @@ void string_test() {
   assert(string_equal(str2.data, "test1test2") == true);
   string_free(&str1);
   string_free(&str2);
-  console_log("!STRING");
 }
 void array_test() {
   console_log("ARRAY");
@@ -32,21 +31,20 @@ void array_test() {
   assert(arr.length == 3);
   assert(arr.capacity == 4);
   array_free(&arr);
-  console_log("!ARRAY");
 }
 void socket_test() {
   console_log("SOCKET");
-  error_code code = socket_startup();
-  if (code)
+  error_last = socket_startup();
+  if (error_last)
     return;
   net_socket socket;
-  code = socket_constructor(
+  error_last = socket_constructor(
     &socket, (socket_options) {
     .host = "google.com.br",
       .port = 80,
       .timeout = 0
   });
-  if (code)
+  if (error_last)
     return;
   socket_write_cstr(
     &socket,
@@ -63,16 +61,23 @@ void socket_test() {
     if (!received)
       break;
     if (received < 0) {
-      code = error_last;
+      error_last = error_last;
       return;
     }
     buffer_length += received;
   }
-  if (!code) {
+  if (!error_last) {
     console_log("%s", buffer);
   }
   socket_free(&socket);
-  console_log("!SOCKET");
+}
+void date_test() {
+  console_log("DATE");
+  assert(date_now() > 0);
+}
+void snowflake_test() {
+  console_log("SNOWFLAKE");
+  assert(snowflake_uid() > 0);
 }
 
 int main() {
@@ -80,8 +85,17 @@ int main() {
 
   // string_test();
   // array_test();
-  socket_test();
+  // socket_test();
+  // date_test();
+  // snowflake_test();
 
   app_run();
+
+  console_log_cstr(
+    CONSOLE_FORE_GREEN
+    "SUCCESS"
+    CONSOLE_FORE_GREEN
+    CONSOLE_RESET
+  );
   return 0;
 }

@@ -15,11 +15,11 @@ bool __socket_inicialized = false;
 error_code socket_startup() {
   if (!__socket_inicialized) {
     WSADATA wsaData;
-    error_code code = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (code) {
+    error_last = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (error_last) {
+      error("WSAStartup", error_last);
       WSACleanup();
-      error("WSAStartup", code);
-      return code;
+      return error_last;
     }
     __socket_inicialized = true;
   }
@@ -99,13 +99,12 @@ void socket_free(net_socket* this) {
   closesocket(this->id);
 }
 
-error_code socket_write(net_socket* this, const byte* chunk, u32 length) {
-  error_code code = send(this->id, chunk, length, 0);
+i32 socket_write(net_socket* this, const byte* chunk, u32 length) {
+  i32 code = send(this->id, chunk, length, 0);
   if (code == SOCKET_ERROR) {
     error("send", WSAGetLastError());
-    return code;
   }
-  return ERR_SUCCESS;
+  return code;
 }
 i32 socket_read(net_socket* this, byte* buffer, u32 length) {
   i32 received = recv(this->id, buffer, length, 0);

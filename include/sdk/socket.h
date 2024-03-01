@@ -35,8 +35,10 @@ socket_constructor(
 */
 error_code socket_constructor(net_socket*, socket_options);
 void socket_free(net_socket*);
-
-error_code socket_write(net_socket*, const byte* chunk, u32 length);
+/*
+@returns i32 >= 0 ? bytes_sent : error
+*/
+i32 socket_write(net_socket*, const byte* chunk, u32 length);
 /*
 @returns i32 >= 0 ? bytes_received : error
 */

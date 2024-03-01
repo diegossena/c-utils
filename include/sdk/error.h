@@ -5,7 +5,6 @@
 #define error(syscall, code) error_last = code; _error(syscall, error_last); 
 
 typedef enum error_code {
-  ERR_UNKNOWN = MIN_I16,
   ERR_INVALID_URL,
   ERR_STREAM_WRITE_AFTER_END,
   ERR_STREAM_READ_AFTER_END,
@@ -24,6 +23,7 @@ typedef enum error_code {
   ERR_COULDNT_RESOLVE_PROXY,
   ERR_ENOTFOUND,
   ERR_ECONNREFUSED,
+  ERR_UNKNOWN = -1,
   // https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
   ERR_SUCCESS = 0,
   ERR_INVALID_FUNCTION = 1,
