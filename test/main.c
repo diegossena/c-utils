@@ -86,6 +86,7 @@ void map_test() {
   map_set(&map_u64, map_hash("key1"), (u64)10);
   assert(*(u64*)map_get(&map_u64, map_hash("key1")) == 10);
   map_delete(&map_u64, map_hash("key1"));
+  assert(map_get(&map_u64, map_hash("key1")) == 0);
   map_free(&map_u64);
 }
 
