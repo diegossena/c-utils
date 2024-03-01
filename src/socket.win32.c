@@ -36,13 +36,10 @@ error_code socket_constructor(net_socket* this, socket_options opt) {
   assert(*opt.host);
   assert(opt.port);
 
-  error_code code;
-
   struct hostent* remoteHost = gethostbyname(opt.host);
   if (remoteHost == NULL) {
-    code = WSAGetLastError();
-    error("gethostbyname", code);
-    return code;
+    error("gethostbyname", WSAGetLastError());
+    return error_last;
   }
 
   struct in_addr addr;
@@ -55,10 +52,9 @@ error_code socket_constructor(net_socket* this, socket_options opt) {
   server_addr.sin_addr.s_addr = inet_addr(host);
   this->id = socket(server_addr.sin_family, SOCK_STREAM, IPPROTO_TCP);
   if (this->id == INVALID_SOCKET) {
-    code = WSAGetLastError();
+    error("socket", WSAGetLastError());
     closesocket(this->id);
-    error("socket", code);
-    return code;
+    return error_last;
   }
   /**
    * If iMode = 0, blocking is enabled;
@@ -66,19 +62,19 @@ error_code socket_constructor(net_socket* this, socket_options opt) {
    */
   u_long iMode = 1;
   if (opt.timeout) {
-    code = ioctlsocket(this->id, FIONBIO, &iMode);
-    if (code != NO_ERROR) {
+    error_last = ioctlsocket(this->id, FIONBIO, &iMode);
+    if (error_last != NO_ERROR) {
+      error("ioctlsocket", error_last);
       closesocket(this->id);
-      error("ioctlsocket", code);
-      return code;
+      return error_last;
     }
   }
-  code = connect(this->id, (SOCKADDR*)&server_addr, sizeof(server_addr));
+  error_last = connect(this->id, (SOCKADDR*)&server_addr, sizeof(server_addr));
   if (opt.timeout) {
-    if (code != WSAEWOULDBLOCK) {
+    if (error_last != WSAEWOULDBLOCK) {
+      error("connect", error_last);
       closesocket(this->id);
-      error("connect", code);
-      return code;
+      return error_last;
     }
     TIMEVAL timeval = { 0, opt.timeout * 1000 };
     fd_set readable, writable;
@@ -86,16 +82,16 @@ error_code socket_constructor(net_socket* this, socket_options opt) {
     FD_SET(this->id, &readable);
     FD_ZERO(&writable);
     FD_SET(this->id, &writable);
-    code = select(0, &readable, &writable, NULL, &timeval);
-    if (code <= 0) {
-      closesocket(this->id);
+    error_last = select(0, &readable, &writable, NULL, &timeval);
+    if (error_last <= 0) {
       error("select", ERR_ETIMEDOUT);
-      return code;
+      closesocket(this->id);
+      return error_last;
     }
-  } else if (code == SOCKET_ERROR) {
-    closesocket(this->id);
+  } else if (error_last == SOCKET_ERROR) {
     error("connect", ERR_ETIMEDOUT);
-    return code;
+    closesocket(this->id);
+    return error_last;
   }
   return ERR_SUCCESS;
 }
@@ -106,8 +102,7 @@ void socket_free(net_socket* this) {
 error_code socket_write(net_socket* this, const byte* chunk, u32 length) {
   error_code code = send(this->id, chunk, length, 0);
   if (code == SOCKET_ERROR) {
-    code = WSAGetLastError();
-    error("send", code);
+    error("send", WSAGetLastError());
     return code;
   }
   return ERR_SUCCESS;
