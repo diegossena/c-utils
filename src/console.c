@@ -10,12 +10,14 @@
 
 error_code _console_write(log_level level, const char* message, ...) {
   char out_message[MAX_BUFSIZ];
+
   __builtin_va_list args;
   va_start(args, message);
-  i32 length = string_format(out_message, message, args);
+  i32 length = string_format_v(out_message, message, args);
+  va_end(args);
   if (length < 0)
     return length;
-  va_end(args);
+
   return base_console_write(level, out_message, length);
 }
 

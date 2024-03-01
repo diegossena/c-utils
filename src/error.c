@@ -20,6 +20,15 @@ const char* error_cstr(i32 code) {
     case ERR_INVALID_URL: return "ERR_INVALID_URL";
     // Others
     case ERR_UNKNOWN: return "ERR_UNKNOWN";
+    // winsock2
+    case ERR_WSAEINVAL: return "ERR_WSAEINVAL";
+    case ERR_WSAEWOULDBLOCK: return "ERR_WSAEWOULDBLOCK";
+    case ERR_WSAENOTSOCK: return "ERR_WSAENOTSOCK";
+    case ERR_WSAEMSGSIZE: return "ERR_WSAEMSGSIZE";
+    case ERR_EADDRNOTAVAIL: return "ERR_EADDRNOTAVAIL";
+    case ERR_ETIMEDOUT: return "ERR_ETIMEDOUT";
+    case ERR_WSAECONNREFUSED: return "ERR_WSAECONNREFUSED";
+    case ERR_WSANOTINITIALISED: return "ERR_WSANOTINITIALISED";
     default:
       return strerror(code);
   }
@@ -27,5 +36,8 @@ const char* error_cstr(i32 code) {
 
 void _error(const char* message, error_code code) {
   const char* error_str = error_cstr(code);
-  console_error("%sError:%s %s %s", console_fore_red, console_reset, error_str, message);
+  console_error(
+    "%sError:%s %s %d %s",
+    console_fore_red, console_reset, error_str, code, message
+  );
 }

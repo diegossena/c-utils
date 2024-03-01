@@ -115,9 +115,7 @@ error_code socket_write(net_socket* this, const byte* chunk, u32 length) {
 i32 socket_read(net_socket* this, byte* buffer, u32 length) {
   i32 received = recv(this->id, buffer, length, 0);
   if (received < 0) {
-    error_code code = WSAGetLastError();
-    error("recv", code);
-    return code;
+    error("recv", WSAGetLastError());
   }
   return received;
 }

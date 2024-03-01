@@ -4,6 +4,8 @@ typedef _Bool bool;
 #define true 1
 #define false 0
 
+typedef unsigned char byte;
+
 typedef signed char i8; // -128 ~ 127
 typedef signed short i16; // -32768 ~ 32767
 typedef signed int i32; // -2147483648 ~ 2147483647
@@ -17,7 +19,6 @@ typedef unsigned long long u64; // 0 ~ 18446744073709551615
 typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
-typedef unsigned char byte;
 
 #define interface typedef struct
 #define class typedef struct

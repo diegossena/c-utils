@@ -6,13 +6,15 @@ void string_test() {
   string str2 = {};
 
   string_append_cstr(&str1, "test");
+  assert(string_equal(str1.data, "test") == true);
   string_append_char(&str1, '1');
-  string_append_cstr(&str2, "test2");
   assert(string_equal(str1.data, "test1") == true);
+  string_append_cstr(&str2, "test2");
   assert(string_equal(str2.data, "test2") == true);
   assert(string_equal(str1.data, str2.data) == false);
   assert(string_compare(str1.data, str2.data) != 0);
-
+  string_append_str(&str1, str2.data, str2.length);
+  assert(string_equal(str2.data, "test1test2") == true);
   string_free(&str1);
   string_free(&str2);
   console_log("!STRING");
@@ -34,22 +36,48 @@ void array_test() {
 }
 void socket_test() {
   console_log("SOCKET");
-  error_code error = socket_startup();
-  if (error)
+  error_code code = socket_startup();
+  if (code)
     return;
-  net_socket sock;
-  socket_constructor(
-    &sock, (socket_options) {
-    .host = "localhost",
-      .port = 8080,
+  net_socket socket;
+  code = socket_constructor(
+    &socket, (socket_options) {
+    .host = "google.com.br",
+      .port = 80,
       .timeout = 0
   });
-  socket_free(&sock);
+  if (code)
+    return;
+  socket_write_cstr(
+    &socket,
+    "GET / HTTP/1.1\r\n"
+    "Host: google.com.br\r\n"
+    "Connection: close\r\n"
+    "\r\n"
+  );
+  u64 buffer_size = 25565;
+  char buffer[buffer_size];
+  u64 buffer_length = 0;
+  while (true) {
+    i32 received = socket_read(&socket, buffer + buffer_length, buffer_size);
+    if (!received)
+      break;
+    if (received < 0) {
+      code = error_last;
+      return;
+    }
+    buffer_length += received;
+  }
+  if (!code) {
+    console_log("%s", buffer);
+  }
+  socket_free(&socket);
   console_log("!SOCKET");
 }
 
 int main() {
   console_inicialize();
+
   // string_test();
   // array_test();
   socket_test();

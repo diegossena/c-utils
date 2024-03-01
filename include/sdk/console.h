@@ -3,6 +3,18 @@
 #include <sdk/types.h>
 #include <sdk/error.h>
 
+#define console_fatal(message, ...) _console_write(LOG_LEVEL_FATAL, message "\n", ##__VA_ARGS__)
+#define console_warn(message, ...) _console_write(LOG_LEVEL_WARN, message "\n", ##__VA_ARGS__)
+#define console_info(message, ...) _console_write(LOG_LEVEL_INFO, message "\n", ##__VA_ARGS__)
+#define console_debug(message, ...) _console_write(LOG_LEVEL_DEBUG, message "\n", ##__VA_ARGS__)
+#define console_trace(message, ...) _console_write(LOG_LEVEL_TRACE, message "\n", ##__VA_ARGS__)
+
+#define console_log(message, ...) _console_write(LOG_LEVEL_INFO, message "\n", ##__VA_ARGS__)
+#define console_write(message, ...) _console_write(LOG_LEVEL_INFO, message, ...)
+
+#define console_error(message, ...) _console_write(LOG_LEVEL_ERROR, message "\n", ##__VA_ARGS__)
+#define console_error_write(message, ...) _console_write(LOG_LEVEL_ERROR, message, ##__VA_ARGS__)
+
 typedef enum log_level {
   // @brief Fatal log level, should be used to stop the application when hit.
   LOG_LEVEL_FATAL,
@@ -17,22 +29,6 @@ typedef enum log_level {
   // @brief Trace log level, should be used for verbose debugging purposes.
   LOG_LEVEL_TRACE
 } log_level;
-
-#define console_fatal(message, ...) _console_write(LOG_LEVEL_FATAL, message "\n", ##__VA_ARGS__)
-#define console_warn(message, ...) _console_write(LOG_LEVEL_WARN, message "\n", ##__VA_ARGS__)
-#define console_info(message, ...) _console_write(LOG_LEVEL_INFO, message "\n", ##__VA_ARGS__)
-#define console_debug(message, ...) _console_write(LOG_LEVEL_DEBUG, message "\n", ##__VA_ARGS__)
-#define console_trace(message, ...) _console_write(LOG_LEVEL_TRACE, message "\n", ##__VA_ARGS__)
-
-#define console_log(message, ...) _console_write(LOG_LEVEL_INFO, message "\n", ##__VA_ARGS__)
-#define console_write(message, ...) _console_write(LOG_LEVEL_INFO, message, ...)
-
-#define console_error(message, ...) _console_write(LOG_LEVEL_ERROR, message "\n", ##__VA_ARGS__)
-#define console_error_write(message, ...) _console_write(LOG_LEVEL_ERROR, message, ##__VA_ARGS__)
-
-error_code console_inicialize();
-
-error_code _console_write(log_level, const char* message, ...);
 
 extern const char* console_reset;
 extern const char* console_bold;
@@ -75,3 +71,7 @@ extern const char* console_back_lightblue;
 extern const char* console_back_lightmagenta;
 extern const char* console_back_lightcyan;
 extern const char* console_back_lightwhite;
+
+error_code console_inicialize();
+
+error_code _console_write(log_level, const char* message, ...);
