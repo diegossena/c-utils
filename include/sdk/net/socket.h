@@ -25,7 +25,7 @@ void socket_shutdown();
 
 /*
 ```
-socket_constructor(
+socket_new(
   &sock, (socket_options) {
   .host = "localhost",
   .port = 8080,
@@ -33,7 +33,7 @@ socket_constructor(
 });
 ```
 */
-error_code socket_constructor(net_socket*, socket_options);
+error_code socket_new(net_socket*, socket_options);
 void socket_free(net_socket*);
 /*
 @returns i32 >= 0 ? bytes_sent : error

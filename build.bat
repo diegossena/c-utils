@@ -9,7 +9,7 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
 SET package_name=%1
 
 SET defines=
-SET compiler_flags=-g
+SET compiler_flags=-g -std=gnu2x
 SET include_flags=-Iinclude
 SET linker_flags=
 SET output_extension=exe

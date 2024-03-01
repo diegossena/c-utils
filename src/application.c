@@ -1,6 +1,6 @@
 #include "sdk/application.h"
 
-#include "sdk/socket.h"
+#include "sdk/net/socket.h"
 
 void app_run() {
   while (false) {

@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "sdk/socket.h"
+#include "sdk/net/socket.h"
 #include "sdk/assert.h"
 #include "sdk/console.h" // TODO: remove this line
 
@@ -32,7 +32,7 @@ void socket_shutdown() {
   }
 }
 
-error_code socket_constructor(net_socket* this, socket_options opt) {
+error_code socket_new(net_socket* this, socket_options opt) {
   assert(*opt.host);
   assert(opt.port);
 

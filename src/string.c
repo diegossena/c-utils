@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <stdio.h> // TODO: remove this line
 
-void string_constructor(string* this) {
+void string_new(string* this) {
   this->data = 0;
   this->length = 0;
 }
@@ -67,6 +67,7 @@ void string_append_char(string* this, const char ch) {
   if (!ch)
     return;
   this->data = memory_realloc(this->data, this->length + 2);
-  this->data[this->length++] = ch;
+  this->data[this->length] = ch;
+  ++this->length;
   this->data[this->length] = '\0';
 }

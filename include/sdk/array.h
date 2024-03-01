@@ -6,8 +6,8 @@
   typeof(value) tmp = value;      \
   _array_push(this, &tmp);         \
 }
-#define array_constructor(this, type) \
-  _array_constructor(this, sizeof(type))
+#define array_new(this, type) \
+  array_new_stride(this, sizeof(type))
 
 
 class array {
@@ -17,7 +17,8 @@ class array {
   void* data;
 } array;
 
-void _array_constructor(array*, u64 stride);
-void array_free(array*);
+void array_new_stride(array* this, u64 stride);
+void array_free(array* this);
 
-void _array_push(array*, const void* value);
+void array_reserve(array* this, u64 size);
+void _array_push(array* this, const void* value);

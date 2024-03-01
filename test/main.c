@@ -21,7 +21,7 @@ void string_test() {
 void array_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "ARRAY" CONSOLE_RESET);
   array arr;
-  array_constructor(&arr, u64);
+  array_new(&arr, u64);
   array_push(&arr, (u64)10);
   array_push(&arr, (u64)11);
   array_push(&arr, (u64)12);
@@ -38,7 +38,7 @@ void socket_test() {
   if (error_last)
     return;
   net_socket socket;
-  error_last = socket_constructor(
+  error_last = socket_new(
     &socket, (socket_options) {
     .host = "google.com.br",
       .port = 80,
@@ -79,16 +79,27 @@ void snowflake_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SNOWFLAKE" CONSOLE_RESET);
   assert(snowflake_uid() > 0);
 }
+void map_test() {
+  map map_u64;
+  console_log("new_map");
+  map_new(&map_u64, u64);
+  console_log("map_set");
+  map_set(&map_u64, map_hash("key1"), (u64)10);
+  console_log("console_log");
+  console_log("value=%d", *(u64*)map_get(&map_u64, map_hash("key1")));
+
+  map_free(&map_u64);
+}
 
 int main() {
   console_inicialize();
 
-
-  string_test();
-  array_test();
-  socket_test();
-  date_test();
-  snowflake_test();
+  // string_test();
+  // array_test();
+  // socket_test();
+  // date_test();
+  // snowflake_test();
+  map_test();
 
   app_run();
 

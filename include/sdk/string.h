@@ -4,7 +4,7 @@
 
 #define string_append_cstr(this, cstr) {        \
   const char ptr[] = cstr;                       \
-  string_append_str(this, cstr, sizeof(cstr) - 1); \
+  string_append_str(this, ptr, sizeof(ptr) - 1); \
 }
 
 /*
@@ -20,13 +20,13 @@ class string {
   u64 length;
 } string;
 
-void string_constructor(string*);
+void string_new(string*);
 void string_free(string*);
 
 i16 string_compare(const char*, const char*);
 bool string_equal(const char*, const char*);
-i32 string_format(char* dest, const char* format, ...);
-i32 string_format_v(char* dest, const char* format, void* va_listp);
+i32 string_format(char* this, const char* format, ...);
+i32 string_format_v(char* this, const char* format, void* va_listp);
 
-void string_append_str(string*, const char* cstr, u64 length);
-void string_append_char(string*, const char);
+void string_append_str(string* this, const char* cstr, u64 length);
+void string_append_char(string* this, const char);
