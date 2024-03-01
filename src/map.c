@@ -16,13 +16,14 @@ interface map_entry {
 } map_entry;
 
 void __rehash(map* this, u64 bucket_length) {
-  map_entry** buckets = memory_alloc0(bucket_length);
   map_entry** old_it = this->buckets;
+  this->buckets = memory_alloc0(bucket_length);
   if (this->length) {
     while (true) {
       map_entry* node = *old_it;
       while (node) {
-        map_entry** it = buckets + node->hash % bucket_length;
+        map_entry** it = this->buckets;
+        it += node->hash % bucket_length;
         while (*it) it = &(*it)->next;
         *it = node;
         --this->length;
@@ -33,8 +34,7 @@ void __rehash(map* this, u64 bucket_length) {
       ++old_it;
     }
   }
-  memory_free(this->buckets);
-  this->buckets = buckets;
+  memory_free(old_it);
   this->buckets_length = bucket_length;
 }
 
