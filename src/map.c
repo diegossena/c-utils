@@ -61,8 +61,6 @@ void map_free(map* this) {
 }
 
 void* map_get(const map* this, const u64 hash) {
-  if (!this->length)
-    return 0;
   map_entry* node = *(map_entry**)(this->buckets + hash % this->buckets_length);
   while (node) {
     if (hash == node->hash) {

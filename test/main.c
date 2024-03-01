@@ -80,14 +80,12 @@ void snowflake_test() {
   assert(snowflake_uid() > 0);
 }
 void map_test() {
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "MAP" CONSOLE_RESET);
   map map_u64;
-  console_log("new_map");
   map_new(&map_u64, u64);
-  console_log("map_set");
   map_set(&map_u64, map_hash("key1"), (u64)10);
-  console_log("console_log");
-  console_log("value=%d", *(u64*)map_get(&map_u64, map_hash("key1")));
-
+  assert(*(u64*)map_get(&map_u64, map_hash("key1")) == 10);
+  console_log_cstr("map_free");
   map_free(&map_u64);
 }
 
