@@ -15,14 +15,14 @@ interface map_entry {
   map_entry* next;
 } map_entry;
 
-void __rehash(map* this, u64 new_length) {
-  map_entry** buckets_it = this->buckets;
-  map_entry** new_buckets = memory_alloc0(new_length);
+void __rehash(map* this, u64 bucket_length) {
+  map_entry** buckets = memory_alloc0(bucket_length);
+  map_entry** old_it = this->buckets;
   if (this->length) {
     while (true) {
-      map_entry* node = *buckets_it;
+      map_entry* node = *old_it;
       while (node) {
-        map_entry** it = new_buckets + node->hash % new_length;
+        map_entry** it = buckets + node->hash % bucket_length;
         while (*it) it = &(*it)->next;
         *it = node;
         --this->length;
@@ -30,32 +30,39 @@ void __rehash(map* this, u64 new_length) {
       }
       if (!this->length)
         break;
-      ++buckets_it;
+      ++old_it;
     }
   }
   memory_free(this->buckets);
-  this->buckets = new_buckets;
-  this->buckets_length = new_length;
+  this->buckets = buckets;
+  this->buckets_length = bucket_length;
 }
 
 void map_new_stride(map* this, u64 stride) {
   this->length = 0;
   this->stride = stride;
-  this->buckets = memory_alloc0(MIN_HASH_SIZE);
+  this->buckets = memory_alloc0(sizeof(map_entry**) * MIN_HASH_SIZE);
   this->buckets_length = MIN_HASH_SIZE;
+  printf("this->buckets=%d\n", this->buckets);
+  printf("sizeof(map_entry**)=%d\n", sizeof(map_entry**));
 }
 void map_free(map* this) {
-  map_entry** buckets_it = this->buckets;
-  while (this->length) {
-    map_entry* node = *buckets_it;
+  map_entry** it = this->buckets;
+  printf("this->buckets=%d\n", this->buckets);
+  while (true) {
+    map_entry* node = *it;
+    printf("node=%d\n", node);
+    printf("this->length=%llu\n", this->length);
     while (node) {
-      map_entry* next_node = *buckets_it;
+      map_entry* node_next = node->next;
       memory_free(node->value);
       memory_free(node);
-      node = next_node;
       --this->length;
+      node = node_next;
     }
-    ++buckets_it;
+    if (!this->length)
+      break;
+    ++it;
   }
   memory_free(this->buckets);
 }
