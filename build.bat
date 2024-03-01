@@ -42,14 +42,13 @@ IF %ERRORLEVEL% NEQ 0 (
   ECHO gcc %compiler_flags%%cFilenames% -o ./bin/%package_name%.%output_extension% %defines% %include_flags% %linker_flags%
   GOTO :EOF
 ) 
-:: clean
-FOR /R "%source_path%" %%f IN (*.o) DO del "%%~dpnf.o"
 :: Get elapsed time:
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
    set /A "end=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
 )
 set /A elapsed=end-start
+ECHO %package_name% compiled in %elapsed%ms
+:: clean
+FOR /R "%source_path%" %%f IN (*.o) DO del "%%~dpnf.o"
 :: execute
 IF %output_extension%==exe bin\%package_name%
-
-ECHO %package_name% compiled in %elapsed%ms
