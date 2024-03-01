@@ -13,6 +13,6 @@
 #define assert(value) { \
   if(value) { \
   } else { \
-    console_error_cstr("AssertionError [" #value "]: " __FILE__ ":" STRINGIZE(__LINE__)); \
+    console_error_cstr("AssertionError: " #value  " ("__FILE__ ":" STRINGIZE(__LINE__)")"); \
   } \
 }

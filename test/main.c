@@ -1,7 +1,7 @@
 #include <sdk/sdk.h>
 
 void string_test() {
-  console_log_cstr(CONSOLE_FORE_BLACK "STRING" CONSOLE_RESET);
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "STRING" CONSOLE_RESET);
   string str1 = {};
   string str2 = {};
 
@@ -14,12 +14,12 @@ void string_test() {
   assert(string_equal(str1.data, str2.data) == false);
   assert(string_compare(str1.data, str2.data) != 0);
   string_append_str(&str1, str2.data, str2.length);
-  assert(string_equal(str2.data, "test1test2") == true);
+  assert(string_equal(str1.data, "test1test2") == true);
   string_free(&str1);
   string_free(&str2);
 }
 void array_test() {
-  console_log_cstr(CONSOLE_FORE_BLACK "ARRAY" CONSOLE_RESET);
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "ARRAY" CONSOLE_RESET);
   array arr;
   array_constructor(&arr, u64);
   array_push(&arr, (u64)10);
@@ -33,7 +33,7 @@ void array_test() {
   array_free(&arr);
 }
 void socket_test() {
-  console_log_cstr(CONSOLE_FORE_BLACK "SOCKET" CONSOLE_RESET);
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SOCKET" CONSOLE_RESET);
   error_last = socket_startup();
   if (error_last)
     return;
@@ -67,27 +67,28 @@ void socket_test() {
     buffer_length += received;
   }
   if (!error_last) {
-    console_log_str(buffer, buffer_length);
+    assert(buffer_length > 0);
   }
   socket_free(&socket);
 }
 void date_test() {
-  console_log_cstr(CONSOLE_FORE_BLACK "DATE" CONSOLE_RESET);
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "DATE" CONSOLE_RESET);
   assert(date_now() > 0);
 }
 void snowflake_test() {
-  console_log_cstr(CONSOLE_FORE_BLACK "SNOWFLAKE" CONSOLE_RESET);
-  assert(snowflake_uid() < 0);
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SNOWFLAKE" CONSOLE_RESET);
+  assert(snowflake_uid() > 0);
 }
 
 int main() {
   console_inicialize();
 
-  // string_test();
-  // array_test();
-  // socket_test();
-  // date_test();
-  // snowflake_test();
+
+  string_test();
+  array_test();
+  socket_test();
+  date_test();
+  snowflake_test();
 
   app_run();
 

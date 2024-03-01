@@ -21,13 +21,13 @@
 }
 #define console_log_cstr(message) { \
   const char cstr[] = message "\n"; \
-  console_write_str(LOG_LEVEL_INFO, cstr, sizeof(cstr)); \
+  console_write_str(LOG_LEVEL_INFO, cstr, sizeof(cstr) - 1); \
 }
 #define console_write(message, ...) _console_write(LOG_LEVEL_INFO, message, ...)
 #define console_error(message, ...) _console_write(LOG_LEVEL_ERROR, message "\n", ##__VA_ARGS__)
 #define console_error_cstr(message) { \
   const char cstr[] = message "\n"; \
-  console_write_str(LOG_LEVEL_ERROR, cstr, sizeof(cstr)); \
+  console_write_str(LOG_LEVEL_ERROR, cstr, sizeof(cstr) - 1); \
 }
 #define console_error_write(message, ...) _console_write(LOG_LEVEL_ERROR, message, ##__VA_ARGS__)
 

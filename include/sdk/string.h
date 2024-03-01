@@ -4,7 +4,7 @@
 
 #define string_append_cstr(this, cstr) {        \
   const char ptr[] = cstr;                       \
-  string_append_str(this, cstr, sizeof(cstr)); \
+  string_append_str(this, cstr, sizeof(cstr) - 1); \
 }
 
 /*

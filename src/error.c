@@ -18,8 +18,21 @@ const char* error_cstr(i32 code) {
     case ERR_SNMP_STAT_TIMEOUT: return "ERR_SNMP_STAT_TIMEOUT";
     // URL
     case ERR_INVALID_URL: return "ERR_INVALID_URL";
-    // Others
+    // system
     case ERR_UNKNOWN: return "ERR_UNKNOWN";
+    case ERR_SUCCESS: return "ERR_SUCCESS";
+    case ERR_INVALID_FUNCTION: return "ERR_INVALID_FUNCTION";
+    case ERR_FILE_NOT_FOUND: return "ERR_FILE_NOT_FOUND";
+    case ERR_PATH_NOT_FOUND: return "ERR_PATH_NOT_FOUND";
+    case ERR_TOO_MANY_OPEN_FILES: return "ERR_TOO_MANY_OPEN_FILES";
+    case ERR_ACCESS_DENIED: return "ERR_ACCESS_DENIED";
+    case ERR_INVALID_HANDLE: return "ERR_INVALID_HANDLE";
+    case ERR_ARENA_TRASHED: return "ERR_ARENA_TRASHED";
+    case ERR_NOT_ENOUGH_MEMORY: return "ERR_NOT_ENOUGH_MEMORY";
+    case ERR_INVALID_BLOCK: return "ERR_INVALID_BLOCK";
+    case ERR_BAD_ENVIRONMENT: return "ERR_BAD_ENVIRONMENT";
+    case ERR_BAD_FORMAT: return "ERR_BAD_FORMAT";
+    case ERR_INSUFFICIENT_BUFFER: return "ERR_INSUFFICIENT_BUFFER";
     // winsock2
     case ERR_WSAEINVAL: return "ERR_WSAEINVAL";
     case ERR_WSAEWOULDBLOCK: return "ERR_WSAEWOULDBLOCK";

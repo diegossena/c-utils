@@ -7,34 +7,31 @@
 #include "base/memory.h"
 
 #include <heapapi.h>
-
-u64 allocated = 0;
+#include <stdio.h> // TODO: remove this line
 
 void* memory_alloc(u64 size) {
   void* block = HeapAlloc(GetProcessHeap(), 0, size);
-  if (!block)
+  if (!block) {
     error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
+  }
   return block;
 }
 void* memory_alloc0(u64 size) {
   void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
-  if (!block)
+  if (!block) {
     error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
+  }
   return block;
 }
-void memory_free(void* block) {
-  HeapFree(GetProcessHeap(), 0, block);
+void memory_free(void* this) {
+  HeapFree(GetProcessHeap(), 0, this);
 }
-void* memory_realloc(void* block, u64 size) {
-  void* new_block;
-  if (block) {
-    new_block = HeapReAlloc(GetProcessHeap(), 0, block, size);
-  } else {
-    new_block = HeapAlloc(GetProcessHeap(), 0, size);
+void* _memory_realloc(void* this, u64 size) {
+  this = HeapReAlloc(GetProcessHeap(), 0, this, size);
+  if (!this) {
+    error("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
-  if (!new_block)
-    error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
-  return new_block;
+  return this;
 }
 
 #endif

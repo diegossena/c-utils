@@ -29,6 +29,7 @@
     "date.h": "c",
     "snowflake.h": "c",
     "math.h": "c",
-    "_mingw.h": "c"
+    "_mingw.h": "c",
+    "handleapi.h": "c"
   }
 }

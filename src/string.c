@@ -53,15 +53,14 @@ i32 string_format(char* stream, const char* format, ...) {
 }
 
 void string_append_str(string* this, const char* cstr, u64 length) {
-  if (!*cstr)
+  if (!cstr || !*cstr)
     return;
   u64 total_length = this->length + length;
   this->data = memory_realloc(this->data, total_length + 1);
 
-  char* ch = this->data + length;
+  char* ch = this->data + this->length;
   do { *ch++ = *cstr++; } while (*cstr);
   *ch = '\0';
-
   this->length = total_length;
 }
 void string_append_char(string* this, const char ch) {

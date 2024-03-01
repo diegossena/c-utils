@@ -6,7 +6,7 @@
 
 #define socket_write_cstr(this, cstr)  { \
   const char ptr[] = cstr;                \
-  socket_write(this, ptr, sizeof(ptr));  \
+  socket_write(this, ptr, sizeof(ptr) - 1);  \
 }
 
 interface socket_options {
