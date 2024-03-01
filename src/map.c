@@ -101,6 +101,7 @@ bool map_delete(map* this, u64 hash) {
   if (!this->length)
     return false;
   map_entry** it = this->buckets;
+  it += hash % this->buckets_length;
   while (*it) {
     if ((*it)->hash == hash) {
       map_entry* node_next = (*it)->next;
