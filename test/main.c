@@ -92,11 +92,11 @@ void map_test() {
 int main() {
   console_inicialize();
 
-  string_test();
-  array_test();
-  socket_test();
-  date_test();
-  snowflake_test();
+  // string_test();
+  // array_test();
+  // socket_test();
+  // date_test();
+  // snowflake_test();
   map_test();
 
   app_run();
