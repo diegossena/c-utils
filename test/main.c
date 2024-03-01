@@ -89,6 +89,9 @@ void map_test() {
   assert(map_get(&map_u64, map_hash("key1")) == 0);
   map_free(&map_u64);
 }
+void http_test() {
+
+}
 
 int main() {
   console_inicialize();
@@ -98,7 +101,7 @@ int main() {
   // socket_test();
   // date_test();
   // snowflake_test();
-  map_test();
+  // map_test();
 
   app_run();
 

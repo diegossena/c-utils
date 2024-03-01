@@ -9,6 +9,7 @@
     "sdk.h": "c",
     "console.h": "c",
     "compare": "c",
-    "array.h": "c"
+    "array.h": "c",
+    "client.h": "c"
   }
 }
