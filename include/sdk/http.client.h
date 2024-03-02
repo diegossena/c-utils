@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sdk/types.h>
-#include <sdk/http/http.h>
+#include <sdk/http.h>
 #include <sdk/string.h>
 #include <sdk/map.h>
 

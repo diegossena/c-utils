@@ -8,6 +8,7 @@
 #define OCCUPANCY_PCT 0.5 // large PCT means smaller and slower
 
 interface map_entry map_entry;
+
 interface map_entry {
   u64 hash;
   void* value;
@@ -72,7 +73,7 @@ void map_free(map* this) {
 }
 
 void* map_get(const map* this, const u64 hash) {
-  map_entry* node = *((map_entry**)this->buckets + hash % this->buckets_length);
+  map_entry* node = *(this->buckets + hash % this->buckets_length);
   while (node) {
     if (hash == node->hash) {
       return node->value;

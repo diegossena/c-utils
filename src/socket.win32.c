@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "sdk/net/socket.h"
+#include "sdk/net.socket.h"
 #include "sdk/assert.h"
 #include "sdk/console.h" // TODO: remove this line
 

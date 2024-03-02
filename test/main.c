@@ -88,14 +88,14 @@ void map_test() {
   map_free(map_u64);
 }
 void http_server_test() {
-  // console_log_cstr(CONSOLE_FORE_LIGHTBLUE "HTTP_SERVER_TEST" CONSOLE_RESET);
-  // http_server* request = http_server_new();
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "HTTP_SERVER_TEST" CONSOLE_RESET);
+  http_server* request = http_server_new();
 
-  // http_server_listen(request, 80);
+  http_server_listen(request, 80);
 
-  // app_run();
+  app_run();
 
-  // http_server_free(request);
+  http_server_free(request);
 }
 
 int main() {
@@ -106,8 +106,8 @@ int main() {
   // socket_test();
   // date_test();
   // snowflake_test();
-  map_test();
-  // http_server_test();
+  // map_test();
+  http_server_test();
 
   app_run();
 

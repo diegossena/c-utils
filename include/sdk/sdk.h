@@ -11,10 +11,10 @@
 #include <sdk/math.h>
 #include <sdk/snowflake.h>
 
-#include <sdk/net/socket.h>
-#include <sdk/net/server.h>
+#include <sdk/net.socket.h>
+#include <sdk/net.server.h>
 
-#include <sdk/http/client.h>
-#include <sdk/http/server.h>
+#include <sdk/http.client.h>
+#include <sdk/http.server.h>
 
 #include <sdk/application.h>

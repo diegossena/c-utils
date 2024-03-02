@@ -1,5 +1,5 @@
-#include "sdk/http/client.h"
-#include "sdk/net/socket.h"
+#include "sdk/http.client.h"
+#include "sdk/net.socket.h"
 
 #include "internal/memory.h"
 

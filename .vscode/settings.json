@@ -20,6 +20,7 @@
     "time.h": "c",
     "timeb.h": "c",
     "client.h": "c",
-    "server.h": "c"
+    "server.h": "c",
+    "http.server.h": "c"
   }
 }
