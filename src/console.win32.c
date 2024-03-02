@@ -1,4 +1,4 @@
-#include "base/platform.h"
+#include "internal/platform.h"
 
 #if PLATFORM_WINDOWS
 

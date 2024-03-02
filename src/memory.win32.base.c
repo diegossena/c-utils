@@ -1,10 +1,10 @@
-#include "base/platform.h"
+#include "internal/platform.h"
 
 #if PLATFORM_WINDOWS
 
 #include "sdk/application.h"
 #include "sdk/error.h"
-#include "base/memory.h"
+#include "internal/memory.h"
 
 #include <heapapi.h>
 #include <stdio.h> // TODO: remove this line

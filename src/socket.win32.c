@@ -1,4 +1,4 @@
-#include "base/platform.h"
+#include "internal/platform.h"
 
 #if PLATFORM_WINDOWS
 
@@ -6,7 +6,8 @@
 #include "sdk/assert.h"
 #include "sdk/console.h" // TODO: remove this line
 
-#include "base/memory.h"
+#include "internal/socket.h"
+#include "internal/memory.h"
 
 #include <winsock2.h>
 
@@ -32,23 +33,38 @@ void socket_shutdown() {
   }
 }
 
-error_code socket_new(net_socket* this, socket_options opt) {
-  assert(*opt.host);
-  assert(opt.port);
+net_socket* socket_new() {
+  net_socket* this = memory_alloc0(sizeof(net_socket));
+  return this;
+}
+void socket_free(net_socket* this) {
+  closesocket(this->id);
+}
 
-  struct hostent* remoteHost = gethostbyname(opt.host);
+void socket_host_set(net_socket* this, const char* host) {
+  this->host = host;
+}
+void socket_port_set(net_socket* this, u64 port) {
+  this->port = port;
+}
+
+error_code socket_connect(net_socket* this) {
+  assert(*this->host);
+  assert(this->port > 0);
+
+  struct hostent* remoteHost = gethostbyname(this->host);
   if (remoteHost == NULL) {
     error("gethostbyname", WSAGetLastError());
     return error_last;
   }
 
   struct in_addr addr;
-  addr.s_addr = *(u_long*)remoteHost->h_addr_list[0];
+  addr.s_addr = *(u32*)remoteHost->h_addr_list[0];
   const char* host = (const char*)inet_ntoa(addr);
 
   struct sockaddr_in server_addr = {};
   server_addr.sin_family = AF_INET;
-  server_addr.sin_port = htons(opt.port);
+  server_addr.sin_port = htons(this->port);
   server_addr.sin_addr.s_addr = inet_addr(host);
   this->id = socket(server_addr.sin_family, SOCK_STREAM, IPPROTO_TCP);
   if (this->id == INVALID_SOCKET) {
@@ -61,7 +77,7 @@ error_code socket_new(net_socket* this, socket_options opt) {
    * If iMode != 0, non-blocking mode is enabled.
    */
   u_long iMode = 1;
-  if (opt.timeout) {
+  if (this->timeout) {
     error_last = ioctlsocket(this->id, FIONBIO, &iMode);
     if (error_last != NO_ERROR) {
       error("ioctlsocket", error_last);
@@ -70,13 +86,13 @@ error_code socket_new(net_socket* this, socket_options opt) {
     }
   }
   error_last = connect(this->id, (SOCKADDR*)&server_addr, sizeof(server_addr));
-  if (opt.timeout) {
+  if (this->timeout) {
     if (error_last != WSAEWOULDBLOCK) {
       error("connect", error_last);
       closesocket(this->id);
       return error_last;
     }
-    TIMEVAL timeval = { 0, opt.timeout * 1000 };
+    TIMEVAL timeval = { 0, this->timeout * 1000 };
     fd_set readable, writable;
     FD_ZERO(&readable);
     FD_SET(this->id, &readable);
@@ -94,9 +110,6 @@ error_code socket_new(net_socket* this, socket_options opt) {
     return error_last;
   }
   return ERR_SUCCESS;
-}
-void socket_free(net_socket* this) {
-  closesocket(this->id);
 }
 
 i32 socket_write(net_socket* this, const byte* chunk, u32 length) {

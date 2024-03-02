@@ -3,9 +3,6 @@
 #include <sdk/types.h>
 #include <sdk/error.h>
 
-#define STRINGIZE_KEY(x) #x
-#define STRINGIZE(x) STRINGIZE_KEY(x)
-
 #define console_write_cstr(level, message, length) { \
   const char cstr[] = message; \
   console_write_str(level, message, length); \

@@ -9,37 +9,20 @@
   socket_write(this, ptr, sizeof(ptr) - 1);  \
 }
 
-interface socket_options {
-  const char* host;
-  u16
-    port,
-    timeout;
-} socket_options;
-
-class net_socket {
-  u64 id;
-} net_socket;
+class net_socket net_socket;
 
 error_code socket_startup();
 void socket_shutdown();
 
-/*
-```
-socket_new(
-  &sock, (socket_options) {
-  .host = "localhost",
-  .port = 8080,
-  .timeout = 0
-});
-```
-*/
-error_code socket_new(net_socket*, socket_options);
+net_socket* socket_new();
 void socket_free(net_socket*);
-/*
-@returns i32 >= 0 ? bytes_sent : error
-*/
+
+void socket_host_set(net_socket*, const char*);
+void socket_port_set(net_socket*, u64);
+
+error_code socket_connect(net_socket*);
+
+// @returns i32 >= 0 ? bytes_sent : error
 i32 socket_write(net_socket*, const byte* chunk, u32 length);
-/*
-@returns i32 >= 0 ? bytes_received : error
-*/
+// @returns i32 >= 0 ? bytes_received : error
 i32 socket_read(net_socket*, byte* buffer, u32 length);

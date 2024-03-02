@@ -1,15 +1,10 @@
 {
   "files.associations": {
     ".htaccess": "ruby",
-    "type_traits": "c",
-    "math.h": "c",
     "types.h": "c",
-    "map.h": "c",
-    "memory.h": "c",
-    "sdk.h": "c",
-    "console.h": "c",
-    "compare": "c",
-    "array.h": "c",
-    "client.h": "c"
+    "math.h": "c",
+    "type_traits": "c",
+    "*.tcc": "c",
+    "compare": "c"
   }
 }

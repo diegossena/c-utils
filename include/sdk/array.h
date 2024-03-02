@@ -6,19 +6,18 @@
   typeof(value) tmp = value;      \
   _array_push(this, &tmp);         \
 }
-#define array_new(this, type) \
-  array_new_stride(this, sizeof(type))
+#define array_new(type) \
+  _array_new(sizeof(type))
+#define array_at(this, type, index) (*(type*)_array_at(this, index))
 
 
-class array {
-  u64 capacity;
-  u64 length;
-  u64 stride;
-  void* data;
-} array;
+class array array;
 
-void array_new_stride(array* this, u64 stride);
-void array_free(array* this);
+array* _array_new(u64 stride);
+void array_free(array*);
 
-void array_reserve(array* this, u64 size);
-void _array_push(array* this, const void* value);
+void* _array_at(const array*, u64 index);
+u64 array_length(const array*);
+void array_reserve(array*, u64 size);
+u64 array_capacity(array*);
+void _array_push(array*, const void* value);

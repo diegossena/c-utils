@@ -1,14 +1,19 @@
 #include "sdk/map.h"
 
-#include "base/memory.h"
+#include "internal/memory.h"
 
 #include <stdio.h> // TODO: remove this line
 
 #define MIN_HASH_SIZE 512ULL // table size when first created
 #define OCCUPANCY_PCT 0.5 // large PCT means smaller and slower
 
+class map {
+  u64 length;
+  u64 stride;
+  void* buckets;
+  u64 buckets_length;
+} map;
 interface map_entry map_entry;
-
 interface map_entry {
   u64 hash;
   void* value;
@@ -38,11 +43,12 @@ void __rehash(map* this, u64 bucket_length) {
   this->buckets_length = bucket_length;
 }
 
-void map_new_stride(map* this, u64 stride) {
+map* _map_new(u64 stride) {
+  map* this = memory_alloc0(sizeof(map_entry**) * MIN_HASH_SIZE);
+  this->buckets_length = MIN_HASH_SIZE;
   this->length = 0;
   this->stride = stride;
-  this->buckets = memory_alloc0(sizeof(map_entry**) * MIN_HASH_SIZE);
-  this->buckets_length = MIN_HASH_SIZE;
+  return this;
 }
 void map_free(map* this) {
   map_entry** it = this->buckets;
@@ -72,7 +78,7 @@ void* map_get(const map* this, const u64 hash) {
   }
   return 0;
 }
-void _map_set(map* this, const u64 hash, const void* value) {
+void map_set(map* this, const u64 hash, const void* value) {
   map_entry** it = this->buckets;
   it += hash % this->buckets_length;
   while (true) {

@@ -5,30 +5,19 @@
 #include <sdk/map.h>
 
 typedef enum http_method {
-  GET,
-  POST,
-  DELETE,
-  PATCH,
-  PUT
+  HTTP_GET,
+  HTTP_POST,
+  HTTP_DELETE,
+  HTTP_PATCH,
+  HTTP_PUT
 } http_method;
 
-interface http_client_request {
-  u16 port, timeout;
-  http_method method;
-  const char* path;
-} http_client_request;
+interface http_client_request http_client_request;
 /*
 map<string, string> headers;
 */
-interface http_client_response {
-  u16 statusCode;
-  string statusText;
-  u64 content_length;
-  map headers;
+interface http_client_response http_client_response;
 
-  u64 __socket;
-} http_client_response;
-
-void http_request(http_client_request, http_client_response*);
+void http_request(http_client_request*);
 
 void http_response_free();

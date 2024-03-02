@@ -1,5 +1,8 @@
 #pragma once
 
+#define STRINGIZE_KEY(x) #x
+#define STRINGIZE(x) STRINGIZE_KEY(x)
+
 typedef _Bool bool;
 #define true 1
 #define false 0
