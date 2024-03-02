@@ -2,16 +2,39 @@
 
 #if PLATFORM_WINDOWS
 
-#include "internal/console.h"
-#include "sdk/string.h" // string_format
+#include "internal/console.win32.h"
+
 /*
 GetStdHandle, GetConsoleMode, SetConsoleMode, DWORD, HANDLE, OSVERSIONINFO
 ENABLE_VIRTUAL_TERMINAL_PROCESSING, STD_OUTPUT_HANDLE
 */
-#include <windows.h> // 
+#include <windows.h>
 
 bool console_has_ansi = false;
 
+void console_inicialize() {
+  OSVERSIONINFO os_version = { .dwOSVersionInfoSize = sizeof(OSVERSIONINFO) };
+  if (GetVersionEx(&os_version) && os_version.dwMajorVersion >= 10) {
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (handle == INVALID_HANDLE_VALUE) {
+      error("GetStdHandle", ERR_INVALID_HANDLE);
+    } else {
+      DWORD console_mode;
+
+      GetConsoleMode(handle, &console_mode);
+      console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+      SetConsoleMode(handle, console_mode);
+
+      handle = GetStdHandle(STD_ERROR_HANDLE);
+
+      GetConsoleMode(handle, &console_mode);
+      console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+      SetConsoleMode(handle, console_mode);
+
+      console_has_ansi = true;
+    }
+  }
+}
 error_code console_write_str(log_level level, const char* message, u64 length) {
   DWORD nStdHandle = level < LOG_LEVEL_WARN ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE;
   HANDLE handle = GetStdHandle(nStdHandle);

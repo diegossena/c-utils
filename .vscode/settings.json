@@ -15,6 +15,7 @@
     "http.client.h": "c",
     "net.h": "c",
     "winsock2.h": "c",
-    "error.h": "c"
+    "error.h": "c",
+    "console.win32.h": "c"
   }
 }

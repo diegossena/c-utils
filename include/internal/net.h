@@ -6,6 +6,9 @@
 #define SOCKET_FIELDS \
   u64 socket;
 
+void net_inicialize();
+void net_shutdown();
+
 // #define socket_write_cstr(this, cstr)  { \
 //   const char ptr[] = cstr;                \
 //   socket_write(this, ptr, sizeof(ptr) - 1);  \
