@@ -1,8 +1,6 @@
 #include "sdk/error.h"
 #include "sdk/console.h"
 
-#include <string.h> // strerror
-
 error_code error_last = ERR_SUCCESS;
 
 const char* error_cstr(i32 code) {
@@ -19,7 +17,6 @@ const char* error_cstr(i32 code) {
     // URL
     case ERR_INVALID_URL: return "ERR_INVALID_URL";
     // system
-    case ERR_UNKNOWN: return "ERR_UNKNOWN";
     case ERR_SUCCESS: return "ERR_SUCCESS";
     case ERR_INVALID_FUNCTION: return "ERR_INVALID_FUNCTION";
     case ERR_FILE_NOT_FOUND: return "ERR_FILE_NOT_FOUND";
@@ -44,7 +41,7 @@ const char* error_cstr(i32 code) {
     case ERR_WSAECONNREFUSED: return "ERR_WSAECONNREFUSED";
     case ERR_WSANOTINITIALISED: return "ERR_WSANOTINITIALISED";
     default:
-      return strerror(code);
+      return "ERR_UNKNOWN";
   }
 }
 

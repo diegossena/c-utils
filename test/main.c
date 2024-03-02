@@ -70,6 +70,7 @@ void socket_test() {
 void date_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "DATE" CONSOLE_RESET);
   assert(date_now() > 0);
+  console_log("%llu", date_now);
 }
 void snowflake_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SNOWFLAKE" CONSOLE_RESET);
@@ -97,10 +98,10 @@ void http_test() {
 int main() {
   console_inicialize();
 
-  string_test();
+  // string_test();
   // array_test();
   // socket_test();
-  // date_test();
+  date_test();
   // snowflake_test();
   // map_test();
   // http_test();

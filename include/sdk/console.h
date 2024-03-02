@@ -87,48 +87,6 @@ typedef enum log_level {
   LOG_LEVEL_TRACE
 } log_level;
 
-extern const char* console_reset;
-extern const char* console_bold;
-extern const char* console_underline;
-
-extern const char* console_fore_black;
-extern const char* console_fore_red;
-extern const char* console_fore_green;
-extern const char* console_fore_yellow;
-extern const char* console_fore_blue;
-extern const char* console_fore_magenta;
-extern const char* console_fore_cyan;
-extern const char* console_fore_white;
-extern const char* console_fore_reset;
-
-extern const char* console_fore_lightblack;
-extern const char* console_fore_lightred;
-extern const char* console_fore_lightgreen;
-extern const char* console_fore_lightyellow;
-extern const char* console_fore_lightblue;
-extern const char* console_fore_lightmagenta;
-extern const char* console_fore_lightcyan;
-extern const char* console_fore_lightwhite;
-
-extern const char* console_back_black;
-extern const char* console_back_blue;
-extern const char* console_back_red;
-extern const char* console_back_magenta;
-extern const char* console_back_green;
-extern const char* console_back_cyan;
-extern const char* console_back_yellow;
-extern const char* console_back_white;
-extern const char* console_back_reset;
-
-extern const char* console_back_lightblack;
-extern const char* console_back_lightred;
-extern const char* console_back_lightgreen;
-extern const char* console_back_lightyellow;
-extern const char* console_back_lightblue;
-extern const char* console_back_lightmagenta;
-extern const char* console_back_lightcyan;
-extern const char* console_back_lightwhite;
-
 error_code console_inicialize();
 
 error_code _console_write(log_level, const char* message, ...);

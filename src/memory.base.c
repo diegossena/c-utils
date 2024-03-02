@@ -1,7 +1,5 @@
 #include "internal/memory.h"
 
-#include <stdio.h> // TODO: remove this line
-
 void* memory_fill(void* block, byte value, u64 size) {
   u8* c = (u8*)block;
   while (size) {
