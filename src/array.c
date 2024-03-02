@@ -26,7 +26,7 @@ void array_free(array* this) {
 }
 
 void* _array_at(const array* this, u64 index) {
-  return this->data + index;
+  return this->data + this->stride * index;
 }
 u64 array_length(const array* this) {
   return this->length;

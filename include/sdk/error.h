@@ -40,6 +40,7 @@ typedef enum error_code {
   ERR_BAD_FORMAT = 11,
   ERR_INSUFFICIENT_BUFFER = 122,
   // https://learn.microsoft.com/pt-br/windows/win32/winsock/windows-sockets-error-codes-2
+  ERR_WSAEFAULT = 10014,
   ERR_WSAEINVAL = 10022,
   ERR_WSAEWOULDBLOCK = 10035,
   ERR_WSAENOTSOCK = 10038,

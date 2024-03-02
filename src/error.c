@@ -34,6 +34,7 @@ const char* error_cstr(i32 code) {
     case ERR_BAD_FORMAT: return "ERR_BAD_FORMAT";
     case ERR_INSUFFICIENT_BUFFER: return "ERR_INSUFFICIENT_BUFFER";
     // winsock2
+    case ERR_WSAEFAULT: return "ERR_WSAEFAULT";
     case ERR_WSAEINVAL: return "ERR_WSAEINVAL";
     case ERR_WSAEWOULDBLOCK: return "ERR_WSAEWOULDBLOCK";
     case ERR_WSAENOTSOCK: return "ERR_WSAENOTSOCK";

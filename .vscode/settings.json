@@ -5,6 +5,9 @@
     "math.h": "c",
     "type_traits": "c",
     "*.tcc": "c",
-    "compare": "c"
+    "compare": "c",
+    "stdio.h": "c",
+    "memory.h": "c",
+    "map.h": "c"
   }
 }

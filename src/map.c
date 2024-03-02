@@ -44,7 +44,8 @@ void __rehash(map* this, u64 bucket_length) {
 }
 
 map* _map_new(u64 stride) {
-  map* this = memory_alloc0(sizeof(map_entry**) * MIN_HASH_SIZE);
+  map* this = memory_alloc(sizeof(map));
+  this->buckets = memory_alloc0(sizeof(map_entry**) * MIN_HASH_SIZE);
   this->buckets_length = MIN_HASH_SIZE;
   this->length = 0;
   this->stride = stride;
@@ -66,9 +67,11 @@ void map_free(map* this) {
     ++it;
   }
   memory_free(this->buckets);
+  memory_free(this);
 }
 
 void* map_get(const map* this, const u64 hash) {
+  printf("map_get\n");
   map_entry* node = *((map_entry**)this->buckets + hash % this->buckets_length);
   while (node) {
     if (hash == node->hash) {
@@ -76,6 +79,7 @@ void* map_get(const map* this, const u64 hash) {
     }
     node = node->next;
   }
+  printf("!map_get\n");
   return 0;
 }
 void map_set(map* this, const u64 hash, const void* value) {
@@ -103,7 +107,7 @@ void map_set(map* this, const u64 hash, const void* value) {
     __rehash(this, new_length);
   }
 }
-bool map_delete(map* this, u64 hash) {
+bool map_delete(map* this, const u64 hash) {
   if (!this->length)
     return false;
   map_entry** it = this->buckets;

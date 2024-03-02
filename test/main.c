@@ -63,7 +63,6 @@ void socket_test() {
     buffer_length += received;
   }
   if (!error_last) {
-    console_log_str(buffer, buffer_length);
     assert(buffer_length > 0);
   }
   socket_free(socket);
@@ -82,7 +81,9 @@ void map_test() {
   map_set_cstr(map_u64, "key1", (u64)10);
   assert(map_get_cstr(map_u64, u64, "key1") == 10);
   map_delete_cstr(map_u64, "key1");
-  assert(map_get_cstr(map_u64, u64, "key1") == 0);
+  console_log_cstr("map_test");
+  assert(map_get_cstr_p(map_u64, u64, "key1") == 0);
+  console_log_cstr("!map_test");
   map_free(map_u64);
 }
 void http_test() {
@@ -97,7 +98,7 @@ int main() {
   // socket_test();
   // date_test();
   // snowflake_test();
-  // map_test();
+  map_test();
 
   app_run();
 

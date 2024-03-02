@@ -10,7 +10,9 @@
   map_set(this, math_jenkins_hash(key, sizeof(key)), &tmp);         \
 }
 #define map_get_cstr(this, type, key) \
-  (*(type*)map_get(this, math_jenkins_hash(key, sizeof(key))))
+  (*map_get_cstr_p(this, type, key))
+#define map_get_cstr_p(this, type, key) \
+  (type*)map_get(this, math_jenkins_hash(key, sizeof(key)))
 #define map_delete_cstr(this, key) \
   map_delete(this, math_jenkins_hash(key, sizeof(key)))
 

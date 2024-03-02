@@ -8,7 +8,8 @@
 }
 #define array_new(type) \
   _array_new(sizeof(type))
-#define array_at(this, type, index) (*(type*)_array_at(this, index))
+#define array_at(this, type, index) \
+  (*(type*)_array_at(this, index))
 
 
 class array array;
