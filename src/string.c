@@ -40,6 +40,7 @@ void string_append_str(string* this, const char* cstr, u64 length) {
     return;
   u64 total_length = this->length + length;
   this->data = memory_realloc(this->data, total_length + 1);
+  printf("test\n");
 
   char* ch = this->data + this->length;
   do { *ch++ = *cstr++; } while (*cstr);

@@ -1,10 +1,14 @@
-#include "sdk/application.h"
+#include "internal/application.h"
 
-#include "sdk/net.socket.h"
+// application application_main = {
+//   .queue = {
+//     .
+//   }
+// };
 
 void app_run() {
   while (false) {
     // TODO: main loop handle
   }
-  socket_shutdown();
+  app_shutdown();
 }

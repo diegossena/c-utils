@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "sdk/console.h" // console_inicialize
+#include "internal/console.h"
 #include "sdk/string.h" // string_format
 /*
 GetStdHandle, GetConsoleMode, SetConsoleMode, DWORD, HANDLE, OSVERSIONINFO
@@ -10,33 +10,8 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING, STD_OUTPUT_HANDLE
 */
 #include <windows.h> // 
 
-bool has_ansi = false;
+bool console_has_ansi = false;
 
-error_code console_inicialize() {
-  OSVERSIONINFO os_version = { .dwOSVersionInfoSize = sizeof(OSVERSIONINFO) };
-  if (GetVersionEx(&os_version) && os_version.dwMajorVersion >= 10) {
-    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (handle == INVALID_HANDLE_VALUE) {
-      error("GetStdHandle", ERR_INVALID_HANDLE);
-      return ERR_INVALID_HANDLE;
-    }
-
-    DWORD console_mode;
-
-    GetConsoleMode(handle, &console_mode);
-    console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(handle, console_mode);
-
-    handle = GetStdHandle(STD_ERROR_HANDLE);
-
-    GetConsoleMode(handle, &console_mode);
-    console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(handle, console_mode);
-
-    has_ansi = true;
-  }
-  return ERR_SUCCESS;
-}
 error_code console_write_str(log_level level, const char* message, u64 length) {
   DWORD nStdHandle = level < LOG_LEVEL_WARN ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE;
   HANDLE handle = GetStdHandle(nStdHandle);
@@ -45,7 +20,7 @@ error_code console_write_str(log_level level, const char* message, u64 length) {
     return ERR_INVALID_HANDLE;
   }
 
-  if (!has_ansi && message[0] == '\033' && message[1] == '[') {
+  if (!console_has_ansi && message[0] == '\033' && message[1] == '[') {
     u8 ansi_code = message[4] == 'm'
       ? (message[2] - '0') * 10 + message[3] - '0'
       : message[2] - '0';

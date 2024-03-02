@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sdk/types.h>
+#include <sdk/error.h>
 
 class http_server http_server;
 class http_route http_route;
@@ -23,4 +24,4 @@ http_server* http_server_new();
 void http_server_free(http_server*);
 void http_server_use(http_server*, http_request_handler);
 void http_server_route(http_server*, http_route*);
-void http_server_listen(http_server*, u64 port);
+error_code http_server_listen(http_server*, u64 port);

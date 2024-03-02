@@ -87,7 +87,5 @@ typedef enum log_level {
   LOG_LEVEL_TRACE
 } log_level;
 
-error_code console_inicialize();
-
 error_code _console_write(log_level, const char* message, ...);
 error_code console_write_str(log_level, const char* message, u64 length);

@@ -1,7 +1,20 @@
 {
   "files.associations": {
     ".htaccess": "ruby",
+    "tcp.net.h": "c",
+    "memory.h": "c",
+    "application.h": "c",
+    "stream.h": "c",
+    "platform.h": "c",
     "net.socket.h": "c",
-    "types.h": "c"
+    "console.h": "c",
+    "string.h": "c",
+    "queue.h": "c",
+    "assert.h": "c",
+    "sdk.h": "c",
+    "http.client.h": "c",
+    "net.h": "c",
+    "winsock2.h": "c",
+    "error.h": "c"
   }
 }
