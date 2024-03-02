@@ -9,6 +9,7 @@
     "stdio.h": "c",
     "memory.h": "c",
     "map.h": "c",
-    "error.h": "c"
+    "error.h": "c",
+    "string.h": "c"
   }
 }

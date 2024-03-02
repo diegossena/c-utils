@@ -39,6 +39,7 @@ net_socket* socket_new() {
 }
 void socket_free(net_socket* this) {
   closesocket(this->id);
+  memory_free(this);
 }
 
 void socket_host_set(net_socket* this, const char* host) {

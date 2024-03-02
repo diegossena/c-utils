@@ -23,6 +23,7 @@ array* _array_new(u64 stride) {
 }
 void array_free(array* this) {
   memory_free(this->data);
+  memory_free(this);
 }
 
 void* _array_at(const array* this, u64 index) {

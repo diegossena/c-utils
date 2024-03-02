@@ -1,29 +1,32 @@
 #include "sdk/http/client.h"
 #include "sdk/net/socket.h"
 
+#include "internal/memory.h"
+
 interface http_client_request {
-  const char* host, path;
+  const char* host, * path;
   u16 port, timeout;
   http_method method;
 } http_client_request;
 /*
-map<string, string> headers;
+map<const char*, const char*> headers;
 */
-// interface http_client_response {
-//   u16 statusCode;
-//   string* statusText;
-//   u64 content_length;
-//   map headers;
+interface http_client_response {
+  u16 statusCode;
+  string* statusText;
+  u64 content_length;
+  map* headers;
 
-//   u64 __socket;
-// } http_client_response;
+  net_socket* socket;
+} http_client_response;
 
-// void http_request(http_client_request request) {
-//   net_socket socket;
-//   error_last = socket_new(
-//     &socket, (socket_options) {
-//     .host = request.host,
-//       .port = request.port,
-//       .timeout = 0
-//   });
-// }
+http_client_request* http_request_new() {
+  http_client_request* this = memory_alloc(sizeof(http_client_request));
+  this->method = HTTP_GET;
+  this->host = "localhost";
+  this->path = "/";
+  this->timeout = 0;
+}
+void http_response_free(http_client_request* this) {
+  memory_free(this);
+}

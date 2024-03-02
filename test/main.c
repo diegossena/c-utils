@@ -6,6 +6,7 @@ void string_test() {
   string* str2 = string_new();
 
   string_append_cstr(str1, "test");
+  console_log_cstr("LINE");
   assert(string_equal_cstr(str1, "test") == true);
   string_append_char(str1, '1');
   assert(string_equal_cstr(str1, "test1") == true);

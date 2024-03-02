@@ -71,7 +71,6 @@ void map_free(map* this) {
 }
 
 void* map_get(const map* this, const u64 hash) {
-  printf("map_get\n");
   map_entry* node = *((map_entry**)this->buckets + hash % this->buckets_length);
   while (node) {
     if (hash == node->hash) {
@@ -79,7 +78,6 @@ void* map_get(const map* this, const u64 hash) {
     }
     node = node->next;
   }
-  printf("!map_get\n");
   return 0;
 }
 void map_set(map* this, const u64 hash, const void* value) {

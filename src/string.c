@@ -15,6 +15,7 @@ string* string_new(string* this) {
 }
 void string_free(string* this) {
   memory_free(this->data);
+  memory_free(this);
 }
 
 const char* string_cstr(const string* this) {
