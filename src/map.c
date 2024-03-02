@@ -7,18 +7,19 @@
 #define MIN_HASH_SIZE 512ULL // table size when first created
 #define OCCUPANCY_PCT 0.5 // large PCT means smaller and slower
 
-class map {
-  u64 length;
-  u64 stride;
-  void* buckets;
-  u64 buckets_length;
-} map;
 interface map_entry map_entry;
 interface map_entry {
   u64 hash;
   void* value;
   map_entry* next;
 } map_entry;
+
+class map {
+  u64 length;
+  u64 stride;
+  map_entry** buckets;
+  u64 buckets_length;
+} map;
 
 void __rehash(map* this, u64 bucket_length) {
   map_entry** old_it = this->buckets;
@@ -45,7 +46,7 @@ void __rehash(map* this, u64 bucket_length) {
 
 map* _map_new(u64 stride) {
   map* this = memory_alloc(sizeof(map));
-  this->buckets = memory_alloc0(sizeof(map_entry**) * MIN_HASH_SIZE);
+  this->buckets = memory_alloc0(sizeof(this->buckets) * MIN_HASH_SIZE);
   this->buckets_length = MIN_HASH_SIZE;
   this->length = 0;
   this->stride = stride;

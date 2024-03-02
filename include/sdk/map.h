@@ -4,6 +4,7 @@
 #include <sdk/math.h>
 
 #define map_hash(data) math_jenkins_hash(data, sizeof(data))
+
 #define map_new(type) _map_new(sizeof(type))
 #define map_set_cstr(this, key, value) { \
   typeof(value) tmp = value;      \

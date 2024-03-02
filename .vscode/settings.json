@@ -18,6 +18,8 @@
     "platform.h": "c",
     "snowflake.h": "c",
     "time.h": "c",
-    "timeb.h": "c"
+    "timeb.h": "c",
+    "client.h": "c",
+    "server.h": "c"
   }
 }
