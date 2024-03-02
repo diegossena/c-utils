@@ -1,11 +1,11 @@
 #include "sdk/http/client.h"
 #include "sdk/net/socket.h"
 
-// interface http_client_request {
-//   const char* host, path;
-//   u16 port, timeout;
-//   http_method method;
-// } http_client_request;
+interface http_client_request {
+  const char* host, path;
+  u16 port, timeout;
+  http_method method;
+} http_client_request;
 /*
 map<string, string> headers;
 */

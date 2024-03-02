@@ -40,30 +40,30 @@ void socket_test() {
   socket_host_set(socket, "google.com.br");
   socket_port_set(socket, 80);
   error_last = socket_connect(socket);
-  if (error_last)
-    return;
-  socket_write_cstr(
-    socket,
-    "GET / HTTP/1.1\r\n"
-    "Host: google.com.br\r\n"
-    "Connection: close\r\n"
-    "\r\n"
-  );
-  u16 buffer_size = 65535;
-  char buffer[buffer_size];
-  u16 buffer_length = 0;
-  while (true) {
-    i32 received = socket_read(socket, buffer + buffer_length, buffer_size);
-    if (!received)
-      break;
-    if (received < 0) {
-      error_last = error_last;
-      return;
-    }
-    buffer_length += received;
-  }
   if (!error_last) {
-    assert(buffer_length > 0);
+    socket_write_cstr(
+      socket,
+      "GET / HTTP/1.1\r\n"
+      "Host: google.com.br\r\n"
+      "Connection: close\r\n"
+      "\r\n"
+    );
+    u16 buffer_size = 65535;
+    char buffer[buffer_size];
+    u16 buffer_length = 0;
+    while (true) {
+      i32 received = socket_read(socket, buffer + buffer_length, buffer_size);
+      if (!received)
+        break;
+      if (received < 0) {
+        error_last = error_last;
+        return;
+      }
+      buffer_length += received;
+    }
+    if (!error_last) {
+      assert(buffer_length > 0);
+    }
   }
   socket_free(socket);
 }
@@ -87,7 +87,9 @@ void map_test() {
   map_free(map_u64);
 }
 void http_test() {
+  http_client_request* request = http_request_new();
 
+  http_response_free(request);
 }
 
 int main() {
@@ -98,7 +100,8 @@ int main() {
   // socket_test();
   // date_test();
   // snowflake_test();
-  map_test();
+  // map_test();
+  http_test();
 
   app_run();
 
