@@ -13,6 +13,7 @@
     "string.h": "c",
     "socket.h": "c",
     "typeinfo": "c",
-    "sdk.h": "c"
+    "sdk.h": "c",
+    "application.h": "c"
   }
 }

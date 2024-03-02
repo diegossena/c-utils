@@ -22,3 +22,4 @@ http_client_request* http_request_new();
 void http_request_free(http_client_request*);
 
 void http_request_method_set(http_client_request*, http_method);
+void http_request_host_set(http_client_request*, const char*);

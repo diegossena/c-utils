@@ -34,3 +34,6 @@ void http_request_free(http_client_request* this) {
 void http_request_method_set(http_client_request* this, http_method method) {
   this->method = method;
 }
+void http_request_host_set(http_client_request* this, const char* host) {
+  this->host = host;
+}

@@ -89,6 +89,8 @@ void map_test() {
 void http_test() {
   http_client_request* request = http_request_new();
 
+  http_request_host_set(request, "google.com.br");
+
   http_request_free(request);
 }
 
