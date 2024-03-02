@@ -19,4 +19,6 @@ map<string, string> headers;
 interface http_client_response http_client_response;
 
 http_client_request* http_request_new();
-void http_response_free(http_client_request*);
+void http_request_free(http_client_request*);
+
+void http
