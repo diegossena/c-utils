@@ -27,6 +27,10 @@ http_client_request* http_request_new() {
   this->path = "/";
   this->timeout = 0;
 }
-void http_response_free(http_client_request* this) {
+void http_request_free(http_client_request* this) {
   memory_free(this);
+}
+
+void http_request_method_set(http_client_request* this, http_method method) {
+  this->method = method;
 }

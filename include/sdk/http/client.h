@@ -21,4 +21,4 @@ interface http_client_response http_client_response;
 http_client_request* http_request_new();
 void http_request_free(http_client_request*);
 
-void http
+void http_request_method_set(http_client_request*, http_method);

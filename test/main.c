@@ -4,7 +4,6 @@ void string_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "STRING" CONSOLE_RESET);
   string* str1 = string_new();
   string* str2 = string_new();
-
   string_append_cstr(str1, "test");
   console_log_cstr("LINE");
   assert(string_equal_cstr(str1, "test") == true);
@@ -90,19 +89,19 @@ void map_test() {
 void http_test() {
   http_client_request* request = http_request_new();
 
-  http_response_free(request);
+  http_request_free(request);
 }
 
 int main() {
   console_inicialize();
 
-  // string_test();
+  string_test();
   // array_test();
   // socket_test();
   // date_test();
   // snowflake_test();
   // map_test();
-  http_test();
+  // http_test();
 
   app_run();
 

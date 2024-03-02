@@ -6,8 +6,8 @@
 #include <stdio.h> // vsnprintf
 
 class string {
-  char* data;
   u64 length;
+  char* data;
 } string;
 
 string* string_new(string* this) {

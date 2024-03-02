@@ -11,6 +11,8 @@
     "map.h": "c",
     "error.h": "c",
     "string.h": "c",
-    "socket.h": "c"
+    "socket.h": "c",
+    "typeinfo": "c",
+    "sdk.h": "c"
   }
 }
