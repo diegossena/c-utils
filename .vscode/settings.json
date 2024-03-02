@@ -1,26 +1,7 @@
 {
   "files.associations": {
     ".htaccess": "ruby",
-    "types.h": "c",
-    "math.h": "c",
-    "type_traits": "c",
-    "*.tcc": "c",
-    "compare": "c",
-    "stdio.h": "c",
-    "memory.h": "c",
-    "map.h": "c",
-    "error.h": "c",
-    "string.h": "c",
-    "socket.h": "c",
-    "typeinfo": "c",
-    "sdk.h": "c",
-    "application.h": "c",
-    "platform.h": "c",
-    "snowflake.h": "c",
-    "time.h": "c",
-    "timeb.h": "c",
-    "client.h": "c",
-    "server.h": "c",
-    "http.server.h": "c"
+    "net.socket.h": "c",
+    "types.h": "c"
   }
 }

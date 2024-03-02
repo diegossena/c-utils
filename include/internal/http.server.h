@@ -15,4 +15,5 @@ class http_route {
 class http_server {
   http_request_handler* middlewares;
   http_route* routes;
+  u64 _socket;
 } http_server;

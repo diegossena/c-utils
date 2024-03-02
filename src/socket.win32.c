@@ -6,7 +6,7 @@
 #include "sdk/assert.h"
 #include "sdk/console.h" // TODO: remove this line
 
-#include "internal/socket.h"
+#include "internal/net.socket.h"
 #include "internal/memory.h"
 
 #include <winsock2.h>
