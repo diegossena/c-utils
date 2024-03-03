@@ -51,38 +51,15 @@ void map_test() {
   console_log_cstr("!map_test");
   map_free(map_u64);
 }
-void socket_test() {
+void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SOCKET" CONSOLE_RESET);
-  // net_socket* socket = socket_new();
-  // socket_host_set(socket, "google.com.br");
-  // socket_port_set(socket, 80);
-  // error_last = socket_connect(socket);
-  // if (!error_last) {
-  //   socket_write_cstr(
-  //     socket,
-  //     "GET / HTTP/1.1\r\n"
-  //     "Host: google.com.br\r\n"
-  //     "Connection: close\r\n"
-  //     "\r\n"
-  //   );
-  //   u16 buffer_size = 65535;
-  //   char buffer[buffer_size];
-  //   u16 buffer_length = 0;
-  //   while (true) {
-  //     i32 received = socket_read(socket, buffer + buffer_length, buffer_size);
-  //     if (!received)
-  //       break;
-  //     if (received < 0) {
-  //       error_last = error_last;
-  //       return;
-  //     }
-  //     buffer_length += received;
-  //   }
-  //   if (!error_last) {
-  //     assert(buffer_length > 0);
-  //   }
-  // }
-  // socket_free(socket);
+  net_address options = {
+    .family = NET_IPV4,
+    .port = 80
+  };
+  net_tcp* socket = net_tcp_new();
+  net_tcp_listen(socket, &options);
+  net_tcp_free(socket);
 }
 
 i32 main() {
@@ -93,7 +70,7 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
-  // net_tcp_test();
+  net_tcp_server_test();
 
   app_run();
 

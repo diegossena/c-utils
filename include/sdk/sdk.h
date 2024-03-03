@@ -12,6 +12,7 @@
 #include <sdk/snowflake.h>
 
 #include <sdk/net.h>
+#include <sdk/net.tcp.h>
 
 #include <sdk/http.client.h>
 #include <sdk/http.server.h>

@@ -1,8 +1,8 @@
 #include "internal/platform.h"
 #include "internal/net.h"
-#include "internal/tcp.net.h"
 #include "internal/memory.h"
 
+#include "sdk/net.tcp.h"
 #include "sdk/assert.h"
 
 #if PLATFORM_WINDOWS
@@ -11,14 +11,12 @@
 
 net_tcp* net_tcp_new() {
   net_tcp* this = memory_alloc0(sizeof(net_tcp));
-
   return this;
 }
 void net_tcp_free(net_tcp* this) {
   closesocket(this->socket);
   memory_free(this);
 }
-
 
 error_code net_tcp_connect(net_tcp* this, net_connect_opt* options) {
   assert(*options->host);
@@ -33,7 +31,7 @@ error_code net_tcp_connect(net_tcp* this, net_connect_opt* options) {
   addr.s_addr = *(u32*)remoteHost->h_addr_list[0];
   const char* host = (const char*)inet_ntoa(addr);
   struct sockaddr_in socket_address = {};
-  socket_address.sin_family = options->family;
+  socket_address.sin_family = (u16)options->family;
   socket_address.sin_port = htons(options->port);
   socket_address.sin_addr.s_addr = inet_addr(host);
   // create socket
@@ -41,7 +39,7 @@ error_code net_tcp_connect(net_tcp* this, net_connect_opt* options) {
   if (this->socket == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
     closesocket(this->socket);
-    this->socket = 0;
+    return error_last;
   }
   /**
    * If iMode = 0, blocking is enabled;
@@ -85,32 +83,30 @@ error_code net_tcp_connect(net_tcp* this, net_connect_opt* options) {
 
 error_code net_tcp_listen(net_tcp* this, net_address* address) {
   // Definir o endereço e a porta do servidor
-  struct sockaddr_in socket_address = {};
+  struct sockaddr_in  socket_address = {};
   socket_address.sin_family = address->family;
   socket_address.sin_port = htons(address->port);
   // create socket
   this->socket = socket(socket_address.sin_family, SOCK_STREAM, IPPROTO_TCP);
   if (this->socket == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
-    closesocket(this->socket);
-    this->socket = 0;
+    goto onerror;
   }
   // Vincular o socket ao endereço e porta
-  if (bind(this->socket, (struct sockaddr*)&address, sizeof(struct sockaddr)) == SOCKET_ERROR) {
+  if (bind(this->socket, (SOCKADDR*)&socket_address, sizeof(socket_address)) == SOCKET_ERROR) {
     error("bind", WSAGetLastError());
-    closesocket(this->socket);
-    return error_last;
+    goto onerror;
   }
   // Escutar por conexões
   if (listen(this->socket, SOMAXCONN) == SOCKET_ERROR) {
     error("listen", WSAGetLastError());
-    closesocket(this->socket);
+    goto onerror;
   }
   // Set the socket to nonblocking mode
   u_long mode = 1;
   if (ioctlsocket(this->socket, FIONBIO, &mode) == SOCKET_ERROR) {
     error("ioctlsocket", WSAGetLastError());
-    closesocket(this->socket);
+    goto onerror;
   }
   // Aceitar conexões e lidar com elas
   console_log_cstr("Servidor HTTP iniciado. Aguardando conexoes...");
@@ -125,6 +121,9 @@ error_code net_tcp_listen(net_tcp* this, net_address* address) {
     }
   }
   return ERR_SUCCESS;
+onerror:
+  closesocket(this->socket);
+  return error_last;
 }
 
 #endif

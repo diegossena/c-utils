@@ -7,8 +7,8 @@
   u16 port;
 
 typedef enum net_family {
-  IPV4 = 2,
-  IPV6 = 23
+  NET_IPV4 = 2,
+  NET_IPV6 = 23
 } net_family;
 
 interface net_address {

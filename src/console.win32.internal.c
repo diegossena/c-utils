@@ -43,7 +43,6 @@ error_code console_write_str(log_level level, const char* message, u64 length) {
     error("GetStdHandle", ERR_INVALID_HANDLE);
     return ERR_INVALID_HANDLE;
   }
-
   if (!console_has_ansi && message[0] == '\033' && message[1] == '[') {
     u8 ansi_code = message[4] == 'm'
       ? (message[2] - '0') * 10 + message[3] - '0'

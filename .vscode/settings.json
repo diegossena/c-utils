@@ -16,6 +16,7 @@
     "net.h": "c",
     "winsock2.h": "c",
     "error.h": "c",
-    "console.win32.h": "c"
+    "console.win32.h": "c",
+    "types.h": "c"
   }
 }
