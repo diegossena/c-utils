@@ -57,10 +57,6 @@ void on_tcp_server_connection(stream_t* this) {
 }
 void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);
-  net_address_t options = {
-    .family = NET_IPV4,
-    .port = 8080
-  };
   net_tcp_t* socket = net_tcp_new();
   net_tcp_on_connect(socket, on_tcp_server_connection);
   net_tcp_ip4_addr(socket, 8080, null);

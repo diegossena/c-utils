@@ -4,7 +4,6 @@
 
 class net_tcp_t {
   stream_t stream;
-  u64 socket;
   net_addr_t addr;
 } net_tcp_t;
 
