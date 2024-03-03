@@ -23,11 +23,8 @@ void net_tcp_connect_handle(net_tcp_t* this) {
   fd_set readable, writable;
   FD_SET(this->socket, &readable);
   FD_SET(this->socket, &writable);
-  error_last = select(app_global.max_fd + 1, &readable, &writable, null, &timeout);
-  if (error_last == -1) {
-    error("select", ERR_ETIMEDOUT);
-    this->stream.task.type = TASK_NONE;
-  } else if (error_last > 0) {
+  error_last = select(app_global.max_fd, &readable, &writable, null, &timeout);
+  if (error_last > 0) {
     this->stream.connection_cb(&this->stream);
     this->stream.task.type = TASK_NONE;
   }

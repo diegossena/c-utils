@@ -24,7 +24,7 @@ error_code __net_tcp_create_socket(net_tcp_t* this) {
     return error_last;
   }
   if (this->socket > app_global.max_fd) {
-    app_global.max_fd = this->socket;
+    app_global.max_fd = this->socket + 1;
   }
   return ERR_SUCCESS;
 }
