@@ -62,7 +62,7 @@ void net_tcp_server_test() {
     .port = 8080
   };
   net_tcp* socket = net_tcp_new();
-  net_tcp_on_connect(socket, &on_tcp_server_connection);
+  net_tcp_on_connect(socket, on_tcp_server_connection);
   net_tcp_listen(socket, &options);
 }
 
