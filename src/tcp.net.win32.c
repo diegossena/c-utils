@@ -7,17 +7,17 @@
 #include "sdk/assert.h"
 #include <winsock2.h>
 
-net_tcp* net_tcp_new() {
-  net_tcp* this = memory_alloc0(sizeof(net_tcp));
-  stream_init(&this->tcp_stream, HANDLE_NONE);
+net_tcp_t* net_tcp_new() {
+  net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));
+  stream_register(&this->stream, TASK_NONE);
   return this;
 }
-void net_tcp_free(net_tcp* this) {
+void net_tcp_free(net_tcp_t* this) {
   closesocket(this->socket);
   memory_free(this);
 }
 
-error_code net_tcp_connect(net_tcp* this, net_connect_opt* options) {
+error_code net_tcp_connect(net_tcp_t* this, net_connect_opt* options) {
   assert(*options->host);
   assert(options->adress.port > 0);
   // resolve address
@@ -52,34 +52,41 @@ error_code net_tcp_connect(net_tcp* this, net_connect_opt* options) {
     }
   }
   error_last = connect(this->socket, (SOCKADDR*)&socket_address, sizeof(socket_address));
-  if (options->timeout) {
+  if (error_last == SOCKET_ERROR) {
+    error_last = WSAGetLastError();
     if (error_last != WSAEWOULDBLOCK) {
       error("connect", error_last);
       goto onerror;
     }
-    TIMEVAL timeval = { 0, options->timeout * 1000 };
-    fd_set readable, writable;
-    FD_ZERO(&readable);
-    FD_SET(this->socket, &readable);
-    FD_ZERO(&writable);
-    FD_SET(this->socket, &writable);
-    error_last = select(0, &readable, &writable, NULL, &timeval);
-    if (error_last <= 0) {
-      error("select", ERR_ETIMEDOUT);
-      goto onerror;
-    }
-  } else if (error_last == SOCKET_ERROR) {
-    error("connect", ERR_ETIMEDOUT);
-    goto onerror;
   }
+  this->stream.task.type = TASK_TCP_CONNECTING;
+  // if (options->timeout) {
+  //   if (error_last != WSAEWOULDBLOCK) {
+  //     error("connect", error_last);
+  //     goto onerror;
+  //   }
+  //   TIMEVAL timeval = { 0, options->timeout * 1000 };
+  //   fd_set readable, writable;
+  //   FD_ZERO(&readable);
+  //   FD_SET(this->socket, &readable);
+  //   FD_ZERO(&writable);
+  //   FD_SET(this->socket, &writable);
+  //   error_last = select(0, &readable, &writable, NULL, &timeval);
+  //   if (error_last <= 0) {
+  //     error("select", ERR_ETIMEDOUT);
+  //     goto onerror;
+  //   }
+  // } else if (error_last == SOCKET_ERROR) {
+  //   error("connect", ERR_ETIMEDOUT);
+  //   goto onerror;
+  // }
   return ERR_SUCCESS;
 onerror:
   closesocket(this->socket);
   return error_last;
 }
 
-error_code net_tcp_listen(net_tcp* this, net_address* address) {
-  this->tcp_stream.stream_handle.type = HANDLE_TCP_LISTEN;
+error_code net_tcp_listen(net_tcp_t* this, net_address* address) {
   // Definir o endereço e a porta do servidor
   struct sockaddr_in  socket_address = {};
   socket_address.sin_family = address->family;
@@ -107,6 +114,7 @@ error_code net_tcp_listen(net_tcp* this, net_address* address) {
     error("ioctlsocket", WSAGetLastError());
     goto onerror;
   }
+  this->stream.task.type = TASK_TCP_LISTEN;
   // Aceitar conexões e lidar com elas
   return ERR_SUCCESS;
 onerror:

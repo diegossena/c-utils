@@ -52,7 +52,7 @@ void map_test() {
   map_free(map_u64);
 }
 
-void on_tcp_server_connection(const stream* this) {
+void on_tcp_server_connection(const stream_t* this) {
   console_log_cstr("on_tcp_server_connection");
 }
 void net_tcp_server_test() {
@@ -61,7 +61,7 @@ void net_tcp_server_test() {
     .family = NET_IPV4,
     .port = 8080
   };
-  net_tcp* socket = net_tcp_new();
+  net_tcp_t* socket = net_tcp_new();
   net_tcp_on_connect(socket, on_tcp_server_connection);
   net_tcp_listen(socket, &options);
 }
@@ -83,5 +83,6 @@ i32 main() {
     CONSOLE_FORE_GREEN
     CONSOLE_RESET
   );
+
   return app_run();
 }

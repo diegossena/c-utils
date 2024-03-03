@@ -21,6 +21,10 @@
     "handle.h": "c",
     "net.tcp.h": "c",
     "stdio.h": "c",
-    "entry.h": "c"
+    "entry.h": "c",
+    "internet": "c",
+    "map.h": "c",
+    "snowflake.h": "c",
+    "app.task.h": "c"
   }
 }

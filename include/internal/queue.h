@@ -2,8 +2,8 @@
 
 #include "sdk/types.h"
 
-interface queue queue;
+interface queue_t queue_t;
 
-interface queue {
-  queue* next;
-} queue;
+interface queue_t {
+  queue_t* next;
+} queue_t;

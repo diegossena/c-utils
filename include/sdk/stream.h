@@ -1,5 +1,5 @@
 #pragma once
 
-class stream stream;
+class stream_t stream_t;
 
-typedef void (*net_connect_callback)(const stream* handle);
+typedef void (*net_connect_callback)(const stream_t* handle);

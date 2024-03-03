@@ -2,7 +2,7 @@
 #include <sdk/types.h>
 
 interface app_queue app_queue;
-interface handle handle;
+interface app_task app_task;
 
 class application application;
 

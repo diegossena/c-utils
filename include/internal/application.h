@@ -7,8 +7,8 @@
 
 class application {
   u64 active_handles;
-  queue* app_queue_head;
-  queue* app_queue_tail;
+  queue_t* app_queue_head;
+  queue_t* app_queue_tail;
   error_code stop_flag;
 } application;
 

@@ -16,6 +16,6 @@
 // }
 
 
-void stream_init(stream* this, handle_type type) {
-  handle_init(&this->stream_handle, type);
+void stream_register(stream_t* this, app_task_type type) {
+  app_task_register(&this->task, type);
 }

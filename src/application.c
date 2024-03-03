@@ -2,19 +2,19 @@
 #include "internal/net.h"
 #include "internal/application.h"
 #include "sdk/application.h"
-#include "internal/handle.h"
+#include "internal/app.task.h"
 #include "internal/net.tcp.h"
 
 i32 app_run() {
   while (!app_global.stop_flag) {
-    handle* it = (handle*)app_global.app_queue_head;
+    app_task_t* it = (app_task_t*)app_global.app_queue_head;
     while (it) {
       switch (it->type) {
-        case HANDLE_TCP_LISTEN:
-          net_tcp_listen_handle((net_tcp*)it);
+        case TASK_TCP_LISTEN:
+          net_tcp_listen_handle((net_tcp_t*)it);
           break;
       }
-      it = (handle*)it->handle_queue.next;
+      it = (app_task_t*)it->handle_queue.next;
     }
   }
   net_shutdown();
