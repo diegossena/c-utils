@@ -20,6 +20,7 @@
     "types.h": "c",
     "handle.h": "c",
     "net.tcp.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "entry.h": "c"
   }
 }

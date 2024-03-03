@@ -66,8 +66,7 @@ void net_tcp_server_test() {
   net_tcp_listen(socket, &options);
 }
 
-i32 main() {
-  app_inicialize();
+bool app_main(i32 argc, char** argv) {
 
   // string_test();
   // array_test();
@@ -76,13 +75,11 @@ i32 main() {
   // map_test();
   net_tcp_server_test();
 
-  app_run();
-
   console_log_cstr(
     CONSOLE_FORE_GREEN
     "SUCCESS"
     CONSOLE_FORE_GREEN
     CONSOLE_RESET
   );
-  return 0;
+  return true;
 }

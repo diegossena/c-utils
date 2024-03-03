@@ -12,6 +12,4 @@ class application {
   error_code stop_flag;
 } application;
 
-extern application app_main;
-
-void app_shutdown();
+extern application app_global;

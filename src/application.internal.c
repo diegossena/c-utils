@@ -1,3 +1,3 @@
 #include "internal/application.h"
 
-application app_main;
+application app_global;

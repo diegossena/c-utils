@@ -15,8 +15,8 @@ void app_shutdown() {
 }
 
 void app_run() {
-  while (!app_main.stop_flag) {
-    handle* it = (handle*)app_main.app_queue_head;
+  while (!app_global.stop_flag) {
+    handle* it = (handle*)app_global.app_queue_head;
     while (it) {
       switch (it->type) {
         case HANDLE_TCP_LISTEN:
@@ -26,5 +26,4 @@ void app_run() {
       it = (handle*)it->handle_queue.next;
     }
   }
-  app_shutdown();
 }
