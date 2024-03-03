@@ -5,37 +5,37 @@
 #include <stdarg.h>
 #include <stdio.h> // vsnprintf
 
-class string {
+class string_t {
   u64 length;
   char* data;
-} string;
+} string_t;
 
-string* string_new(string* this) {
-  return memory_alloc0(sizeof(string));
+string_t* string_new(string_t* this) {
+  return memory_alloc0(sizeof(string_t));
 }
-void string_free(string* this) {
+void string_free(string_t* this) {
   memory_free(this->data);
   memory_free(this);
 }
 
-const char* string_cstr(const string* this) {
+const char* string_cstr(const string_t* this) {
   return this->data;
 }
-u64 string_length(const string* this) {
+u64 string_length(const string_t* this) {
   return this->length;
 }
-bool string_equal_cstr(const string* this, const char* cstr) {
+bool string_equal_cstr(const string_t* this, const char* cstr) {
   return cstr_equal(this->data, cstr);
 }
-bool string_equal_string(const string* this, const string* other) {
+bool string_equal_string(const string_t* this, const string_t* other) {
   if (this->length != other->length)
     return false;
   return cstr_equal(this->data, other->data);
 }
-i16 string_compare(const string* this, const string* right) {
+i16 string_compare(const string_t* this, const string_t* right) {
   return cstr_compare(this->data, right->data);
 }
-void string_append_str(string* this, const char* cstr, u64 length) {
+void string_append_str(string_t* this, const char* cstr, u64 length) {
   if (!cstr || !*cstr)
     return;
   u64 total_length = this->length + length;
@@ -47,10 +47,10 @@ void string_append_str(string* this, const char* cstr, u64 length) {
   *ch = '\0';
   this->length = total_length;
 }
-void string_append_string(string* this, string* src) {
+void string_append_string(string_t* this, string_t* src) {
   string_append_str(this, src->data, src->length);
 }
-void string_append_char(string* this, const char ch) {
+void string_append_char(string_t* this, const char ch) {
   if (!ch)
     return;
   this->data = memory_realloc(this->data, this->length + 2);

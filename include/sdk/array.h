@@ -12,13 +12,13 @@
   (*(type*)_array_at(this, index))
 
 
-class array array;
+class array_t array_t;
 
-array* _array_new(u64 stride);
-void array_free(array*);
+array_t* _array_new(u64 stride);
+void array_free(array_t*);
 
-void* _array_at(const array*, u64 index);
-u64 array_length(const array*);
-void array_reserve(array*, u64 size);
-u64 array_capacity(array*);
-void _array_push(array*, const void* value);
+void* _array_at(const array_t*, u64 index);
+u64 array_length(const array_t*);
+void array_reserve(array_t*, u64 size);
+u64 array_capacity(array_t*);
+void _array_push(array_t*, const void* value);

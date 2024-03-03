@@ -17,11 +17,11 @@
 #define map_delete_cstr(this, key) \
   map_delete(this, math_jenkins_hash(key, sizeof(key)))
 
-class map map;
+class map_t map_t;
 
-map* _map_new(u64 stride);
-void map_free(map*);
+map_t* _map_new(u64 stride);
+void map_free(map_t*);
 
-void* map_get(const map*, const u64 hash);
-void map_set(map*, const u64 hash, const void* value);
-bool map_delete(map*, const u64 hash);
+void* map_get(const map_t*, const u64 hash);
+void map_set(map_t*, const u64 hash, const void* value);
+bool map_delete(map_t*, const u64 hash);

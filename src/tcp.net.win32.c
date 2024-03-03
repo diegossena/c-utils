@@ -86,7 +86,7 @@ onerror:
   return error_last;
 }
 
-error_code net_tcp_listen(net_tcp_t* this, net_address* address) {
+error_code net_tcp_listen(net_tcp_t* this, net_address_t* address) {
   // Definir o endereço e a porta do servidor
   struct sockaddr_in  socket_address = {};
   socket_address.sin_family = address->family;

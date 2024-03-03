@@ -2,8 +2,8 @@
 
 void string_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "STRING" CONSOLE_RESET);
-  string* str1 = string_new();
-  string* str2 = string_new();
+  string_t* str1 = string_new();
+  string_t* str2 = string_new();
   string_append_cstr(str1, "test");
   console_log_cstr("LINE");
   assert(string_equal_cstr(str1, "test") == true);
@@ -20,7 +20,7 @@ void string_test() {
 }
 void array_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "ARRAY" CONSOLE_RESET);
-  array* arr = array_new(u64);
+  array_t* arr = array_new(u64);
   array_push(arr, (u64)10);
   array_push(arr, (u64)11);
   array_push(arr, (u64)12);
@@ -42,7 +42,7 @@ void snowflake_test() {
 }
 void map_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "MAP" CONSOLE_RESET);
-  map* map_u64 = map_new(u64);
+  map_t* map_u64 = map_new(u64);
   map_set_cstr(map_u64, "key1", (u64)10);
   assert(map_get_cstr(map_u64, u64, "key1") == 10);
   map_delete_cstr(map_u64, "key1");
@@ -57,7 +57,7 @@ void on_tcp_server_connection(const stream_t* this) {
 }
 void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SOCKET" CONSOLE_RESET);
-  net_address options = {
+  net_address_t options = {
     .family = NET_IPV4,
     .port = 8080
   };

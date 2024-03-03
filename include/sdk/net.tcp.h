@@ -25,4 +25,4 @@ void net_tcp_free(net_tcp_t*);
 void net_tcp_on_connect(net_tcp_t*, const net_connect_callback);
 
 error_code net_tcp_connect(net_tcp_t*, net_connect_opt*);
-error_code net_tcp_listen(net_tcp_t*, net_address*);
+error_code net_tcp_listen(net_tcp_t*, net_address_t*);

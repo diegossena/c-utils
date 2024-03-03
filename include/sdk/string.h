@@ -15,20 +15,20 @@ string str;
 string_new(str);
 ```
 */
-class string string;
+class string_t string_t;
 
-string* string_new();
-void string_free(string*);
+string_t* string_new();
+void string_free(string_t*);
 
-const char* string_cstr(const string*);
-u64 string_length(const string*);
+const char* string_cstr(const string_t*);
+u64 string_length(const string_t*);
 
-void string_append_string(string*, string*);
-void string_append_str(string* this, const char* cstr, u64 length);
-void string_append_char(string* this, const char);
-bool string_equal_cstr(const string*, const char*);
-bool string_equal_string(const string*, const string*);
-i16 string_compare(const string*, const string*);
+void string_append_string(string_t*, string_t*);
+void string_append_str(string_t* this, const char* cstr, u64 length);
+void string_append_char(string_t* this, const char);
+bool string_equal_cstr(const string_t*, const char*);
+bool string_equal_string(const string_t*, const string_t*);
+i16 string_compare(const string_t*, const string_t*);
 
 i16 cstr_compare(const char*, const char*);
 bool cstr_equal(const char*, const char*);

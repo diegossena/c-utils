@@ -7,13 +7,13 @@ typedef enum net_family {
   NET_IPV6 = 23
 } net_family;
 
-interface net_address {
+interface net_address_t {
   net_family family;
   u16 port;
-} net_address;
+} net_address_t;
 
 interface net_connect_opt {
-  net_address adress;
+  net_address_t adress;
   const char* host;
   u16 timeout;
 } net_connect_opt;
