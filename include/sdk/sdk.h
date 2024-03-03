@@ -18,4 +18,3 @@
 #include <sdk/http.server.h>
 
 #include <sdk/application.h>
-#include <sdk/entry.h>

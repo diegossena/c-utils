@@ -3,7 +3,8 @@
 #include "sdk/net.h"
 #include "sdk/types.h"
 
-void net_inicialize();
+/** @brief clear net global library if inicialized
+ */
 void net_shutdown();
 
 // #define socket_write_cstr(this, cstr)  { \

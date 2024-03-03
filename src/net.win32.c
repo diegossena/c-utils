@@ -8,16 +8,22 @@
 
 #include <winsock2.h>
 
+bool net_inicialized = false;
+
 void net_inicialize() {
   WSADATA wsaData;
   error_last = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (error_last) {
     error("WSAStartup", error_last);
     WSACleanup();
+  } else {
+    net_inicialized = true;
   }
 }
 void net_shutdown() {
-  WSACleanup();
+  if (net_inicialized) {
+    WSACleanup();
+  }
 }
 
 #endif

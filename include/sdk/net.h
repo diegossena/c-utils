@@ -17,3 +17,5 @@ interface net_connect_opt {
   const char* host;
   u16 timeout;
 } net_connect_opt;
+
+void net_inicialize();

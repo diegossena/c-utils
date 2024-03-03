@@ -5,16 +5,7 @@
 #include "internal/handle.h"
 #include "internal/net.tcp.h"
 
-void app_inicialize() {
-  console_inicialize();
-  net_inicialize();
-}
-
-void app_shutdown() {
-  net_shutdown();
-}
-
-void app_run() {
+i32 app_run() {
   while (!app_global.stop_flag) {
     handle* it = (handle*)app_global.app_queue_head;
     while (it) {
@@ -26,4 +17,6 @@ void app_run() {
       it = (handle*)it->handle_queue.next;
     }
   }
+  net_shutdown();
+  return 0;
 }

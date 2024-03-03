@@ -66,7 +66,9 @@ void net_tcp_server_test() {
   net_tcp_listen(socket, &options);
 }
 
-bool app_main(i32 argc, char** argv) {
+i32 main() {
+  console_inicialize();
+  net_inicialize();
 
   // string_test();
   // array_test();
@@ -81,5 +83,5 @@ bool app_main(i32 argc, char** argv) {
     CONSOLE_FORE_GREEN
     CONSOLE_RESET
   );
-  return true;
+  return app_run();
 }
