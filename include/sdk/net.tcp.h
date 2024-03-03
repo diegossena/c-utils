@@ -23,6 +23,11 @@ net_tcp_t* net_tcp_new();
 void net_tcp_free(net_tcp_t*);
 
 void net_tcp_on_connect(net_tcp_t*, const net_connect_callback);
+/** @brief set socket ipv4 address to bind or connect
+ * @param this net_tcp_t object
+ * @param port port to listen or connect
+ * @param host? host to connect
+ */
 error_code net_tcp_ip4_addr(net_tcp_t*, u16 port, const char* host);
 
 error_code net_tcp_connect(net_tcp_t*);

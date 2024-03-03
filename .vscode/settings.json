@@ -26,6 +26,7 @@
     "map.h": "c",
     "snowflake.h": "c",
     "app.task.h": "c",
-    "_bsd_types.h": "c"
+    "_bsd_types.h": "c",
+    "socket": "c"
   }
 }

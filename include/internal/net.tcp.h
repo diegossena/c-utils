@@ -9,3 +9,4 @@ class net_tcp_t {
 } net_tcp_t;
 
 void net_tcp_listen_handle(net_tcp_t*);
+void net_tcp_connect_handle(net_tcp_t*);

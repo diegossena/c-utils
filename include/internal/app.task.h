@@ -9,7 +9,7 @@ typedef void (*handle_close_callback)(app_task_t* handle);
 
 typedef enum app_task_type {
   TASK_NONE,
-  TASK_TCP_CONNECTING,
+  TASK_TCP_CONNECT,
   TASK_TCP_LISTEN
 } app_task_type;
 

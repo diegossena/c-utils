@@ -52,7 +52,7 @@ void map_test() {
   map_free(map_u64);
 }
 
-void on_tcp_server_connection(const stream_t* this) {
+void on_tcp_server_connection(stream_t* this) {
   console_log_cstr("on_tcp_server_connection");
 }
 void net_tcp_server_test() {
@@ -63,13 +63,16 @@ void net_tcp_server_test() {
   };
   net_tcp_t* socket = net_tcp_new();
   net_tcp_on_connect(socket, on_tcp_server_connection);
-  net_tcp_ip4_addr(socket, 8080, 0);
+  net_tcp_ip4_addr(socket, 8080, null);
   net_tcp_listen(socket);
 }
-
+void on_tcp_client_connection(stream_t* this) {
+  console_log_cstr("on_tcp_client_connection");
+}
 void net_tcp_client() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
   net_tcp_t* socket = net_tcp_new();
+  net_tcp_on_connect(socket, on_tcp_client_connection);
   net_tcp_ip4_addr(socket, 8080, "127.0.0.1");
   net_tcp_connect(socket);
 }

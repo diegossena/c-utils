@@ -3,6 +3,8 @@
 #define STRINGIZE_KEY(x) #x
 #define STRINGIZE(x) STRINGIZE_KEY(x)
 
+#define null ((void *)0)
+
 typedef _Bool bool;
 #define true 1
 #define false 0
@@ -22,7 +24,6 @@ typedef unsigned long long u64; // 0 ~ 18446744073709551615
 typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
-
 #define interface typedef struct
 #define class typedef struct
 
@@ -32,7 +33,6 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 #define MIN_I32 (-2147483647 - 1)
 #define MAX_I16 32767
 #define MIN_I16 -32768
-
 
 #ifdef SDK_LIB
 #define export __declspec(dllexport)
