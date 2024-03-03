@@ -17,6 +17,9 @@
     "winsock2.h": "c",
     "error.h": "c",
     "console.win32.h": "c",
-    "types.h": "c"
+    "types.h": "c",
+    "handle.h": "c",
+    "net.tcp.h": "c",
+    "stdio.h": "c"
   }
 }

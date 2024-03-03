@@ -55,11 +55,10 @@ void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SOCKET" CONSOLE_RESET);
   net_address options = {
     .family = NET_IPV4,
-    .port = 80
+    .port = 8080
   };
   net_tcp* socket = net_tcp_new();
   net_tcp_listen(socket, &options);
-  net_tcp_free(socket);
 }
 
 i32 main() {

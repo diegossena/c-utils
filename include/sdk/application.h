@@ -6,8 +6,6 @@ interface handle handle;
 
 class application application;
 
-extern application application_main;
-
 void app_inicialize();
 
 // run main loop and free on exit

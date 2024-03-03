@@ -3,14 +3,13 @@
 #include "internal/application.h"
 #include "internal/stream.h"
 #include "internal/net.h"
-
+#include "internal/handle.h"
 #include "sdk/error.h"
 
 // Represents a TCP stream or TCP server.
 typedef struct net_tcp {
-  HANDLE_FIELDS;
-  STREAM_FIELDS;
-  SOCKET_FIELDS;
+  stream tcp_stream;
+  u64 socket;
 } net_tcp;
 
 net_tcp* net_tcp_new();

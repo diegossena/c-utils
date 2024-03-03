@@ -3,9 +3,6 @@
 #include "sdk/net.h"
 #include "sdk/types.h"
 
-#define SOCKET_FIELDS \
-  u64 socket;
-
 void net_inicialize();
 void net_shutdown();
 
