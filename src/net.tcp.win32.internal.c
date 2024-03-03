@@ -14,8 +14,8 @@ void net_tcp_listen_handle(net_tcp* this) {
     if (error_last != WSAEWOULDBLOCK) {
       error("accept", error_last);
     }
-  } else {
-    printf("client_socket=%d\n", client_socket);
+  } else if (this->tcp_stream.connection_cb) {
+    this->tcp_stream.connection_cb(&this->tcp_stream);
   }
 }
 

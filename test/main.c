@@ -51,6 +51,10 @@ void map_test() {
   console_log_cstr("!map_test");
   map_free(map_u64);
 }
+
+void on_tcp_server_connection(const stream* this) {
+  console_log_cstr("on_tcp_server_connection");
+}
 void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SOCKET" CONSOLE_RESET);
   net_address options = {
@@ -58,6 +62,7 @@ void net_tcp_server_test() {
     .port = 8080
   };
   net_tcp* socket = net_tcp_new();
+  net_tcp_on_connect(socket, &on_tcp_server_connection);
   net_tcp_listen(socket, &options);
 }
 

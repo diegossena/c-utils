@@ -1,12 +1,14 @@
 #pragma once
 
 #include "internal/queue.h"
+#include "sdk/handle.h"
 
 interface handle handle;
 
 typedef void (*handle_close_callback)(handle* handle);
 
 typedef enum handle_type {
+  HANDLE_NONE,
   HANDLE_TCP_LISTEN
 } handle_type;
 

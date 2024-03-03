@@ -1,18 +1,15 @@
 #include "internal/platform.h"
-#include "internal/net.h"
-#include "internal/memory.h"
-#include "internal/stream.h"
-
-#include "sdk/net.tcp.h"
-#include "sdk/assert.h"
 
 #if PLATFORM_WINDOWS
 
+#include "internal/net.tcp.h"
+#include "internal/memory.h"
+#include "sdk/assert.h"
 #include <winsock2.h>
 
 net_tcp* net_tcp_new() {
   net_tcp* this = memory_alloc0(sizeof(net_tcp));
-  stream_init(&this->tcp_stream, HANDLE_TCP);
+  stream_init(&this->tcp_stream, HANDLE_NONE);
   return this;
 }
 void net_tcp_free(net_tcp* this) {
@@ -111,9 +108,6 @@ error_code net_tcp_listen(net_tcp* this, net_address* address) {
     goto onerror;
   }
   // Aceitar conexões e lidar com elas
-  console_log("address->port=%d", address->port);
-  console_log("socket_address.sin_port=%d", socket_address.sin_port);
-  console_log("this->socket=%d", this->socket);
   return ERR_SUCCESS;
 onerror:
   closesocket(this->socket);

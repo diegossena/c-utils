@@ -5,8 +5,6 @@
 #include "internal/handle.h"
 #include "internal/net.tcp.h"
 
-#include <stdio.h> // TODO: remove this line
-
 void app_inicialize() {
   console_inicialize();
   net_inicialize();
