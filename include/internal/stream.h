@@ -11,7 +11,5 @@ class stream_t {
   u16 timeout;
 } stream_t;
 
-void stream_register(stream_t*, app_task_type);
-
 // void stream_read(stream*);
 // void stream_write(stream*);

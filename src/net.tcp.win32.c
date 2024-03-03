@@ -9,7 +9,7 @@
 
 net_tcp_t* net_tcp_new() {
   net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));
-  stream_register(&this->stream, TASK_NONE);
+  app_task_register((app_task_t*)&this->stream, TASK_NONE);
   return this;
 }
 void net_tcp_free(net_tcp_t* this) {
