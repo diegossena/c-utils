@@ -1,8 +1,7 @@
 #pragma once
 #include <sdk/types.h>
-
-interface app_queue app_queue;
-interface app_task app_task;
+#include <sdk/stream.h>
+#include <sdk/net.tcp.h>
 
 class application application;
 

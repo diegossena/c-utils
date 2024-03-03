@@ -3,13 +3,14 @@
 #include "sdk/application.h"
 #include "sdk/stream.h"
 #include "sdk/net.h"
-#include "sdk/app.task.h"
 #include "sdk/error.h"
 
 /** @brief Represents a TCP stream or TCP server.
  *
  */
 class net_tcp_t net_tcp_t;
+
+typedef void (*net_tcp_on_connect_cb)(stream_t*);
 
 /** @brief Externally-defined function to create a net_tcp, provided by the consumer
  * of this library.
@@ -22,7 +23,7 @@ net_tcp_t* net_tcp_new();
  */
 void net_tcp_free(net_tcp_t*);
 
-void net_tcp_on_connect(net_tcp_t*, const net_connect_callback);
+void net_tcp_on_connect(net_tcp_t*, net_tcp_on_connect_cb);
 /** @brief set socket ipv4 address to bind or connect
  * @param this net_tcp_t object
  * @param port port to listen or connect

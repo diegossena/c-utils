@@ -27,6 +27,11 @@
     "snowflake.h": "c",
     "app.task.h": "c",
     "_bsd_types.h": "c",
-    "socket": "c"
+    "socket": "c",
+    "random": "c",
+    "heapapi.h": "c",
+    "http.server.h": "c",
+    "task.h": "c",
+    "*.tcc": "c"
   }
 }

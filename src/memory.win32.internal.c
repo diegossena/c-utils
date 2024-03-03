@@ -1,12 +1,13 @@
 #include "internal/platform.h"
 
 #if PLATFORM_WINDOWS
-
-#include "sdk/application.h"
+// error, ERR_NOT_ENOUGH_MEMORY
 #include "sdk/error.h"
+// memory_alloc, memory_alloc0, memory_free, memory_realloc, memory_realloc0 
 #include "internal/memory.h"
-
+// GetProcessHeap, HeapReAlloc, HeapAlloc, HEAP_ZERO_MEMORY
 #include <heapapi.h>
+// printf
 #include <stdio.h> // TODO: remove this line
 
 i64 allocated_count = 0;

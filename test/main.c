@@ -46,9 +46,7 @@ void map_test() {
   map_set_cstr(map_u64, "key1", (u64)10);
   assert(map_get_cstr(map_u64, u64, "key1") == 10);
   map_delete_cstr(map_u64, "key1");
-  console_log_cstr("map_test");
   assert(map_get_cstr_p(map_u64, u64, "key1") == 0);
-  console_log_cstr("!map_test");
   map_free(map_u64);
 }
 
@@ -64,6 +62,7 @@ void net_tcp_server_test() {
 }
 void on_tcp_client_connection(stream_t* this) {
   console_log_cstr("on_tcp_client_connection");
+  task_destroy(this);
 }
 void net_tcp_client() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);

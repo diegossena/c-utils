@@ -2,17 +2,25 @@
 
 #if PLATFORM_WINDOWS
 
+// app_global
+#include "internal/application.h"
+// net_tcp_t
 #include "internal/net.tcp.h"
+// memory_alloc0
 #include "internal/memory.h"
+// assert
 #include "sdk/assert.h"
+// socket
 #include <winsock2.h>
 
 net_tcp_t* net_tcp_new() {
   net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));
-  app_task_register((app_task_t*)&this->stream, TASK_NONE);
+  this->stream.task.type = TASK_NONE;
+  task_register(&this->stream.task);
   return this;
 }
 void net_tcp_free(net_tcp_t* this) {
+  task_unregister(&this->stream.task);
   closesocket(this->stream.fd);
   memory_free(this);
 }

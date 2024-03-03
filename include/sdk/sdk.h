@@ -17,4 +17,5 @@
 #include <sdk/http.client.h>
 #include <sdk/http.server.h>
 
+#include <sdk/task.h>
 #include <sdk/application.h>

@@ -1,6 +1,8 @@
-#include "internal/stream.h"
-#include "internal/net.h"
 #include "sdk/net.tcp.h"
+// stream_t
+#include "internal/stream.h"
+// net_addr_t
+#include "internal/net.h"
 
 class net_tcp_t {
   stream_t stream;

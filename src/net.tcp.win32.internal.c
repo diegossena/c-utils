@@ -2,10 +2,13 @@
 
 #if PLATFORM_WINDOWS
 
+// app_global
+#include "internal/application.h"
+// net_tcp_t
 #include "internal/net.tcp.h"
+// TODO: remove this line
+#include "sdk/console.h" 
 #include <winsock2.h>
-
-#include "sdk/console.h" // TODO: remove this line
 
 struct timeval timeout = {};
 
@@ -16,8 +19,8 @@ void net_tcp_listen_handle(net_tcp_t* this) {
     if (error_last != WSAEWOULDBLOCK) {
       error("accept", error_last);
     }
-  } else if (this->stream.connection_cb) {
-    this->stream.connection_cb(&this->stream);
+  } else if (this->stream.task.handle) {
+    this->stream.task.handle(&this->stream);
   }
 }
 void net_tcp_connect_handle(net_tcp_t* this) {
@@ -26,8 +29,8 @@ void net_tcp_connect_handle(net_tcp_t* this) {
   FD_SET(this->stream.fd, &writable);
   error_last = select(app_global.max_fd, &readable, &writable, null, &timeout);
   if (error_last > 0) {
-    if (this->stream.connection_cb) {
-      this->stream.connection_cb(&this->stream);
+    if (this->stream.task.handle) {
+      this->stream.task.handle(&this->stream);
     }
     this->stream.task.type = TASK_NONE;
   }

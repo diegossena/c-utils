@@ -1,15 +1,11 @@
 #pragma once
-
-#include "internal/application.h"
-#include "internal/app.task.h"
+// stream_t
 #include "sdk/stream.h"
+// task_t
+#include "internal/task.h"
 
 class stream_t {
-  app_task_t task;
-  net_connect_callback connection_cb;
+  task_t task;
   i64 fd;
   u16 timeout;
 } stream_t;
-
-// void stream_read(stream*);
-// void stream_write(stream*);

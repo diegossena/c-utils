@@ -1,6 +1,6 @@
+// net_tcp_on_connect, net_tcp_t, task_handle
 #include "internal/net.tcp.h"
-#include "internal/stream.h"
 
-void net_tcp_on_connect(net_tcp_t* this, const net_connect_callback callback) {
-  this->stream.connection_cb = callback;
+void net_tcp_on_connect(net_tcp_t* this, net_tcp_on_connect_cb callback) {
+  this->stream.task.handle = (task_handle)callback;
 }
