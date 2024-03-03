@@ -3,6 +3,19 @@
 #include "sdk/net.h"
 #include "sdk/types.h"
 
+typedef union net_in_addr_t {
+  struct { u8  s_b1, s_b2, s_b3, s_b4; } S_un_b;
+  struct { u16 s_w1, s_w2; } S_un_w;
+  u32 S_addr;
+} net_in_addr_t;
+
+interface net_addr_t {
+  short	family;
+  u16	sin_port;
+  net_in_addr_t	in_addr;
+  char	sin_zero[8];
+} net_addr_t;
+
 /** @brief clear net global library if inicialized
  */
 void net_shutdown();

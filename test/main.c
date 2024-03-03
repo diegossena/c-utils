@@ -56,14 +56,22 @@ void on_tcp_server_connection(const stream_t* this) {
   console_log_cstr("on_tcp_server_connection");
 }
 void net_tcp_server_test() {
-  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SOCKET" CONSOLE_RESET);
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);
   net_address_t options = {
     .family = NET_IPV4,
     .port = 8080
   };
   net_tcp_t* socket = net_tcp_new();
   net_tcp_on_connect(socket, on_tcp_server_connection);
-  net_tcp_listen(socket, &options);
+  net_tcp_ip4_addr(socket, 8080, 0);
+  net_tcp_listen(socket);
+}
+
+void net_tcp_client() {
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
+  net_tcp_t* socket = net_tcp_new();
+  net_tcp_ip4_addr(socket, 8080, "127.0.0.1");
+  net_tcp_connect(socket);
 }
 
 i32 main() {
@@ -75,7 +83,9 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
-  net_tcp_server_test();
+  // net_tcp_server_test();
+  net_tcp_client();
+
 
   console_log_cstr(
     CONSOLE_FORE_GREEN

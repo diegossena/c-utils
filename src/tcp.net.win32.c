@@ -17,24 +17,29 @@ void net_tcp_free(net_tcp_t* this) {
   memory_free(this);
 }
 
-error_code net_tcp_connect(net_tcp_t* this, net_connect_opt* options) {
-  assert(*options->host);
-  assert(options->adress.port > 0);
+error_code net_tcp_ip4_addr(net_tcp_t* this, u16 port, const char* host) {
+  assert(port > 0);
   // resolve address
-  struct hostent* remoteHost = gethostbyname(options->host);
-  if (remoteHost == NULL) {
-    error("gethostbyname", WSAGetLastError());
-    return error_last;
+  if (host) {
+    struct hostent* remote_host = gethostbyname(host);
+    if (remote_host == NULL) {
+      error("gethostbyname", WSAGetLastError());
+      return error_last;
+    }
+    this->addr.in_addr.S_addr = *(u32*)remote_host->h_addr_list[0];
+  } else {
+    this->addr.in_addr.S_addr = INADDR_ANY;
   }
-  struct in_addr addr;
-  addr.s_addr = *(u32*)remoteHost->h_addr_list[0];
-  const char* host = (const char*)inet_ntoa(addr);
-  struct sockaddr_in socket_address = {};
-  socket_address.sin_family = (u16)options->adress.family;
-  socket_address.sin_port = htons(options->adress.port);
-  socket_address.sin_addr.s_addr = inet_addr(host);
+  this->addr.family = AF_INET;
+  this->addr.sin_port = port;
+  // this->addr.in_addr.S_addr = inet_addr(host);
+  //htons(port);
+  // const char* ntoa = (const char*)inet_ntoa(*(struct in_addr*)&this->addr.in_addr);
+  return ERR_SUCCESS;
+}
+error_code net_tcp_connect(net_tcp_t* this) {
   // create socket
-  this->socket = socket(socket_address.sin_family, SOCK_STREAM, IPPROTO_TCP);
+  this->socket = socket(this->addr.family, SOCK_STREAM, IPPROTO_TCP);
   if (this->socket == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
     goto onerror;
@@ -44,14 +49,13 @@ error_code net_tcp_connect(net_tcp_t* this, net_connect_opt* options) {
    * If iMode != 0, non-blocking mode is enabled.
    */
   u_long iMode = 1;
-  if (options->timeout) {
-    error_last = ioctlsocket(this->socket, FIONBIO, &iMode);
-    if (error_last != NO_ERROR) {
-      error("ioctlsocket", error_last);
-      goto onerror;
-    }
+  error_last = ioctlsocket(this->socket, FIONBIO, &iMode);
+  if (error_last != NO_ERROR) {
+    error("ioctlsocket", error_last);
+    goto onerror;
   }
-  error_last = connect(this->socket, (SOCKADDR*)&socket_address, sizeof(socket_address));
+  // connect
+  error_last = connect(this->socket, (SOCKADDR*)&this->addr, sizeof(this->addr));
   if (error_last == SOCKET_ERROR) {
     error_last = WSAGetLastError();
     if (error_last != WSAEWOULDBLOCK) {
@@ -60,46 +64,21 @@ error_code net_tcp_connect(net_tcp_t* this, net_connect_opt* options) {
     }
   }
   this->stream.task.type = TASK_TCP_CONNECTING;
-  // if (options->timeout) {
-  //   if (error_last != WSAEWOULDBLOCK) {
-  //     error("connect", error_last);
-  //     goto onerror;
-  //   }
-  //   TIMEVAL timeval = { 0, options->timeout * 1000 };
-  //   fd_set readable, writable;
-  //   FD_ZERO(&readable);
-  //   FD_SET(this->socket, &readable);
-  //   FD_ZERO(&writable);
-  //   FD_SET(this->socket, &writable);
-  //   error_last = select(0, &readable, &writable, NULL, &timeval);
-  //   if (error_last <= 0) {
-  //     error("select", ERR_ETIMEDOUT);
-  //     goto onerror;
-  //   }
-  // } else if (error_last == SOCKET_ERROR) {
-  //   error("connect", ERR_ETIMEDOUT);
-  //   goto onerror;
-  // }
   return ERR_SUCCESS;
 onerror:
   closesocket(this->socket);
   return error_last;
 }
 
-error_code net_tcp_listen(net_tcp_t* this, net_address_t* address) {
-  // Definir o endereço e a porta do servidor
-  struct sockaddr_in  socket_address = {};
-  socket_address.sin_family = address->family;
-  socket_address.sin_addr.s_addr = INADDR_ANY;
-  socket_address.sin_port = htons(address->port);
+error_code net_tcp_listen(net_tcp_t* this) {
   // Create socket
-  this->socket = socket(socket_address.sin_family, SOCK_STREAM, IPPROTO_TCP);
+  this->socket = socket(this->addr.family, SOCK_STREAM, IPPROTO_TCP);
   if (this->socket == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
     goto onerror;
   }
   // Vincular o socket ao endereço e porta
-  if (bind(this->socket, (SOCKADDR*)&socket_address, sizeof(socket_address)) == SOCKET_ERROR) {
+  if (bind(this->socket, (SOCKADDR*)&this->addr, sizeof(this->addr)) == SOCKET_ERROR) {
     error("bind", WSAGetLastError());
     goto onerror;
   }

@@ -23,6 +23,7 @@ net_tcp_t* net_tcp_new();
 void net_tcp_free(net_tcp_t*);
 
 void net_tcp_on_connect(net_tcp_t*, const net_connect_callback);
+error_code net_tcp_ip4_addr(net_tcp_t*, u16 port, const char* host);
 
-error_code net_tcp_connect(net_tcp_t*, net_connect_opt*);
-error_code net_tcp_listen(net_tcp_t*, net_address_t*);
+error_code net_tcp_connect(net_tcp_t*);
+error_code net_tcp_listen(net_tcp_t*);
