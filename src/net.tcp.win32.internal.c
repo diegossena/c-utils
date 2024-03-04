@@ -64,6 +64,7 @@ void net_tcp_read_handle(net_tcp_t* this) {
   byte* buffer_start = this->stream.buffer + this->stream.processed;
   i32 received = recv(this->socket, buffer_start, remaining, 0);
   if (received > 0) {
+    console_log("received=%d", received);
     this->stream.updatedAt = date_now();
     this->stream.processed += received;
     if (this->stream.length == this->stream.processed) {
