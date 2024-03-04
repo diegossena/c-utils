@@ -16,8 +16,7 @@
 #include <winsock2.h>
 
 void net_tcp_close_handle(net_tcp_t* this) {
-  shutdown(this->socket, FD_READ);
-  shutdown(this->socket, FD_WRITE);
+  shutdown(this->socket, FD_WRITE | FD_READ);
   queue_remove(&app_global.tasks, (queue_t*)this);
   closesocket(this->socket);
   memory_free(this);
