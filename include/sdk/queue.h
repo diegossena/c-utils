@@ -2,4 +2,4 @@
 
 #include <sdk/types.h>
 
-interface queue_t queue_t;
+typedef struct queue_t queue_t;

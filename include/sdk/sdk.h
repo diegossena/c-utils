@@ -13,6 +13,8 @@
 
 #include <sdk/net.h>
 #include <sdk/net.tcp.h>
+#include <sdk/net.tcp.server.h>
+#include <sdk/net.tcp.client.h>
 
 #include <sdk/http.client.h>
 #include <sdk/http.server.h>

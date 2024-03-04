@@ -50,26 +50,33 @@ void map_test() {
   map_free(map_u64);
 }
 
-void on_tcp_server_connection(stream_t* this) {
+
+void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* context) {
+  console_log_cstr("on_tcp_on_read");
+  console_log_str(data, length);
+}
+void on_tcp_on_write(net_tcp_t* this, const void* context) {
+  console_log_cstr("on_tcp_on_write");
+  net_tcp_read(this, 0, on_tcp_on_read);
+}
+
+void on_tcp_on_connect(net_tcp_t* this) {
+  console_log_cstr("on_tcp_on_connect");
+  net_tcp_write(this, "Hello Server", 4, on_tcp_on_write);
+}
+void net_tcp_test() {
+  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
+  net_tcp_t* socket = net_tcp_new();
+  net_tcp_ip4_connect(socket, "127.0.0.1", 8080, on_tcp_on_connect);
+}
+
+void tcp_server_on_connection(net_tcp_client_t* client) {
   console_log_cstr("on_tcp_server_connection");
 }
 void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);
-  net_tcp_t* socket = net_tcp_new();
-  net_tcp_on_connect(socket, on_tcp_server_connection);
-  net_tcp_ip4_addr(socket, 8080, null);
-  net_tcp_listen(socket);
-}
-void on_tcp_client_connection(stream_t* this) {
-  console_log_cstr("on_tcp_client_connection");
-  task_destroy(this);
-}
-void net_tcp_client() {
-  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  net_tcp_t* socket = net_tcp_new();
-  net_tcp_on_connect(socket, on_tcp_client_connection);
-  net_tcp_ip4_addr(socket, 8080, "127.0.0.1");
-  net_tcp_connect(socket);
+  net_tcp_server_t* server = net_tcp_server_new();
+  net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
 }
 
 i32 main() {
@@ -81,9 +88,8 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
+  net_tcp_test();
   // net_tcp_server_test();
-  net_tcp_client();
-
 
   console_log_cstr(
     CONSOLE_FORE_GREEN
@@ -91,6 +97,5 @@ i32 main() {
     CONSOLE_FORE_GREEN
     CONSOLE_RESET
   );
-
   return app_run();
 }

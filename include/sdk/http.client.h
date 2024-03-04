@@ -5,11 +5,11 @@
 #include <sdk/string.h>
 #include <sdk/map.h>
 
-interface http_client_request http_client_request;
+typedef struct http_client_request http_client_request;
 /*
 map<string, string> headers;
 */
-interface http_client_response http_client_response;
+typedef struct http_client_response http_client_response;
 
 http_client_request* http_request_new();
 void http_request_free(http_client_request*);

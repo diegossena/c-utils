@@ -1,7 +1,9 @@
+// net_tcp_connect_handle, net_tcp_t
+#include "internal/net.tcp.h"
 // app_run, app_global
 #include "internal/application.h"
-// net_tcp_listen_handle, net_tcp_connect_handle, net_tcp_t
-#include "internal/net.tcp.h"
+// net_tcp_server_listen_handle
+#include "internal/net.tcp.server.h"
 // task_t
 #include "internal/task.h"
 // memory_free
@@ -13,9 +15,23 @@ i32 app_run() {
   task_t* it = (task_t*)app_global.tasks;
   while (it) {
     while (it) {
+      // console_log("type=%d", it->type);
       switch (it->type) {
-        case TASK_TCP_CONNECT: net_tcp_connect_handle((net_tcp_t*)it); break;
-        case TASK_TCP_LISTEN: net_tcp_listen_handle((net_tcp_t*)it); break;
+        case TASK_TCP_CONNECTING: net_tcp_connect_handle((net_tcp_t*)it); break;
+        case TASK_TCP_WRITING:  net_tcp_write_handle((net_tcp_t*)it); break;
+        case TASK_TCP_READING: net_tcp_read_handle((net_tcp_t*)it); break;
+        case TASK_TCP_CLOSING: net_tcp_close_handle((net_tcp_t*)it); break;
+
+        case TASK_TCP_SERVER_LISTENING:
+          net_tcp_server_listen_handle((net_tcp_server_t*)it);
+          break;
+        case TASK_TCP_SERVER_CLOSING:
+          net_tcp_server_close_handle((net_tcp_server_t*)it);
+          break;
+
+        case TASK_TCP_CLIENT_WRITING: break;
+        case TASK_TCP_CLIENT_READING: break;
+        case TASK_TCP_CLIENT_CLOSING: break;
       }
       it = (task_t*)it->queue.next;
     }

@@ -7,15 +7,15 @@
 #define MIN_HASH_SIZE 512ULL // table size when first created
 #define OCCUPANCY_PCT 0.5 // large PCT means smaller and slower
 
-interface map_entry map_entry;
+typedef struct map_entry map_entry;
 
-interface map_entry {
+typedef struct map_entry {
   u64 hash;
   void* value;
   map_entry* next;
 } map_entry;
 
-class map_t {
+typedef struct map_t {
   u64 length;
   u64 stride;
   map_entry** buckets;

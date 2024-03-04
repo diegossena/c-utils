@@ -3,12 +3,12 @@
 #include <sdk/types.h>
 #include <sdk/error.h>
 
-class http_server http_server;
-class http_route http_route;
+typedef struct http_server http_server;
+typedef struct http_route http_route;
 
-interface http_message http_message;
-interface http_server_request http_server_request;
-interface http_server_response http_server_response;
+typedef struct http_message http_message;
+typedef struct http_server_request http_server_request;
+typedef struct http_server_response http_server_response;
 
 typedef void (*http_request_handler)(const http_server_request*, const http_server_response*);
 

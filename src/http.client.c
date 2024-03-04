@@ -3,7 +3,7 @@
 
 // #include "internal/memory.h"
 
-// interface http_client_request {
+// typedef struct http_client_request {
 //   const char* host, * path;
 //   u16 port, timeout;
 //   http_method method;
@@ -11,7 +11,7 @@
 // /*
 // map<const char*, const char*> headers;
 // */
-// interface http_client_response {
+// typedef struct http_client_response {
 //   u16 statusCode;
 //   string* statusText;
 //   u64 content_length;

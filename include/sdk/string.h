@@ -15,7 +15,7 @@ string str;
 string_new(str);
 ```
 */
-class string_t string_t;
+typedef struct string_t string_t;
 
 string_t* string_new();
 void string_free(string_t*);

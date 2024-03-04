@@ -1,13 +1,22 @@
-#include "sdk/net.tcp.h"
-// stream_t
-#include "internal/stream.h"
 // net_addr_t
 #include "internal/net.h"
+// net_tcp_t
+#include "sdk/net.tcp.h"
+// task_t
+#include "internal/task.h"
+// stream_t
+#include "internal/stream.h"
 
-class net_tcp_t {
+typedef struct net_tcp_t {
+  task_t task;
   stream_t stream;
-  net_addr_t addr;
+  u64 socket;
+  net_tcp_on_connect_cb on_connect;
 } net_tcp_t;
 
-void net_tcp_listen_handle(net_tcp_t*);
+u64 net_tcp_create_socket(const net_addr_t*);
+
 void net_tcp_connect_handle(net_tcp_t*);
+void net_tcp_close_handle(net_tcp_t*);
+void net_tcp_read_handle(net_tcp_t*);
+void net_tcp_write_handle(net_tcp_t*);

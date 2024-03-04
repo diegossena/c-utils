@@ -6,7 +6,7 @@
 // error_code
 #include "sdk/error.h"
 
-class application {
+typedef struct application {
   u64 active_handles;
   queue_t* tasks;
   error_code stop_flag;

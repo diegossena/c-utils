@@ -11,13 +11,14 @@ u64 math_next2pow(u64 number) {
   return ++number;
 }
 
-u64 math_jenkins_hash(const byte* data, u64 size) {
+u64 math_hash_jenkins(const byte* data, u64 size) {
   u64 hash = 0;
   const byte* end = data + size;
   while (data != end) {
-    hash += *data++;
+    hash += *data;
     hash += hash << 10;
     hash ^= hash >> 6;
+    ++data;
   }
   hash += hash << 3;
   hash ^= hash >> 11;

@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <stdio.h> // vsnprintf
 
-class string_t {
+typedef struct string_t {
   u64 length;
   char* data;
 } string_t;

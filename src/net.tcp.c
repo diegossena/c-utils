@@ -1,6 +1,24 @@
 // net_tcp_on_connect, net_tcp_t, task_handle
 #include "internal/net.tcp.h"
+// memory_alloc0
+#include "internal/memory.h"
+// TODO: remove this line
+#include "sdk/console.h"
 
-void net_tcp_on_connect(net_tcp_t* this, net_tcp_on_connect_cb callback) {
-  this->stream.task.handle = (task_handle)callback;
+void net_tcp_set_context(net_tcp_t* this, const void* context) {
+  this->stream.context = context;
+}
+
+void net_tcp_write(net_tcp_t* this, const byte* chunk, u64 length, net_tcp_on_write_cb callback) {
+  this->task.type = TASK_TCP_WRITING;
+  this->stream.buffer = (byte*)chunk;
+  this->stream.length = length;
+  this->task.handle = (void*)callback;
+  console_log_cstr("net_tcp_write");
+}
+void net_tcp_read(net_tcp_t* this, u64 length, net_tcp_on_read_cb callback) {
+  this->task.type = TASK_TCP_READING;
+  this->stream.buffer = memory_alloc0(length);
+  this->stream.length = length;
+  this->task.handle = (void*)callback;
 }

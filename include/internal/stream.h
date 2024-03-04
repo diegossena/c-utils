@@ -1,11 +1,10 @@
 #pragma once
-// stream_t
-#include "sdk/stream.h"
-// task_t
-#include "internal/task.h"
 
-class stream_t {
-  task_t task;
-  i64 fd;
-  u16 timeout;
+#include "sdk/types.h"
+
+typedef struct stream_t {
+  const void* context;
+  byte* buffer;
+  u64 length;
+  u64 processed;
 } stream_t;

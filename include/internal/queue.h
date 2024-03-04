@@ -2,7 +2,7 @@
 
 #include "sdk/queue.h"
 
-interface queue_t {
+typedef struct queue_t {
   queue_t* next;
   queue_t* prev;
 } queue_t;

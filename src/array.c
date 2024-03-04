@@ -4,7 +4,7 @@
 
 #include <stdio.h> // TODO: remove this line
 
-class array_t {
+typedef struct array_t {
   u64 capacity;
   u64 length;
   u64 stride;

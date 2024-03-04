@@ -12,7 +12,7 @@
   (*(type*)_array_at(this, index))
 
 
-class array_t array_t;
+typedef struct array_t array_t;
 
 array_t* _array_new(u64 stride);
 void array_free(array_t*);

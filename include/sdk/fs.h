@@ -1,6 +1,6 @@
 #include <sdk/types.h>
 
-interface {
+typedef struct {
   u64 dev;
   u64 mode;
   u64 nlink;
