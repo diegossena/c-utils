@@ -63,12 +63,13 @@ void on_tcp_on_write(net_tcp_t* this, const void* context) {
 
 void on_tcp_on_connect(net_tcp_t* this) {
   console_log_cstr("on_tcp_on_connect");
-  net_tcp_write(this, "Hello Server", 12, on_tcp_on_write);
+  const char request [] = "GET / HTTP/1.1\r\nHost: google.com.br\r\nConnection: close\r\n\r\n";
+  net_tcp_write(this, request, sizeof(request) - 1, on_tcp_on_write);
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
   net_tcp_t* socket = net_tcp_new();
-  net_tcp_ip4_connect(socket, "127.0.0.1", 8080, on_tcp_on_connect);
+  net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
 }
 
 void tcp_server_on_connection(net_tcp_client_t* client) {
