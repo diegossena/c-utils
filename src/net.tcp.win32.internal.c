@@ -76,10 +76,10 @@ void net_tcp_read_handle(net_tcp_t* this) {
       this->task.type = TASK_TCP_CLOSING;
       error("recv", error_last);
     } else if (!this->stream.length) {
-      u64 deltaTime = date_now() - this->stream.updatedAt;
-      if (deltaTime > 100) {
-        goto endstream;
-      }
+      // u64 deltaTime = date_now() - this->stream.updatedAt;
+      // if (deltaTime > 100) {
+      // }
+      goto endstream;
     }
   }
   return;

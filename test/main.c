@@ -63,7 +63,7 @@ void on_tcp_on_write(net_tcp_t* this, const void* context) {
 
 void on_tcp_on_connect(net_tcp_t* this) {
   console_log_cstr("on_tcp_on_connect");
-  net_tcp_write(this, "Hello Server", 4, on_tcp_on_write);
+  net_tcp_write(this, "Hello Server", 12, on_tcp_on_write);
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
