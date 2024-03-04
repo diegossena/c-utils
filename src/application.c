@@ -15,7 +15,7 @@ i32 app_run() {
   task_t* it = (task_t*)app_global.tasks;
   while (it) {
     while (it) {
-      // console_log("type=%d", it->type);
+      task_t* next = (task_t*)it->queue.next;
       switch (it->type) {
         case TASK_TCP_CONNECTING: net_tcp_connect_handle((net_tcp_t*)it); break;
         case TASK_TCP_WRITING: net_tcp_write_handle((net_tcp_t*)it); break;
@@ -33,7 +33,7 @@ i32 app_run() {
         case TASK_TCP_CLIENT_READING: break;
         case TASK_TCP_CLIENT_CLOSING: break;
       }
-      it = (task_t*)it->queue.next;
+      it = next;
     }
     it = (task_t*)app_global.tasks;
   }
