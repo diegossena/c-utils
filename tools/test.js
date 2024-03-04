@@ -42,7 +42,7 @@ if (true) {
       console.log('connect')
     })
     socket.on('data', chunk => {
-      console.log('data', chunk.toString())
+      console.log('data', chunk.toString('utf-8'))
       socket.write(Buffer.from('Hello Client').toString('utf-8'))
     })
     socket.on('error', console.error)
