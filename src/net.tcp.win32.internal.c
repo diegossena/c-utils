@@ -17,7 +17,7 @@
 
 void net_tcp_close_handle(net_tcp_t* this) {
   console_log_cstr("net_tcp_close_handle");
-  queue_remove(&app_global.tasks, (queue_t*)&this);
+  queue_remove(&app_global.tasks, (queue_t*)this);
   closesocket(this->socket);
   memory_free(this);
 }
@@ -65,9 +65,6 @@ void net_tcp_read_handle(net_tcp_t* this) {
   byte* buffer_start = this->stream.buffer + this->stream.processed;
   i32 received = recv(this->socket, buffer_start, remaining, 0);
   console_log("received=%d", received);
-  console_log("remaining=%llu", remaining);
-  console_log("this->stream.length=%llu", this->stream.length);
-  console_log("this->stream.processed=%llu", this->stream.processed);
   if (received > 0) {
     this->stream.updatedAt = date_now();
     this->stream.processed += received;
@@ -79,8 +76,11 @@ void net_tcp_read_handle(net_tcp_t* this) {
     if (error_last != WSAEWOULDBLOCK) {
       this->task.type = TASK_TCP_CLOSING;
       error("recv", error_last);
-    } else if (!this->stream.length && (date_now() - this->stream.updatedAt) > 1000) {
-      goto endstream;
+    } else if (!this->stream.length) {
+      u64 deltaTime = date_now() - this->stream.updatedAt;
+      if (deltaTime > 1000) {
+        goto endstream;
+      }
     }
   }
   return;

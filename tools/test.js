@@ -45,6 +45,7 @@ if (true) {
       console.log('data', chunk.toString())
       socket.write(Buffer.from('Hello Client').toString('utf-8'))
     })
+    socket.on('error', console.error)
     socket.on('timeout', () => {
       console.log('timeout')
     })
