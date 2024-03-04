@@ -40,7 +40,6 @@ void net_tcp_connect_handle(net_tcp_t* this) {
   }
 }
 void net_tcp_write_handle(net_tcp_t* this) {
-  console_log_cstr("net_tcp_write_handle");
   u64 remaining = this->stream.length - this->stream.processed;
   const byte* buffer_start = this->stream.buffer + this->stream.processed;
   i32 sent = send(this->socket, buffer_start, remaining, 0);
@@ -77,16 +76,16 @@ void net_tcp_read_handle(net_tcp_t* this) {
       error("recv", error_last);
     } else if (!this->stream.length) {
       u64 deltaTime = date_now() - this->stream.updatedAt;
-      if (deltaTime > 1000) {
+      if (deltaTime > 100) {
         goto endstream;
       }
     }
   }
   return;
 endstream:
-  this->stream.processed = 0;
   this->task.type = TASK_TCP_CLOSING;
-  this->task.handle(this, this->stream.buffer, this->stream.length, this->stream.context);
+  this->task.handle(this, this->stream.buffer, this->stream.processed, this->stream.context);
+  this->stream.processed = 0;
   memory_free(this->stream.buffer);
 }
 

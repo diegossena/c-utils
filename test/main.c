@@ -52,6 +52,7 @@ void map_test() {
 
 
 void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* context) {
+  console_log("data=%d", data);
   console_log("on_tcp_on_read=%llu", length);
   console_log_str(data, length);
 }
