@@ -1,5 +1,5 @@
 const net = require('net')
-
+const http = require('http')
 const PORT = 8080
 
 if (false) {
@@ -27,7 +27,7 @@ if (false) {
 }
 
 
-if (true) {
+if (false) {
   const server = new net.Server()
   server.listen(PORT)
   server.on('listening', () => {
@@ -50,4 +50,12 @@ if (true) {
       console.log('timeout')
     })
   })
+}
+
+if (true) {
+  const server = http.createServer((request, response) => {
+    console.log('request')
+    response.end('Hello Client')
+  })
+  server.listen(PORT, () => console.log(`Listening on ${PORT}`))
 }
