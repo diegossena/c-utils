@@ -16,9 +16,7 @@
 #include <winsock2.h>
 
 void net_tcp_close_handle(net_tcp_t* this) {
-  console_log_cstr("net_tcp_close_handle");
   queue_remove(&app_global.tasks, (queue_t*)this);
-  console_log("app_global.tasks=%d", app_global.tasks);
   closesocket(this->socket);
   memory_free(this);
 }
