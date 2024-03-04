@@ -79,6 +79,8 @@ void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);
   net_tcp_server_t* server = net_tcp_server_new();
   net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
+  net_tcp_server_t* server = net_tcp_server_new();
+  net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
 }
 
 i32 main() {
