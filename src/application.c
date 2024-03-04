@@ -18,7 +18,7 @@ i32 app_run() {
       // console_log("type=%d", it->type);
       switch (it->type) {
         case TASK_TCP_CONNECTING: net_tcp_connect_handle((net_tcp_t*)it); break;
-        case TASK_TCP_WRITING:  net_tcp_write_handle((net_tcp_t*)it); break;
+        case TASK_TCP_WRITING: net_tcp_write_handle((net_tcp_t*)it); break;
         case TASK_TCP_READING: net_tcp_read_handle((net_tcp_t*)it); break;
         case TASK_TCP_CLOSING: net_tcp_close_handle((net_tcp_t*)it); break;
 
