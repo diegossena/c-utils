@@ -17,11 +17,7 @@
 
 void net_tcp_close_handle(net_tcp_t* this) {
   shutdown(this->socket, FD_WRITE | FD_READ);
-  console_log("tasks=%d", app_global.tasks);
-  console_log("tasks.next=%d", app_global.tasks->next);
-  console_log("tasks.prev=%d", app_global.tasks->prev);
-  queue_remove(&app_global.tasks, (queue_t*)app_global.tasks);
-  console_log("!tasks=%d", app_global.tasks);
+  queue_remove(&app_global.tasks, &this->task.queue);
   closesocket(this->socket);
   memory_free(this);
 }

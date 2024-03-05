@@ -14,7 +14,7 @@
 i32 app_run() {
   task_t* it = (task_t*)app_global.tasks;
   while (it) {
-    while (it) {
+    do {
       task_t* next = (task_t*)it->queue.next;
       switch (it->type) {
         case TASK_TCP_CONNECTING: net_tcp_connect_handle((net_tcp_t*)it); break;
@@ -34,7 +34,7 @@ i32 app_run() {
         case TASK_TCP_CLIENT_CLOSING: break;
       }
       it = next;
-    }
+    } while (it);
     it = (task_t*)app_global.tasks;
   }
   net_shutdown();

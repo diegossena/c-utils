@@ -6,11 +6,13 @@
 #include "sdk/console.h"
 // date_now
 #include "sdk/date.h"
+// app_global
+#include "internal/application.h"
 
 net_tcp_t* net_tcp_new() {
   net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));
   this->task.type = TASK_TCP_CLOSING;
-  task_register(&this->task);
+  queue_push(&app_global.tasks, &this->task.queue);
   return this;
 }
 void net_tcp_set_context(net_tcp_t* this, const void* context) {
