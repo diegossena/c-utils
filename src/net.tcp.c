@@ -25,7 +25,6 @@ void net_tcp_write(net_tcp_t* this, const byte* chunk, u64 length, net_tcp_on_wr
   this->stream.length = length;
   this->task.handle = (void*)callback;
   memory_copy(this->stream.buffer, chunk, length);
-  console_log("%d='%s'", this, chunk);
 }
 void net_tcp_read(net_tcp_t* this, u64 length, net_tcp_on_read_cb callback) {
   this->task.type = TASK_TCP_READING;
