@@ -26,6 +26,7 @@
     "string_view": "c",
     "socket": "c",
     "queue.h": "c",
-    "heapapi.h": "c"
+    "heapapi.h": "c",
+    "stdio.h": "c"
   }
 }

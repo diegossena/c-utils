@@ -6,10 +6,10 @@
 #include "internal/net.tcp.server.h"
 // task_t
 #include "internal/task.h"
-// memory_free
+// memory_free, memory_counter
 #include "internal/memory.h"
-// console_log_cstr
-#include "sdk/console.h" // TODO: remove this line
+// assert
+#include "sdk/assert.h"
 
 i32 app_run() {
   task_t* it = (task_t*)app_global.tasks;
