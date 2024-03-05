@@ -64,11 +64,11 @@ void on_tcp_on_write(net_tcp_t* this, const void* context) {
 void on_tcp_on_connect(net_tcp_t* this) {
   // console_log_cstr("on_tcp_on_connect");
   const char request [] = "GET / HTTP/1.1\r\nConnection: close\r\n\r\n";
-  net_tcp_write(this, request, sizeof(request) - 1, on_tcp_on_write);
+  net_tcp_write(this, &request[0], sizeof(request) - 1, on_tcp_on_write);
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  for (u64 i = 0; i < 1000; i++) {
+  for (u64 i = 0; i < 200; i++) {
     net_tcp_t* socket = net_tcp_new();
     net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
   }
