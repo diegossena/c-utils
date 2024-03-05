@@ -13,12 +13,6 @@
 // socket
 #include <winsock2.h>
 
-net_tcp_t* net_tcp_new() {
-  net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));
-  this->task.type = TASK_TCP_CLOSING;
-  task_register(&this->task);
-  return this;
-}
 void net_tcp_free(net_tcp_t* this) {
   task_unregister(&this->task);
   closesocket((SOCKET)this->socket);

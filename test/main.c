@@ -53,7 +53,7 @@ void map_test() {
 
 void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* context) {
   console_log("on_tcp_on_read=%llu", length);
-  console_log_str(data, length);
+  console_log_str(data, 12);
   console_log_cstr();
 }
 void on_tcp_on_write(net_tcp_t* this, const void* context) {
@@ -68,8 +68,10 @@ void on_tcp_on_connect(net_tcp_t* this) {
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  net_tcp_t* socket = net_tcp_new();
-  net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
+  net_tcp_t* socket1 = net_tcp_new();
+  net_tcp_ip4_connect(socket1, "google.com.br", 80, on_tcp_on_connect);
+  net_tcp_t* socket2 = net_tcp_new();
+  net_tcp_ip4_connect(socket2, "google.com.br", 80, on_tcp_on_connect);
 }
 
 void tcp_server_on_connection(net_tcp_client_t* client) {
@@ -77,8 +79,6 @@ void tcp_server_on_connection(net_tcp_client_t* client) {
 }
 void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);
-  net_tcp_server_t* server = net_tcp_server_new();
-  net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
   net_tcp_server_t* server = net_tcp_server_new();
   net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
 }
@@ -95,11 +95,11 @@ i32 main() {
   net_tcp_test();
   // net_tcp_server_test();
 
+  app_run();
   console_log_cstr(
     CONSOLE_FORE_GREEN
     "SUCCESS"
     CONSOLE_FORE_GREEN
     CONSOLE_RESET
   );
-  return app_run();
 }

@@ -24,6 +24,7 @@
     "_mingw.h": "c",
     "cstddef": "c",
     "string_view": "c",
-    "socket": "c"
+    "socket": "c",
+    "queue.h": "c"
   }
 }

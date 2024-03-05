@@ -6,6 +6,7 @@ void queue_push(queue_t** head, queue_t* q) {
   if (*head) {
     q->prev = (*head)->prev;
     q->prev->next = q;
+    q->next = 0;
   } else {
     *head = q;
   }
