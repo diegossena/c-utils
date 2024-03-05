@@ -47,6 +47,7 @@ void net_tcp_write_handle(net_tcp_t* this) {
   if (sent >= 0) {
     this->stream.processed += sent;
     if (this->stream.length == this->stream.processed) {
+      memory_free(this->stream.buffer);
       this->stream.processed = 0;
       this->task.type = TASK_TCP_CLOSING;
       this->task.handle(this, this->stream.context);
