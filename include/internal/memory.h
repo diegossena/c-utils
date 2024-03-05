@@ -3,6 +3,8 @@
 
 #define MAX_BUFSIZ 65535
 
+extern i64 memory_counter;
+
 void* memory_alloc0(u64 size);
 void* memory_alloc(u64 size);
 void* memory_realloc(void* this, u64 size);

@@ -38,5 +38,6 @@ i32 app_run() {
     it = (task_t*)app_global.tasks;
   }
   net_shutdown();
+  assert(memory_counter == 0);
   return 0;
 }
