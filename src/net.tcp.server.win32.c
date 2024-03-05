@@ -21,13 +21,14 @@ void net_tcp_server_free(net_tcp_server_t* this) {
   memory_free(this);
 }
 
-error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_on_connect_cb callback) {
+error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_on_connection_cb callback) {
   assert(port > 0);
   net_addr_t ipv4_addr = {
     .family = AF_INET,
     .port = htons(port)
   };
-  if (this->socket = net_tcp_create_socket(&ipv4_addr)) {
+  this->socket = net_tcp_create_socket(&ipv4_addr);
+  if (this->socket < 0) {
     goto onerror;
   }
   // Vincular o socket ao endereço e porta

@@ -74,8 +74,17 @@ void net_tcp_test() {
   }
 }
 
-void tcp_server_on_connection(net_tcp_t* client) {
+void tcp_server_on_write(net_tcp_client_t* this, const void* context) {
+  console_log_cstr("tcp_server_on_write");
+}
+void tcp_server_on_read(net_tcp_client_t* this, const byte* data, u64 length, const void* context) {
+  console_log_cstr("tcp_server_on_write");
+  const char http_response [] = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
+  net_tcp_client_write(this, http_response, sizeof(http_response) - 1, tcp_server_on_write);
+}
+void tcp_server_on_connection(net_tcp_client_t* this) {
   console_log_cstr("on_tcp_server_connection");
+  net_tcp_client_read(this, 0, tcp_server_on_read);
 }
 void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);

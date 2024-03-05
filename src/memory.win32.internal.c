@@ -7,8 +7,6 @@
 #include "internal/memory.h"
 // GetProcessHeap, HeapReAlloc, HeapAlloc, HEAP_ZERO_MEMORY
 #include <heapapi.h>
-// printf
-#include <stdio.h> // TODO: remove this line
 
 i64 memory_counter = 0;
 

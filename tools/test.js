@@ -52,10 +52,20 @@ if (false) {
   })
 }
 
-if (true) {
+if (false) {
   const server = http.createServer((request, response) => {
     console.log('request')
     response.end('Hello Client')
   })
   server.listen(PORT, () => console.log(`Listening on ${PORT}`))
+}
+
+if (true) {
+  const server = http.request({
+    host: '127.0.0.1',
+    port: PORT
+  }, () => {
+    console.log('success')
+  })
+  server.end()
 }

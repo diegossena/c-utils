@@ -19,4 +19,6 @@ typedef struct net_tcp_client_t {
   net_tcp_server_t* server;
 } net_tcp_client_t;
 
-void net_tcp_connect_handle(net_tcp_t*);
+void net_tcp_client_close_handle(net_tcp_client_t*);
+void net_tcp_client_read_handle(net_tcp_client_t*);
+void net_tcp_client_write_handle(net_tcp_client_t*);

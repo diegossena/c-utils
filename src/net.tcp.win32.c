@@ -37,6 +37,7 @@ u64 net_tcp_create_socket(const net_addr_t* addr) {
   if (sock > app_global.max_fd) {
     app_global.max_fd = sock + 1;
   }
+  console_log("net_tcp_create_socket=%d", sock);
   return sock;
 }
 

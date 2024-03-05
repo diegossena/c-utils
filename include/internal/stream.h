@@ -4,8 +4,9 @@
 
 typedef struct stream_t {
   const void* context;
-  byte* buffer;
-  u64 size;
+  byte* writable;
+  byte* readable;
+  u64 buffer_size;
   u64 length;
   u64 processed;
   u64 updatedAt;

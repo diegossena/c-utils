@@ -4,6 +4,8 @@
 #include "internal/application.h"
 // net_tcp_server_listen_handle
 #include "internal/net.tcp.server.h"
+// net_tcp_client_close_handle
+#include "internal/net.tcp.client.h"
 // task_t
 #include "internal/task.h"
 // memory_free, memory_counter
@@ -30,9 +32,9 @@ i32 app_run() {
           net_tcp_server_close_handle((net_tcp_server_t*)it);
           break;
         // net_tcp_client_t
-        case TASK_TCP_CLIENT_WRITING: break;
-        case TASK_TCP_CLIENT_READING: break;
-        case TASK_TCP_CLIENT_CLOSING: break;
+        case TASK_TCP_CLIENT_WRITING: net_tcp_client_write_handle((net_tcp_client_t*)it); break;
+        case TASK_TCP_CLIENT_READING: net_tcp_client_read_handle((net_tcp_client_t*)it); break;
+        case TASK_TCP_CLIENT_CLOSING: net_tcp_client_close_handle((net_tcp_client_t*)it); break;
       }
       it = next;
     } while (it);

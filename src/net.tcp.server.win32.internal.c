@@ -24,7 +24,6 @@ void net_tcp_server_close_handle(net_tcp_server_t* this) {
 }
 
 void net_tcp_server_listen_handle(net_tcp_server_t* this) {
-  console_log_cstr("net_tcp_server_listen_handle");
   SOCKET client_socket = accept((SOCKET)this->socket, 0, 0);
   if (client_socket == INVALID_SOCKET) {
     error_last = WSAGetLastError();
@@ -32,12 +31,19 @@ void net_tcp_server_listen_handle(net_tcp_server_t* this) {
       error("accept", error_last);
     }
   } else {
+    console_log("client_socket=%d", client_socket);
     net_tcp_client_t* client = memory_alloc0(sizeof(net_tcp_client_t));
     client->server = this;
     client->socket = client_socket;
-    client->task.type = TASK_TCP_CLOSING;
+    client->task.type = TASK_TCP_CLIENT_CLOSING;
     this->task.handle(client);
-    ++this->client_count;
+    if (client->task.type == TASK_TCP_CLIENT_CLOSING) {
+      closesocket(client_socket);
+      memory_free(client);
+    } else {
+      queue_push(&app_global.tasks, &client->task.queue);
+      ++this->client_count;
+    }
   }
 }
 
