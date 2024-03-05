@@ -23,6 +23,3 @@ typedef struct task_t {
   task_type type;
   task_handle handle;
 } task_t;
-
-void task_register(task_t*);
-void task_unregister(task_t*);

@@ -16,12 +16,12 @@
 #include <winsock2.h>
 
 void net_tcp_server_free(net_tcp_server_t* this) {
-  task_unregister(&this->task);
   closesocket(this->socket);
+  queue_remove(&app_global.tasks, &this->task.queue);
   memory_free(this);
 }
 
-error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_on_connection_cb callback) {
+error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_on_connect_cb callback) {
   assert(port > 0);
   net_addr_t ipv4_addr = {
     .family = AF_INET,
@@ -31,7 +31,7 @@ error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_o
     goto onerror;
   }
   // Vincular o socket ao endereço e porta
-  if (bind(this->socket, (SOCKADDR*)&this->addr, sizeof(this->addr)) == SOCKET_ERROR) {
+  if (bind(this->socket, (SOCKADDR*)&ipv4_addr, sizeof(ipv4_addr)) == SOCKET_ERROR) {
     error("bind", WSAGetLastError());
     goto onerror;
   }

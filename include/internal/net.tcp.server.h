@@ -8,7 +8,6 @@
 
 typedef struct net_tcp_server_t {
   task_t task;
-  net_addr_t addr;
   u64 socket;
   u64 client_count;
 } net_tcp_server_t;

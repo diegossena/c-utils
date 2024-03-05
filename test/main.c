@@ -74,7 +74,7 @@ void net_tcp_test() {
   }
 }
 
-void tcp_server_on_connection(net_tcp_client_t* client) {
+void tcp_server_on_connection(net_tcp_t* client) {
   console_log_cstr("on_tcp_server_connection");
 }
 void net_tcp_server_test() {
@@ -92,8 +92,8 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
-  net_tcp_test();
-  // net_tcp_server_test();
+  // net_tcp_test();
+  net_tcp_server_test();
 
   app_run();
   console_log_cstr(

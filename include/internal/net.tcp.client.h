@@ -10,14 +10,13 @@
 #include "internal/stream.h"
 
 typedef struct net_tcp_client_t {
+  // extends net_tcp_t
   task_t task;
-  net_addr_t addr;
-  i64 socket;
-  net_tcp_server_t* server;
   stream_t stream;
-  // events
-  task_handle on_read;
-  task_handle on_write;
+  u64 socket;
+  // fields
+  net_addr_t addr;
+  net_tcp_server_t* server;
 } net_tcp_client_t;
 
 void net_tcp_connect_handle(net_tcp_t*);

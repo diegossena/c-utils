@@ -27,6 +27,7 @@
     "socket": "c",
     "queue.h": "c",
     "heapapi.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "date.h": "c"
   }
 }

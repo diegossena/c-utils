@@ -14,8 +14,8 @@
 #include <winsock2.h>
 
 void net_tcp_free(net_tcp_t* this) {
-  task_unregister(&this->task);
   closesocket((SOCKET)this->socket);
+  queue_remove(&app_global.tasks, &this->task.queue);
   memory_free(this);
 }
 
