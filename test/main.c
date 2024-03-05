@@ -53,7 +53,7 @@ void map_test() {
 
 void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* context) {
   console_log("on_tcp_on_read=%llu", length);
-  console_log_str(data, 1000);
+  console_log_str(data, 12);
   console_log_cstr();
 }
 void on_tcp_on_write(net_tcp_t* this, const void* context) {
