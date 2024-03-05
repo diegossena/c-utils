@@ -9,8 +9,11 @@
 #include "internal/memory.h"
 // socket, shutdown
 #include <winsock2.h>
+// TODO: remove this line
+#include "sdk/console.h"
 
 void net_tcp_client_close_handle(net_tcp_client_t* this) {
+  console_log("net_tcp_client_close_handle");
   shutdown(this->socket, FD_WRITE | FD_READ);
   queue_remove(&app_global.tasks, &this->task.queue);
   closesocket(this->socket);

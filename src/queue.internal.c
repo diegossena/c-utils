@@ -24,6 +24,8 @@ void queue_remove(queue_t** head, queue_t* q) {
     q->prev->next = q->next;
     if (q->next) {
       q->next->prev = q->prev;
+    } else if (q->prev == *head) {
+      (*head)->prev = *head;
     }
   }
 }

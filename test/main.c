@@ -78,7 +78,7 @@ void tcp_server_on_write(net_tcp_client_t* this, const void* context) {
   console_log_cstr("tcp_server_on_write");
 }
 void tcp_server_on_read(net_tcp_client_t* this, const byte* data, u64 length, const void* context) {
-  console_log_cstr("tcp_server_on_write");
+  console_log_cstr("tcp_server_on_read");
   const char http_response [] = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
   net_tcp_client_write(this, http_response, sizeof(http_response) - 1, tcp_server_on_write);
 }

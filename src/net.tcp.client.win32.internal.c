@@ -1,7 +1,7 @@
 #include "internal/platform.h"
 
 #if PLATFORM_WINDOWS
-
+// net_tcp_client_close_handle
 #include "internal/net.tcp.client.h"
 // app_global
 #include "internal/application.h"
@@ -61,8 +61,13 @@ void net_tcp_client_write_handle(net_tcp_client_t* this) {
     if (this->stream.length == this->stream.processed) {
       memory_free(this->stream.writable);
       this->stream.processed = 0;
-      this->task.type = TASK_TCP_CLOSING;
+      this->task.type = TASK_TCP_CLIENT_CLOSING;
       this->task.handle(this, this->stream.context);
+      if (this->task.type == TASK_TCP_CLIENT_CLOSING) {
+        net_tcp_client_close_handle(this);
+      } else {
+        this->stream.processed = 0;
+      }
     }
   } else {
     error_last = WSAGetLastError();

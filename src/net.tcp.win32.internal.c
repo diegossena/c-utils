@@ -48,9 +48,13 @@ void net_tcp_write_handle(net_tcp_t* this) {
     this->stream.processed += sent;
     if (this->stream.length == this->stream.processed) {
       memory_free(this->stream.writable);
-      this->stream.processed = 0;
       this->task.type = TASK_TCP_CLOSING;
       this->task.handle(this, this->stream.context);
+      if (this->task.type == TASK_TCP_CLOSING) {
+        net_tcp_close_handle(this);
+      } else {
+        this->stream.processed = 0;
+      }
     }
   } else {
     error_last = WSAGetLastError();

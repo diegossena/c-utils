@@ -31,7 +31,6 @@ void net_tcp_server_listen_handle(net_tcp_server_t* this) {
       error("accept", error_last);
     }
   } else {
-    console_log("client_socket=%d", client_socket);
     net_tcp_client_t* client = memory_alloc0(sizeof(net_tcp_client_t));
     client->server = this;
     client->socket = client_socket;
