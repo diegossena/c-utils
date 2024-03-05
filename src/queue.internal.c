@@ -11,10 +11,6 @@ void queue_push(queue_t** head, queue_t* q) {
     *head = q;
   }
   (*head)->prev = q;
-  console_log_cstr("!queue_push");
-  console_log("head=%d", (*head));
-  console_log("head.next=%d", (*head)->next);
-  console_log("head.prev=%d", (*head)->prev);
 }
 void queue_remove(queue_t** head, queue_t* q) {
   if (*head == q) {
