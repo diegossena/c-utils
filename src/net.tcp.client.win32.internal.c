@@ -15,7 +15,6 @@
 #include "sdk/console.h"
 
 void net_tcp_client_read_handle(net_tcp_client_t* this) {
-  console_log("net_tcp_client_read_handle");
   u64 remaining = this->stream.buffer_size - this->stream.processed;
   byte* buffer_start = this->stream.readable + this->stream.processed;
   i32 received = recv(this->socket, buffer_start, remaining, 0);
