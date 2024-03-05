@@ -22,6 +22,16 @@ void net_tcp_server_close_handle(net_tcp_server_t* this) {
     memory_free(this);
   }
 }
+static char buffer_zero [] = "";
+void CALLBACK net_tcp_client_read_handle_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags) {
+  console_log_cstr("net_tcp_client_read_handle_callback");
+  net_tcp_client_t* this = (net_tcp_client_t*)lpOverlapped->hEvent;
+  if (dwError) {
+    error("WSARecv", error_last);
+  } else {
+    net_tcp_client_close_handle(this);
+  }
+}
 
 void net_tcp_server_listen_handle(net_tcp_server_t* this) {
   SOCKET client_socket = accept((SOCKET)this->socket, 0, 0);
@@ -40,8 +50,8 @@ void net_tcp_server_listen_handle(net_tcp_server_t* this) {
       closesocket(client_socket);
       memory_free(client);
     } else {
-      queue_push(&app_global.tasks, &client->task.queue);
       ++this->client_count;
+      queue_push(&app_global.tasks, &client->task.queue);
     }
   }
 }

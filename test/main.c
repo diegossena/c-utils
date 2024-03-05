@@ -53,8 +53,9 @@ void map_test() {
 
 void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* context) {
   console_log("on_tcp_on_read=%llu", length);
+  console_write_cstr(LOG_LEVEL_INFO, "'", 1);
   console_log_str(data, 12);
-  console_log_cstr();
+  console_write_cstr(LOG_LEVEL_INFO, "'", 1);
 }
 void on_tcp_on_write(net_tcp_t* this, const void* context) {
   // console_log_cstr("on_tcp_on_write");
@@ -68,22 +69,19 @@ void on_tcp_on_connect(net_tcp_t* this) {
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  for (u64 i = 0; i < 200; i++) {
+  for (u64 i = 0; i < 100; i++) {
     net_tcp_t* socket = net_tcp_new();
     net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
   }
 }
 
 void tcp_server_on_write(net_tcp_client_t* this, const void* context) {
-  console_log_cstr("tcp_server_on_write");
 }
 void tcp_server_on_read(net_tcp_client_t* this, const byte* data, u64 length, const void* context) {
-  console_log_cstr("tcp_server_on_read");
   const char http_response [] = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
   net_tcp_client_write(this, http_response, sizeof(http_response) - 1, tcp_server_on_write);
 }
 void tcp_server_on_connection(net_tcp_client_t* this) {
-  console_log_cstr("on_tcp_server_connection");
   net_tcp_client_read(this, 0, tcp_server_on_read);
 }
 void net_tcp_server_test() {
@@ -101,8 +99,8 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
-  // net_tcp_test();
-  net_tcp_server_test();
+  net_tcp_test();
+  // net_tcp_server_test();
 
   app_run();
   console_log_cstr(

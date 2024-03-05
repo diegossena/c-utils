@@ -62,6 +62,8 @@ const char* error_cstr(i32 code) {
       return "ERR_WSAENOTSOCK";
     case ERR_WSAEMSGSIZE:
       return "ERR_WSAEMSGSIZE";
+    case ERR_WSAEOPNOTSUPP:
+      return "ERR_WSAEOPNOTSUPP";
     case ERR_WSAEAFNOSUPPORT:
       return "ERR_WSAEAFNOSUPPORT";
     case ERR_EADDRNOTAVAIL:

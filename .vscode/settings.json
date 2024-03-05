@@ -28,6 +28,17 @@
     "queue.h": "c",
     "heapapi.h": "c",
     "stdio.h": "c",
-    "date.h": "c"
+    "date.h": "c",
+    "buffer": "c",
+    "array": "c",
+    "deque": "c",
+    "forward_list": "c",
+    "list": "c",
+    "string": "c",
+    "unordered_map": "c",
+    "vector": "c",
+    "initializer_list": "c",
+    "ranges": "c",
+    "functional": "c"
   }
 }

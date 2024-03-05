@@ -17,31 +17,26 @@
 void net_tcp_client_read_handle(net_tcp_client_t* this) {
   u64 remaining = this->stream.buffer_size - this->stream.processed;
   byte* buffer_start = this->stream.readable + this->stream.processed;
+  u64 time = date_now();
   i32 received = recv(this->socket, buffer_start, remaining, 0);
-  if (received < 0) {
-    error_last = WSAGetLastError();
-    if (error_last) {
-      if (error_last != WSAEWOULDBLOCK) {
-        error("recv", error_last);
-        goto endstream;
-      }
-      if (this->stream.processed > 0) {
-        goto endstream;
-      }
-    } else {
-      goto endstream;
-    }
-  } else if (received > 0) {
+  u64 deltaTime = date_now() - time;
+  if (deltaTime > 0) {
+    console_log("recv=%llums", deltaTime);
+  }
+  if (received > 0) {
     this->stream.updatedAt = date_now();
     this->stream.processed += received;
-    if (this->stream.length == this->stream.processed) {
-      goto endstream;
+    if (this->stream.length != this->stream.processed) {
+      return;
     }
-  } else {
-    goto endstream;
+  } else if (received < 0) {
+    error_last = WSAGetLastError();
+    if (error_last == WSAEWOULDBLOCK) {
+      return;
+    } else if (error_last) {
+      error("recv", error_last);
+    }
   }
-  return;
-endstream:
   this->task.type = TASK_TCP_CLIENT_CLOSING;
   this->task.handle(this, this->stream.readable, this->stream.processed, this->stream.context);
   memory_free(this->stream.readable);
@@ -77,5 +72,6 @@ void net_tcp_client_write_handle(net_tcp_client_t* this) {
     }
   }
 }
+
 
 #endif
