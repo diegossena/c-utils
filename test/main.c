@@ -57,21 +57,21 @@ void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* c
   console_log_cstr();
 }
 void on_tcp_on_write(net_tcp_t* this, const void* context) {
-  console_log_cstr("on_tcp_on_write");
+  // console_log_cstr("on_tcp_on_write");
   net_tcp_read(this, 0, on_tcp_on_read);
 }
 
 void on_tcp_on_connect(net_tcp_t* this) {
-  console_log_cstr("on_tcp_on_connect");
+  // console_log_cstr("on_tcp_on_connect");
   const char request [] = "GET / HTTP/1.1\r\nConnection: close\r\n\r\n";
   net_tcp_write(this, request, sizeof(request) - 1, on_tcp_on_write);
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  net_tcp_t* socket1 = net_tcp_new();
-  net_tcp_ip4_connect(socket1, "google.com.br", 80, on_tcp_on_connect);
-  net_tcp_t* socket2 = net_tcp_new();
-  net_tcp_ip4_connect(socket2, "google.com.br", 80, on_tcp_on_connect);
+  for (u64 i = 0; i < 10; i++) {
+    net_tcp_t* socket = net_tcp_new();
+    net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
+  }
 }
 
 void tcp_server_on_connection(net_tcp_client_t* client) {
