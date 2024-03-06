@@ -3,6 +3,7 @@
 #include "sdk/net.h"
 #include "sdk/types.h"
 
+#define DEFAULT_TIMEOUT 120000LLU
 
 typedef union net_in_addr_t {
   struct { u8  s_b1, s_b2, s_b3, s_b4; } S_un_b;

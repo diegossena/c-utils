@@ -29,22 +29,34 @@ void net_tcp_connect_handle(net_tcp_t* this) {
   error_last = select(app_global.max_fd, null, &writable, null, &timeout);
   if (error_last > 0) {
     // connected
+    this->task.type = TASK_TCP_CLOSING;
     this->handle(this);
-  } else if (error_last == SOCKET_ERROR) {
-    error_last = WSAGetLastError();
-    if (error_last != WSAEWOULDBLOCK) {
-      error("select", error_last);
+    if (this->task.type == TASK_TCP_CLOSING) {
       net_tcp_close_handle(this);
+    } else {
+      this->stream.updatedAt = date_now();
+    }
+    return;
+  } else if (error_last == 0) {
+    u64 deltaTime = date_now() - this->stream.updatedAt;
+    if (deltaTime > DEFAULT_TIMEOUT) {
+      error_last = ERR_ETIMEDOUT;
+    } else {
       return;
     }
-    // connecting...
+  } else {
+    error_last = WSAGetLastError();
   }
+  // onerror
+  error("select", error_last);
+  net_tcp_close_handle(this);
 }
 void net_tcp_write_handle(net_tcp_t* this) {
   u64 remaining = this->stream.length - this->stream.processed;
   const byte* buffer_start = this->stream.writable + this->stream.processed;
   i32 sent = send(this->socket, buffer_start, remaining, 0);
-  if (sent >= 0) {
+  if (sent > 0) {
+    this->stream.updatedAt = date_now();
     this->stream.processed += sent;
     if (this->stream.length == this->stream.processed) {
       memory_free(this->stream.writable);
@@ -56,32 +68,46 @@ void net_tcp_write_handle(net_tcp_t* this) {
         this->stream.processed = 0;
       }
     }
-  } else {
-    error_last = WSAGetLastError();
-    if (error_last != WSAEWOULDBLOCK) {
-      error("send", error_last);
-      net_tcp_close_handle(this);
-    }
+    return;
   }
+  u64 deltaTime = date_now() - this->stream.updatedAt;
+  console_log("deltaTime=%llu", deltaTime);
+  if (deltaTime > DEFAULT_TIMEOUT) {
+    error_last = ERR_ETIMEDOUT;
+  } else if (error_last < 0) {
+    error_last = WSAGetLastError();
+    if (error_last == WSAEWOULDBLOCK) return;
+  } else {
+    return;
+  }
+  // onerror
+  error("send", error_last);
+  net_tcp_close_handle(this);
 }
 void net_tcp_read_handle(net_tcp_t* this) {
   u64 remaining = this->stream.buffer_size - this->stream.processed;
   byte* buffer_start = this->stream.readable + this->stream.processed;
   i32 received = recv(this->socket, buffer_start, remaining, 0);
+  u64 deltaTime = date_now() - this->stream.updatedAt;
   if (received > 0) {
-    this->stream.updatedAt = date_now();
     this->stream.processed += received;
-    if (this->stream.length != this->stream.processed) {
-      return;
+    if (this->stream.length == this->stream.processed) {
+      goto readend;
     }
-  } else if (received < 0) {
-    error_last = WSAGetLastError();
-    if (error_last == WSAEWOULDBLOCK) {
-      return;
-    } else if (error_last) {
-      error("recv", error_last);
-    }
+    this->stream.updatedAt = date_now();
+    return;
+  } else if (received == 0) {
+    goto readend;
   }
+  if (deltaTime > DEFAULT_TIMEOUT) {
+    error_last = ERR_ETIMEDOUT;
+  } else {
+    error_last = WSAGetLastError();
+    if (error_last == WSAEWOULDBLOCK) return;
+  }
+  // onerror
+  error("recv", ERR_ETIMEDOUT);
+readend:
   this->task.type = TASK_TCP_CLOSING;
   this->handle(this, this->stream.readable, this->stream.processed, this->stream.context);
   memory_free(this->stream.readable);

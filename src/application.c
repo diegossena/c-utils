@@ -22,6 +22,7 @@ void app_inicialize() {
   app_global.tasks.queue.next = &app_global.tasks.queue;
   app_global.tasks.queue.prev = &app_global.tasks.queue;
 }
+u64 cached = 0;
 
 i32 app_run() {
   i64 i = 0;

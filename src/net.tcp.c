@@ -32,5 +32,4 @@ void net_tcp_read(net_tcp_t* this, u64 length, net_tcp_on_read_cb callback) {
   this->stream.buffer_size = length > 0 ? length : MAX_BUFSIZ;
   this->stream.readable = memory_alloc(this->stream.buffer_size);
   this->handle = (void*)callback;
-  this->stream.updatedAt = date_now();
 }

@@ -10,6 +10,8 @@
 #include "internal/memory.h"
 // assert
 #include "sdk/assert.h"
+// date_now
+#include "sdk/date.h"
 // socket
 #include <winsock2.h>
 
@@ -61,6 +63,7 @@ error_code net_tcp_ip4_connect(net_tcp_t* this, const char* host, u16 port, net_
   }
   this->task.type = TASK_TCP_CONNECTING;
   this->handle = callback;
+  this->stream.updatedAt = date_now();
   return ERR_SUCCESS;
 onerror:
   closesocket(this->socket);

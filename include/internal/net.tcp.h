@@ -12,6 +12,7 @@ typedef struct net_tcp_t {
   stream_t stream;
   u64 socket;
   task_handle handle;
+  u64 updatedAt;
 } net_tcp_t;
 
 u64 net_tcp_create_socket(const net_addr_t*);
