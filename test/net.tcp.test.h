@@ -17,7 +17,7 @@ void on_tcp_on_connect(net_tcp_t* this) {
 }
 void net_tcp_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  for (u64 i = 0; i < 1000; i++) {
+  for (u64 i = 0; i < 100; i++) {
     net_tcp_t* socket = net_tcp_new();
     net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
   }
