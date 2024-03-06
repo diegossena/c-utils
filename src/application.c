@@ -29,10 +29,10 @@ i32 app_run() {
   while (app_global.tasks_count) {
     // process a small fixed number of times to avoid loop starvation.
     for (i = 0; i < 8; i++) {
-      window_pooling();
       task_t* next = (task_t*)it->queue.next;
       switch (it->type) {
         case TASK_APPLICATION:
+          window_pooling();
           break;
         // net_tcp_t
         case TASK_TCP_CONNECTING:
