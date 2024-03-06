@@ -29,7 +29,7 @@ void net_tcp_connect_handle(net_tcp_t* this) {
   error_last = select(app_global.max_fd, null, &writable, null, &timeout);
   if (error_last > 0) {
     // connected
-    this->task.handle(this);
+    this->handle(this);
   } else if (error_last == SOCKET_ERROR) {
     error_last = WSAGetLastError();
     if (error_last != WSAEWOULDBLOCK) {
@@ -49,7 +49,7 @@ void net_tcp_write_handle(net_tcp_t* this) {
     if (this->stream.length == this->stream.processed) {
       memory_free(this->stream.writable);
       this->task.type = TASK_TCP_CLOSING;
-      this->task.handle(this, this->stream.context);
+      this->handle(this, this->stream.context);
       if (this->task.type == TASK_TCP_CLOSING) {
         net_tcp_close_handle(this);
       } else {
@@ -83,7 +83,7 @@ void net_tcp_read_handle(net_tcp_t* this) {
     }
   }
   this->task.type = TASK_TCP_CLOSING;
-  this->task.handle(this, this->stream.readable, this->stream.processed, this->stream.context);
+  this->handle(this, this->stream.readable, this->stream.processed, this->stream.context);
   memory_free(this->stream.readable);
   if (this->task.type == TASK_TCP_CLOSING) {
     net_tcp_close_handle(this);

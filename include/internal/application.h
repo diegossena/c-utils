@@ -11,6 +11,7 @@ typedef struct application {
   queue_t* tasks;
   error_code stop_flag;
   u64 max_fd;
+  bool window_pooling;
 } application;
 
 extern application app_global;

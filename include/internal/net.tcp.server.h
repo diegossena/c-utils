@@ -10,6 +10,7 @@ typedef struct net_tcp_server_t {
   task_t task;
   u64 socket;
   u64 client_count;
+  net_tcp_on_connection_cb handle;
 } net_tcp_server_t;
 
 void net_tcp_server_close_handle(net_tcp_server_t*);

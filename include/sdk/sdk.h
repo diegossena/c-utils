@@ -21,3 +21,5 @@
 
 #include <sdk/task.h>
 #include <sdk/application.h>
+
+#include <sdk/window.h>

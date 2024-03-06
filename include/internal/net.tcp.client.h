@@ -14,6 +14,7 @@ typedef struct net_tcp_client_t {
   task_t task;
   stream_t stream;
   u64 socket;
+  task_handle handle;
   // fields
   net_addr_t addr;
   net_tcp_server_t* server;

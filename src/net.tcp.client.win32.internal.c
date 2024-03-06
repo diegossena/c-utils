@@ -38,7 +38,7 @@ void net_tcp_client_read_handle(net_tcp_client_t* this) {
     }
   }
   this->task.type = TASK_TCP_CLIENT_CLOSING;
-  this->task.handle(this, this->stream.readable, this->stream.processed, this->stream.context);
+  this->handle(this, this->stream.readable, this->stream.processed, this->stream.context);
   memory_free(this->stream.readable);
   if (this->task.type == TASK_TCP_CLIENT_CLOSING) {
     net_tcp_client_close_handle(this);
@@ -57,7 +57,7 @@ void net_tcp_client_write_handle(net_tcp_client_t* this) {
       memory_free(this->stream.writable);
       this->stream.processed = 0;
       this->task.type = TASK_TCP_CLIENT_CLOSING;
-      this->task.handle(this, this->stream.context);
+      this->handle(this, this->stream.context);
       if (this->task.type == TASK_TCP_CLIENT_CLOSING) {
         net_tcp_client_close_handle(this);
       } else {

@@ -45,7 +45,7 @@ void net_tcp_server_listen_handle(net_tcp_server_t* this) {
     client->server = this;
     client->socket = client_socket;
     client->task.type = TASK_TCP_CLIENT_CLOSING;
-    this->task.handle(client);
+    this->handle(client);
     if (client->task.type == TASK_TCP_CLIENT_CLOSING) {
       closesocket(client_socket);
       memory_free(client);

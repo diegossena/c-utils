@@ -18,8 +18,9 @@ typedef enum task_type {
   TASK_TCP_CLIENT_CLOSING
 } task_type;
 
+typedef void (*task_handle)();
+
 typedef struct task_t {
   queue_t queue;
   task_type type;
-  task_handle handle;
 } task_t;

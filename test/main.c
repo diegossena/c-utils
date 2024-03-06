@@ -50,12 +50,12 @@ void map_test() {
   map_free(map_u64);
 }
 
-
-void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length, const void* context) {
+void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length,
+  const void* context) {
   console_log("on_tcp_on_read=%llu", length);
   console_write_cstr(LOG_LEVEL_INFO, "'", 1);
   console_log_str(data, 12);
-  console_write_cstr(LOG_LEVEL_INFO, "'", 1);
+  console_write_cstr(LOG_LEVEL_INFO, "'\n", 2);
 }
 void on_tcp_on_write(net_tcp_t* this, const void* context) {
   // console_log_cstr("on_tcp_on_write");
@@ -75,11 +75,12 @@ void net_tcp_test() {
   }
 }
 
-void tcp_server_on_write(net_tcp_client_t* this, const void* context) {
-}
-void tcp_server_on_read(net_tcp_client_t* this, const byte* data, u64 length, const void* context) {
+void tcp_server_on_write(net_tcp_client_t* this, const void* context) {}
+void tcp_server_on_read(net_tcp_client_t* this, const byte* data, u64 length,
+  const void* context) {
   const char http_response [] = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
-  net_tcp_client_write(this, http_response, sizeof(http_response) - 1, tcp_server_on_write);
+  net_tcp_client_write(this, http_response, sizeof(http_response) - 1,
+    tcp_server_on_write);
 }
 void tcp_server_on_connection(net_tcp_client_t* this) {
   net_tcp_client_read(this, 0, tcp_server_on_read);
@@ -88,6 +89,17 @@ void net_tcp_server_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_SERVER" CONSOLE_RESET);
   net_tcp_server_t* server = net_tcp_server_new();
   net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
+}
+
+void window_test() {
+  window_opt options = {
+    .name = "Window",
+    .width = 800,
+    .height = 600,
+    .x = 0,
+    .y = 0
+  };
+  window_new(&options);
 }
 
 i32 main() {
@@ -99,14 +111,10 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
-  net_tcp_test();
+  // net_tcp_test();
   // net_tcp_server_test();
+  window_test();
 
   app_run();
-  console_log_cstr(
-    CONSOLE_FORE_GREEN
-    "SUCCESS"
-    CONSOLE_FORE_GREEN
-    CONSOLE_RESET
-  );
+  console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_FORE_GREEN CONSOLE_RESET);
 }

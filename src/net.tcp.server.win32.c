@@ -42,7 +42,7 @@ error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_o
     goto onerror;
   }
   this->task.type = TASK_TCP_SERVER_LISTENING;
-  this->task.handle = (void*)callback;
+  this->handle = (void*)callback;
   // Aceitar conexões e lidar com elas
   return ERR_SUCCESS;
 onerror:

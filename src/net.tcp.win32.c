@@ -60,7 +60,7 @@ error_code net_tcp_ip4_connect(net_tcp_t* this, const char* host, u16 port, net_
     }
   }
   this->task.type = TASK_TCP_CONNECTING;
-  this->task.handle = callback;
+  this->handle = callback;
   return ERR_SUCCESS;
 onerror:
   closesocket(this->socket);
