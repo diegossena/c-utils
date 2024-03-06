@@ -14,7 +14,7 @@
 #include "sdk/console.h"
 
 LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
-  console_log("WINDOW_EVENT=[%x, %llu]", message, message);
+  // console_log("WINDOW_EVENT=[%x, %llu]", message, message);
   window_t* window = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
     case WM_TIMER:

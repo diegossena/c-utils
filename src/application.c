@@ -27,6 +27,7 @@ i32 app_run() {
   i64 i = 0;
   task_t* it = &app_global.tasks;
   while (app_global.tasks_count) {
+    console_log("tasks_count=%d", app_global.tasks_count);
     // process a small fixed number of times to avoid loop starvation.
     for (i = 0; i < 8; i++) {
       window_pooling();
