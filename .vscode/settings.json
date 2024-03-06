@@ -50,6 +50,7 @@
     "path.h": "c",
     "limits.h": "c",
     "fileapi.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "shlwapi.h": "c"
   }
 }

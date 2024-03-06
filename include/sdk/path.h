@@ -4,4 +4,5 @@
 
 extern const char path_sep;
 
-string_t* path_absolute(const char* path);
+string_t* path_absolute(const char*);
+string_t* path_join(const char*, const char*)
