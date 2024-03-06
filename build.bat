@@ -20,7 +20,7 @@ SET source_path=
 IF "%package_name%" == "" (
   SET source_path=.\src
   SET include_flags=%include_flags%
-  SET linker_flags=%linker_flags% -lws2_32 -ld3d11
+  SET linker_flags=%linker_flags% -lws2_32 -ld3d11 -ldxguid
   :: -lcurl -lz -lssl -lcrypto -lnetsnmp -lcrypt32 -luser32 -lversion -lwldap32 -lws2_32 -lshlwapi -lmingw32  -ld3dcompiler
   set defines=%defines% -DSDK_LIB
   SET output_extension=dll

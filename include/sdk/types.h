@@ -32,6 +32,8 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 #define MAX_I16 32767
 #define MIN_I16 -32768
 
+#define PATH_MAX 260
+
 #ifdef SDK_LIB
 #define export __declspec(dllexport)
 #else

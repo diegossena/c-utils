@@ -24,4 +24,5 @@
 #include <sdk/task.h>
 #include <sdk/application.h>
 
+#include <sdk/path.h>
 #include <sdk/window.h>

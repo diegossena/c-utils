@@ -43,6 +43,13 @@
     "window.win32.h": "c",
     "window.test.h": "c",
     "window.h": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "d3d11.h": "c",
+    "minwindef.h": "c",
+    "path.test.h": "c",
+    "path.h": "c",
+    "limits.h": "c",
+    "fileapi.h": "c",
+    "string.h": "c"
   }
 }

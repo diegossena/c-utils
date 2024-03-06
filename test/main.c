@@ -2,6 +2,7 @@
 
 #include "window.test.h"
 #include "net.tcp.test.h"
+#include "path.test.h"
 
 void string_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "STRING" CONSOLE_RESET);
@@ -80,7 +81,8 @@ i32 main() {
   // map_test();
   // net_tcp_test();
   // net_tcp_server_test();
-  window_test();
+  // window_test();
+  path_test();
 
   app_run();
   console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_FORE_GREEN CONSOLE_RESET);
