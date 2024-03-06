@@ -35,6 +35,13 @@ i32 app_run() {
         case TASK_APPLICATION:
           window_pooling();
           break;
+        // net_tcp_server_t
+        case TASK_TCP_SERVER_LISTENING:
+          net_tcp_server_listen_handle((net_tcp_server_t*)it);
+          break;
+        case TASK_TCP_SERVER_CLOSING:
+          net_tcp_server_close_handle((net_tcp_server_t*)it);
+          break;
         // net_tcp_t
         case TASK_TCP_CONNECTING:
           net_tcp_connect_handle((net_tcp_t*)it);
@@ -47,13 +54,6 @@ i32 app_run() {
           break;
         case TASK_TCP_CLOSING:
           net_tcp_close_handle((net_tcp_t*)it);
-          break;
-        // net_tcp_server_t
-        case TASK_TCP_SERVER_LISTENING:
-          net_tcp_server_listen_handle((net_tcp_server_t*)it);
-          break;
-        case TASK_TCP_SERVER_CLOSING:
-          net_tcp_server_close_handle((net_tcp_server_t*)it);
           break;
         // net_tcp_client_t
         case TASK_TCP_CLIENT_WRITING:

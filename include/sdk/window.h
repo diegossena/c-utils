@@ -4,8 +4,6 @@
 
 #define  WINDOW_POS_CENTERED MAX_U64
 
-typedef struct window_t window_t;
-
 typedef enum window_flags {
   WINDOW_HIDDEN = 1,
   WINDOW_BORDELESS = 2,
@@ -19,4 +17,4 @@ typedef struct window_opt {
   void* context;
 } window_opt;
 
-window_t* window_new(window_opt*);
+void window_inicialize(window_opt*);

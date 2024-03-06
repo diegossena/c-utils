@@ -14,7 +14,6 @@
 #include "sdk/console.h"
 
 LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
-  // console_log("WINDOW_EVENT=[%x, %llu]", message, message);
   window_t* window = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
     case WM_TIMER:
@@ -24,15 +23,11 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       RECT rect;
       GetClientRect(handle, &rect);
       HBRUSH white_background = (HBRUSH)(COLOR_WINDOW + 1);
-      FillRect(hdc, &rect, white_background); // Mesma cor definida na classe da janela
-      return 1; // Indicar que o fundo foi desenhado
+      FillRect(hdc, &rect, white_background);
+      return true;
     }
     case WM_PAINT: {
-      PAINTSTRUCT ps;
-      HDC hdc = BeginPaint(handle, &ps);
-      // Desenhar texto na janela
-      TextOut(hdc, 10, 10, "Hello, World!", 13);
-      EndPaint(handle, &ps);
+
     } break;
     case WM_NCCREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
@@ -53,7 +48,7 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
   return DefWindowProc(handle, message, wParam, lParam);
 }
 
-window_t* window_new(window_opt* options) {
+void window_inicialize(window_opt* options) {
   window_t* this = memory_alloc(sizeof(window_t));
   // RegisterWindowClass
   WNDCLASSEXA wc = {
@@ -62,7 +57,8 @@ window_t* window_new(window_opt* options) {
     .lpfnWndProc = window_procedure,
     .hInstance = GetModuleHandleA(0),
     .hCursor = LoadCursor(0, IDC_ARROW),
-    .lpszClassName = "MainWClass"
+    .lpszClassName = "MainWClass",
+    .hbrBackground = null
   };
   if (!RegisterClassExA(&wc)) {
     error("RegisterClassExA", ERR_UNKNOWN);
@@ -87,10 +83,9 @@ window_t* window_new(window_opt* options) {
   }
   SetTimer(this->handle, 0, 0, 0);
   ++app_global.tasks_count;
-  return this;
+  return;
 clear:
   memory_free(this);
-  return 0;
 }
 
 #endif

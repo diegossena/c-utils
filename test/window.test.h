@@ -8,5 +8,5 @@ void window_test() {
     .x = 0,
     .y = 0
   };
-  window_new(&options);
+  window_inicialize(&options);
 }
