@@ -8,6 +8,6 @@
 net_tcp_server_t* net_tcp_server_new() {
   net_tcp_server_t* this = memory_alloc0(sizeof(net_tcp_server_t));
   this->task.type = TASK_TCP_SERVER_CLOSING;
-  queue_push(&app_global.tasks, &this->task.queue);
+  task_register(this);
   return this;
 }

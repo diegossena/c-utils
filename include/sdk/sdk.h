@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sdk/types.h>
 
 #include <sdk/assert.h>

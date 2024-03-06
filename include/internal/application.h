@@ -1,17 +1,16 @@
 #pragma once
-// queue_t
-#include "internal/queue.h"
+// task_t
+#include "internal/task.h"
 // application
 #include "sdk/application.h"
 // error_code
 #include "sdk/error.h"
 
 typedef struct application {
-  u64 active_handles;
-  queue_t* tasks;
-  error_code stop_flag;
+  task_t tasks;
+  u64 tasks_count;
+  bool stopping;
   u64 max_fd;
-  bool window_pooling;
 } application;
 
 extern application app_global;

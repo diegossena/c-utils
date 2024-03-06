@@ -4,7 +4,7 @@
 
 // app_global
 #include "internal/application.h"
-// net_tcp_server_t
+// net_tcp_server_t, task_unregister
 #include "internal/net.tcp.server.h"
 // net_tcp_client_t
 #include "internal/net.tcp.client.h"
@@ -18,7 +18,7 @@
 void net_tcp_server_close_handle(net_tcp_server_t* this) {
   if (!this->client_count) {
     closesocket((SOCKET)this->socket);
-    queue_remove(&app_global.tasks, &this->task.queue);
+    task_unregister(this);
     memory_free(this);
   }
 }
@@ -51,7 +51,7 @@ void net_tcp_server_listen_handle(net_tcp_server_t* this) {
       memory_free(client);
     } else {
       ++this->client_count;
-      queue_push(&app_global.tasks, &client->task.queue);
+      task_register(client);
     }
   }
 }

@@ -6,6 +6,5 @@
 
 typedef struct window_t {
   HWND handle;
+  void* context;
 } window_t;
-
-void window_pooling();

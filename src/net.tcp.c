@@ -12,7 +12,7 @@
 net_tcp_t* net_tcp_new() {
   net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));
   this->task.type = TASK_TCP_CLOSING;
-  queue_push(&app_global.tasks, &this->task.queue);
+  task_register(this);
   return this;
 }
 void net_tcp_set_context(net_tcp_t* this, const void* context) {

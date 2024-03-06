@@ -41,6 +41,7 @@
     "ranges": "c",
     "functional": "c",
     "window.win32.h": "c",
+    "window.test.h": "c",
     "window.h": "c",
     "typeinfo": "c"
   }

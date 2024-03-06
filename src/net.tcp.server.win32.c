@@ -4,7 +4,7 @@
 
 // app_global
 #include "internal/application.h"
-// net_tcp_server_t
+// net_tcp_server_t, task_register
 #include "internal/net.tcp.server.h"
 // net_tcp_create_socket
 #include "internal/net.tcp.h"
@@ -17,7 +17,7 @@
 
 void net_tcp_server_free(net_tcp_server_t* this) {
   closesocket(this->socket);
-  queue_remove(&app_global.tasks, &this->task.queue);
+  task_register(this);
   memory_free(this);
 }
 

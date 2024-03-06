@@ -13,17 +13,27 @@
 // assert
 #include "sdk/assert.h"
 // window_pooling
-#include "internal/window.win32.h"
+#include "internal/window.h"
+// math_min
+#include "sdk/math.h"
+
+void app_inicialize() {
+  app_global.tasks.type = TASK_APPLICATION;
+  app_global.tasks.queue.next = &app_global.tasks.queue;
+  app_global.tasks.queue.prev = &app_global.tasks.queue;
+}
 
 i32 app_run() {
-  task_t* it = (task_t*)app_global.tasks;
-  while (it || app_global.window_pooling) {
-    if (app_global.window_pooling) {
+  i64 i = 0;
+  task_t* it = &app_global.tasks;
+  while (app_global.tasks_count) {
+    // process a small fixed number of times to avoid loop starvation.
+    for (i = 0; i < 8; i++) {
       window_pooling();
-    }
-    while (it) {
       task_t* next = (task_t*)it->queue.next;
       switch (it->type) {
+        case TASK_APPLICATION:
+          break;
         // net_tcp_t
         case TASK_TCP_CONNECTING:
           net_tcp_connect_handle((net_tcp_t*)it);
@@ -56,8 +66,7 @@ i32 app_run() {
           break;
       }
       it = next;
-    };
-    it = (task_t*)app_global.tasks;
+    }
   }
   net_shutdown();
   if (memory_counter > 0) {

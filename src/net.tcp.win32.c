@@ -2,10 +2,10 @@
 
 #if PLATFORM_WINDOWS
 
+// net_tcp_t, task_unregister
+#include "internal/net.tcp.h"
 // app_global
 #include "internal/application.h"
-// net_tcp_t
-#include "internal/net.tcp.h"
 // memory_alloc0
 #include "internal/memory.h"
 // assert
@@ -15,7 +15,7 @@
 
 void net_tcp_free(net_tcp_t* this) {
   closesocket((SOCKET)this->socket);
-  queue_remove(&app_global.tasks, &this->task.queue);
+  task_unregister(this);
   memory_free(this);
 }
 

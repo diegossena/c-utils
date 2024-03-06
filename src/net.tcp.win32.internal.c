@@ -2,10 +2,10 @@
 
 #if PLATFORM_WINDOWS
 
+// net_tcp_t, task_unregister
+#include "internal/net.tcp.h"
 // app_global
 #include "internal/application.h"
-// net_tcp_t
-#include "internal/net.tcp.h"
 // memory_free
 #include "internal/memory.h"
 // TODO: remove this line
@@ -17,7 +17,7 @@
 
 void net_tcp_close_handle(net_tcp_t* this) {
   shutdown(this->socket, FD_WRITE | FD_READ);
-  queue_remove(&app_global.tasks, &this->task.queue);
+  task_unregister(this);
   closesocket(this->socket);
   memory_free(this);
 }

@@ -16,6 +16,7 @@ typedef struct window_opt {
   const char* name;
   i32 x, y, width, height;
   u64 flags;
+  void* context;
 } window_opt;
 
 window_t* window_new(window_opt*);

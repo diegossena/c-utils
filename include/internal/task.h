@@ -5,6 +5,8 @@
 #include "internal/queue.h"
 
 typedef enum task_type {
+  TASK_APPLICATION,
+
   TASK_TCP_CONNECTING,
   TASK_TCP_WRITING,
   TASK_TCP_READING,
@@ -24,3 +26,6 @@ typedef struct task_t {
   queue_t queue;
   task_type type;
 } task_t;
+
+#define task_register(this) queue_push((queue_t*)&app_global.tasks, (queue_t*)this); ++app_global.tasks_count
+#define task_unregister(this) queue_remove((queue_t*)this); --app_global.tasks_count;

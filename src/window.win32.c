@@ -14,12 +14,12 @@
 #include "sdk/console.h"
 
 LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
+  console_log("WINDOW_EVENT=[%x, %llu]", message, message);
   window_t* window = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
     case WM_TIMER:
       break;
     case WM_ERASEBKGND: {
-      console_log_cstr("WM_ERASEBKGND");
       HDC hdc = (HDC)wParam;
       RECT rect;
       GetClientRect(handle, &rect);
@@ -28,7 +28,6 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       return 1; // Indicar que o fundo foi desenhado
     }
     case WM_PAINT: {
-      console_log_cstr("WM_PAINT");
       PAINTSTRUCT ps;
       HDC hdc = BeginPaint(handle, &ps);
       // Desenhar texto na janela
@@ -41,12 +40,10 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)window);
     } break;
     case WM_CLOSE: // onClose
-      console_log_cstr("WM_CLOSE");
       DestroyWindow(handle);
       window->handle = 0;
       break;
     case WM_DESTROY: // onDestroy
-      console_log_cstr("WM_DESTROY");
       KillTimer(handle, 0);
       window->handle = 0;
       memory_free(window);
@@ -89,7 +86,7 @@ window_t* window_new(window_opt* options) {
     goto clear;
   }
   SetTimer(this->handle, 0, 0, 0);
-  app_global.window_pooling = true;
+  ++app_global.tasks_count;
   return this;
 clear:
   memory_free(this);

@@ -1,5 +1,8 @@
 #include <sdk/sdk.h>
 
+#include "window.test.h"
+#include "net.tcp.test.h"
+
 void string_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "STRING" CONSOLE_RESET);
   string_t* str1 = string_new();
@@ -50,31 +53,6 @@ void map_test() {
   map_free(map_u64);
 }
 
-void on_tcp_on_read(net_tcp_t* this, const byte* data, u64 length,
-  const void* context) {
-  console_log("on_tcp_on_read=%llu", length);
-  console_write_cstr(LOG_LEVEL_INFO, "'", 1);
-  console_log_str(data, 12);
-  console_write_cstr(LOG_LEVEL_INFO, "'\n", 2);
-}
-void on_tcp_on_write(net_tcp_t* this, const void* context) {
-  // console_log_cstr("on_tcp_on_write");
-  net_tcp_read(this, 0, on_tcp_on_read);
-}
-
-void on_tcp_on_connect(net_tcp_t* this) {
-  // console_log_cstr("on_tcp_on_connect");
-  const char request [] = "GET / HTTP/1.1\r\nConnection: close\r\n\r\n";
-  net_tcp_write(this, &request[0], sizeof(request) - 1, on_tcp_on_write);
-}
-void net_tcp_test() {
-  console_log_cstr(CONSOLE_FORE_LIGHTBLUE "NET_TCP_CLIENT" CONSOLE_RESET);
-  for (u64 i = 0; i < 100; i++) {
-    net_tcp_t* socket = net_tcp_new();
-    net_tcp_ip4_connect(socket, "google.com.br", 80, on_tcp_on_connect);
-  }
-}
-
 void tcp_server_on_write(net_tcp_client_t* this, const void* context) {}
 void tcp_server_on_read(net_tcp_client_t* this, const byte* data, u64 length,
   const void* context) {
@@ -91,18 +69,8 @@ void net_tcp_server_test() {
   net_tcp_server_ip4_listen(server, 8080, tcp_server_on_connection);
 }
 
-void window_test() {
-  window_opt options = {
-    .name = "Window",
-    .width = 800,
-    .height = 600,
-    .x = 0,
-    .y = 0
-  };
-  window_new(&options);
-}
-
 i32 main() {
+  app_inicialize();
   console_inicialize();
   net_inicialize();
 
@@ -111,9 +79,9 @@ i32 main() {
   // date_test();
   // snowflake_test();
   // map_test();
-  // net_tcp_test();
+  net_tcp_test();
   // net_tcp_server_test();
-  window_test();
+  // window_test();
 
   app_run();
   console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_FORE_GREEN CONSOLE_RESET);
