@@ -27,18 +27,18 @@
     ++length; \
   } \
   __ptr = this + length; \
-  memory_copy(__ptr, src, sizeof(wchar_t) * src_length); \
+  memory_copy(__ptr, src, sizeof(wchar_t) * src_length + 2); \
   __ptr += length; \
   *__ptr = L'\0'; \
   length += length; \
 }
-#define pathw_join_cstr(this, length, cstr) {     \
-  wchar_t __src[MAX_PATH]; \
-  u64 __src_length = mbstowcs(__src, cstr, MAX_PATH); \
-  pathw_join(this, length, __src, __src_length) \
+#define pathw_join_cstrw(this, length, cstrw) { \
+  u64 __cstrw_length = sizeof(cstrw) / 2 - 2; \
+  pathw_join(this, length, cstrw, __cstrw_length) \
 }
 
 void shader_load_2d_paint(window_t* window) {
+  sizeof(L"a");
   if (window->input_layout) {
     ID3D11InputLayout_Release(window->input_layout);
     ID3D11VertexShader_Release(window->vertex_shader);
@@ -55,7 +55,7 @@ void shader_load_2d_paint(window_t* window) {
     {"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
   };
   // vertex_shader
-  pathw_join_cstr(path, path_length, "vs_2d_paint.cso");
+  pathw_join_cstrw(path, path_length, L"vs_2d_paint.cso");
   result = D3DReadFileToBlob(path, &blob);
   if (result != 0) {
     error("D3DReadFileToBlob::vs_2d_paint.cso", result);
@@ -79,7 +79,7 @@ void shader_load_2d_paint(window_t* window) {
     goto input_layout_free;
   }
   pathw_dirname(path, path_length);
-  pathw_join_cstr(path, path_length, "ps_2d_paint.cso");
+  pathw_join_cstrw(path, path_length, L"ps_2d_paint.cso");
   ID3D10Blob_Release(blob);
   result = D3DReadFileToBlob(path, &blob);
   if (result != 0) {
@@ -148,7 +148,7 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   );
   ID3D11Texture2D_Release(backbuffer);
   // CreateRasterizerState
-  D3D11_RASTERIZER_DESC rasterizer_desc;
+  D3D11_RASTERIZER_DESC rasterizer_desc = {};
   rasterizer_desc.FillMode = D3D11_FILL_SOLID;
   rasterizer_desc.CullMode = D3D11_CULL_NONE;
   ID3D11Device_CreateRasterizerState(this->device, &rasterizer_desc, &this->rasterizer_state);
@@ -197,8 +197,8 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       break;
     case WM_DESTROY: // onDestroy
       KillTimer(handle, 0);
-      window_free(this);
       PostQuitMessage(0);
+      window_free(this);
       break;
   }
   return DefWindowProc(handle, message, wParam, lParam);
