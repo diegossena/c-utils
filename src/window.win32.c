@@ -2,22 +2,14 @@
 
 #if PLATFORM_WINDOWS
 
-// window
+// windows.h, d3d11.h, sdk/window.h
 #include "internal/window.win32.h"
-// memory_alloc
 #include "internal/memory.h"
-// error
 #include "sdk/error.h"
-// app_main
 #include "internal/application.h"
-// console_log_cstr
 #include "sdk/console.h"
-// process_execpath
 #include "sdk/process.h"
-// DXGI_SWAP_CHAIN_DESC
-#define COBJMACROS 1
-#include <d3d11.h>
-#undef COBJMACROS
+#include "sdk/path.h"
 
 void window_create_renderer(window_t* window, LPCREATESTRUCT lpc) {
   // create renderer
@@ -71,7 +63,9 @@ void window_create_renderer(window_t* window, LPCREATESTRUCT lpc) {
   rasterizer_desc.CullMode = D3D11_CULL_NONE;
   ID3D11Device_CreateRasterizerState(window->device, &rasterizer_desc, &window->rasterizer_state);
   // CreateShaders
-  string_t* path = process_execpath();
+  string_t* execpath = process_execpath();
+  path_join_cstr(execpath, "..");
+  string_free(execpath);
 }
 
 LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -98,7 +92,6 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
     } break;
     case WM_CLOSE: // onClose
       DestroyWindow(handle);
-      window->handle = 0;
       break;
     case WM_DESTROY: // onDestroy
       KillTimer(handle, 0);
@@ -117,8 +110,8 @@ void window_inicialize(window_opt* options) {
     .cbSize = sizeof(WNDCLASSEXA),
     .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
     .lpfnWndProc = window_procedure,
-    .hInstance = GetModuleHandleA(0),
-    .hCursor = LoadCursor(0, IDC_ARROW),
+    .hInstance = GetModuleHandleA(null),
+    .hCursor = LoadCursor(null, IDC_ARROW),
     .lpszClassName = "MainWClass",
     .hbrBackground = null
   };

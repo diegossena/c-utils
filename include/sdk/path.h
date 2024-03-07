@@ -2,7 +2,12 @@
 
 #include <sdk/string.h>
 
+#define path_join_cstr(this, cstr) {     \
+  const char ptr[] = cstr;               \
+  path_join(this, ptr, sizeof(ptr) - 1); \
+}
+
 extern const char path_sep;
 
-string_t* path_resolve(const char*);
-string_t* path_join(const char*, u64, const char*, u64);
+void path_resolve(string_t*);
+void path_join(string_t*, const char*, u64);

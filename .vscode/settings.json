@@ -53,6 +53,7 @@
     "string.h": "c",
     "shlwapi.h": "c",
     "process.h": "c",
-    "math.h": "c"
+    "math.h": "c",
+    "stdarg.h": "c"
   }
 }

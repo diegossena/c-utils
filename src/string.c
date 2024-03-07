@@ -1,14 +1,9 @@
-#include "sdk/string.h"
-
+// string_t
+#include "internal/string.h"
 #include "internal/memory.h"
 
 #include <stdarg.h>
 #include <stdio.h> // vsnprintf
-
-typedef struct string_t {
-  u64 length;
-  char* data;
-} string_t;
 
 string_t* string_new(string_t* this) {
   return memory_alloc0(sizeof(string_t));
@@ -58,10 +53,7 @@ void string_append_char(string_t* this, const char ch) {
 }
 
 i16 cstr_compare(const char* s1, const char* s2) {
-  while (*s1 && *s1 == *s2) {
-    ++s1;
-    ++s2;
-  }
+  while (*s1 && *s1 == *s2) { ++s1; ++s2; }
   return (*s1 - *s2);
 }
 bool cstr_equal(const char* s1, const char* s2) {
@@ -80,7 +72,6 @@ i32 cstr_format_v(char* stream, const char* format, void* args) {
   stream[length] = '\0';
   if (length < 0) {
     error("vsnprintf", length);
-    return length;
   }
   return length;
 }
