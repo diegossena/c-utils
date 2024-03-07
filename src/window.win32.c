@@ -21,21 +21,21 @@
   *ptr = L'\0'; \
 }
 #define pathw_join(this, length, src, src_length) { \
-  wchar_t* ptr = this + length - 1; \
-  if (*ptr != L'\\' && *ptr != L'/') { \
-    *++ptr =  L'\\'; \
+  wchar_t* __ptr = this + length - 1; \
+  if (*__ptr != L'\\' && *__ptr != L'/') { \
+    *++__ptr =  L'\\'; \
     ++length; \
   } \
-  ptr = this + length; \
-  memory_copy(ptr, src, sizeof(wchar_t) * src_length); \
-  ptr += length; \
-  *ptr = L'\0'; \
+  __ptr = this + length; \
+  memory_copy(__ptr, src, sizeof(wchar_t) * src_length); \
+  __ptr += length; \
+  *__ptr = L'\0'; \
   length += length; \
 }
 #define pathw_join_cstr(this, length, cstr) {     \
-  wchar_t src[MAX_PATH]; \
-  u64 src_length = mbstowcs(src, cstr, MAX_PATH); \
-  pathw_join(this, length, src, src_length) \
+  wchar_t __src[MAX_PATH]; \
+  u64 __src_length = mbstowcs(__src, cstr, MAX_PATH); \
+  pathw_join(this, length, __src, __src_length) \
 }
 
 void shader_load_2d_paint(window_t* window) {
