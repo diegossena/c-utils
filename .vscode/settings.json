@@ -54,6 +54,7 @@
     "shlwapi.h": "c",
     "process.h": "c",
     "math.h": "c",
-    "stdarg.h": "c"
+    "stdarg.h": "c",
+    "system_error": "c"
   }
 }

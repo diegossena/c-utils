@@ -19,6 +19,7 @@ void path_resolve(string_t* this) {
   if (length) {
     u64 capacity = length + 1;
     this->data = memory_realloc(this->data, capacity);
+    this->length = length;
     memory_copy(this->data, buffer, capacity);
   } else {
     error("GetFullPathNameA", ERR_UNKNOWN);

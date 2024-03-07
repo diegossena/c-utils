@@ -1,8 +1,7 @@
-// path_join
 #include "sdk/path.h"
 #include "internal/memory.h"
-// string_t
 #include "internal/string.h"
+#include "sdk/console.h" // TODO: remove this line
 
 void path_join(string_t* this, const char* path, u64 length) {
   char* ptr = this->data + this->length - 1;
@@ -16,4 +15,12 @@ void path_join(string_t* this, const char* path, u64 length) {
   ptr += length;
   *ptr = '\0';
   this->length += length;
+}
+void path_dirname(string_t* this) {
+  char* ptr = this->data + this->length - 1;
+  while (--this->length && *ptr != '\\' && *ptr != '/') {
+    --ptr;
+  }
+  *ptr = '\0';
+  this->data = memory_realloc(this->data, this->length + 1);
 }

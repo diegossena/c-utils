@@ -83,8 +83,8 @@ i32 main() {
   // net_tcp_test();
   // net_tcp_server_test();
   // path_test();
-  // window_test();
-  process_test();
+  window_test();
+  // process_test();
 
   app_run();
   console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_FORE_GREEN CONSOLE_RESET);

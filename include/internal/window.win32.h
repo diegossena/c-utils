@@ -16,4 +16,7 @@ typedef struct window_t {
   ID3D11DeviceContext* device_context;
   ID3D11RenderTargetView* backbuffer;
   ID3D11RasterizerState* rasterizer_state;
+  ID3D11VertexShader* vertex_shader;
+  ID3D11InputLayout* input_layout;
+  ID3D11PixelShader* pixel_shader;
 } window_t;

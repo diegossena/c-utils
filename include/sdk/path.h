@@ -11,3 +11,4 @@ extern const char path_sep;
 
 void path_resolve(string_t*);
 void path_join(string_t*, const char*, u64);
+void path_dirname(string_t*);
