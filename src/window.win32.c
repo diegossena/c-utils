@@ -12,6 +12,8 @@
 #include "internal/application.h"
 // console_log_cstr
 #include "sdk/console.h"
+// process_execpath
+#include "sdk/process.h"
 // DXGI_SWAP_CHAIN_DESC
 #define COBJMACROS 1
 #include <d3d11.h>
@@ -68,6 +70,8 @@ void window_create_renderer(window_t* window, LPCREATESTRUCT lpc) {
   rasterizer_desc.FillMode = D3D11_FILL_SOLID;
   rasterizer_desc.CullMode = D3D11_CULL_NONE;
   ID3D11Device_CreateRasterizerState(window->device, &rasterizer_desc, &window->rasterizer_state);
+  // CreateShaders
+  string_t* path = process_execpath();
 }
 
 LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {

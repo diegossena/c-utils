@@ -25,4 +25,6 @@
 #include <sdk/application.h>
 
 #include <sdk/path.h>
+#include <sdk/process.h>
+
 #include <sdk/window.h>

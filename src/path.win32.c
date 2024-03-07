@@ -12,14 +12,14 @@
 
 const char path_sep = '\\';
 
-string_t* path_absolute(const char* path) {
+string_t* path_resolve(const char* path) {
   char buffer[MAX_PATH];
   u32 length = GetFullPathNameA(path, MAX_PATH, buffer, NULL);
   string_t* result = string_new();
   if (length) {
     string_append_str(result, buffer, length);
   } else {
-    error("GetFullPathNameA", length);
+    error("GetFullPathNameA", ERR_UNKNOWN);
   }
   return result;
 }

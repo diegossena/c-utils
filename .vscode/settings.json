@@ -51,6 +51,8 @@
     "limits.h": "c",
     "fileapi.h": "c",
     "string.h": "c",
-    "shlwapi.h": "c"
+    "shlwapi.h": "c",
+    "process.h": "c",
+    "math.h": "c"
   }
 }
