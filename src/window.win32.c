@@ -103,22 +103,6 @@ vertex_shader_free:
   window->vertex_shader = 0;
   ID3D10Blob_Release(blob);
 }
-void d2_inicialize(window_t* this) {
-  HRESULT result = D2D1CreateFactory(
-    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
-    (void**)&this->d2_factory
-  );
-  if (FAILED(result)) {
-    error("D2D1CreateFactory", result);
-  }
-  result = DWriteCreateFactory(
-    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
-    (IUnknown**)&this->d2_write_factory
-  );
-  if (FAILED(result)) {
-    error("DWriteCreateFactory", result);
-  }
-}
 void renderer_set_viewport(window_t* this, i32 width, i32 height) {
   if (this->backbuffer) {
     ID2D1RenderTarget_Release(this->d2_render_target);
@@ -171,7 +155,22 @@ void renderer_set_viewport(window_t* this, i32 width, i32 height) {
   // free resources
   ID3D11Texture2D_Release(backbuffer);
 }
-void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
+void renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
+  // d2 inicialize
+  HRESULT result = D2D1CreateFactory(
+    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
+    (void**)&this->d2_factory
+  );
+  if (FAILED(result)) {
+    error("D2D1CreateFactory", result);
+  }
+  result = DWriteCreateFactory(
+    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
+    (IUnknown**)&this->d2_write_factory
+  );
+  if (FAILED(result)) {
+    error("DWriteCreateFactory", result);
+  }
   // create renderer
   DXGI_SWAP_CHAIN_DESC scd = { };
   scd.BufferCount = 1;                                // one back buffer
@@ -183,7 +182,7 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   scd.SampleDesc.Count = 4;                           // how many multisamples
   scd.Windowed = TRUE;                                // windowed/full-screen mode
   scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // allow full-screen switching
-  HRESULT result = D3D11CreateDeviceAndSwapChain(
+  result = D3D11CreateDeviceAndSwapChain(
     0,
     D3D_DRIVER_TYPE_HARDWARE,
     0,
@@ -278,8 +277,7 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       this = (window_t*)pcs->lpCreateParams;
       this->handle = handle;
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
-      d2_inicialize(this);
-      window_renderer_inicialize(this, pcs);
+      renderer_inicialize(this, pcs);
     } break;
     case WM_CLOSE: // onClose
       DestroyWindow(handle);
