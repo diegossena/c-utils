@@ -259,11 +259,12 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
         &text_format
       );
 
-      (this->d2_render_target)->lpVtbl->DrawTextA(
+      ID2D1RenderTarget_DrawText(
         this->d2_render_target, text, text_length, text_format, &layoutRect,
         (ID2D1Brush*)text_brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
         DWRITE_MEASURING_MODE_NATURAL
       );
+
       ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
       IDXGISwapChain_Present(this->swapchain, 0, 0);
     } break;
