@@ -103,42 +103,14 @@ vertex_shader_free:
   window->vertex_shader = 0;
   ID3D10Blob_Release(blob);
 }
-
-void window_renderer_2d_inicialize(window_t* this, ID3D11Texture2D* backbuffer) {
-  // 2D renderer
+void d2_inicialize(window_t* this) {
   HRESULT result = D2D1CreateFactory(
     D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
     (void**)&this->d2_factory
   );
   if (FAILED(result)) {
     error("D2D1CreateFactory", result);
-    return;
   }
-  D2D1_RENDER_TARGET_PROPERTIES renter_target_props = {
-    .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
-    .pixelFormat = {
-      .format = DXGI_FORMAT_UNKNOWN,
-      .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
-    }
-  };
-  ID3D11Texture2D_QueryInterface(
-    backbuffer, &IID_IDXGISurface, (void**)&this->d2_surface
-  );
-  console_log("this->d2_surface=%d", this->d2_surface);
-  // ID2D1Factory_CreateDxgiSurfaceRenderTarget(
-  //   this->d2_factory, this->d2_surface, &renter_target_props,
-  //   &this->d2_render_target
-  // );
-  result = (this->d2_factory)->lpVtbl->CreateDxgiSurfaceRenderTarget(
-    this->d2_factory, this->d2_surface, &renter_target_props,
-    &this->d2_render_target
-  );
-  if (FAILED(result)) {
-    console_log("Error: %x", result);
-    error("CreateDxgiSurfaceRenderTarget", result);
-    exit(1);
-  }
-  console_log("this->d2_render_target=%d", this->d2_render_target);
   result = DWriteCreateFactory(
     DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
     (IUnknown**)&this->d2_write_factory
@@ -146,7 +118,58 @@ void window_renderer_2d_inicialize(window_t* this, ID3D11Texture2D* backbuffer) 
   if (FAILED(result)) {
     error("DWriteCreateFactory", result);
   }
-  console_log("!window_renderer_2d_inicialize");
+}
+void renderer_set_viewport(window_t* this, i32 width, i32 height) {
+  if (this->backbuffer) {
+    ID2D1RenderTarget_Release(this->d2_render_target);
+    IDXGISurface_Release(this->d2_surface);
+    ID3D11RenderTargetView_Release(this->backbuffer);
+  }
+  D3D11_VIEWPORT viewport = {
+    .TopLeftX = 0.f,
+    .TopLeftY = 0.f,
+    .Width = (f32)width,
+    .Height = (f32)height,
+    .MinDepth = 0.f,
+    .MaxDepth = 1.f,
+  };
+  ID3D11DeviceContext_RSSetViewports(this->device_context, 1, &viewport);
+  IDXGISwapChain_ResizeBuffers(
+    this->swapchain, 1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
+  );
+  // get backbuffer
+  ID3D11Texture2D* backbuffer;
+  IDXGISwapChain_GetBuffer(this->swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
+  /**
+   * use the back buffer address to create the render target
+   * set the render target as the back buffer
+   */
+  ID3D11Device_CreateRenderTargetView(
+    this->device, (ID3D11Resource*)backbuffer, null, &this->backbuffer
+  );
+  ID3D11DeviceContext_OMSetRenderTargets(
+    this->device_context, 1, &this->backbuffer, 0
+  );
+  // set d2_render_target
+  ID3D11Texture2D_QueryInterface(
+    backbuffer, &IID_IDXGISurface, (void**)&this->d2_surface
+  );
+  D2D1_RENDER_TARGET_PROPERTIES renter_target_props = {
+    .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
+    .pixelFormat = {
+      .format = DXGI_FORMAT_UNKNOWN,
+      .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
+    }
+  };
+  HRESULT result = ID2D1Factory_CreateDxgiSurfaceRenderTarget(
+    this->d2_factory, this->d2_surface, &renter_target_props,
+    &this->d2_render_target
+  );
+  if (FAILED(result)) {
+    error("CreateDxgiSurfaceRenderTarget", result);
+  }
+  // free resources
+  ID3D11Texture2D_Release(backbuffer);
 }
 void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   // create renderer
@@ -179,28 +202,7 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
     console_log("D3D11CreateDeviceAndSwapChain %x", result);
     exit(1);
   }
-  // set viewports
-  D3D11_VIEWPORT viewport = {
-    .TopLeftX = 0.f,
-    .TopLeftY = 0.f,
-    .Width = (f32)lpc->cx,
-    .Height = (f32)lpc->cy,
-    .MinDepth = 0.f,
-    .MaxDepth = 1.f,
-  };
-  ID3D11DeviceContext_RSSetViewports(this->device_context, 1, &viewport);
-  // GetBackBuffer
-  ID3D11Texture2D* backbuffer;
-  IDXGISwapChain_GetBuffer(this->swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
-  /**
-   * use the back buffer address to create the render target
-   * set the render target as the back buffer
-   */
-  ID3D11Device_CreateRenderTargetView(
-    this->device, (ID3D11Resource*)backbuffer, null, &this->backbuffer
-  );
-  window_renderer_2d_inicialize(this, backbuffer);
-  ID3D11Texture2D_Release(backbuffer);
+  renderer_set_viewport(this, lpc->cx, lpc->cy);
   // CreateRasterizerState
   D3D11_RASTERIZER_DESC rasterizer_desc = {
     .FillMode = D3D11_FILL_SOLID,
@@ -235,8 +237,6 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
   switch (message) {
     case WM_TIMER:
       break;
-    case WM_ERASEBKGND: {
-    }
     case WM_PAINT: {
       const FLOAT clearColor [] = { 1.0f, 1.0f, 1.0f, 1.0f };
       ID3D11DeviceContext_ClearRenderTargetView(
@@ -245,7 +245,7 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       ID2D1RenderTarget_BeginDraw(this->d2_render_target);
       const WCHAR text [] = L"Hello, World!";
       u64 text_length = sizeof(text) / sizeof(WCHAR) - 1;
-      D2D1_RECT_F layoutRect = { 10.0f, 10.0f, 200.0f, 100.0f };
+      D2D1_RECT_F layoutRect = { 10.0f, 10.0f, 300.0f, 100.0f };
       D2D1_COLOR_F color = { 0.f, 0.f, 0.f, 1.f };
 
       ID2D1SolidColorBrush* text_brush;
@@ -268,11 +268,17 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
       IDXGISwapChain_Present(this->swapchain, 0, 0);
     } break;
+    case WM_SIZE: {
+      UINT width = LOWORD(lParam);
+      UINT height = HIWORD(lParam);
+      renderer_set_viewport(this, width, height);
+    } break;
     case WM_NCCREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
       this->handle = handle;
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
+      d2_inicialize(this);
       window_renderer_inicialize(this, pcs);
     } break;
     case WM_CLOSE: // onClose
