@@ -32,6 +32,6 @@ i16 string_compare(const string_t*, const string_t*);
 
 i16 cstr_compare(const char*, const char*);
 bool cstr_equal(const char*, const char*);
+i32 cstr_format_v(char* this, const char* format, void* va_list_p);
 i32 cstr_format(char*, const char* format, ...);
-i32 cstr_format_v(char* this, const char* format, void* va_listp);
 u64 cstr_length(const char*);

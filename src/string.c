@@ -57,9 +57,11 @@ i16 cstr_compare(const char* s1, const char* s2) {
   return (*s1 - *s2);
 }
 bool cstr_equal(const char* s1, const char* s2) {
-  while (*s1) {
+  while (true) {
     if (*s1 != *s2)
       return false;
+    if (!*s1)
+      break;
     ++s1; ++s2;
   }
   return true;

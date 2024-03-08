@@ -183,7 +183,13 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       return true;
     }
     case WM_PAINT: {
-
+      // float red [] = { 1.0f, 0.0f, 0.0f, 1.0f };
+      // float vertex[4][8] = {
+      //   {0.f, -.5f, 0.0f, red},
+      //   {.5f, .5f, 0.0f, red},
+      //   {.0f, .5f, 0.0f, red},
+      //   {.5f, -.5f, 0.0f, red},
+      // };
     } break;
     case WM_NCCREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
