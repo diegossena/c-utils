@@ -14,7 +14,7 @@
 typedef struct window_t {
   HWND handle;
   void* context;
-  // 3D renderer
+  // 3d_renderer
   IDXGISwapChain* swapchain;
   ID3D11Device* device;
   ID3D11DeviceContext* device_context;
@@ -23,7 +23,7 @@ typedef struct window_t {
   ID3D11VertexShader* vertex_shader;
   ID3D11InputLayout* input_layout;
   ID3D11PixelShader* pixel_shader;
-  // 2D renderer
+  // 2d_renderer
   ID2D1Factory* d2_factory;
   IDXGISurface* d2_surface;
   ID2D1RenderTarget* d2_render_target;
