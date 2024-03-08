@@ -136,7 +136,6 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   };
   ID3D11DeviceContext_RSSetViewports(this->device_context, 1, &viewport);
   // GetBackBuffer
-  // get the address of the back buffer
   ID3D11Texture2D* backbuffer;
   IDXGISwapChain_GetBuffer(this->swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
   /**
@@ -148,9 +147,10 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   );
   ID3D11Texture2D_Release(backbuffer);
   // CreateRasterizerState
-  D3D11_RASTERIZER_DESC rasterizer_desc = {};
-  rasterizer_desc.FillMode = D3D11_FILL_SOLID;
-  rasterizer_desc.CullMode = D3D11_CULL_NONE;
+  D3D11_RASTERIZER_DESC rasterizer_desc = {
+    .FillMode = D3D11_FILL_SOLID,
+    .CullMode = D3D11_CULL_NONE
+  };
   ID3D11Device_CreateRasterizerState(this->device, &rasterizer_desc, &this->rasterizer_state);
   // CreateShaders
   shader_load_2d_paint(this);
