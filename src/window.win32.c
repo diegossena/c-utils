@@ -38,7 +38,6 @@
 }
 
 void shader_load_2d_paint(window_t* window) {
-  sizeof(L"a");
   if (window->input_layout) {
     ID3D11InputLayout_Release(window->input_layout);
     ID3D11VertexShader_Release(window->vertex_shader);
