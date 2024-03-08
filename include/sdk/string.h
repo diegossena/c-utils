@@ -11,8 +11,7 @@
 ```c
 string str = {}
 
-string str;
-string_new(str);
+string_t str* =string_new(str);
 ```
 */
 typedef struct string_t string_t;

@@ -13,14 +13,14 @@
 
 #include <d3dcompiler.h>
 
-#define pathw_dirname(this, length) { \
-  wchar_t* ptr = this + length - 1; \
-  while (--length && *ptr != L'\\' && *ptr != L'/') { \
-    --ptr; \
+#define wpath_dirname(this, length) { \
+  wchar_t* __ptr = this + length - 1; \
+  while (--length && *__ptr != L'\\' && *__ptr != L'/') { \
+    --__ptr; \
   } \
-  *ptr = L'\0'; \
+  *__ptr = L'\0'; \
 }
-#define pathw_join(this, length, src, src_length) { \
+#define wpath_join(this, length, src, src_length) { \
   wchar_t* __ptr = this + length - 1; \
   if (*__ptr != L'\\' && *__ptr != L'/') { \
     *++__ptr =  L'\\'; \
@@ -32,9 +32,9 @@
   *__ptr = L'\0'; \
   length += length; \
 }
-#define pathw_join_cstrw(this, length, cstrw) { \
+#define wpath_join_cwstr(this, length, cstrw) { \
   u64 __cstrw_length = sizeof(cstrw) / 2 - 2; \
-  pathw_join(this, length, cstrw, __cstrw_length) \
+  wpath_join(this, length, cstrw, __cstrw_length) \
 }
 
 void shader_load_2d_paint(window_t* window) {
@@ -48,14 +48,14 @@ void shader_load_2d_paint(window_t* window) {
   HRESULT result;
   wchar_t path[MAX_PATH] = {};
   u64 path_length = GetModuleFileNameW(NULL, path, MAX_PATH);
-  pathw_dirname(path, path_length);
+  wpath_dirname(path, path_length);
   // layout
   D3D11_INPUT_ELEMENT_DESC ied [] = {
     {"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
     {"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
   };
   // vertex_shader
-  pathw_join_cstrw(path, path_length, L"vs_2d_paint.cso");
+  wpath_join_cwstr(path, path_length, L"vs_2d_paint.cso");
   result = D3DReadFileToBlob(path, &blob);
   if (result != 0) {
     error("D3DReadFileToBlob::vs_2d_paint.cso", result);
@@ -78,8 +78,8 @@ void shader_load_2d_paint(window_t* window) {
     error("CreateInputLayout", result);
     goto input_layout_free;
   }
-  pathw_dirname(path, path_length);
-  pathw_join_cstrw(path, path_length, L"ps_2d_paint.cso");
+  wpath_dirname(path, path_length);
+  wpath_join_cwstr(path, path_length, L"ps_2d_paint.cso");
   ID3D10Blob_Release(blob);
   result = D3DReadFileToBlob(path, &blob);
   if (result != 0) {

@@ -4,13 +4,12 @@
 #define STRINGIZE_KEY(x) #x
 #define STRINGIZE(x) STRINGIZE_KEY(x)
 
-#define null ((void *)0)
+#define null ((void*)0)
 
-typedef _Bool bool;
 #define true 1
 #define false 0
 
-typedef unsigned char byte;
+typedef _Bool bool;
 
 typedef signed char i8; // -128 ~ 127
 typedef signed short i16; // -32768 ~ 32767
@@ -24,6 +23,8 @@ typedef unsigned long long u64; // 0 ~ 18446744073709551615
 
 typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
+
+typedef u8 byte;
 
 #define MAX_U64 (((u64)-1) / sizeof(u64))
 #define MAX_I64 (((i64)-1) / sizeof(i64))
