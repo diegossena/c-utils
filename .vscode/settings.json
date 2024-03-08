@@ -55,6 +55,13 @@
     "process.h": "c",
     "math.h": "c",
     "stdarg.h": "c",
-    "system_error": "c"
+    "system_error": "c",
+    "d2d1.h": "c",
+    "d3dcompiler.h": "c",
+    "d3dcommon.h": "c",
+    "d2d1_1.h": "c",
+    "dxgi.h": "c",
+    "dwrite.h": "c",
+    "initguid.h": "c"
   }
 }

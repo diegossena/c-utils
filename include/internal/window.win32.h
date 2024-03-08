@@ -5,12 +5,16 @@
 #include <windows.h>
 #define COBJMACROS 1
 #include <d3d11.h>
+#include <d3dcompiler.h>
+#include <initguid.h>
+#include <d2d1.h>
+#include <dwrite.h>
 #undef COBJMACROS
 
 typedef struct window_t {
   HWND handle;
   void* context;
-  // renderer
+  // 3D renderer
   IDXGISwapChain* swapchain;
   ID3D11Device* device;
   ID3D11DeviceContext* device_context;
@@ -19,4 +23,9 @@ typedef struct window_t {
   ID3D11VertexShader* vertex_shader;
   ID3D11InputLayout* input_layout;
   ID3D11PixelShader* pixel_shader;
+  // 2D renderer
+  ID2D1Factory* d2_factory;
+  IDXGISurface* d2_surface;
+  ID2D1RenderTarget* d2_render_target;
+  IDWriteFactory* d2_write_factory;
 } window_t;

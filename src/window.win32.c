@@ -11,8 +11,6 @@
 #include "sdk/console.h"
 #include "sdk/process.h"
 
-#include <d3dcompiler.h>
-
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \
   while (--length && *__ptr != L'\\' && *__ptr != L'/') { \
@@ -58,7 +56,7 @@ void shader_load_2d_paint(window_t* window) {
   result = D3DReadFileToBlob(path, &blob);
   if (result != 0) {
     error("D3DReadFileToBlob::vs_2d_paint.cso", result);
-    goto onend;
+    return;
   }
   result = ID3D11Device_CreateVertexShader(
     window->device, ID3D10Blob_GetBufferPointer(blob),
@@ -93,7 +91,7 @@ void shader_load_2d_paint(window_t* window) {
     error("ID3D11Device_CreatePixelShader::2d_paint", result);
     goto pixel_shader_free;
   }
-  goto onend;
+  return;
 pixel_shader_free:
   ID3D11PixelShader_Release(window->pixel_shader);
   window->pixel_shader = 0;
@@ -104,10 +102,52 @@ vertex_shader_free:
   ID3D11VertexShader_Release(window->vertex_shader);
   window->vertex_shader = 0;
   ID3D10Blob_Release(blob);
-onend:
-  return;
 }
 
+void window_renderer_2d_inicialize(window_t* this, ID3D11Texture2D* backbuffer) {
+  // 2D renderer
+  HRESULT result = D2D1CreateFactory(
+    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
+    (void**)&this->d2_factory
+  );
+  if (FAILED(result)) {
+    error("D2D1CreateFactory", result);
+    return;
+  }
+  D2D1_RENDER_TARGET_PROPERTIES renter_target_props = {
+    .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
+    .pixelFormat = {
+      .format = DXGI_FORMAT_UNKNOWN,
+      .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
+    }
+  };
+  ID3D11Texture2D_QueryInterface(
+    backbuffer, &IID_IDXGISurface, (void**)&this->d2_surface
+  );
+  console_log("this->d2_surface=%d", this->d2_surface);
+  // ID2D1Factory_CreateDxgiSurfaceRenderTarget(
+  //   this->d2_factory, this->d2_surface, &renter_target_props,
+  //   &this->d2_render_target
+  // );
+  result = (this->d2_factory)->lpVtbl->CreateDxgiSurfaceRenderTarget(
+    this->d2_factory, this->d2_surface, &renter_target_props,
+    &this->d2_render_target
+  );
+  if (FAILED(result)) {
+    console_log("Error: %x", result);
+    error("CreateDxgiSurfaceRenderTarget", result);
+    exit(1);
+  }
+  console_log("this->d2_render_target=%d", this->d2_render_target);
+  result = DWriteCreateFactory(
+    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
+    (IUnknown**)&this->d2_write_factory
+  );
+  if (FAILED(result)) {
+    error("DWriteCreateFactory", result);
+  }
+  console_log("!window_renderer_2d_inicialize");
+}
 void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   // create renderer
   DXGI_SWAP_CHAIN_DESC scd = { };
@@ -120,10 +160,25 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   scd.SampleDesc.Count = 4;                           // how many multisamples
   scd.Windowed = TRUE;                                // windowed/full-screen mode
   scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // allow full-screen switching
-  D3D11CreateDeviceAndSwapChain(
-    0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, 0, 0, D3D11_SDK_VERSION, &scd,
-    &this->swapchain, &this->device, 0, &this->device_context
+  HRESULT result = D3D11CreateDeviceAndSwapChain(
+    0,
+    D3D_DRIVER_TYPE_HARDWARE,
+    0,
+    // Required for Direct2D interoperability with Direct3D resources.
+    D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+    0,
+    0,
+    D3D11_SDK_VERSION,
+    &scd,
+    &this->swapchain,
+    &this->device,
+    0,
+    &this->device_context
   );
+  if (FAILED(result)) {
+    console_log("D3D11CreateDeviceAndSwapChain %x", result);
+    exit(1);
+  }
   // set viewports
   D3D11_VIEWPORT viewport = {
     .TopLeftX = 0.f,
@@ -144,6 +199,7 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   ID3D11Device_CreateRenderTargetView(
     this->device, (ID3D11Resource*)backbuffer, null, &this->backbuffer
   );
+  window_renderer_2d_inicialize(this, backbuffer);
   ID3D11Texture2D_Release(backbuffer);
   // CreateRasterizerState
   D3D11_RASTERIZER_DESC rasterizer_desc = {
@@ -156,6 +212,11 @@ void window_renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
 }
 
 void window_free(window_t* this) {
+  // D2D
+  ID2D1RenderTarget_Release(this->d2_render_target);
+  IDXGISurface_Release(this->d2_surface);
+  ID2D1Factory_Release(this->d2_factory);
+  // D3D
   ID3D11PixelShader_Release(this->pixel_shader);
   ID3D11InputLayout_Release(this->input_layout);
   ID3D11VertexShader_Release(this->vertex_shader);
@@ -164,6 +225,7 @@ void window_free(window_t* this) {
   ID3D11DeviceContext_Release(this->device_context);
   ID3D11Device_Release(this->device);
   IDXGISwapChain_Release(this->swapchain);
+  // window_t
   this->handle = 0;
   memory_free(this);
 }
@@ -174,21 +236,37 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
     case WM_TIMER:
       break;
     case WM_ERASEBKGND: {
-      HDC hdc = (HDC)wParam;
-      RECT rect;
-      GetClientRect(handle, &rect);
-      HBRUSH white_background = (HBRUSH)(COLOR_WINDOW + 1);
-      FillRect(hdc, &rect, white_background);
-      return true;
     }
     case WM_PAINT: {
-      // float red [] = { 1.0f, 0.0f, 0.0f, 1.0f };
-      // float vertex[4][8] = {
-      //   {0.f, -.5f, 0.0f, red},
-      //   {.5f, .5f, 0.0f, red},
-      //   {.0f, .5f, 0.0f, red},
-      //   {.5f, -.5f, 0.0f, red},
-      // };
+      const FLOAT clearColor [] = { 1.0f, 1.0f, 1.0f, 1.0f };
+      ID3D11DeviceContext_ClearRenderTargetView(
+        this->device_context, this->backbuffer, clearColor
+      );
+      ID2D1RenderTarget_BeginDraw(this->d2_render_target);
+      const WCHAR text [] = L"Hello, World!";
+      u64 text_length = sizeof(text) / sizeof(WCHAR) - 1;
+      D2D1_RECT_F layoutRect = { 10.0f, 10.0f, 200.0f, 100.0f };
+      D2D1_COLOR_F color = { 0.f, 0.f, 0.f, 1.f };
+
+      ID2D1SolidColorBrush* text_brush;
+      ID2D1RenderTarget_CreateSolidColorBrush(
+        this->d2_render_target, &color, null, &text_brush
+      );
+
+      IDWriteTextFormat* text_format;
+      IDWriteFactory_CreateTextFormat(
+        this->d2_write_factory, L"Arial", null, DWRITE_FONT_WEIGHT_NORMAL,
+        DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 14.0f, L"en-US",
+        &text_format
+      );
+
+      (this->d2_render_target)->lpVtbl->DrawTextA(
+        this->d2_render_target, text, text_length, text_format, &layoutRect,
+        (ID2D1Brush*)text_brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
+        DWRITE_MEASURING_MODE_NATURAL
+      );
+      ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
+      IDXGISwapChain_Present(this->swapchain, 0, 0);
     } break;
     case WM_NCCREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
@@ -219,7 +297,7 @@ void window_inicialize(window_opt* options) {
     .hInstance = GetModuleHandleA(null),
     .hCursor = LoadCursor(null, IDC_ARROW),
     .lpszClassName = "MainWClass",
-    .hbrBackground = null
+    // .hbrBackground = (HBRUSH)(COLOR_WINDOW + 2)
   };
   if (!RegisterClassExA(&wc)) {
     error("RegisterClassExA", ERR_UNKNOWN);

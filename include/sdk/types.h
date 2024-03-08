@@ -4,7 +4,7 @@
 #define STRINGIZE_KEY(x) #x
 #define STRINGIZE(x) STRINGIZE_KEY(x)
 
-#define null ((void*)0)
+#define null 0
 
 #define true 1
 #define false 0
