@@ -7,7 +7,7 @@ struct window_context_t {
 
 void onupdate(window_t* this) {
   gfx_rect_f rect = { 10.0f, 10.0f, 300.0f, 100.0f };
-  gfx_draw_text_cstr(this, L"Hello", &rect, window_context.text_style);
+  gfx_draw_text_cstr(this, L"Hello World", &rect, window_context.text_style);
 }
 void onresize(window_t* this) {
   u16 width = window_get_screen_width(this);
