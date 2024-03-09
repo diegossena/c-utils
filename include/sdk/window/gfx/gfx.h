@@ -9,4 +9,4 @@
   gfx_draw_text(this, text, sizeof(text) / sizeof(wchar_t) - 1, rect, style); \
 }
 
-void gfx_draw_text(window_t*, const wchar_t* text, u64 length, gfx_rect_f*, text_style_t*);
+void gfx_draw_text(window_t*, const wchar_t* text, u64 length, gfx_frect_t*, text_style_t*);

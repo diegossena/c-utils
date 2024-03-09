@@ -4,7 +4,7 @@ struct window_context_t {
   float pixel_width, pixel_height;
   text_style_t* text_style;
 } window_context;
-gfx_rect_f rect = { 10.0f, 10.0f, 0, 0 };
+gfx_frect_t rect = { 10.0f, 10.0f, 0, 0 };
 
 void onupdate(window_t* this) {
   gfx_draw_text_cstr(this, L"Hello World", &rect, window_context.text_style);

@@ -2,6 +2,6 @@
 
 #include <sdk/types.h>
 
-typedef struct gfx_rect_f {
+typedef struct gfx_frect_t {
   float x, y, width, height;
-} gfx_rect_f;
+} gfx_frect_t;
