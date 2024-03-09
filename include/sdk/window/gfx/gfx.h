@@ -10,3 +10,5 @@
 }
 
 void gfx_draw_text(window_t*, const wchar_t* text, u64 length, gfx_frect_t*, text_style_t*);
+
+void gfx_draw_rect(window_t*, gfx_frect_t*);
