@@ -11,9 +11,10 @@
  * top left corner [0, 0]
  * bottom right corner [window.height, window.width]
  */
-typedef struct gfx_position_t {
+typedef struct gfx_rect_t {
   float left, top, right, bottom;
-} gfx_position_t;
+  float width, height;
+} gfx_rect_t;
 typedef struct gfx_color_t {
   float r, g, b, a;
 } gfx_color_t;
@@ -30,10 +31,15 @@ typedef struct text_props_t {
   font_weight_t weight;
   font_style_t style;
   float size;
+  gfx_rect_t rect;
   gfx_color_t color;
-  gfx_position_t position;
 } text_props_t;
 
+typedef struct rect_props_t {
+  gfx_rect_t rect;
+  gfx_color_t color;
+} rect_props_t;
+
 void gfx_draw_text(window_t*, const wchar_t* text, u64 length, text_props_t*);
-void gfx_draw_rect(window_t*, gfx_position_t*);
-void gfx_draw_ellipse(window_t*, gfx_position_t*);
+void gfx_draw_rect(window_t*, rect_props_t*);
+void gfx_draw_ellipse(window_t*, rect_props_t*);
