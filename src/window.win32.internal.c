@@ -173,27 +173,6 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       if (this->onupdate) {
         this->onupdate(this);
       }
-      // const WCHAR text [] = L"Hello, World!";
-      // u64 text_length = sizeof(text) / sizeof(WCHAR) - 1;
-      // D2D1_RECT_F layoutRect = { 10.0f, 10.0f, 300.0f, 100.0f };
-      // D2D1_COLOR_F color = { 0.f, 0.f, 0.f, 1.f };
-
-      // ID2D1SolidColorBrush* text_brush;
-      // ID2D1RenderTarget_CreateSolidColorBrush(
-      //   this->d2_render_target, &color, null, &text_brush
-      // );
-      // IDWriteTextFormat* text_format;
-      // IDWriteFactory_CreateTextFormat(
-      //   this->d2_write_factory, L"Arial", null, DWRITE_FONT_WEIGHT_NORMAL,
-      //   DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 14.0f, L"en-US",
-      //   &text_format
-      // );
-      // ID2D1RenderTarget_DrawText(
-      //   this->d2_render_target, text, text_length, text_format, &layoutRect,
-      //   (ID2D1Brush*)text_brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
-      //   DWRITE_MEASURING_MODE_NATURAL
-      // );
-
       ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
       IDXGISwapChain_Present(this->swapchain, 0, 0);
     } break;
