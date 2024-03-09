@@ -10,7 +10,8 @@
 #include "sdk/console.h" // TODO: remove this lines
 
 void window_inicialize(window_opt* options) {
-  if (FindWindowA("MainWClass", null)) {
+  LPCSTR class_name = "MainWClass";
+  if (FindWindowA(class_name, null)) {
     error("FindWindowA", ERR_UNKNOWN);
     return;
   }
@@ -22,7 +23,7 @@ void window_inicialize(window_opt* options) {
     .lpfnWndProc = window_procedure,
     .hInstance = GetModuleHandleA(null),
     .hCursor = LoadCursor(null, IDC_ARROW),
-    .lpszClassName = "MainWClass",
+    .lpszClassName = class_name,
   };
   if (!RegisterClassExA(&wc)) {
     error("RegisterClassExA", ERR_UNKNOWN);
