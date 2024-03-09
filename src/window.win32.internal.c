@@ -148,9 +148,11 @@ void window_free(window_t* this) {
   IDXGISurface_Release(this->d2_surface);
   ID2D1Factory_Release(this->d2_factory);
   // D3D
-  ID3D11PixelShader_Release(this->pixel_shader);
-  ID3D11InputLayout_Release(this->input_layout);
-  ID3D11VertexShader_Release(this->vertex_shader);
+  if (this->input_layout) {
+    ID3D11PixelShader_Release(this->pixel_shader);
+    ID3D11InputLayout_Release(this->input_layout);
+    ID3D11VertexShader_Release(this->vertex_shader);
+  }
   ID3D11RasterizerState_Release(this->rasterizer_state);
   ID3D11RenderTargetView_Release(this->backbuffer);
   ID3D11DeviceContext_Release(this->device_context);

@@ -37,6 +37,7 @@ text_style_t* text_style_new(text_style_properties_t* props, window_t* window) {
 void text_style_free(text_style_t* this) {
   IDWriteTextFormat_Release(this->format);
   ID2D1Brush_Release(this->brush);
+  memory_free(this);
 }
 
 #endif
