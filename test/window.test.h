@@ -24,8 +24,7 @@ void onupdate(window_t* this) {
 void onresize(window_t* this) {
   u16 width = window_get_screen_width(this);
   u16 height = window_get_screen_height(this);
-  rect.width = width;
-  console_log("width %f %d", rect.width, width);
+  rect.width = width - 20.f;
   rect.height = height;
 }
 void onkeydown(window_t* this) {}
