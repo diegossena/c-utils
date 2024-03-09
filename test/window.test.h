@@ -5,7 +5,10 @@ struct window_context_t {
 } window_context;
 
 void onresize(window_t* this) {
-  console_log("onresize");
+  u16 width = window_get_screen_width(this);
+  u16 height = window_get_screen_height(this);
+  window_context.pixel_width = 2.f / width;
+  window_context.pixel_height = 2.f / height;
 }
 void oncreate(window_t* this) {}
 void onclose(window_t* this) {}

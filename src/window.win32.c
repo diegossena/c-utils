@@ -65,4 +65,15 @@ clear:
   memory_free(this);
 }
 
+u16 window_get_screen_width(window_t* this) {
+  RECT rect;
+  GetWindowRect(this->handle, &rect);
+  return rect.right - rect.left;
+}
+u16 window_get_screen_height(window_t* this) {
+  RECT rect;
+  GetWindowRect(this->handle, &rect);
+  return rect.bottom - rect.top;
+}
+
 #endif

@@ -37,4 +37,7 @@ typedef struct window_opt {
 } window_opt;
 
 void window_inicialize(window_opt*);
-void* window_context_get(window_t*);
+void* window_get_context(window_t*);
+
+u16 window_get_screen_width(window_t*);
+u16 window_get_screen_height(window_t*);
