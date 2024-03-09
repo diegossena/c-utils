@@ -4,7 +4,7 @@
 #include <sdk/window/gfx/text_style.h>
 #include <sdk/window/gfx/rect.h>
 
-#define gfx_draw_text_cstr(this, text, rect, style) { \
+#define gfx_draw_text_cwstr(this, text, rect, style) { \
   const wchar_t __text[] = text; \
   gfx_draw_text(this, text, sizeof(text) / sizeof(wchar_t) - 1, rect, style); \
 }

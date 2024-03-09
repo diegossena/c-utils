@@ -69,6 +69,7 @@
     "rect.h": "c",
     "gfx.h": "c",
     "snowflake.h": "c",
-    "keyboard.h": "c"
+    "keyboard.h": "c",
+    "http.client.h": "c"
   }
 }
