@@ -6,7 +6,7 @@
 
 typedef struct window_t window_t;
 
-typedef void (*window_create_ev)(window_t* this);
+typedef void (*window_ev)(window_t* this);
 typedef void (*window_update_ev)(window_t* this);
 typedef void (*window_keyboard_ev)(window_t* this);
 typedef void (*window_ui_ev)(window_t* this);
@@ -32,7 +32,9 @@ typedef struct window_opt {
   window_keyboard_ev onkeyup;
   window_keyboard_ev ondblclick;
   window_ui_ev onresize;
-  window_create_ev oncreate;
+  window_ev oncreate;
+  window_ev onclose;
 } window_opt;
 
 void window_inicialize(window_opt*);
+void* window_context(window_t*);

@@ -43,6 +43,7 @@ void window_inicialize(window_opt* options) {
   this->ondblclick = options->ondblclick;
   this->onresize = options->onresize;
   this->oncreate = options->oncreate;
+  this->onclose = options->onclose;
     // CreateWindow
   CreateWindowExA(
     window_ex_style, wc.lpszClassName, options->name, window_style,

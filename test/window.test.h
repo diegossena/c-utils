@@ -1,31 +1,24 @@
 #include <sdk/sdk.h>
 
 void oncreate(window_t* this) {
-  // console_log("oncreate");
+}
+void onclose(window_t* this) {
 }
 void onupdate(window_t* this) {
-  // console_log("onupdate");
 }
 void onkeydown(window_t* this) {
-  // console_log("onkeydown");
 }
 void onkeyup(window_t* this) {
-  // console_log("onkeyup");
 }
 void onresize(window_t* this) {
-  // console_log("onresize");
 }
 void onmousemove(window_t* this) {
-  // console_log("onmousemove");
 }
 void onmousedown(window_t* this) {
-  // console_log("onmousedown");
 }
 void onmouseup(window_t* this) {
-  // console_log("onmouseup");
 }
 void ondblclick(window_t* this) {
-  // console_log("ondblclick");
 }
 
 void window_test() {
@@ -43,7 +36,8 @@ void window_test() {
     .onmousemove = onmousemove,
     .onmousedown = onmousedown,
     .onmouseup = onmouseup,
-    .ondblclick = ondblclick
+    .ondblclick = ondblclick,
+    .onclose = onclose
   };
   window_inicialize(&options);
 }

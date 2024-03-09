@@ -337,17 +337,17 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
         this->oncreate(this);
       }
     } break;
-    case WM_CLOSE: // onClose
+    case WM_CLOSE:
+      if (this->onclose) {
+        this->onclose(this);
+      }
       DestroyWindow(handle);
       break;
-    case WM_DESTROY: // onDestroy
+    case WM_DESTROY:
       KillTimer(handle, 0);
       PostQuitMessage(0);
       window_free(this);
       break;
-    default: {
-      console_log("window_inicialize=%x", message);
-    }
   }
   return DefWindowProc(handle, message, wParam, lParam);
 }

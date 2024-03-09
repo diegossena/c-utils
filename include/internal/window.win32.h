@@ -22,7 +22,8 @@ typedef struct window_t {
   window_keyboard_ev onkeyup;
   window_keyboard_ev ondblclick;
   window_ui_ev onresize;
-  window_create_ev oncreate;
+  window_ev oncreate;
+  window_ev onclose;
   // 3d_renderer
   IDXGISwapChain* swapchain;
   ID3D11Device* device;
