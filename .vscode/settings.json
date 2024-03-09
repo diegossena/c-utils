@@ -68,6 +68,7 @@
     "gfx.text_style.win32.h": "c",
     "rect.h": "c",
     "gfx.h": "c",
-    "snowflake.h": "c"
+    "snowflake.h": "c",
+    "keyboard.h": "c"
   }
 }
