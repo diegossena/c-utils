@@ -2,43 +2,44 @@
 
 struct window_context_t {
   float pixel_width, pixel_height;
-  text_style_t* text_style;
   u64 index;
 } window_context;
-gfx_frect_t rect_text = { 10.0f, 10.0f, 0, 0 };
-gfx_frect_t rect = { 10.0f, 10.0f, 100.f, 100.f };
+text_props_t text_props = {
+  .family = L"Arial",
+  .size = 25.f,
+  .style = FONT_STYLE_NORMAL,
+  .weight = FONT_WEIGHT_BOLD,
+  .color = { 1.f, 0.f, 0.f, 1.f },
+  .position = { 10.f, 10.f, 0.f, 0.f }
+};
 
 void onupdate(window_t* this) {
   float speed = 5.f;
   if (is_key_pressed(KEY_UP)) {
-    rect_text.y -= speed;
-    rect.y -= speed;
+    text_props.position.top -= speed;
   } else if (is_key_pressed(KEY_DOWN)) {
-    rect_text.y += speed;
-    rect.y += speed;
+    text_props.position.top += speed;
   }
   if (is_key_pressed(KEY_LEFT)) {
-    rect_text.x -= speed;
-    rect.x -= speed;
+    text_props.position.left -= speed;
   } else if (is_key_pressed(KEY_RIGHT)) {
-    rect_text.x += speed;
-    rect.x += speed;
+    text_props.position.left += speed;
   }
 
   switch (window_context.index) {
     case 0:
-      gfx_draw_text_cwstr(this, L"Hello World", &rect_text, window_context.text_style);
+      gfx_draw_text_cwstr(this, L"Hello World", &text_props);
       break;
-    case 1:
-      gfx_draw_rect(this, &rect);
-      break;
+    // case 1:
+    //   gfx_draw_rect(this, &rect);
+    //   break;
   }
 }
 void onresize(window_t* this) {
   u16 width = window_get_screen_width(this);
   u16 height = window_get_screen_height(this);
-  rect_text.width = width - 20.f;
-  rect_text.height = height;
+  text_props.position.right = width - 20.f;
+  text_props.position.bottom = height;
 }
 void onkeydown(window_t* this) {
   if (is_key_pressed(KEY_C)) {
@@ -50,19 +51,8 @@ void onmousemove(window_t* this) {}
 void onmousedown(window_t* this) {}
 void onmouseup(window_t* this) {}
 void ondblclick(window_t* this) {}
-
-void oncreate(window_t* this) {
-  text_style_properties_t text_style_properties = {
-    .family = L"Roboto",
-    .size = 25.f,
-    .style = FONT_STYLE_NORMAL,
-    .weight = FONT_WEIGHT_BOLD
-  };
-  window_context.text_style = text_style_new(&text_style_properties, this);
-}
-void onclose(window_t* this) {
-  text_style_free(window_context.text_style);
-}
+void oncreate(window_t* this) {}
+void onclose(window_t* this) {}
 
 void window_test() {
   window_opt options = {

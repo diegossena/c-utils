@@ -28,5 +28,5 @@
 #include <sdk/process.h>
 
 #include <sdk/window/window.h>
+#include <sdk/window/gfx.h>
 #include <sdk/window/keyboard.h>
-#include <sdk/window/gfx/gfx.h>
