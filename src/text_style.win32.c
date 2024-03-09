@@ -15,6 +15,9 @@ text_style_t* text_style_new(text_style_properties_t* props, window_t* window) {
     case FONT_WEIGHT_NORMAL:
       font_weight = DWRITE_FONT_WEIGHT_NORMAL;
       break;
+    case FONT_WEIGHT_BOLD:
+      font_weight = DWRITE_FONT_WEIGHT_BOLD;
+      break;
   }
   switch (props->style) {
     case FONT_STYLE_NORMAL:

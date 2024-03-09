@@ -36,10 +36,10 @@ void ondblclick(window_t* this) {}
 
 void oncreate(window_t* this) {
   text_style_properties_t text_style_properties = {
-    .family = L"Arial",
-    .size = 14.f,
+    .family = L"Roboto",
+    .size = 25.f,
     .style = FONT_STYLE_NORMAL,
-    .weight = FONT_WEIGHT_NORMAL
+    .weight = FONT_WEIGHT_BOLD
   };
   window_context.text_style = text_style_new(&text_style_properties, this);
 }

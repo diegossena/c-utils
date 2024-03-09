@@ -6,7 +6,8 @@
 typedef struct text_style_t text_style_t;
 
 typedef enum font_weight_t {
-  FONT_WEIGHT_NORMAL
+  FONT_WEIGHT_NORMAL,
+  FONT_WEIGHT_BOLD
 } font_weight_t;
 typedef enum font_style_t {
   FONT_STYLE_NORMAL
