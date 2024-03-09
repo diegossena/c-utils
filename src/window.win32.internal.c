@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-// windows.h, d3d11.h, sdk/window.h
+// windows.h, d3d11.h, sdk/window/window.h
 #include "internal/window.win32.h"
 #include "internal/memory.h"
 #include "internal/application.h"

@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "sdk/gfx/gfx.h"
+#include "sdk/window/gfx/gfx.h"
 #include "internal/gfx.text_style.win32.h"
 #include "internal/window.win32.h"
 

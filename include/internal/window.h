@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sdk/window.h"
+#include "sdk/window/window.h"
 
 void window_free(window_t*);
 void window_pooling();

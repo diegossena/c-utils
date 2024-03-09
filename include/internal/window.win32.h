@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sdk/window.h"
+#include "sdk/window/window.h"
 #include "internal/task.h"
 #include "internal/gfx.win32.h"
 #include <windows.h>

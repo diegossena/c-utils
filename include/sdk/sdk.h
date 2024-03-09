@@ -27,5 +27,5 @@
 #include <sdk/path.h>
 #include <sdk/process.h>
 
-#include <sdk/window.h>
-#include <sdk/gfx/gfx.h>
+#include <sdk/window/window.h>
+#include <sdk/window/gfx/gfx.h>

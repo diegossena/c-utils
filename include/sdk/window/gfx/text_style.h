@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sdk/types.h>
-#include <sdk/window.h>
+#include <sdk/window/window.h>
 
 typedef struct text_style_t text_style_t;
 

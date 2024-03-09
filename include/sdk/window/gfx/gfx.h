@@ -1,8 +1,8 @@
 #pragma once
 
-#include <sdk/window.h>
-#include <sdk/gfx/text_style.h>
-#include <sdk/gfx/rect.h>
+#include <sdk/window/window.h>
+#include <sdk/window/gfx/text_style.h>
+#include <sdk/window/gfx/rect.h>
 
 #define gfx_draw_text_cstr(this, text, rect, style) { \
   const wchar_t __text[] = text; \

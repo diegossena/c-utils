@@ -1,4 +1,4 @@
-#include "sdk/window.h"
+#include "sdk/window/window.h"
 #include "internal/platform.h"
 
 #if PLATFORM_WINDOWS
