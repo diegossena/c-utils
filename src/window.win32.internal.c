@@ -233,6 +233,7 @@ void window_free(window_t* this) {
 
 void window_pooling() {
   MSG msg;
+  console_log("msg=%d", &msg);
   WINBOOL result = PeekMessageA(&msg, 0, 0, 0, PM_REMOVE);
   if (result) {
     TranslateMessage(&msg);
