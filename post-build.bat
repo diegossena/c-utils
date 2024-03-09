@@ -1,6 +1,6 @@
 @ECHO OFF
 :: config
-SET name=2d_paint
+SET name=fill
 SET output=bin
 :: shader compiler
 ECHO Compiling shaders...

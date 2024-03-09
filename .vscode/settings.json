@@ -63,6 +63,10 @@
     "dxgi.h": "c",
     "dwrite.h": "c",
     "initguid.h": "c",
-    "*.rh": "c"
+    "*.rh": "c",
+    "text_style.h": "c",
+    "gfx.text_style.win32.h": "c",
+    "rect.h": "c",
+    "gfx.h": "c"
   }
 }

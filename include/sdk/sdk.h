@@ -28,3 +28,4 @@
 #include <sdk/process.h>
 
 #include <sdk/window.h>
+#include <sdk/gfx/gfx.h>

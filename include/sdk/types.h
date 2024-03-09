@@ -26,6 +26,8 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef u8 byte;
 
+typedef u16 wchar_t;
+
 #define MAX_U64 (((u64)-1) / sizeof(u64))
 #define MAX_I64 (((i64)-1) / sizeof(i64))
 #define MAX_I32 2147483647

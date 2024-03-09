@@ -2,23 +2,37 @@
 
 struct window_context_t {
   float pixel_width, pixel_height;
+  text_style_t* text_style;
 } window_context;
 
+void onupdate(window_t* this) {
+  gfx_rect_f rect = { 10.0f, 10.0f, 300.0f, 100.0f };
+  gfx_draw_text_cstr(this, L"Hello", &rect, window_context.text_style);
+}
 void onresize(window_t* this) {
   u16 width = window_get_screen_width(this);
   u16 height = window_get_screen_height(this);
   window_context.pixel_width = 2.f / width;
   window_context.pixel_height = 2.f / height;
 }
-void oncreate(window_t* this) {}
-void onclose(window_t* this) {}
-void onupdate(window_t* this) {}
 void onkeydown(window_t* this) {}
 void onkeyup(window_t* this) {}
 void onmousemove(window_t* this) {}
 void onmousedown(window_t* this) {}
 void onmouseup(window_t* this) {}
 void ondblclick(window_t* this) {}
+void oncreate(window_t* this) {
+  text_style_properties_t text_style_properties = {
+    .family = L"Arial",
+    .size = 14.f,
+    .style = FONT_STYLE_NORMAL,
+    .weight = FONT_WEIGHT_NORMAL
+  };
+  window_context.text_style = text_style_new(&text_style_properties, this);
+}
+void onclose(window_t* this) {
+  text_style_free(window_context.text_style);
+}
 
 void window_test() {
   window_opt options = {

@@ -2,14 +2,8 @@
 
 #include "sdk/window.h"
 #include "internal/task.h"
+#include "internal/gfx.win32.h"
 #include <windows.h>
-#define COBJMACROS 1
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <initguid.h>
-#include <d2d1.h>
-#include <dwrite.h>
-#undef COBJMACROS
 
 typedef struct window_t {
   HWND handle;
