@@ -13,7 +13,7 @@
  */
 typedef struct gfx_rect_t {
   float left, top, right, bottom;
-  float width, height;
+  float width, height, size;
 } gfx_rect_t;
 typedef struct gfx_color_t {
   float r, g, b, a;

@@ -5,16 +5,27 @@
 #include "sdk/window/gfx.h"
 #include "internal/window.win32.h"
 
-#define rect_calc(gfx_rect) {\
-  gfx_rect.left, gfx_rect.top, \
-  gfx_rect.width ? gfx_rect.left + gfx_rect.width : gfx_rect.right, \
-  gfx_rect.height ? gfx_rect.top + gfx_rect.height : gfx_rect.bottom \
+void rect_calc(D2D1_RECT_F* rect, gfx_rect_t* gfx_rect) {
+  rect->left = gfx_rect->left;
+  rect->top = gfx_rect->top;
+  if (gfx_rect->width) {
+    rect->right = gfx_rect->left + gfx_rect->width;
+  } else if (gfx_rect->size) {
+    rect->right = gfx_rect->left + gfx_rect->size;
+  }
+  if (gfx_rect->height) {
+    rect->bottom = gfx_rect->left + gfx_rect->height;
+  } else if (gfx_rect->size) {
+    rect->bottom = gfx_rect->left + gfx_rect->size;
+  }
 }
 
 void gfx_draw_text(window_t* this, const wchar_t* text, u64 length, text_props_t* props) {
   IDWriteTextFormat* text_format;
   ID2D1SolidColorBrush* brush;
-  D2D1_RECT_F rect = rect_calc(props->rect);
+  D2D1_RECT_F rect;
+  // rect
+  rect_calc(&rect, &props->rect);
   // text_format
   DWRITE_FONT_WEIGHT font_weight;
   DWRITE_FONT_STYLE font_style;
@@ -36,11 +47,11 @@ void gfx_draw_text(window_t* this, const wchar_t* text, u64 length, text_props_t
     font_style, DWRITE_FONT_STRETCH_NORMAL, props->size, L"en-US",
     &text_format
   );
-  // CreateColorBrush
+  // brush
   ID2D1RenderTarget_CreateSolidColorBrush(
     this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, (ID2D1SolidColorBrush**)&brush
   );
-  // render
+  // draw
   ID2D1RenderTarget_DrawText(
     this->d2_render_target, text, length, text_format, &rect, (ID2D1Brush*)brush,
     D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
@@ -53,12 +64,14 @@ void gfx_draw_rect(window_t* this, rect_props_t* props) {
   ID2D1SolidColorBrush* brush;
   ID2D1StrokeStyle* stroke_style;
   float stroke_width = 2.f;
-  D2D1_RECT_F d2_rect = rect_calc(props->rect);
-  // CreateSolidColorBrush
+  D2D1_RECT_F rect;
+  // rect
+  rect_calc(&rect, &props->rect);
+  // brush
   ID2D1RenderTarget_CreateSolidColorBrush(
     this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
   );
-  // CreateStrokeStyle
+  // stroke
   D2D1_STROKE_STYLE_PROPERTIES stroke_properties;
   stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
   stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
@@ -70,11 +83,10 @@ void gfx_draw_rect(window_t* this, rect_props_t* props) {
   ID2D1Factory_CreateStrokeStyle(
     this->d2_factory, &stroke_properties, null, null, &stroke_style
   );
-  // Draw
+  // draw
   ID2D1RenderTarget_DrawRectangle(
-    this->d2_render_target, &d2_rect, (ID2D1Brush*)brush, stroke_width, null
+    this->d2_render_target, &rect, (ID2D1Brush*)brush, stroke_width, null
   );
-  // ID2D1RenderTarget_DrawRectangle(this->d2_render_target);
   // free resources
   ID2D1SolidColorBrush_Release(brush);
   ID2D1StrokeStyle_Release(stroke_style);
