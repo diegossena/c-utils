@@ -9,7 +9,7 @@ gfx_rect_f rect = { 10.0f, 10.0f, 0, 0 };
 void onupdate(window_t* this) {
   gfx_draw_text_cstr(this, L"Hello World", &rect, window_context.text_style);
 
-  float speed = 1.f;
+  float speed = 5.f;
   if (is_key_pressed(KEY_UP)) {
     rect.y -= speed;
   } else if (is_key_pressed(KEY_DOWN)) {
