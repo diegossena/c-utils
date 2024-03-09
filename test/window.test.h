@@ -26,8 +26,6 @@ void onresize(window_t* this) {
   u16 height = window_get_screen_height(this);
   rect.width = width;
   rect.height = height;
-  // window_context.pixel_width = 2.f / width;
-  // window_context.pixel_height = 2.f / height;
 }
 void onkeydown(window_t* this) {}
 void onkeyup(window_t* this) {}
