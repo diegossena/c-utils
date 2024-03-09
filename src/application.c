@@ -28,46 +28,43 @@ i32 app_run() {
   i64 i = 0;
   task_t* it = &app_global.tasks;
   while (app_global.tasks_count) {
-    // process a small fixed number of times to avoid loop starvation.
-    for (i = 0; i < 8; i++) {
-      task_t* next = (task_t*)it->queue.next;
-      switch (it->type) {
-        case TASK_APPLICATION:
-          window_pooling();
-          break;
-        // net_tcp_server_t
-        case TASK_TCP_SERVER_LISTENING:
-          net_tcp_server_listen_handle((net_tcp_server_t*)it);
-          break;
-        case TASK_TCP_SERVER_CLOSING:
-          net_tcp_server_close_handle((net_tcp_server_t*)it);
-          break;
-        // net_tcp_t
-        case TASK_TCP_CONNECTING:
-          net_tcp_connect_handle((net_tcp_t*)it);
-          break;
-        case TASK_TCP_WRITING:
-          net_tcp_write_handle((net_tcp_t*)it);
-          break;
-        case TASK_TCP_READING:
-          net_tcp_read_handle((net_tcp_t*)it);
-          break;
-        case TASK_TCP_CLOSING:
-          net_tcp_close_handle((net_tcp_t*)it);
-          break;
-        // net_tcp_client_t
-        case TASK_TCP_CLIENT_WRITING:
-          net_tcp_client_write_handle((net_tcp_client_t*)it);
-          break;
-        case TASK_TCP_CLIENT_READING:
-          net_tcp_client_read_handle((net_tcp_client_t*)it);
-          break;
-        case TASK_TCP_CLIENT_CLOSING:
-          net_tcp_client_close_handle((net_tcp_client_t*)it);
-          break;
-      }
-      it = next;
+    task_t* next = (task_t*)it->queue.next;
+    switch (it->type) {
+      case TASK_APPLICATION:
+        window_pooling();
+        break;
+      // net_tcp_server_t
+      case TASK_TCP_SERVER_LISTENING:
+        net_tcp_server_listen_handle((net_tcp_server_t*)it);
+        break;
+      case TASK_TCP_SERVER_CLOSING:
+        net_tcp_server_close_handle((net_tcp_server_t*)it);
+        break;
+      // net_tcp_t
+      case TASK_TCP_CONNECTING:
+        net_tcp_connect_handle((net_tcp_t*)it);
+        break;
+      case TASK_TCP_WRITING:
+        net_tcp_write_handle((net_tcp_t*)it);
+        break;
+      case TASK_TCP_READING:
+        net_tcp_read_handle((net_tcp_t*)it);
+        break;
+      case TASK_TCP_CLOSING:
+        net_tcp_close_handle((net_tcp_t*)it);
+        break;
+      // net_tcp_client_t
+      case TASK_TCP_CLIENT_WRITING:
+        net_tcp_client_write_handle((net_tcp_client_t*)it);
+        break;
+      case TASK_TCP_CLIENT_READING:
+        net_tcp_client_read_handle((net_tcp_client_t*)it);
+        break;
+      case TASK_TCP_CLIENT_CLOSING:
+        net_tcp_client_close_handle((net_tcp_client_t*)it);
+        break;
     }
+    it = next;
   }
   net_shutdown();
   if (memory_counter > 0) {

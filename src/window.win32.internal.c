@@ -103,6 +103,7 @@ vertex_shader_free:
   window->vertex_shader = 0;
   ID3D10Blob_Release(blob);
 }
+
 void renderer_set_viewport(window_t* this, i32 width, i32 height) {
   if (this->backbuffer) {
     ID2D1RenderTarget_Release(this->d2_render_target);
@@ -233,7 +234,6 @@ void window_free(window_t* this) {
 
 void window_pooling() {
   MSG msg;
-  console_log("msg=%d", &msg);
   WINBOOL result = PeekMessageA(&msg, 0, 0, 0, PM_REMOVE);
   if (result) {
     TranslateMessage(&msg);
@@ -248,9 +248,10 @@ void window_pooling() {
 LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
-    case WM_TIMER:
-      break;
-    case WM_PAINT: {
+    case WM_TIMER: {
+      if (this->onupdate) {
+        this->onupdate(this);
+      }
       const FLOAT clearColor [] = { 1.0f, 1.0f, 1.0f, 1.0f };
       ID3D11DeviceContext_ClearRenderTargetView(
         this->device_context, this->backbuffer, clearColor
@@ -282,17 +283,59 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
       IDXGISwapChain_Present(this->swapchain, 0, 0);
     } break;
+    case WM_MOUSEMOVE:
+      if (this->onmousemove) {
+        this->onmousemove(this);
+      }
+      break;
+    case WM_LBUTTONDOWN:
+    case WM_RBUTTONDOWN:
+    case WM_MBUTTONDOWN:
+    case WM_XBUTTONDOWN:
+      if (this->onmousedown) {
+        this->onmousedown(this);
+      }
+      break;
+    case WM_LBUTTONUP:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONUP:
+    case WM_XBUTTONUP:
+      if (this->onmouseup) {
+        this->onmouseup(this);
+      }
+      break;
+    case WM_LBUTTONDBLCLK:
+      if (this->ondblclick) {
+        this->ondblclick(this);
+      }
+      break;
+    case WM_KEYDOWN:
+      if (this->onkeydown) {
+        this->onkeydown(this);
+      }
+      break;
+    case WM_KEYUP:
+      if (this->onkeyup) {
+        this->onkeyup(this);
+      }
+      break;
     case WM_SIZE: {
       UINT width = LOWORD(lParam);
       UINT height = HIWORD(lParam);
       renderer_set_viewport(this, width, height);
+      if (this->onresize) {
+        this->onresize(this);
+      }
     } break;
-    case WM_NCCREATE: {
+    case WM_CREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
       this->handle = handle;
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
       renderer_inicialize(this, pcs);
+      if (this->oncreate) {
+        this->oncreate(this);
+      }
     } break;
     case WM_CLOSE: // onClose
       DestroyWindow(handle);
@@ -302,6 +345,9 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
       PostQuitMessage(0);
       window_free(this);
       break;
+    default: {
+      console_log("window_inicialize=%x", message);
+    }
   }
   return DefWindowProc(handle, message, wParam, lParam);
 }

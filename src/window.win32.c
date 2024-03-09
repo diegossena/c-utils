@@ -7,10 +7,12 @@
 #include "internal/memory.h"
 #include "internal/application.h"
 #include "sdk/error.h"
+#include "sdk/console.h" // TODO: remove this lines
 
 void window_inicialize(window_opt* options) {
   if (FindWindowA("MainWClass", null)) {
     error("FindWindowA", ERR_UNKNOWN);
+    return;
   }
   window_t* this = memory_alloc0(sizeof(window_t));
   // RegisterWindowClass
@@ -31,6 +33,17 @@ void window_inicialize(window_opt* options) {
     window_style |= WS_VISIBLE;
   }
   u32 window_ex_style = WS_EX_APPWINDOW;
+  // Register Events
+  this->onupdate = options->onupdate;
+  this->onmousemove = options->onmousemove;
+  this->onmousedown = options->onmousedown;
+  this->onmouseup = options->onmouseup;
+  this->onkeydown = options->onkeydown;
+  this->onkeyup = options->onkeyup;
+  this->ondblclick = options->ondblclick;
+  this->onresize = options->onresize;
+  this->oncreate = options->oncreate;
+    // CreateWindow
   CreateWindowExA(
     window_ex_style, wc.lpszClassName, options->name, window_style,
     options->x, options->y, options->width, options->height,

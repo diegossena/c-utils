@@ -14,6 +14,15 @@
 typedef struct window_t {
   HWND handle;
   void* context;
+  window_update_ev onupdate;
+  window_mouse_ev onmousemove;
+  window_mouse_ev onmousedown;
+  window_mouse_ev onmouseup;
+  window_keyboard_ev onkeydown;
+  window_keyboard_ev onkeyup;
+  window_keyboard_ev ondblclick;
+  window_ui_ev onresize;
+  window_create_ev oncreate;
   // 3d_renderer
   IDXGISwapChain* swapchain;
   ID3D11Device* device;
