@@ -7,7 +7,7 @@ struct window_context_t {
 gfx_frect_t rect = { 10.0f, 10.0f, 0, 0 };
 
 void onupdate(window_t* this) {
-  gfx_draw_text_cstr(this, L"Hello World", &rect, window_context.text_style);
+  gfx_draw_text_cwstr(this, L"Hello World", &rect, window_context.text_style);
 
   float speed = 5.f;
   if (is_key_pressed(KEY_UP)) {
