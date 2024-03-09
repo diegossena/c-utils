@@ -12,11 +12,15 @@ void rect_calc(D2D1_RECT_F* rect, gfx_rect_t* gfx_rect) {
     rect->right = gfx_rect->left + gfx_rect->width;
   } else if (gfx_rect->size) {
     rect->right = gfx_rect->left + gfx_rect->size;
+  } else {
+    rect->right = gfx_rect->right;
   }
   if (gfx_rect->height) {
-    rect->bottom = gfx_rect->left + gfx_rect->height;
+    rect->bottom = gfx_rect->top + gfx_rect->height;
   } else if (gfx_rect->size) {
-    rect->bottom = gfx_rect->left + gfx_rect->size;
+    rect->bottom = gfx_rect->top + gfx_rect->size;
+  } else {
+    rect->bottom = gfx_rect->bottom;
   }
 }
 

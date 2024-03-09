@@ -14,7 +14,7 @@ text_props_t text_props = {
   .rect = { 10.f, 10.f, 0.f, 0.f }
 };
 rect_props_t rect_props = {
-  .rect = { 10.f, 10.f, .width = 100.f, .height = 100.f},
+  .rect = { 10.f, 10.f, .size = 100.f},
   .color = { 0.f, 1.f, 0.f, 1.f }
 };
 
