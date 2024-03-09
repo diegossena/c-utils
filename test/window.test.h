@@ -1,7 +1,6 @@
 #include <sdk/sdk.h>
 
 struct window_context_t {
-  float pixel_width, pixel_height;
   u64 index;
 } window_context;
 
@@ -17,30 +16,42 @@ rect_props_t rect_props = {
   .rect = { 10.f, 10.f, .size = 100.f},
   .color = { 0.f, 1.f, 0.f, 1.f }
 };
+ellipse_props_t ellipse_props = {
+  60.f, 60.f, 50.f, 50.f,
+  .color = { 0.f, 0.f, 1.f, 1.f }
+};
 
 void onupdate(window_t* this) {
-  u16 width = window_get_screen_width(this);
-  u16 height = window_get_screen_height(this);
   float speed = 5.f;
   if (is_key_pressed(KEY_UP)) {
-    text_props.rect.top -= speed;
-    rect_props.rect.top -= speed;
+    switch (window_context.index) {
+      case 0: text_props.rect.top -= speed; break;
+      case 1: rect_props.rect.top -= speed;  break;
+      case 2: ellipse_props.y -= speed;  break;
+    }
   } else if (is_key_pressed(KEY_DOWN)) {
-    text_props.rect.top += speed;
-    rect_props.rect.top += speed;
+    switch (window_context.index) {
+      case 0: text_props.rect.top += speed;  break;
+      case 1: rect_props.rect.top += speed; break;
+      case 2: ellipse_props.y += speed; break;
+    }
   }
   if (is_key_pressed(KEY_LEFT)) {
-    text_props.rect.left -= speed;
-    rect_props.rect.left -= speed;
+    switch (window_context.index) {
+      case 0: text_props.rect.left -= speed; break;
+      case 1: rect_props.rect.left -= speed; break;
+      case 2: ellipse_props.x -= speed; break;
+    }
   } else if (is_key_pressed(KEY_RIGHT)) {
-    text_props.rect.left += speed;
-    rect_props.rect.left += speed;
+    switch (window_context.index) {
+      case 0: text_props.rect.left += speed;  break;
+      case 1: rect_props.rect.left += speed; break;
+      case 2: ellipse_props.x += speed; break;
+    }
   }
-
-  switch (window_context.index) {
-    case 0: gfx_draw_text_cwstr(this, L"Hello World", &text_props); break;
-    case 1: gfx_draw_rect(this, &rect_props); break;
-  }
+  gfx_draw_text_cwstr(this, L"Hello World", &text_props);
+  gfx_draw_rect(this, &rect_props);
+  gfx_draw_ellipse(this, &ellipse_props);
 }
 void onresize(window_t* this) {
   u16 width = window_get_screen_width(this);
@@ -50,7 +61,7 @@ void onresize(window_t* this) {
 }
 void onkeydown(window_t* this) {
   if (is_key_pressed(KEY_C)) {
-    window_context.index = (window_context.index + 1) % 2;
+    window_context.index = (window_context.index + 1) % 3;
   }
 }
 void onkeyup(window_t* this) {}

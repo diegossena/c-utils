@@ -89,13 +89,41 @@ void gfx_draw_rect(window_t* this, rect_props_t* props) {
   );
   // draw
   ID2D1RenderTarget_DrawRectangle(
-    this->d2_render_target, &rect, (ID2D1Brush*)brush, stroke_width, null
+    this->d2_render_target, &rect, (ID2D1Brush*)brush, stroke_width,
+    stroke_style
   );
   // free resources
   ID2D1SolidColorBrush_Release(brush);
   ID2D1StrokeStyle_Release(stroke_style);
 }
-// void gfx_draw_ellipse(window_t* this, gfx_frect_t* rect) {
-
-// }
+void gfx_draw_ellipse(window_t* this, ellipse_props_t* props) {
+  ID2D1SolidColorBrush* brush;
+  ID2D1StrokeStyle* stroke_style;
+  float stroke_width = 2.f;
+  D2D1_ELLIPSE ellipse = { 100.f, 100.f, 50.f, 30.f };
+  // brush
+  ID2D1RenderTarget_CreateSolidColorBrush(
+    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
+  );
+  // stroke
+  D2D1_STROKE_STYLE_PROPERTIES stroke_properties;
+  stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.dashCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.lineJoin = D2D1_LINE_JOIN_ROUND;
+  stroke_properties.miterLimit = 10.0f;
+  stroke_properties.dashStyle = D2D1_DASH_STYLE_SOLID;
+  stroke_properties.dashOffset = 0.0f;
+  ID2D1Factory_CreateStrokeStyle(
+    this->d2_factory, &stroke_properties, null, null, &stroke_style
+  );
+  // draw
+  ID2D1RenderTarget_DrawEllipse(
+    this->d2_render_target, (D2D1_ELLIPSE*)props, (ID2D1Brush*)brush,
+    stroke_width, stroke_style
+  );
+  // free resources
+  ID2D1SolidColorBrush_Release(brush);
+  ID2D1StrokeStyle_Release(stroke_style);
+}
 #endif

@@ -40,6 +40,12 @@ typedef struct rect_props_t {
   gfx_color_t color;
 } rect_props_t;
 
+typedef struct ellipse_props_t {
+  float x, y;
+  float radius_x, radius_y;
+  gfx_color_t color;
+} ellipse_props_t;
+
 void gfx_draw_text(window_t*, const wchar_t* text, u64 length, text_props_t*);
 void gfx_draw_rect(window_t*, rect_props_t*);
-void gfx_draw_ellipse(window_t*, rect_props_t*);
+void gfx_draw_ellipse(window_t*, ellipse_props_t*);
