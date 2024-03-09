@@ -5,4 +5,4 @@
 #include "internal/window.win32.h"
 #endif
 
-void* window_context(window_t* this) { return this->context; }
+void* window_context_get(window_t* this) { return this->context; }

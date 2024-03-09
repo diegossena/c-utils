@@ -37,4 +37,4 @@ typedef struct window_opt {
 } window_opt;
 
 void window_inicialize(window_opt*);
-void* window_context(window_t*);
+void* window_context_get(window_t*);

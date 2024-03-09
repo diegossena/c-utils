@@ -5,10 +5,9 @@ struct window_context_t {
 } window_context;
 
 void onresize(window_t* this) {
+  console_log("onresize");
 }
-void oncreate(window_t* this) {
-
-}
+void oncreate(window_t* this) {}
 void onclose(window_t* this) {}
 void onupdate(window_t* this) {}
 void onkeydown(window_t* this) {}
