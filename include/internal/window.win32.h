@@ -29,3 +29,5 @@ typedef struct window_t {
   ID2D1RenderTarget* d2_render_target;
   IDWriteFactory* d2_write_factory;
 } window_t;
+
+LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
