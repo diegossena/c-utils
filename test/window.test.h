@@ -33,6 +33,7 @@ void onmousemove(window_t* this) {}
 void onmousedown(window_t* this) {}
 void onmouseup(window_t* this) {}
 void ondblclick(window_t* this) {}
+
 void oncreate(window_t* this) {
   text_style_properties_t text_style_properties = {
     .family = L"Arial",
