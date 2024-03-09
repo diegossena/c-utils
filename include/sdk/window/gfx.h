@@ -18,6 +18,7 @@ typedef struct gfx_rect_t {
 typedef struct gfx_color_t {
   float r, g, b, a;
 } gfx_color_t;
+typedef struct image_t image_t;
 
 typedef enum font_weight_t {
   FONT_WEIGHT_NORMAL,
@@ -39,13 +40,21 @@ typedef struct rect_props_t {
   gfx_rect_t rect;
   gfx_color_t color;
 } rect_props_t;
-
 typedef struct ellipse_props_t {
   float x, y;
   float radius_x, radius_y;
   gfx_color_t color;
 } ellipse_props_t;
+typedef struct bitmap_props_t {
+  gfx_rect_t rect;
+  image_t* image;
+} bitmap_props_t;
 
 void gfx_draw_text(window_t*, const wchar_t* text, u64 length, text_props_t*);
 void gfx_draw_rect(window_t*, rect_props_t*);
 void gfx_draw_ellipse(window_t*, ellipse_props_t*);
+
+image_t* gfx_image_new(window_t*, const wchar_t* path);
+void gfx_image_free(image_t*);
+
+void gfx_draw_bitmap(window_t*, bitmap_props_t*);

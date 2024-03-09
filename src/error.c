@@ -78,6 +78,8 @@ const char* error_cstr(i32 code) {
       return "ERR_WSAECONNREFUSED";
     case ERR_WSANOTINITIALISED:
       return "ERR_WSANOTINITIALISED";
+    case ERR_CO_E_NOTINITIALIZED:
+      return "ERR_CO_E_NOTINITIALIZED";
     default:
       return "ERR_UNKNOWN";
   }
@@ -85,6 +87,6 @@ const char* error_cstr(i32 code) {
 
 void _error(const char* message, error_code code) {
   const char* error_str = error_cstr(code);
-  console_error("%sError:%s %s %d %s", CONSOLE_FORE_RED, CONSOLE_RESET,
+  console_error("%sError:%s %s %x %s", CONSOLE_FORE_RED, CONSOLE_RESET,
     error_str, code, message);
 }

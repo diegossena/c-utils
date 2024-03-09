@@ -4,6 +4,12 @@
 
 #include "sdk/window/gfx.h"
 #include "internal/window.win32.h"
+#include "sdk/error.h"
+#include <wincodec.h>
+
+typedef struct image_t {
+  ID2D1Bitmap* bitmap;
+} image_t;
 
 void rect_calc(D2D1_RECT_F* rect, gfx_rect_t* gfx_rect) {
   rect->left = gfx_rect->left;
@@ -125,4 +131,81 @@ void gfx_draw_ellipse(window_t* this, ellipse_props_t* props) {
   ID2D1SolidColorBrush_Release(brush);
   ID2D1StrokeStyle_Release(stroke_style);
 }
+image_t* gfx_image_new(window_t* window, const wchar_t* path) {
+  ID2D1Bitmap* bitmap = 0;
+  HRESULT result;
+  IWICImagingFactory* wic_factory;
+  IWICBitmapDecoder* decoder;
+  IWICBitmapFrameDecode* frame_decode;
+  IWICFormatConverter* converter;
+
+  result = CoInitialize(NULL);
+  if (FAILED(result)) {
+    error("CoInitialize", result);
+    return 0;
+  }
+  CLSID clsid = CLSID_WICImagingFactory;
+  IID iid = IID_IWICImagingFactory;
+  result = CoCreateInstance(
+    &clsid, null, CLSCTX_INPROC_SERVER,
+    &iid, (void**)&wic_factory
+  );
+  if (FAILED(result)) {
+    error("CoCreateInstance", result);
+    goto wic_factory_free;
+  }
+  result = wic_factory->lpVtbl->CreateDecoderFromFilename(
+    wic_factory, path, NULL, GENERIC_READ,
+    WICDecodeMetadataCacheOnDemand, &decoder
+  );
+  if (FAILED(result)) {
+    error("CreateDecoderFromFilename", result);
+    goto decoder_free;
+  }
+  result = decoder->lpVtbl->GetFrame(decoder, 0, &frame_decode);
+  if (FAILED(result)) {
+    error("GetFrame", result);
+    goto decoder_free;
+  }
+  result = wic_factory->lpVtbl->CreateFormatConverter(wic_factory, &converter);
+  if (FAILED(result)) {
+    error("CreateFormatConverter", result);
+    goto frame_decode_free;
+  }
+  result = converter->lpVtbl->Initialize(
+    converter, (IWICBitmapSource*)frame_decode, &GUID_WICPixelFormat32bppPBGRA,
+    WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeMedianCut
+  );
+  if (FAILED(result)) {
+    error("IWICFormatConverter::Initialize", result);
+    goto frame_decode_free;
+  }
+  result = window->d2_render_target->lpVtbl->CreateBitmapFromWicBitmap(
+    window->d2_render_target, (IWICBitmapSource*)converter, NULL, &bitmap
+  );
+  if (FAILED(result)) {
+    error("CreateBitmapFromWicBitmap", result);
+  }
+frame_decode_free:
+  frame_decode->lpVtbl->Release(frame_decode);
+decoder_free:
+  decoder->lpVtbl->Release(decoder);
+wic_factory_free:
+  wic_factory->lpVtbl->Release(wic_factory);
+  return (image_t*)bitmap;
+}
+void gfx_image_free(image_t* this) {
+  ID2D1Bitmap_Release((ID2D1Bitmap*)this);
+}
+void gfx_draw_bitmap(window_t* this, bitmap_props_t* props) {
+  D2D1_RECT_F rect;
+  // rect
+  rect_calc(&rect, &props->rect);
+  // draw
+  (this->d2_render_target)->lpVtbl->DrawBitmap(
+    this->d2_render_target, (ID2D1Bitmap*)props->image, &rect, 1.f,
+    D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, null
+  );
+}
+
 #endif
