@@ -99,7 +99,7 @@ void gfx_draw_rect(window_t* this, rect_props_t* props) {
 void gfx_draw_ellipse(window_t* this, ellipse_props_t* props) {
   ID2D1SolidColorBrush* brush;
   ID2D1StrokeStyle* stroke_style;
-  float stroke_width = 2.f;
+  float stroke_width = 0.f;
   D2D1_ELLIPSE ellipse = { 100.f, 100.f, 50.f, 30.f };
   // brush
   ID2D1RenderTarget_CreateSolidColorBrush(
