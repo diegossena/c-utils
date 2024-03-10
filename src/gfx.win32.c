@@ -17,7 +17,7 @@ void __rect_calc(D2D1_RECT_F* rect, gfx_rect_t* gfx_rect) {
   if (gfx_rect->width) {
     rect->right = gfx_rect->left + gfx_rect->width;
   } else if (gfx_rect->size) {
-    rect->right = gfx_rect->left + gfx_rect->size;
+    rect->right = (f64)gfx_rect->left + (f64)gfx_rect->size;
   } else {
     rect->right = gfx_rect->right;
   }
@@ -94,10 +94,13 @@ void gfx_draw_rect(window_t* this, rect_props_t* props) {
     this->d2_factory, &stroke_properties, null, null, &stroke_style
   );
   // draw
-  ID2D1RenderTarget_DrawRectangle(
-    this->d2_render_target, &rect, (ID2D1Brush*)brush, stroke_width,
-    stroke_style
+  ID2D1RenderTarget_FillRectangle(
+    this->d2_render_target, &rect, (ID2D1Brush*)brush
   );
+  // ID2D1RenderTarget_DrawRectangle(
+  //   this->d2_render_target, &rect, (ID2D1Brush*)brush, stroke_width,
+  //   stroke_style
+  // );
   // free resources
   ID2D1SolidColorBrush_Release(brush);
   ID2D1StrokeStyle_Release(stroke_style);

@@ -71,6 +71,9 @@
     "snowflake.h": "c",
     "keyboard.h": "c",
     "http.client.h": "c",
-    "utility": "c"
+    "utility": "c",
+    "random": "c",
+    "map.h": "c",
+    "time.h": "c"
   }
 }

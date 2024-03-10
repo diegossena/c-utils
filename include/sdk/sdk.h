@@ -10,6 +10,7 @@
 #include <sdk/map.h>
 
 #include <sdk/date.h>
+#include <sdk/time.h>
 #include <sdk/math.h>
 #include <sdk/snowflake.h>
 
