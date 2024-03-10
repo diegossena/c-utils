@@ -79,7 +79,7 @@ void onmouseup(window_t* this) {}
 void ondblclick(window_t* this) {}
 void oncreate(window_t* this) {
   context.index = 0;
-  bitmap_props.image = gfx_image_new(this, L"C:\\Users\\Diego\\Downloads\\1678136103504.jpg");
+  bitmap_props.image = gfx_image_new(this, L"1678136103504.jpg");
 }
 void onclose(window_t* this) {
   gfx_image_free(bitmap_props.image);

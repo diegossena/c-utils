@@ -11,7 +11,7 @@ typedef struct image_t {
   ID2D1Bitmap* bitmap;
 } image_t;
 
-void rect_calc(D2D1_RECT_F* rect, gfx_rect_t* gfx_rect) {
+void __rect_calc(D2D1_RECT_F* rect, gfx_rect_t* gfx_rect) {
   rect->left = gfx_rect->left;
   rect->top = gfx_rect->top;
   if (gfx_rect->width) {
@@ -35,7 +35,7 @@ void gfx_draw_text(window_t* this, const wchar_t* text, u64 length, text_props_t
   ID2D1SolidColorBrush* brush;
   D2D1_RECT_F rect;
   // rect
-  rect_calc(&rect, &props->rect);
+  __rect_calc(&rect, &props->rect);
   // text_format
   DWRITE_FONT_WEIGHT font_weight;
   DWRITE_FONT_STYLE font_style;
@@ -76,7 +76,7 @@ void gfx_draw_rect(window_t* this, rect_props_t* props) {
   float stroke_width = 2.f;
   D2D1_RECT_F rect;
   // rect
-  rect_calc(&rect, &props->rect);
+  __rect_calc(&rect, &props->rect);
   // brush
   ID2D1RenderTarget_CreateSolidColorBrush(
     this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
@@ -200,7 +200,7 @@ void gfx_image_free(image_t* this) {
 void gfx_draw_bitmap(window_t* this, bitmap_props_t* props) {
   D2D1_RECT_F rect;
   // rect
-  rect_calc(&rect, &props->rect);
+  __rect_calc(&rect, &props->rect);
   // draw
   (this->d2_render_target)->lpVtbl->DrawBitmap(
     this->d2_render_target, (ID2D1Bitmap*)props->image, &rect, 1.f,
