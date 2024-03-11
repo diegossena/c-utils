@@ -4,9 +4,9 @@ struct window_context_t {
   char* level;
   u64 level_width;
   u64 level_height;
-  f64 camera_x, camera_y;
-  f64 player_x, player_y;
-  f64 player_vel_x, player_vel_y;
+  f32 camera_x, camera_y;
+  f32 player_x, player_y;
+  f32 player_vel_x, player_vel_y;
   u64 index;
   f64 last_update;
 } context;
@@ -22,28 +22,16 @@ char get_tile(u64 x, u64 y) {
 
 // events
 
+f64 elapsed = 0.;
 void onupdate(window_t* this) {
   // timer
   f64 now = time_absolute();
   f64 delta_time = now - context.last_update;
   context.last_update = now;
-  // window info
-  u16 window_width = window_get_screen_width(this);
-  u16 window_height = window_get_screen_height(this);
-  // level info
-  f64 tile_size = 50.;
-  u64 visible_tiles_x = window_width / tile_size;
-  u64 visible_tiles_y = window_height / tile_size;
-  // calculate top-leftmost visible tile
-  f64 offset_x = context.camera_x - (f64)visible_tiles_x / 2.;
-  f64 offset_y = context.camera_y - (f64)visible_tiles_y / 2.;
-  // clamp camera to game boudaries
-  offset_x = math_clamp(offset_x, 0., context.level_width - visible_tiles_x);
-  offset_y = math_clamp(offset_y, 0., context.level_height - visible_tiles_y);
   // handle input
-  context.player_vel_x = 0.;
-  context.player_vel_y = 0.;
-  f64 velocity = 6.;
+  context.player_vel_x = 0.f;
+  context.player_vel_y = 0.f;
+  f32 velocity = 6.f;
   if (is_key_pressed(KEY_UP)) {
     context.player_vel_y = -velocity;
   } else if (is_key_pressed(KEY_DOWN)) {
@@ -58,10 +46,23 @@ void onupdate(window_t* this) {
   context.player_y = context.player_y + context.player_vel_y * delta_time;
   context.camera_x = context.player_x;
   context.camera_y = context.player_y;
+  // window info
+  u16 window_width = window_get_screen_width(this);
+  u16 window_height = window_get_screen_height(this);
+  // level info
+  f32 tile_size = 50.f;
+  u64 visible_tiles_x = window_width / tile_size;
+  u64 visible_tiles_y = window_height / tile_size;
+  // calculate top-leftmost visible tile
+  f32 offset_x = context.camera_x - (f32)visible_tiles_x / 2.f;
+  f32 offset_y = context.camera_y - (f32)visible_tiles_y / 2.f;
+  // clamp camera to game boudaries
+  offset_x = math_clamp(offset_x, 0.f, context.level_width - visible_tiles_x);
+  offset_y = math_clamp(offset_y, 0.f, context.level_height - visible_tiles_y);
   // draw visible tile map
   for (u64 x = 0; x < visible_tiles_x; x++) {
     rect_props_t rect_props = {
-      .rect = { 10., 10., .size = 100.},
+      .rect = { 10.f, 10.f, .size = 100.f},
       .color = { 0.f, 1.f, 0.f, 1.f }
     };
     for (u64 y = 0; y < visible_tiles_y; y++) {
@@ -89,9 +90,8 @@ void onupdate(window_t* this) {
       gfx_draw_rect(this, &tile_props);
     }
   }
-  console_log("context.player_x=%f", context.player_x);
-  console_log("context.player_y=%f", context.player_y);
-  console_log("delta_time=%f", delta_time);
+  elapsed += delta_time;
+
   // draw player
   rect_props_t player_props = {
     .rect = {
@@ -101,6 +101,19 @@ void onupdate(window_t* this) {
     },
     .color = { 1.f, 0.f, 0.f, 1.f }
   };
+  if (elapsed >= 0.1) {
+    elapsed = 0.;
+    console_log("player_props.rect.left=%f", player_props.rect.left);
+    console_log("player_props.rect.top=%f", player_props.rect.top);
+
+    console_log("context.player_x=%f", context.player_x);
+    console_log("context.player_y=%f", context.player_y);
+    console_log("context.camera_x=%f", context.camera_x);
+    console_log("context.camera_y=%f", context.camera_y);
+    console_log("offset_x=%f", offset_x);
+    console_log("offset_y=%f", offset_y);
+    console_log("delta_time=%f", delta_time);
+  }
   gfx_draw_rect(this, &player_props);
 }
 void onresize(window_t* this) {
