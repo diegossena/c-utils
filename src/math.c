@@ -2,6 +2,13 @@
 
 const u8 u64_bits_length = sizeof(u64) * 8; // 64
 
+f32 math_min_f32(f32 a, f32 b) { return math_min(a, b); }
+f32 math_max_f32(f32 a, f32 b) { return math_max(a, b); }
+f32 math_clamp_f32(f32 value, f32 min, f32 max) {
+  f32 higher = math_max(value, min);
+  return math_min(higher, max);
+}
+
 u64 math_next2pow(u64 number) {
   if (!number)
     return 1;

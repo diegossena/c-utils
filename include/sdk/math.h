@@ -8,5 +8,9 @@
 #define math_clamp(value, min, max) (math_min(math_max(value, min), max))
 #define math_abs(value) (value < 0 ? -(value) : value)
 
+f32 math_min_f32(f32, f32);
+f32 math_max_f32(f32, f32);
+f32 math_clamp_f32(f32 value, f32 min, f32 max);
+
 u64 math_next2pow(u64 number);
 u64 math_hash_jenkins(const byte* data, u64 size);

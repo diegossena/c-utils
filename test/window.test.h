@@ -58,10 +58,14 @@ void onupdate(window_t* this) {
   f32 offset_x = context.camera_x - (f32)visible_tiles_x / 2.f;
   f32 offset_y = context.camera_y - (f32)visible_tiles_y / 2.f;
   // clamp camera to game boudaries
-  i32 max_x_offset = context.level_width - visible_tiles_x;
-  i32 max_y_offset = context.level_height - visible_tiles_y;
-  offset_x = math_clamp(offset_x, 0.f, math_max(0.f, max_x_offset));
-  offset_y = math_clamp(offset_y, 0.f, math_max(0.f, max_y_offset));
+  offset_x = math_clamp_f32(
+    offset_x,
+    0.f, math_max_f32(0.f, context.level_width - visible_tiles_x)
+  );
+  offset_y = math_clamp_f32(
+    offset_y,
+    0.f, math_max_f32(0.f, context.level_height - visible_tiles_y)
+  );
   // Get offsets for smooth movement
   f32 tile_offset_x = (offset_x - (i32)offset_x) * tile_size;
   f32 tile_offset_y = (offset_y - (i32)offset_y) * tile_size;
