@@ -167,9 +167,9 @@ LRESULT window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
     case WM_TIMER: {
-      const FLOAT clearColor [] = { 1.0f, 1.0f, 1.0f, 1.0f };
+      const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
       ID3D11DeviceContext_ClearRenderTargetView(
-        this->device_context, this->backbuffer, clearColor
+        this->device_context, this->backbuffer, background_color
       );
       ID2D1RenderTarget_BeginDraw(this->d2_render_target);
       if (this->onupdate) {

@@ -82,6 +82,8 @@
     "ostream": "c",
     "ratio": "c",
     "tuple": "c",
-    "type_traits": "c"
+    "type_traits": "c",
+    "world.h": "c",
+    "player.h": "c"
   }
 }

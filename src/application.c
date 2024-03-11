@@ -25,6 +25,9 @@ void app_inicialize() {
 u64 cached = 0;
 
 i32 app_run() {
+  if (app_global.tasks.queue.next == 0) {
+    console_warn("app not inicialized");
+  }
   i64 i = 0;
   task_t* it = &app_global.tasks;
   while (app_global.tasks_count) {
