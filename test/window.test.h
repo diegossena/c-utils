@@ -51,15 +51,17 @@ void onupdate(window_t* this) {
   u16 window_width = window_get_screen_width(this);
   u16 window_height = window_get_screen_height(this);
   // level info
-  i32 tile_size = 50;
-  i32 visible_tiles_x = window_width / tile_size;
-  i32 visible_tiles_y = window_height / tile_size;
+  i32 tile_size = 32;
+  i32 visible_tiles_x = ((f32)window_width / tile_size) + .5f;
+  i32 visible_tiles_y = ((f32)window_height / tile_size) + .5f;
   // calculate top-leftmost visible tile
   f32 offset_x = context.camera_x - (f32)visible_tiles_x / 2.f;
   f32 offset_y = context.camera_y - (f32)visible_tiles_y / 2.f;
   // clamp camera to game boudaries
-  offset_x = math_clamp(offset_x, 0.f, context.level_width - visible_tiles_x);
-  offset_y = math_clamp(offset_y, 0.f, context.level_height - visible_tiles_y);
+  i32 max_x_offset = context.level_width - visible_tiles_x;
+  i32 max_y_offset = context.level_height - visible_tiles_y;
+  offset_x = math_clamp(offset_x, 0.f, math_max(0.f, max_x_offset));
+  offset_y = math_clamp(offset_y, 0.f, math_max(0.f, max_y_offset));
   // Get offsets for smooth movement
   f32 tile_offset_x = (offset_x - (i32)offset_x) * tile_size;
   f32 tile_offset_y = (offset_y - (i32)offset_y) * tile_size;
@@ -79,17 +81,6 @@ void onupdate(window_t* this) {
         },
         .color = {.a = 1.f }
       };
-      if (x == 0 && y == 0) {
-        if (elapsed >= 0.1) {
-          elapsed = 0.;
-          console_log("x=%d", x);
-          console_log("tile_size=%d", tile_size);
-          console_log("offset_x=%f", offset_x);
-          console_log("tile_props.rect.left=%f", tile_props.rect.left);
-          console_log("tile_props.rect.top=%f", tile_props.rect.top);
-        }
-      } else {
-      }
       switch (tile_id) {
         case '.': // Sky
           tile_props.color.r = 0.f;
@@ -116,6 +107,10 @@ void onupdate(window_t* this) {
     .color = { 1.f, 0.f, 0.f, 1.f }
   };
   gfx_draw_rect(this, &player_props);
+
+  if (elapsed >= 0.1) {
+    elapsed = 0;
+  }
 }
 void onresize(window_t* this) {
   u16 width = window_get_screen_width(this);

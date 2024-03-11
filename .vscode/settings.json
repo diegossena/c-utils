@@ -74,6 +74,14 @@
     "utility": "c",
     "random": "c",
     "map.h": "c",
-    "time.h": "c"
+    "time.h": "c",
+    "chrono": "c",
+    "limits": "c",
+    "optional": "c",
+    "istream": "c",
+    "ostream": "c",
+    "ratio": "c",
+    "tuple": "c",
+    "type_traits": "c"
   }
 }
