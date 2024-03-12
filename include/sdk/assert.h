@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sdk/types.h>
-#include <sdk/console.h>
+#include <sdk/console/console.h>
 
 // #if _MSC_VER
 // #include <_mingw.h>

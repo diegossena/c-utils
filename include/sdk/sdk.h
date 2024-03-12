@@ -3,31 +3,29 @@
 #include <sdk/types.h>
 
 #include <sdk/assert.h>
-#include <sdk/console.h>
+#include <sdk/error/error.h>
+#include <sdk/console/console.h>
 
-#include <sdk/string.h>
-#include <sdk/array.h>
-#include <sdk/map.h>
+#include <sdk/string/string.h>
+#include <sdk/array/array.h>
+#include <sdk/map/map.h>
 
-#include <sdk/date.h>
-#include <sdk/time.h>
-#include <sdk/math.h>
-#include <sdk/snowflake.h>
+#include <sdk/date/date.h>
+#include <sdk/time/time.h>
+#include <sdk/math/math.h>
+#include <sdk/snowflake/snowflake.h>
 
-#include <sdk/net.h>
-#include <sdk/net.tcp.h>
-#include <sdk/net.tcp.server.h>
-#include <sdk/net.tcp.client.h>
+#include <sdk/net/net.h>
+#include <sdk/net/net.tcp.h>
+#include <sdk/net/net.tcp.server.h>
+#include <sdk/net/net.tcp.client.h>
 
-#include <sdk/http.client.h>
-#include <sdk/http.server.h>
+#include <sdk/application/task.h>
+#include <sdk/application/application.h>
 
-#include <sdk/task.h>
-#include <sdk/application.h>
-
-#include <sdk/path.h>
-#include <sdk/process.h>
+#include <sdk/path/path.h>
+#include <sdk/process/process.h>
 
 #include <sdk/window/window.h>
-#include <sdk/window/gfx.h>
 #include <sdk/window/keyboard.h>
+#include <sdk/window/gfx.h>

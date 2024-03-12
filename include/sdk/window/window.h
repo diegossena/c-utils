@@ -6,11 +6,11 @@
 
 typedef struct window_t window_t;
 
-typedef void (*window_ev)(window_t* this);
-typedef void (*window_update_ev)(window_t* this);
-typedef void (*window_keyboard_ev)(window_t* this);
-typedef void (*window_ui_ev)(window_t* this);
-typedef void (*window_mouse_ev)(window_t* this);
+typedef void (*window_event_cb)(window_t* this);
+typedef void (*update_event_cb)(window_t* this);
+typedef void (*keyboard_event_cb)(window_t* this);
+typedef void (*ui_event_cb)(window_t* this);
+typedef void (*mouse_event_cb)(window_t* this);
 
 typedef enum window_flags {
   WINDOW_HIDDEN = 1,
@@ -24,20 +24,26 @@ typedef struct window_opt {
   u64 flags;
   void* context;
   // events
-  window_update_ev onupdate;
-  window_mouse_ev onmousemove;
-  window_mouse_ev onmousedown;
-  window_mouse_ev onmouseup;
-  window_keyboard_ev onkeydown;
-  window_keyboard_ev onkeyup;
-  window_keyboard_ev ondblclick;
-  window_ui_ev onresize;
-  window_ev oncreate;
-  window_ev onclose;
+  update_event_cb onupdate;
+  mouse_event_cb onmousemove;
+  mouse_event_cb onmousedown;
+  mouse_event_cb onmouseup;
+  keyboard_event_cb onkeydown;
+  keyboard_event_cb onkeyup;
+  keyboard_event_cb ondblclick;
+  ui_event_cb onresize;
+  window_event_cb oncreate;
+  window_event_cb onclose;
 } window_opt;
 
-void window_inicialize(window_opt*);
+void window_startup(application_t*, window_opt*);
+// getters
 void* window_get_context(window_t*);
+u16 window_get_width(window_t*);
+u16 window_get_height(window_t*);
+// application handlers
+void window_free(window_t*);
+void window_pooling();
 
-u16 window_get_screen_width(window_t*);
-u16 window_get_screen_height(window_t*);
+#include <sdk/window/window.win32.inl.h>
+#include <sdk/window/window.inl.h>

@@ -9,37 +9,21 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
 SET package_name=%1
 
 SET defines=
-SET compiler_flags=-g -std=gnu2x
+SET compiler_flags=-O3 -g -std=gnu2x
 SET include_flags=-Iinclude
-SET linker_flags=
-SET output_extension=exe
+SET linker_flags=-lws2_32 -ld3d11 -ld3dcompiler -ld2d1 -lDwrite -ldxguid -lole32 -lwindowscodecs
 :: get all c files on the package
+SET source_path=.\packages\%package_name%
 SET cFilenames=
-SET source_path=
-:: check if is a library
-IF "%package_name%" == "" (
-  SET source_path=.\src
-  SET include_flags=%include_flags%
-  SET linker_flags=%linker_flags% -lws2_32 -ld3d11 -ld3dcompiler -ld2d1 -lDwrite -ldxguid -lole32
-  :: -lcurl -lz -lssl -lcrypto -lnetsnmp -lcrypt32 -luser32 -lversion -lwldap32 -lws2_32 -lshlwapi -lmingw32 
-  set defines=%defines% -DSDK_LIB
-  SET output_extension=dll
-  SET compiler_flags=%compiler_flags% -shared -static
-  SET package_name=sdk
-) ELSE (
-  SET source_path=.\%package_name%
-  SET include_flags=%include_flags%
-  SET linker_flags=%linker_flags% -Lbin -lsdk
-)
 :: compile resource files
 FOR /R "%source_path%" %%f IN (*.rc) DO windres "%%f" -o "%%~dpnf.o"
 :: compile
 FOR /R "%source_path%" %%f IN (*.c *.o) DO CALL SET cFilenames=%%cFilenames%% "%%f"
-if EXIST .\bin\%package_name%.%output_extension% DEL .\bin\%package_name%.%output_extension%
+if EXIST .\bin\%package_name%.exe DEL .\bin\%package_name%.exe
 ECHO %package_name% compiling...
-gcc %compiler_flags%%cFilenames% -o ./bin/%package_name%.%output_extension% %defines% %include_flags% %linker_flags%
+gcc %compiler_flags%%cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
 IF %ERRORLEVEL% NEQ 0 (
-  ECHO gcc %compiler_flags%%cFilenames% -o ./bin/%package_name%.%output_extension% %defines% %include_flags% %linker_flags%
+  ECHO gcc %compiler_flags%%cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
   GOTO :EOF
 ) 
 :: Get elapsed time:
@@ -51,4 +35,4 @@ ECHO %package_name% compiled in %elapsed%ms
 :: clean
 FOR /R "%source_path%" %%f IN (*.o) DO del "%%~dpnf.o"
 :: execute
-IF %output_extension%==exe bin\%package_name%
+bin\%package_name%

@@ -2,7 +2,7 @@
 
 #include <sdk/types.h>
 
-typedef enum key_code {
+typedef enum key_code_t {
   MOUSE_LEFT = 0x01,
   MOUSE_RIGHT = 0x02,
   MOUSE_MIDDLE = 0x04,
@@ -50,7 +50,7 @@ typedef enum key_code {
   KEY_DOWN = 0x28,
   KEY_SELECT = 0x29,
   KEY_PRINT = 0x2A,
-  KEY_EXECUTE = 0x2B,
+  // KEY_EXECUTE = 0x2B,
   /** The Print Screen key. */
   KEY_PRINTSCREEN = 0x2C,
   /** The insert key. */
@@ -278,7 +278,9 @@ typedef enum key_code {
   KEY_RBRACKET = 0xDD,
 
   KEYS_MAX_KEYS = 255
-} key_code;
+} key_code_t;
 
 
-bool is_key_pressed(key_code key);
+bool keyboard_pressed(key_code_t key);
+
+#include <sdk/window/keyboard.win32.inl.h>

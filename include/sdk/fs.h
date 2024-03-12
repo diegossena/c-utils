@@ -16,5 +16,5 @@ typedef struct {
   u64 atim;
   u64 mtim;
   u64 ctim;
-  u64 birthtim;
+  u64 birthtime;
 } fs_stats;
