@@ -1,6 +1,5 @@
 #pragma once
 #include <sdk/types.h>
-#include <sdk/application/task.h>
 
 typedef struct application_t {
   task_t __tasks;

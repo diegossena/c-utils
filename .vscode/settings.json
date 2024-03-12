@@ -110,6 +110,6 @@
     "future": "c",
     "win32.h": "c",
     "window.inl.h": "c",
-    "application.inl.h": "c"
+    "task.inl.h": "c"
   }
 }

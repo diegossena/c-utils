@@ -56,6 +56,9 @@ void onupdate(window_t* this) {
       case 3: bitmap_props.rect.left += speed; break;
     }
   }
+  rect_set_size(&rect_props.rect, 100.f);
+  rect_set_size(&bitmap_props.rect, 100.f);
+  // render
   gfx_draw_text_cwstr(this, L"Hello World", &text_props);
   gfx_draw_rect(this, &rect_props);
   gfx_draw_ellipse(this, &ellipse_props);
@@ -69,7 +72,7 @@ void onresize(window_t* this) {
 }
 void onkeydown(window_t* this) {
   if (keyboard_pressed(KEY_C)) {
-    context.index = (context.index + 1) % 4;
+    context.index = (context.index + 1) % 3;
   }
 }
 void onkeyup(window_t* this) {}
@@ -79,8 +82,6 @@ void onmouseup(window_t* this) {}
 void ondblclick(window_t* this) {}
 void oncreate(window_t* this) {
   context.index = 0;
-  rect_set_size(&rect_props.rect, 100.f);
-  rect_set_size(&bitmap_props.rect, 100.f);
   // bitmap_props.image = gfx_image_new(this, L"1678136103504.jpg");
 }
 void onclose(window_t* this) {

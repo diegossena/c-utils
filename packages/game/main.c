@@ -24,7 +24,7 @@ i32 main() {
   application_t app;
   app_constructor(&app);
   window_opt options = {
-    .name = "Window",
+    .name = "Game Test",
     .width = 800,
     .height = 600,
     .x = 0,
