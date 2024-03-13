@@ -8,7 +8,7 @@
 #include <sdk/net/net.tcp.h>
 #endif
 #ifdef SDK_NET_TCP_SERVER_H
-#include <sdk/net/net.tcp.server.h>
+#include <sdk/net/tcp/server.h>
 #endif
 
 void app_constructor(application_t* this) {
