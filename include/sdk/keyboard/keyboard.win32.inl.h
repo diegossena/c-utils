@@ -2,7 +2,8 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/window/keyboard.h>
+#include <sdk/keyboard/keyboard.h>
+#include <windows.h>
 
 bool keyboard_pressed(key_code_t key) {
   return (GetAsyncKeyState(key) & 0x8000) != 0;

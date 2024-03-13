@@ -283,4 +283,4 @@ typedef enum key_code_t {
 
 bool keyboard_pressed(key_code_t key);
 
-#include <sdk/window/keyboard.win32.inl.h>
+#include <sdk/keyboard/keyboard.win32.inl.h>
