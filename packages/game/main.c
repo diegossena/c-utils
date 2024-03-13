@@ -4,7 +4,7 @@
 #include "world.h"
 #include "player.h"
 
-f32 last_update;
+f64 last_update;
 world_t world;
 player_t player;
 
@@ -20,7 +20,7 @@ void onresize(window_t* this) {
   world_on_resize(&world);
 }
 void onupdate(window_t* this) {
-  f32 now = time_absolute();
+  f64 now = time_absolute();
   f32 delta_time = now - last_update;
   last_update = now;
   player_update(&player, delta_time);
@@ -33,6 +33,7 @@ void onupdate(window_t* this) {
   if (frame_time >= 1.f) {
     console_log("frames=%d", frames);
     frame_time = 0;
+    frames = 0;
   }
 }
 
