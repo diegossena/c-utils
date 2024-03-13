@@ -36,9 +36,3 @@ typedef u16 wchar_t;
 #define MIN_I16 -32768
 
 #define PATH_MAX 260
-
-#ifdef SDK_LIB
-#define export __declspec(dllexport)
-#else
-#define export __declspec(dllimport)
-#endif
