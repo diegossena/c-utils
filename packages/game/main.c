@@ -1,4 +1,4 @@
-#include <sdk/sdk.h>
+#include <sdk/window/window.h>
 
 #include "time.h"
 #include "world.h"
@@ -9,7 +9,7 @@ void oncreate(window_t* this) {
   world_start();
   player_start();
 }
-void onreisze(window_t* this) {
+void onresize(window_t* this) {
   world_on_resize(this);
 }
 void onupdate(window_t* this) {
@@ -23,7 +23,7 @@ void onupdate(window_t* this) {
 i32 main() {
   application_t app;
   app_constructor(&app);
-  window_opt options = {
+  window_options_t options = {
     .name = "Game Test",
     .width = 800,
     .height = 600,
@@ -31,7 +31,7 @@ i32 main() {
     .y = 0,
     .oncreate = oncreate,
     .onupdate = onupdate,
-    .onresize = onreisze
+    .onresize = onresize
   };
   window_startup(&app, &options);
   return app_run(&app);

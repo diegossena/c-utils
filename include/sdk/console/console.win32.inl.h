@@ -1,13 +1,9 @@
-#include <sdk/platform/platform.h>
+#include <sdk/platform.h>
 
 #if PLATFORM_WINDOWS
 
 #include <sdk/console/console.h>
-/*
-GetStdHandle, GetConsoleMode, SetConsoleMode, DWORD, HANDLE, OSVERSIONINFO
-ENABLE_VIRTUAL_TERMINAL_PROCESSING, STD_OUTPUT_HANDLE
-*/
-#include <sdk/platform/win32.h>
+#include <windows.h>
 
 bool console_has_ansi = false;
 

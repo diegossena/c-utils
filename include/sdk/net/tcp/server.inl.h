@@ -1,5 +1,12 @@
-#include <sdk/net/net.tcp.client.h>
+#include <sdk/net/net.tcp.server.h>
 
+net_tcp_server_t* net_tcp_server_new(application_t* app) {
+  net_tcp_server_t* this = memory_alloc0(sizeof(net_tcp_server_t));
+  this->app = app;
+  this->task.type = TASK_TCP_SERVER_CLOSING;
+  task_register(this, app);
+  return this;
+}
 void net_tcp_client_write(net_tcp_client_t* this, const byte* chunk, u64 length, net_tcp_client_on_write_cb callback) {
   this->task.type = TASK_TCP_CLIENT_WRITING;
   this->stream.writable = memory_alloc(length);

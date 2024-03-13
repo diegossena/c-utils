@@ -1,9 +1,8 @@
-#include <sdk/platform/platform.h>
+#include <sdk/platform.h>
 
 #if PLATFORM_WINDOWS
 
 #include <sdk/process/process.h>
-#include <sdk/platform/win32.h>
 
 void process_execpath(string_t* this) {
   __string_mutate(this, MAX_PATH);

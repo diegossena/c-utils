@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sdk/sdk.h>
+#include <sdk/time/time.h>
 
 f32 delta_time;
 

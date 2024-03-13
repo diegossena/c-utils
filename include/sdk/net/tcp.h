@@ -1,7 +1,11 @@
-#pragma once
+#ifndef SDK_NET_TCP_H
+#define SDK_NET_TCP_H
+
+#include <sdk/net/net.h>
 #include <sdk/error/error.h>
-#include <sdk/application/task.h>
 #include <sdk/stream.h>
+#include <sdk/application/application.h>
+
 typedef struct application_t application_t;
 
 /** @brief Represents a TCP socket.
@@ -45,5 +49,7 @@ void net_tcp_connect_handle(net_tcp_t*);
 void net_tcp_read_handle(net_tcp_t*);
 void net_tcp_write_handle(net_tcp_t*);
 
-#include <sdk/net/net.tcp.inl.h>
-#include <sdk/net/net.tcp.win32.inl.h>
+#include <sdk/net/tcp.win32.inl.h>
+#include <sdk/net/tcp.inl.h>
+
+#endif

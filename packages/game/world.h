@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sdk/sdk.h>
+#include <sdk/window/window.h>
 
 i32 tile_size = 32;
 
@@ -75,11 +75,6 @@ void world_render(window_t* window) {
   f32 tile_world_offset_y = (world_offset_y - (i32)world_offset_y) * tile_size;
   // draw visible tile map
   for (i32 x = -1; x < visible_tiles_x + 1; x++) {
-    rect_props_t rect_props = {
-      .rect = { 10.f, 10.f },
-      .color = { 0.f, 1.f, 0.f, 1.f }
-    };
-    rect_set_size(&rect_props.rect, 100);
     for (i32 y = -1; y < visible_tiles_y + 1; y++) {
       char tile_id = get_tile(x + world_offset_x, y + world_offset_y);
       rect_props_t tile_props = {

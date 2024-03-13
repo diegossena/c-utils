@@ -1,9 +1,8 @@
-#include <sdk/platform/platform.h>
+#include <sdk/platform.h>
 
 #if PLATFORM_WINDOWS
 
 #include <sdk/path/path.h>
-#include <sdk/platform/win32.h>
 
 static const char path_sep = '\\';
 

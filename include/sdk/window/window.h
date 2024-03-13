@@ -1,10 +1,16 @@
-#pragma once
+#ifndef SDK_WINDOW_H
+#define SDK_WINDOW_H
 
 #include <sdk/types.h>
 
-#define  WINDOW_POS_CENTERED MAX_U64
+#define WINDOW_POS_CENTERED MAX_U64
+#define gfx_draw_text_cwstr(this, text, props) { \
+  const wchar_t __text[] = text; \
+  gfx_draw_text(this, text, sizeof(text) / sizeof(wchar_t) - 1, props); \
+}
 
-typedef struct window_t window_t;
+typedef struct application_t application_t;
+typedef struct window_t window_t; // defined based on platform
 
 typedef void (*window_event_cb)(window_t* this);
 typedef void (*update_event_cb)(window_t* this);
@@ -12,13 +18,20 @@ typedef void (*keyboard_event_cb)(window_t* this);
 typedef void (*ui_event_cb)(window_t* this);
 typedef void (*mouse_event_cb)(window_t* this);
 
-typedef enum window_flags {
+typedef enum window_flags_t {
   WINDOW_HIDDEN = 1,
   WINDOW_BORDELESS = 2,
   WINDOW_RESIZABLE = 4
-} window_flags;
+} window_flags_t;
+typedef enum font_weight_t {
+  FONT_WEIGHT_NORMAL,
+  FONT_WEIGHT_BOLD
+} font_weight_t;
+typedef enum font_style_t {
+  FONT_STYLE_NORMAL
+} font_style_t;
 
-typedef struct window_opt {
+typedef struct window_options_t {
   const char* name;
   i32 x, y, width, height;
   u64 flags;
@@ -34,16 +47,59 @@ typedef struct window_opt {
   ui_event_cb onresize;
   window_event_cb oncreate;
   window_event_cb onclose;
-} window_opt;
+} window_options_t;
+/**
+ * top left corner [0, 0]
+ * bottom right corner [window.height, window.width]
+ */
+typedef struct gfx_rect_t { f32 left, top, right, bottom; } gfx_rect_t;
+typedef struct gfx_color_t { f32 r, g, b, a; } gfx_color_t;
+typedef struct bitmap_t bitmap_t; // defined based on platform
+typedef struct text_props_t {
+  const wchar_t* family;
+  font_weight_t weight;
+  font_style_t style;
+  float size;
+  gfx_rect_t rect;
+  gfx_color_t color;
+} text_props_t;
 
-void window_startup(application_t*, window_opt*);
-// getters
+typedef struct rect_props_t {
+  gfx_rect_t rect;
+  gfx_color_t color;
+} rect_props_t;
+typedef struct ellipse_props_t {
+  float x, y;
+  float radius_x, radius_y;
+  gfx_color_t color;
+} ellipse_props_t;
+typedef struct bitmap_props_t {
+  gfx_rect_t rect;
+  bitmap_t* image;
+} bitmap_props_t;
+
+void window_startup(application_t*, window_options_t*);
+
 void* window_get_context(window_t*);
 u16 window_get_width(window_t*);
 u16 window_get_height(window_t*);
-// application handlers
+
+void rect_set_width(gfx_rect_t*, f32);
+void rect_set_height(gfx_rect_t*, f32);
+void rect_set_size(gfx_rect_t*, f32);
+
+void gfx_draw_text(window_t*, const wchar_t* text, u64 length, text_props_t*);
+void gfx_draw_rect(window_t*, rect_props_t*);
+void gfx_draw_ellipse(window_t*, ellipse_props_t*);
+void gfx_draw_bitmap(window_t*, bitmap_props_t*);
+
+void gfx_bitmap_constructor(bitmap_t*, window_t*, const wchar_t* path);
+void gfx_bitmap_deconstructor(bitmap_t*);
+
 void window_free(window_t*);
 void window_pooling();
 
 #include <sdk/window/window.win32.inl.h>
 #include <sdk/window/window.inl.h>
+
+#endif

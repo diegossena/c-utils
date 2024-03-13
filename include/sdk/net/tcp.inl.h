@@ -1,6 +1,5 @@
-#include <sdk/net/net.tcp.h>
+#include <sdk/net/tcp.h>
 #include <sdk/memory/memory.h>
-#include <sdk/application/application.h>
 
 net_tcp_t* net_tcp_new(application_t* app) {
   net_tcp_t* this = memory_alloc0(sizeof(net_tcp_t));

@@ -1,10 +1,9 @@
-#include <sdk/platform/platform.h>
+#include <sdk/platform.h>
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/net/net.tcp.h>
-// closesocket, shutdown, socket
-#include <winsock2.h>
+#include <sdk/net/tcp.h>
+#include <sdk/date/date.h>
 
 void net_tcp_free(net_tcp_t* this) {
   shutdown(this->__socket, FD_WRITE | FD_READ);

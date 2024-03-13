@@ -110,6 +110,9 @@
     "future": "c",
     "win32.h": "c",
     "window.inl.h": "c",
-    "task.inl.h": "c"
+    "task.inl.h": "c",
+    "array.h": "c",
+    "tcp.server.win32.inl.h": "c",
+    "time.win32.inl.h": "c"
   }
 }

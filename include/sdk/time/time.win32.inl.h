@@ -1,9 +1,9 @@
-#include <sdk/platform/platform.h>
+#include <sdk/platform.h>
 
 #if PLATFORM_WINDOWS
 
 #include <sdk/time/time.h>
-#include <sdk/platform/win32.h>
+#include <windows.h>
 
 f64 __time_clock_frequency;
 LARGE_INTEGER __time_start;
