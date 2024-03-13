@@ -2,7 +2,7 @@
 #include <sdk/memory/memory.h>
 #include <sdk/assert.h>
 #ifdef SDK_WINDOW_H
-#include <sdk/window/window.h>
+#include <sdk/window.h>
 #endif
 #ifdef SDK_NET_TCP_H
 #include <sdk/net/net.tcp.h>

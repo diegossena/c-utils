@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sdk/window/window.h>
+#include <sdk/window.h>
 
 i32 tile_size = 32;
 

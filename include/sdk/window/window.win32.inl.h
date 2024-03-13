@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/window/window.h>
+#include <sdk/window.h>
 #include <sdk/application/application.h>
 #include <sdk/error/error.h>
 #include <windows.h>

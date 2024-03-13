@@ -1,4 +1,4 @@
-#include <sdk/window/window.h>
+#include <sdk/window.h>
 
 #include "time.h"
 #include "world.h"
