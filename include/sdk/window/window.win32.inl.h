@@ -5,8 +5,6 @@
 #include <sdk/window.h>
 #include <sdk/application/application.h>
 #include <sdk/error/error.h>
-#include <windows.h>
-#include <shlwapi.h>
 #include <wincodec.h>
 #define COBJMACROS 1
 #include <d3d11.h>

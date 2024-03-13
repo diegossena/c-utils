@@ -11,7 +11,8 @@ SET package_name=%1
 SET defines=
 SET compiler_flags=-O3 -g -std=gnu2x
 SET include_flags=-Iinclude
-SET linker_flags=-lws2_32 -ld3d11 -ld3dcompiler -ld2d1 -lDwrite -ldxguid -lole32 -lwindowscodecs
+SET linker_flags=-ld3d11 -ld2d1 -lDwrite -ld3dcompiler -lole32 -lwindowscodecs -ldxguid
+::-lws2_32       
 :: get all c files on the package
 SET source_path=.\packages\%package_name%
 SET cFilenames=
