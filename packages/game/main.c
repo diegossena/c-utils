@@ -4,11 +4,12 @@
 #include "world.h"
 #include "player.h"
 
+f32 last_update;
 world_t world;
 player_t player;
 
 u64 frames = 0;
-f64 last_update;
+f32 frame_time = 0;
 
 void oncreate(window_t* this) {
   world_start(&world, this);
@@ -19,7 +20,7 @@ void onresize(window_t* this) {
   world_on_resize(&world);
 }
 void onupdate(window_t* this) {
-  f64 now = time_absolute();
+  f32 now = time_absolute();
   f32 delta_time = now - last_update;
   last_update = now;
   player_update(&player, delta_time);
@@ -27,6 +28,12 @@ void onupdate(window_t* this) {
   world.camera_y = player.y;
   world_render(&world);
   player_render(&player);
+  ++frames;
+  frame_time += delta_time;
+  if (frame_time >= 1.f) {
+    console_log("frames=%d", frames);
+    frame_time = 0;
+  }
 }
 
 i32 main() {
