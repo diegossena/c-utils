@@ -2,8 +2,6 @@
 
 #include <sdk/types.h>
 
-#define error(syscall, code) error_last = code; _error(syscall, error_last); 
-
 typedef enum error_code {
   ERR_MIN = MIN_I16,
   ERR_INVALID_URL,
@@ -65,6 +63,6 @@ if(result < 0) {
 */
 static error_code error_last = 0;
 
-void _error(const char* message, error_code);
+void error(const char* message, error_code);
 
 #include <sdk/error/error.inl.h>

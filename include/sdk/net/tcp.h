@@ -2,9 +2,9 @@
 #define SDK_NET_TCP_H
 
 #include <sdk/net/net.h>
-#include <sdk/error/error.h>
+#include <sdk/error.h>
 #include <sdk/stream.h>
-#include <sdk/application/application.h>
+#include <sdk/application.h>
 
 typedef struct application_t application_t;
 

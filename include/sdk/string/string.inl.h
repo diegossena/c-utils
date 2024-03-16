@@ -1,6 +1,6 @@
-#include <sdk/string/string.h>
-#include <sdk/memory/memory.h>
-#include <sdk/math/math.h>
+#include <sdk/string.h>
+#include <sdk/memory.h>
+#include <sdk/math.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -28,7 +28,6 @@ void string_constructor(string_t* this) {
 }
 void string_deconstructor(string_t* this) {
   memory_free(this->__data);
-  memory_free(this);
 }
 
 const char* string_cstr(const string_t* this) {

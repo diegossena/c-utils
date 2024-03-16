@@ -1,5 +1,7 @@
-#include <sdk/math/math.h>
+#include <sdk/math.h>
 
+/** @brief An approximate representation of PI. */
+#define K_PI 3.14159265358979323846f
 
 f32 math_min_f32(f32 a, f32 b) { return math_min(a, b); }
 f32 math_max_f32(f32 a, f32 b) { return math_max(a, b); }

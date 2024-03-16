@@ -94,7 +94,7 @@ void gfx_draw_ellipse(window_t*, ellipse_props_t*);
 void gfx_draw_bitmap(window_t*, bitmap_props_t*);
 
 void gfx_bitmap_constructor(bitmap_t*, window_t*, const wchar_t* path);
-void gfx_bitmap_deconstructor(bitmap_t*);
+void gfx_bitmap_free(bitmap_t*);
 
 void window_free(window_t*);
 void window_pooling();

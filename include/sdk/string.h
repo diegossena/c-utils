@@ -1,6 +1,6 @@
 #pragma once
 #include <sdk/types.h>
-#include <sdk/error/error.h>
+#include <sdk/error.h>
 
 #define SMALL_STRING_SIZE 15
 

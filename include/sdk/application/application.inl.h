@@ -1,5 +1,5 @@
-#include <sdk/application/application.h>
-#include <sdk/memory/memory.h>
+#include <sdk/application.h>
+#include <sdk/memory.h>
 #include <sdk/assert.h>
 #ifdef SDK_WINDOW_H
 #include <sdk/window.h>

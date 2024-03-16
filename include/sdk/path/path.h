@@ -1,6 +1,8 @@
 #pragma once
 
-#include <sdk/string/string.h>
+#include <sdk/string.h>
+
+#define PATH_MAX 260
 
 #define path_join_cstr(this, cstr) {     \
   const char ptr[] = cstr;               \

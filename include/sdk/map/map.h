@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sdk/types.h>
-#include <sdk/math/math.h>
+#include <sdk/math.h>
 
 #define map_hash(data) math_jenkins_hash(data, sizeof(data))
 

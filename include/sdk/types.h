@@ -28,11 +28,37 @@ typedef u8 byte;
 
 typedef u16 wchar_t;
 
-#define MAX_U64 (((u64)-1) / sizeof(u64))
-#define MAX_I64 (((i64)-1) / sizeof(i64))
-#define MAX_I32 2147483647
-#define MIN_I32 (-2147483647 - 1)
 #define MAX_I16 32767
 #define MIN_I16 -32768
+#define MAX_U16 0xffffU
+#define MAX_I32 2147483647L
+#define MIN_I32 (-MAX_I32 - 1)
+#define MAX_U32 0xffffffffUL
+#define MAX_U64 0xffffffffffffffffull
+#define MAX_I64 9223372036854775807ll
+#define MIN_I64 (-MAX_I64 - 1)
+#define MAX_F32 3.40282e+38F
+#define MIN_F32 -MAX_F32
 
-#define PATH_MAX 260
+// Inlining
+#if defined(__clang__) || defined(__gcc__)
+/** @brief Inline qualifier */
+#define INLINE __attribute__((always_inline)) inline
+
+/** @brief No-inline qualifier */
+#define NO_INLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+
+/** @brief Inline qualifier */
+#define INLINE __forceinline
+
+/** @brief No-inline qualifier */
+#define NO_INLINE __declspec(noinline)
+#else
+
+/** @brief Inline qualifier */
+#define INLINE static inline
+
+/** @brief No-inline qualifier */
+#define NO_INLINE
+#endif

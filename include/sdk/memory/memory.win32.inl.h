@@ -2,8 +2,8 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/memory/memory.h>
-#include <sdk/error/error.h>
+#include <sdk/memory.h>
+#include <sdk/error.h>
 // GetProcessHeap, HeapReAlloc, HeapAlloc, HEAP_ZERO_MEMORY
 #include <heapapi.h>
 

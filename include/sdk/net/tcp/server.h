@@ -2,7 +2,7 @@
 #define SDK_NET_TCP_SERVER_H
 
 #include <sdk/net/tcp.h>
-#include <sdk/error/error.h>
+#include <sdk/error.h>
 
 typedef struct net_tcp_client_t net_tcp_client_t;
 

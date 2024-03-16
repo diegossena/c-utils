@@ -3,7 +3,7 @@
 #if PLATFORM_WINDOWS
 
 #include <sdk/net/net.h>
-#include <sdk/error/error.h>
+#include <sdk/error.h>
 #include <winsock2.h>
 
 static bool __net_inicialized = false;

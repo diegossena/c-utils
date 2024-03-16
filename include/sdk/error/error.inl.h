@@ -1,4 +1,4 @@
-#include <sdk/error/error.h>
+#include <sdk/error.h>
 #include <sdk/console/console.h>
 
 const char* error_code_cstr(i64 code) {
@@ -83,10 +83,11 @@ const char* error_code_cstr(i64 code) {
   }
 }
 
-void _error(const char* message, error_code code) {
+void error(const char* message, error_code code) {
   const char* error_str = error_code_cstr(code);
+  error_last = code;
   console_error(
-    "%sError:%s %s %x %s",
-    CONSOLE_FORE_RED, CONSOLE_RESET, error_str, code, message
+    CONSOLE_FORE_RED "Error:" CONSOLE_RESET " %s %x %s",
+    error_str, code, message
   );
 }

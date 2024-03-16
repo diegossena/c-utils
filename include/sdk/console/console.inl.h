@@ -1,5 +1,5 @@
 #include <sdk/console/console.h>
-#include <sdk/string/string.h>
+#include <sdk/string.h>
 // __builtin_va_list, va_start, va_end
 #include <stdarg.h>
 

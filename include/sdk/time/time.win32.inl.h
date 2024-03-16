@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/time/time.h>
+#include <sdk/time.h>
 #include <windows.h>
 
 f64 __time_clock_frequency;

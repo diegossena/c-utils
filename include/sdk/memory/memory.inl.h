@@ -1,4 +1,4 @@
-#include <sdk/memory/memory.h>
+#include <sdk/memory.h>
 
 void* memory_fill(void* block, byte value, u64 size) {
   u8* c = (u8*)block;

@@ -3,8 +3,8 @@
 #if PLATFORM_WINDOWS
 
 #include <sdk/window.h>
-#include <sdk/application/application.h>
-#include <sdk/error/error.h>
+#include <sdk/application.h>
+#include <sdk/error.h>
 #include <wincodec.h>
 #define COBJMACROS 1
 #include <d3d11.h>
@@ -361,74 +361,6 @@ void window_pooling() {
   }
 }
 
-void shader_load_fill(window_t* window) {
-  if (window->input_layout) {
-    ID3D11InputLayout_Release(window->input_layout);
-    ID3D11VertexShader_Release(window->vertex_shader);
-    ID3D11PixelShader_Release(window->pixel_shader);
-  }
-  ID3DBlob* blob;
-  HRESULT result;
-  wchar_t path[MAX_PATH] = {};
-  u64 path_length = GetModuleFileNameW(NULL, path, MAX_PATH);
-  wpath_dirname(path, path_length);
-  // layout
-  D3D11_INPUT_ELEMENT_DESC ied [] = {
-    {"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    {"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
-  };
-  // vertex_shader
-  wpath_join_cwstr(path, path_length, L"vs_fill.cso");
-  result = D3DReadFileToBlob(path, &blob);
-  if (result != 0) {
-    error("D3DReadFileToBlob::vs_fill.cso", result);
-    return;
-  }
-  result = ID3D11Device_CreateVertexShader(
-    window->device, ID3D10Blob_GetBufferPointer(blob),
-    ID3D10Blob_GetBufferSize(blob), 0, &window->vertex_shader
-  );
-  if (result != S_OK) {
-    error("CreateVertexShader::fill", result);
-    goto vertex_shader_free;
-  }
-  // input_layout
-  result = ID3D11Device_CreateInputLayout(
-    window->device, ied, 2, ID3D10Blob_GetBufferPointer(blob),
-    ID3D10Blob_GetBufferSize(blob), &window->input_layout
-  );
-  if (result != S_OK) {
-    error("CreateInputLayout", result);
-    goto input_layout_free;
-  }
-  wpath_dirname(path, path_length);
-  wpath_join_cwstr(path, path_length, L"ps_fill.cso");
-  ID3D10Blob_Release(blob);
-  result = D3DReadFileToBlob(path, &blob);
-  if (result != 0) {
-    error("D3DReadFileToBlob::ps_fill.cso", result);
-    goto pixel_shader_free;
-  }
-  result = ID3D11Device_CreatePixelShader(
-    window->device, ID3D10Blob_GetBufferPointer(blob),
-    ID3D10Blob_GetBufferSize(blob), 0, &window->pixel_shader
-  );
-  if (result != S_OK) {
-    error("ID3D11Device_CreatePixelShader::fill", result);
-    goto pixel_shader_free;
-  }
-  return;
-pixel_shader_free:
-  ID3D11PixelShader_Release(window->pixel_shader);
-  window->pixel_shader = 0;
-input_layout_free:
-  ID3D11InputLayout_Release(window->input_layout);
-  window->input_layout = 0;
-vertex_shader_free:
-  ID3D11VertexShader_Release(window->vertex_shader);
-  window->vertex_shader = 0;
-  ID3D10Blob_Release(blob);
-}
 void gfx_draw_text(window_t* this, const wchar_t* text, u64 length, text_props_t* props) {
   IDWriteTextFormat* text_format;
   ID2D1SolidColorBrush* brush;
@@ -588,7 +520,7 @@ decoder_free:
 wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
 }
-void gfx_bitmap_deconstructor(bitmap_t* this) {
+void gfx_bitmap_free(bitmap_t* this) {
   ID2D1Bitmap_Release((ID2D1Bitmap*)this);
 }
 void gfx_draw_bitmap(window_t* this, bitmap_props_t* props) {
@@ -598,6 +530,75 @@ void gfx_draw_bitmap(window_t* this, bitmap_props_t* props) {
     D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, null
   );
 }
+
+// void shader_load_fill(window_t* window) {
+//   if (window->input_layout) {
+//     ID3D11InputLayout_Release(window->input_layout);
+//     ID3D11VertexShader_Release(window->vertex_shader);
+//     ID3D11PixelShader_Release(window->pixel_shader);
+//   }
+//   ID3DBlob* blob;
+//   HRESULT result;
+//   wchar_t path[MAX_PATH] = {};
+//   u64 path_length = GetModuleFileNameW(NULL, path, MAX_PATH);
+//   wpath_dirname(path, path_length);
+//   // layout
+//   D3D11_INPUT_ELEMENT_DESC ied [] = {
+//     {"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+//     {"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+//   };
+//   // vertex_shader
+//   wpath_join_cwstr(path, path_length, L"vs_fill.cso");
+//   result = D3DReadFileToBlob(path, &blob);
+//   if (result != 0) {
+//     error("D3DReadFileToBlob::vs_fill.cso", result);
+//     return;
+//   }
+//   result = ID3D11Device_CreateVertexShader(
+//     window->device, ID3D10Blob_GetBufferPointer(blob),
+//     ID3D10Blob_GetBufferSize(blob), 0, &window->vertex_shader
+//   );
+//   if (result != S_OK) {
+//     error("CreateVertexShader::fill", result);
+//     goto vertex_shader_free;
+//   }
+//   // input_layout
+//   result = ID3D11Device_CreateInputLayout(
+//     window->device, ied, 2, ID3D10Blob_GetBufferPointer(blob),
+//     ID3D10Blob_GetBufferSize(blob), &window->input_layout
+//   );
+//   if (result != S_OK) {
+//     error("CreateInputLayout", result);
+//     goto input_layout_free;
+//   }
+//   wpath_dirname(path, path_length);
+//   wpath_join_cwstr(path, path_length, L"ps_fill.cso");
+//   ID3D10Blob_Release(blob);
+//   result = D3DReadFileToBlob(path, &blob);
+//   if (result != 0) {
+//     error("D3DReadFileToBlob::ps_fill.cso", result);
+//     goto pixel_shader_free;
+//   }
+//   result = ID3D11Device_CreatePixelShader(
+//     window->device, ID3D10Blob_GetBufferPointer(blob),
+//     ID3D10Blob_GetBufferSize(blob), 0, &window->pixel_shader
+//   );
+//   if (result != S_OK) {
+//     error("ID3D11Device_CreatePixelShader::fill", result);
+//     goto pixel_shader_free;
+//   }
+//   return;
+// pixel_shader_free:
+//   ID3D11PixelShader_Release(window->pixel_shader);
+//   window->pixel_shader = 0;
+// input_layout_free:
+//   ID3D11InputLayout_Release(window->input_layout);
+//   window->input_layout = 0;
+// vertex_shader_free:
+//   ID3D11VertexShader_Release(window->vertex_shader);
+//   window->vertex_shader = 0;
+//   ID3D10Blob_Release(blob);
+// }
 
 #undef wpath_dirname
 #undef wpath_join
