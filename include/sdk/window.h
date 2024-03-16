@@ -2,12 +2,20 @@
 #define SDK_WINDOW_H
 
 #include <sdk/types.h>
+#include <sdk/math/geometry_2d.h>
 
 #define WINDOW_POS_CENTERED MAX_U64
 #define gfx_draw_text_cwstr(this, text, props) { \
   const wchar_t __text[] = text; \
   gfx_draw_text(this, text, sizeof(text) / sizeof(wchar_t) - 1, props); \
 }
+#define COLOR_BLACK (gfx_color_t){ 0.f, 0.f, 0.f, 1.f }
+#define COLOR_RED (gfx_color_t){ 1.f, 0.f, 0.f, 1.f }
+#define COLOR_GREEN (gfx_color_t){ 0.f, 1.f, 0.f, 1.f }
+#define COLOR_BLUE (gfx_color_t){ 0.f, 0.f, 1.f, 1.f }
+#define COLOR_CYAN (gfx_color_t){ 0.f, 1.f, 1.f, 1.f }
+#define COLOR_YELLOW (gfx_color_t){ 1.f, 1.f, 0.f, 1.f }
+#define COLOR_ORANGE (gfx_color_t){ 1.f, .4f, 0.f, 1.f }
 
 typedef struct application_t application_t;
 typedef struct window_t window_t; // defined based on platform
@@ -48,11 +56,6 @@ typedef struct window_options_t {
   window_event_cb oncreate;
   window_event_cb onclose;
 } window_options_t;
-/**
- * top left corner [0, 0]
- * bottom right corner [window.height, window.width]
- */
-typedef struct gfx_rect_t { f32 left, top, right, bottom; } gfx_rect_t;
 typedef struct gfx_color_t { f32 r, g, b, a; } gfx_color_t;
 typedef struct bitmap_t bitmap_t; // defined based on platform
 typedef struct text_props_t {
@@ -60,12 +63,12 @@ typedef struct text_props_t {
   font_weight_t weight;
   font_style_t style;
   float size;
-  gfx_rect_t rect;
+  rect_t rect;
   gfx_color_t color;
 } text_props_t;
 
 typedef struct rect_props_t {
-  gfx_rect_t rect;
+  rect_t rect;
   gfx_color_t color;
 } rect_props_t;
 typedef struct ellipse_props_t {
@@ -74,7 +77,7 @@ typedef struct ellipse_props_t {
   gfx_color_t color;
 } ellipse_props_t;
 typedef struct bitmap_props_t {
-  gfx_rect_t rect;
+  rect_t rect;
   bitmap_t* image;
 } bitmap_props_t;
 
@@ -83,10 +86,6 @@ void window_startup(application_t*, window_options_t*);
 void* window_get_context(window_t*);
 u16 window_get_width(window_t*);
 u16 window_get_height(window_t*);
-
-void rect_set_width(gfx_rect_t*, f32);
-void rect_set_height(gfx_rect_t*, f32);
-void rect_set_size(gfx_rect_t*, f32);
 
 void gfx_draw_text(window_t*, const wchar_t* text, u64 length, text_props_t*);
 void gfx_draw_rect(window_t*, rect_props_t*);

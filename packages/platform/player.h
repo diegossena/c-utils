@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sdk/window.h>
-#include <sdk/keyboard/keyboard.h>
+#include <sdk/keyboard.h>
 
 #include "world.h"
 

@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/keyboard/keyboard.h>
+#include <sdk/keyboard.h>
 #include <windows.h>
 
 bool keyboard_pressed(key_code_t key) {
