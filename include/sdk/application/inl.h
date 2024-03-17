@@ -12,20 +12,17 @@
 #endif
 
 void app_constructor(application_t* this) {
-  this->__tasks.type = TASK_MAIN;
-  this->__tasks.queue.next = (queue_t*)&this->__tasks;
-  this->__tasks.queue.prev = (queue_t*)&this->__tasks;
+  this->__tasks.next = &this->__tasks;
+  this->__tasks.prev = &this->__tasks;
+  console_log("constructor=%d", &this->__tasks);
 }
 
 i32 app_run(application_t* this) {
-  task_t* it = (task_t*)this->__tasks.queue.next;
-  while (true) {
+  task_t* it = (task_t*)this->__tasks.next;
+  console_log("it=%d, tasks=%d", it, &this->__tasks);
+  while ((queue_t*)it != ((queue_t*)it)->next) {
     task_t* next = (task_t*)it->queue.next;
     switch (it->type) {
-      case TASK_MAIN:
-        if (&it->queue == it->queue.next)
-          return 0;
-        break;
 #ifdef SDK_WINDOW_H
       case TASK_WINDOW:
         window_pooling();

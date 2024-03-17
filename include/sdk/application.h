@@ -1,12 +1,11 @@
 #pragma once
 #include <sdk/types.h>
-#include <sdk/queue/queue.h>
+#include <sdk/queue.h>
 
 #define task_register(this, app) queue_push((queue_t*)&app->__tasks, (queue_t*)this)
 #define task_unregister(this) queue_remove((queue_t*)this)
 
 typedef enum task_type {
-  TASK_MAIN,
 #ifdef SDK_WINDOW_H
   TASK_WINDOW,
 #endif
@@ -31,7 +30,7 @@ typedef struct task_t {
 } task_t;
 
 typedef struct application_t {
-  task_t __tasks;
+  queue_t __tasks;
 } application_t;
 
 typedef void (*task_handle)();
@@ -42,4 +41,4 @@ void app_constructor(application_t*);
 // run main loop and free on exit
 i32 app_run(application_t*);
 
-#include <sdk/application/application.inl.h>
+#include <sdk/application/inl.h>

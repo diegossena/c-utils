@@ -83,7 +83,8 @@ typedef struct bitmap_props_t {
 
 void window_startup(application_t*, window_options_t*);
 
-void* window_get_context(window_t*);
+INLINE void* window_get_context(window_t*);
+INLINE void window_set_context(window_t*, void*);
 u16 window_get_width(window_t*);
 u16 window_get_height(window_t*);
 

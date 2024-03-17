@@ -11,4 +11,4 @@ typedef struct queue_t {
 void queue_push(queue_t* head, queue_t*);
 void queue_remove(queue_t*);
 
-#include <sdk/queue/queue.inl.h>
+#include <sdk/queue/inl.h>
