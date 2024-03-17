@@ -35,12 +35,14 @@ void onupdate(window_t* this) {
   overlap_2d_t overlap = overlap_rect_rect(&rect.rect, &rect_.rect);
   if (overlap.distance) {
     f32 force = overlap.distance / 2;
-    vector2d_t movement = overlap.axis;
-    vector2d_mul_scalar(&movement, force);
-    vector2d_sum(&rect.rect.left_top, &movement);
-    movement = overlap.axis;
-    vector2d_mul_scalar(&movement, -force);
-    vector2d_sum(&rect_.rect.left_top, &movement);
+    rect.rect.left_top = vector2d_sum(
+      rect.rect.left_top,
+      vector2d_mul_scalar(overlap.axis, force)
+    );
+    rect_.rect.left_top = vector2d_sum(
+      rect_.rect.left_top,
+      vector2d_mul_scalar(overlap.axis, -force)
+    );
   }
   // render
   rect_set_size(&rect.rect, 100.f);

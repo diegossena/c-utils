@@ -1,16 +1,14 @@
 #include <sdk/math/geometry_2d.h>
 #include <sdk/math.h>
 
-void vector2d_sum(vector2d_t* this, const vector2d_t* right) {
-  this->x += right->x;
-  this->y += right->y;
+vector2d_t vector2d_sum(const vector2d_t this, const const vector2d_t right) {
+  return (vector2d_t) { this.x + right.x, this.y + right.y };
 }
-void vector2d_mul_scalar(vector2d_t* this, f32 scalar) {
-  this->x *= scalar;
-  this->y *= scalar;
+vector2d_t vector2d_mul_scalar(const vector2d_t this, f32 scalar) {
+  return (vector2d_t) { this.x* scalar, this.y* scalar };
 }
-f32 vector2d_dot(const vector2d_t left, const vector2d_t right) {
-  return left.x * right.x + left.y * right.y;
+f32 vector2d_dot(const vector2d_t this, const vector2d_t right) {
+  return this.x * right.x + this.y * right.y;
 }
 
 void rect_set_width(rect_t* this, f32 width) {
