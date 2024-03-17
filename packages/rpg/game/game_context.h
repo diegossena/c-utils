@@ -7,11 +7,15 @@ typedef struct game_context_t game_context_t;
 #include <sdk/keyboard.h>
 #include <sdk/memory.h>
 #include <sdk/time.h>
-#include "entities/entity.h"
+#include "./entities/entity.h"
+#include "./routines/routines.h"
+#include "./maps/map.h"
 
 typedef struct game_context_t {
   window_t* window;
   queue_t entities;
+  queue_t routines;
+  map_t* current_map;
   f64 last_update;
   f32 elapsed_time;
 } game_context_t;
@@ -44,9 +48,23 @@ void game_update(game_context_t* this) {
   } else if (keyboard_pressed(KEY_RIGHT)) {
 
   }
-  // entities
-  for (entity_t* it = (entity_t*)this->entities.next; it != (entity_t*)&this->entities; it = (entity_t*)it->queue.next) {
+  bool process_entities = true;
+  // routines
+  for (
+    entity_t* it = (entity_t*)this->entities.next;
+    it != (entity_t*)it->queue.next;
+    it = (entity_t*)it->queue.next) {
     it->update(it);
+    process_entities = false;
+  }
+  // entities
+  if (process_entities) {
+    for (
+      entity_t* it = (entity_t*)this->entities.next;
+      it != (entity_t*)it->queue.next;
+      it = (entity_t*)it->queue.next) {
+      it->update(it);
+    }
   }
   console_log("update");
 }
