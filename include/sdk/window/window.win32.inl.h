@@ -5,7 +5,9 @@
 #include <sdk/window.h>
 #include <sdk/application.h>
 #include <sdk/error.h>
+#include <windowsx.h>
 #include <wincodec.h>
+#include <winuser.h>
 #define COBJMACROS 1
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -40,15 +42,18 @@
 
 typedef struct window_t {
   task_t task;
-  HWND handle;
   void* context;
+  // window
+  HWND handle;
+  bool mouse_is_tracking;
+  // events
   update_event_cb onupdate;
   mouse_event_cb onmousemove;
   mouse_event_cb onmousedown;
   mouse_event_cb onmouseup;
+  mouse_event_cb ondblclick;
   keyboard_event_cb onkeydown;
   keyboard_event_cb onkeyup;
-  keyboard_event_cb ondblclick;
   ui_event_cb onresize;
   window_event_cb oncreate;
   window_event_cb onclose;
@@ -81,8 +86,22 @@ u16 window_get_height(window_t* this) {
   GetWindowRect(this->handle, &rect);
   return rect.bottom - rect.top;
 }
-
-void renderer_set_viewport(window_t* this, i32 width, i32 height) {
+void window_set_size(window_t* this, i32 width, i32 height) {
+  RECT rect = { 0, 0, width, height };
+  AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+  SetWindowPos(
+    this->handle, null,
+    CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
+    WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME
+  );
+}
+vector2d_t window_get_cursor(window_t* this) {
+  POINT point;
+  GetCursorPos(&point);
+  ScreenToClient(this->handle, &point);
+  return (vector2d_t) { point.x, point.y };
+}
+void window_set_viewport(window_t* this, i32 width, i32 height) {
   if (this->backbuffer) {
     ID2D1RenderTarget_Release(this->d2_render_target);
     IDXGISurface_Release(this->d2_surface);
@@ -134,8 +153,192 @@ void renderer_set_viewport(window_t* this, i32 width, i32 height) {
   // free resources
   ID3D11Texture2D_Release(backbuffer);
 }
-void renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
-  // d2 inicialize
+
+void window_free(window_t* this) {
+  // D2D
+  ID2D1RenderTarget_Release(this->d2_render_target);
+  IDXGISurface_Release(this->d2_surface);
+  ID2D1Factory_Release(this->d2_factory);
+  // D3D
+  if (this->input_layout) {
+    ID3D11PixelShader_Release(this->pixel_shader);
+    ID3D11InputLayout_Release(this->input_layout);
+    ID3D11VertexShader_Release(this->vertex_shader);
+  }
+  ID3D11RasterizerState_Release(this->rasterizer_state);
+  ID3D11RenderTargetView_Release(this->backbuffer);
+  ID3D11DeviceContext_Release(this->device_context);
+  ID3D11Device_Release(this->device);
+  IDXGISwapChain_Release(this->swapchain);
+  // window_t
+  task_unregister(&this->task);
+  this->handle = 0;
+  memory_free(this);
+}
+void __window_mouse_tracking(window_t* this) {
+  if (!this->mouse_is_tracking && this->onmousemove) {
+    this->mouse_is_tracking = true;
+    TRACKMOUSEEVENT tme = {
+      .dwHoverTime = 800,
+      .cbSize = sizeof(TRACKMOUSEEVENT),
+      .dwFlags = TME_LEAVE,
+      .hwndTrack = this->handle
+    };
+    TrackMouseEvent(&tme);
+  }
+}
+vector2d_t __window_mouse_event_cursor_handler(LPARAM lParam) {
+  return (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+}
+void __window_update_handler(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
+  window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
+  const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  ID3D11DeviceContext_ClearRenderTargetView(
+    this->device_context, this->backbuffer, background_color
+  );
+  ID2D1RenderTarget_BeginDraw(this->d2_render_target);
+  if (this->onupdate) {
+    this->onupdate(this);
+  }
+  ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
+  IDXGISwapChain_Present(this->swapchain, 1, 0);
+}
+LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
+  window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
+  switch (message) {
+    case WM_MOUSELEAVE:
+      if (this->onmousemove) {
+        this->mouse_is_tracking = false;
+        this->onmousemove(this, (vector2d_t) { -1, -1 });
+      }
+      return 0;
+    case WM_MOUSEMOVE:
+      if (this->onmousemove) {
+        __window_mouse_tracking(this);
+        this->onmousemove(this, __window_mouse_event_cursor_handler(lParam));
+      }
+      return 0;
+    case WM_LBUTTONDOWN:
+    case WM_RBUTTONDOWN:
+    case WM_MBUTTONDOWN:
+    case WM_XBUTTONDOWN:
+      if (this->onmousedown) {
+        this->onmousedown(this, __window_mouse_event_cursor_handler(lParam));
+      }
+      return 0;
+    case WM_LBUTTONUP:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONUP:
+    case WM_XBUTTONUP:
+      if (this->onmouseup) {
+        this->onmouseup(this, __window_mouse_event_cursor_handler(lParam));
+      }
+      return 0;
+    case WM_LBUTTONDBLCLK:
+      if (this->ondblclick) {
+        this->ondblclick(this, __window_mouse_event_cursor_handler(lParam));
+      }
+      return 0;
+    case WM_KEYDOWN:
+      if (this->onkeydown) {
+        this->onkeydown(this);
+      }
+      return 0;
+    case WM_KEYUP:
+      if (this->onkeyup) {
+        this->onkeyup(this);
+      }
+      return 0;
+    case WM_SIZE:
+      if (this->onresize) {
+        this->onresize(this);
+      }
+      return 0;
+    case WM_CREATE: {
+      LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
+      this = (window_t*)pcs->lpCreateParams;
+      SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
+      return 0;
+    };
+    case WM_CLOSE:
+      if (this->onclose) {
+        this->onclose(this);
+      }
+      DestroyWindow(handle);
+      return 0;
+    case WM_DESTROY:
+      KillTimer(handle, 0);
+      PostQuitMessage(0);
+      window_free(this);
+      return 0;
+  }
+  return DefWindowProc(handle, message, wParam, lParam);
+}
+
+void window_startup(application_t* app, window_options_t* options) {
+  LPCSTR class_name = "MainWClass";
+  if (FindWindowA(class_name, null)) {
+    error("FindWindowA", ERR_UNKNOWN);
+    return;
+  }
+  window_t* this = memory_alloc0(sizeof(window_t));
+  this->task.type = TASK_WINDOW;
+  // RegisterWindowClass
+  WNDCLASSEXA wc = {
+    .cbSize = sizeof(WNDCLASSEXA),
+    .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
+    .lpfnWndProc = __window_event_handler,
+    .hInstance = GetModuleHandleA(null),
+    .hCursor = LoadCursor(null, IDC_ARROW),
+    .lpszClassName = class_name,
+  };
+  if (!RegisterClassExA(&wc)) {
+    error("RegisterClassExA", ERR_UNKNOWN);
+    goto clear;
+  }
+  u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
+  if (!(options->flags & WINDOW_HIDDEN)) {
+    window_style |= WS_VISIBLE;
+  }
+  if (!(options->flags & WINDOW_NO_RESIZABLE)) {
+    window_style |= WS_THICKFRAME;
+  }
+  if (!(options->flags & WINDOW_NO_MAXIMIZE)) {
+    window_style |= WS_MAXIMIZEBOX;
+  }
+  u32 window_ex_style = WS_EX_APPWINDOW;
+  // Register Events
+  this->onupdate = options->onupdate;
+  this->onmousemove = options->onmousemove;
+  this->onmousedown = options->onmousedown;
+  this->onmouseup = options->onmouseup;
+  this->onkeydown = options->onkeydown;
+  this->onkeyup = options->onkeyup;
+  this->ondblclick = options->ondblclick;
+  this->onresize = options->onresize;
+  this->oncreate = options->oncreate;
+  this->onclose = options->onclose;
+  // CreateWindow
+  RECT rect = { options->x, options->y, options->width, options->height };
+  AdjustWindowRect(&rect, window_style, false);
+  u32 width = rect.right - rect.left;
+  u32 height = rect.bottom - rect.top;
+  this->handle = CreateWindowExA(
+    window_ex_style, wc.lpszClassName, options->name, window_style,
+    CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+    0, // handle to parent or owner window
+    0, // handle to menu, or child-window identifier
+    wc.hInstance,
+    this // pointer to window-creation data
+  );
+  if (!this->handle) {
+    error("CreateWindowExA", ERR_UNKNOWN);
+    goto clear;
+  }
+  if (this->oncreate) {
+    this->oncreate(this);
+  }
+  // renderer
   HRESULT result = D2D1CreateFactory(
     D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
     (void**)&this->d2_factory
@@ -150,12 +353,11 @@ void renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
   if (FAILED(result)) {
     error("DWriteCreateFactory", result);
   }
-  // create renderer
   DXGI_SWAP_CHAIN_DESC scd = { };
   scd.BufferCount = 1;                                // one back buffer
   scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // use 32-bit color
-  scd.BufferDesc.Width = lpc->cx;                     // set the back buffer width
-  scd.BufferDesc.Height = lpc->cy;                    // set the back buffer height
+  scd.BufferDesc.Width = width;                     // set the back buffer width
+  scd.BufferDesc.Height = height;                    // set the back buffer height
   scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // how swap chain is to be used
   scd.OutputWindow = this->handle;                    // the window to be used
   scd.SampleDesc.Count = 4;                           // how many multisamples
@@ -180,172 +382,15 @@ void renderer_inicialize(window_t* this, LPCREATESTRUCT lpc) {
     console_log("D3D11CreateDeviceAndSwapChain %x", result);
     exit(1);
   }
-  renderer_set_viewport(this, lpc->cx, lpc->cy);
-  // CreateRasterizerState
+  window_set_viewport(this, width, height);
   D3D11_RASTERIZER_DESC rasterizer_desc = {
     .FillMode = D3D11_FILL_SOLID,
     .CullMode = D3D11_CULL_NONE
   };
   ID3D11Device_CreateRasterizerState(this->device, &rasterizer_desc, &this->rasterizer_state);
-}
-
-void window_free(window_t* this) {
-  // D2D
-  ID2D1RenderTarget_Release(this->d2_render_target);
-  IDXGISurface_Release(this->d2_surface);
-  ID2D1Factory_Release(this->d2_factory);
-  // D3D
-  if (this->input_layout) {
-    ID3D11PixelShader_Release(this->pixel_shader);
-    ID3D11InputLayout_Release(this->input_layout);
-    ID3D11VertexShader_Release(this->vertex_shader);
-  }
-  ID3D11RasterizerState_Release(this->rasterizer_state);
-  ID3D11RenderTargetView_Release(this->backbuffer);
-  ID3D11DeviceContext_Release(this->device_context);
-  ID3D11Device_Release(this->device);
-  IDXGISwapChain_Release(this->swapchain);
-  // window_t
-  task_unregister(&this->task);
-  this->handle = 0;
-  memory_free(this);
-}
-
-LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
-  window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
-  switch (message) {
-    case WM_TIMER: {
-      const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
-      ID3D11DeviceContext_ClearRenderTargetView(
-        this->device_context, this->backbuffer, background_color
-      );
-      ID2D1RenderTarget_BeginDraw(this->d2_render_target);
-      if (this->onupdate) {
-        this->onupdate(this);
-      }
-      ID2D1RenderTarget_EndDraw(this->d2_render_target, null, null);
-      IDXGISwapChain_Present(this->swapchain, 0, 0);
-    } break;
-    case WM_MOUSEMOVE:
-      if (this->onmousemove) {
-        this->onmousemove(this);
-      }
-      break;
-    case WM_LBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_XBUTTONDOWN:
-      if (this->onmousedown) {
-        this->onmousedown(this);
-      }
-      break;
-    case WM_LBUTTONUP:
-    case WM_RBUTTONUP:
-    case WM_MBUTTONUP:
-    case WM_XBUTTONUP:
-      if (this->onmouseup) {
-        this->onmouseup(this);
-      }
-      break;
-    case WM_LBUTTONDBLCLK:
-      if (this->ondblclick) {
-        this->ondblclick(this);
-      }
-      break;
-    case WM_KEYDOWN:
-      if (this->onkeydown) {
-        this->onkeydown(this);
-      }
-      break;
-    case WM_KEYUP:
-      if (this->onkeyup) {
-        this->onkeyup(this);
-      }
-      break;
-    case WM_SIZE: {
-      UINT width = LOWORD(lParam);
-      UINT height = HIWORD(lParam);
-      renderer_set_viewport(this, width, height);
-      if (this->onresize) {
-        this->onresize(this);
-      }
-    } break;
-    case WM_CREATE: {
-      LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
-      this = (window_t*)pcs->lpCreateParams;
-      this->handle = handle;
-      SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
-      renderer_inicialize(this, pcs);
-      if (this->oncreate) {
-        this->oncreate(this);
-      }
-    } break;
-    case WM_CLOSE:
-      if (this->onclose) {
-        this->onclose(this);
-      }
-      DestroyWindow(handle);
-      break;
-    case WM_DESTROY:
-      KillTimer(handle, 0);
-      PostQuitMessage(0);
-      window_free(this);
-      break;
-  }
-  return DefWindowProc(handle, message, wParam, lParam);
-}
-
-void window_startup(application_t* app, window_options_t* options) {
-  LPCSTR class_name = "MainWClass";
-  if (FindWindowA(class_name, null)) {
-    error("FindWindowA", ERR_UNKNOWN);
-    return;
-  }
-  window_t* this = memory_alloc0(sizeof(window_t));
-  this->task.type = TASK_WINDOW;
-  // RegisterWindowClass
-  WNDCLASSEXA wc = {
-    .cbSize = sizeof(WNDCLASSEXA),
-    .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
-    .lpfnWndProc = __window_procedure,
-    .hInstance = GetModuleHandleA(null),
-    .hCursor = LoadCursor(null, IDC_ARROW),
-    .lpszClassName = class_name,
-  };
-  if (!RegisterClassExA(&wc)) {
-    error("RegisterClassExA", ERR_UNKNOWN);
-    goto clear;
-  }
-  u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
-  if (!(options->flags & WINDOW_HIDDEN)) {
-    window_style |= WS_VISIBLE;
-  }
-  u32 window_ex_style = WS_EX_APPWINDOW;
-  // Register Events
-  this->onupdate = options->onupdate;
-  this->onmousemove = options->onmousemove;
-  this->onmousedown = options->onmousedown;
-  this->onmouseup = options->onmouseup;
-  this->onkeydown = options->onkeydown;
-  this->onkeyup = options->onkeyup;
-  this->ondblclick = options->ondblclick;
-  this->onresize = options->onresize;
-  this->oncreate = options->oncreate;
-  this->onclose = options->onclose;
-    // CreateWindow
-  CreateWindowExA(
-    window_ex_style, wc.lpszClassName, options->name, window_style,
-    options->x, options->y, options->width, options->height,
-    0, // handle to parent or owner window
-    0, // handle to menu, or child-window identifier
-    wc.hInstance,
-    this // pointer to window-creation data
-  );
-  if (!this->handle) {
-    error("CreateWindowExA", ERR_UNKNOWN);
-    goto clear;
-  }
-  SetTimer(this->handle, 0, 0, 0);
+  // events
+  __window_mouse_tracking(this);
+  SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
   task_register(this, app);
   return;
 clear:
@@ -360,14 +405,71 @@ void window_pooling() {
     DispatchMessageA(&msg);
   }
 }
-
-void gfx_draw_text(window_t* this, const wchar_t* text, u64 length, text_props_t* props) {
+void gfx_draw_rect(window_t* this, gfx_rect_t* props) {
+  ID2D1StrokeStyle* stroke;
+  ID2D1SolidColorBrush* brush;
+  // stroke
+  D2D1_STROKE_STYLE_PROPERTIES stroke_properties;
+  stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.dashCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.lineJoin = D2D1_LINE_JOIN_ROUND;
+  stroke_properties.miterLimit = 10.f;
+  stroke_properties.dashStyle = D2D1_DASH_STYLE_SOLID;
+  stroke_properties.dashOffset = 0.f;
+  stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.dashCap = D2D1_CAP_STYLE_ROUND;
+  stroke_properties.lineJoin = D2D1_LINE_JOIN_ROUND;
+  stroke_properties.miterLimit = 10.f;
+  stroke_properties.dashStyle = D2D1_DASH_STYLE_SOLID;
+  stroke_properties.dashOffset = 0.f;
+  ID2D1Factory_CreateStrokeStyle(
+    this->d2_factory, &stroke_properties, null, null, &stroke
+  );
+  // brush
+  ID2D1RenderTarget_CreateSolidColorBrush(
+    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null,
+    &brush
+  );
+  // draw
+  D2D1_ROUNDED_RECT rect = {
+    {
+      props->rect.left_top.x, props->rect.left_top.y,
+      props->rect.right_bottom.x, props->rect.right_bottom.y
+    },
+    props->border.radius, props->border.radius
+  };
+  if (props->border.width) {
+    ID2D1RenderTarget_DrawRoundedRectangle(
+      this->d2_render_target, &rect, (ID2D1Brush*)brush, props->border.width, stroke
+    );
+  } else {
+    ID2D1RenderTarget_FillRoundedRectangle(
+      this->d2_render_target, &rect, (ID2D1Brush*)brush
+    );
+  }
+// release resources
+  ID2D1StrokeStyle_Release(stroke);
+  ID2D1SolidColorBrush_Release(brush);
+}
+void gfx_draw_fill_rect(window_t* this, gfx_rect_t* props) {
+  ID2D1SolidColorBrush* brush;
+  ID2D1RenderTarget_CreateSolidColorBrush(
+    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
+  );
+  ID2D1RenderTarget_FillRectangle(
+    this->d2_render_target, (D2D1_RECT_F*)&props->rect, (ID2D1Brush*)brush
+  );
+  ID2D1SolidColorBrush_Release(brush);
+}
+void gfx_draw_text(const window_t* this, const gfx_textnode_t* props) {
   IDWriteTextFormat* text_format;
   ID2D1SolidColorBrush* brush;
   // text_format
   DWRITE_FONT_WEIGHT font_weight;
   DWRITE_FONT_STYLE font_style;
-  switch (props->weight) {
+  switch (props->style->weight) {
     case FONT_WEIGHT_NORMAL:
       font_weight = DWRITE_FONT_WEIGHT_NORMAL;
       break;
@@ -375,91 +477,32 @@ void gfx_draw_text(window_t* this, const wchar_t* text, u64 length, text_props_t
       font_weight = DWRITE_FONT_WEIGHT_BOLD;
       break;
   }
-  switch (props->style) {
+  switch (props->style->style) {
     case FONT_STYLE_NORMAL:
       font_style = DWRITE_FONT_STYLE_NORMAL;
       break;
   }
   IDWriteFactory_CreateTextFormat(
-    this->d2_write_factory, props->family, null, font_weight,
-    font_style, DWRITE_FONT_STRETCH_NORMAL, props->size, L"en-US",
+    this->d2_write_factory, props->style->family, null, font_weight,
+    font_style, DWRITE_FONT_STRETCH_NORMAL, props->style->size, L"en-US",
     &text_format
   );
   // brush
   ID2D1RenderTarget_CreateSolidColorBrush(
-    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, (ID2D1SolidColorBrush**)&brush
+    this->d2_render_target, (D2D1_COLOR_F*)&props->style->color, null, (ID2D1SolidColorBrush**)&brush
   );
   // draw
   ID2D1RenderTarget_DrawText(
-    this->d2_render_target, text, length, text_format, (D2D1_RECT_F*)&props->rect, (ID2D1Brush*)brush,
-    D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
+    this->d2_render_target, props->text, props->length, text_format,
+    (D2D1_RECT_F*)props->parent, (ID2D1Brush*)brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
+    DWRITE_MEASURING_MODE_NATURAL
   );
   // free resources
   IDWriteTextFormat_Release(text_format);
   ID2D1SolidColorBrush_Release(brush);
 }
-void gfx_draw_rect(window_t* this, rect_props_t* props) {
-  ID2D1SolidColorBrush* brush;
-  ID2D1StrokeStyle* stroke_style;
-  float stroke_width = 2.f;
-  // brush
-  ID2D1RenderTarget_CreateSolidColorBrush(
-    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
-  );
-  // stroke
-  D2D1_STROKE_STYLE_PROPERTIES stroke_properties;
-  stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
-  stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
-  stroke_properties.dashCap = D2D1_CAP_STYLE_ROUND;
-  stroke_properties.lineJoin = D2D1_LINE_JOIN_ROUND;
-  stroke_properties.miterLimit = 10.0f;
-  stroke_properties.dashStyle = D2D1_DASH_STYLE_SOLID;
-  stroke_properties.dashOffset = 0.0f;
-  ID2D1Factory_CreateStrokeStyle(
-    this->d2_factory, &stroke_properties, null, null, &stroke_style
-  );
-  // draw
-  ID2D1RenderTarget_FillRectangle(
-    this->d2_render_target, (D2D1_RECT_F*)&props->rect, (ID2D1Brush*)brush
-  );
-  // ID2D1RenderTarget_DrawRectangle(
-  //   this->d2_render_target, &rect, (ID2D1Brush*)brush, stroke_width,
-  //   stroke_style
-  // );
-  // free resources
-  ID2D1SolidColorBrush_Release(brush);
-  ID2D1StrokeStyle_Release(stroke_style);
-}
-void gfx_draw_ellipse(window_t* this, ellipse_props_t* props) {
-  ID2D1SolidColorBrush* brush;
-  ID2D1StrokeStyle* stroke_style;
-  float stroke_width = 2.f;
-  // brush
-  ID2D1RenderTarget_CreateSolidColorBrush(
-    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
-  );
-  // stroke
-  D2D1_STROKE_STYLE_PROPERTIES stroke_properties;
-  stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
-  stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
-  stroke_properties.dashCap = D2D1_CAP_STYLE_ROUND;
-  stroke_properties.lineJoin = D2D1_LINE_JOIN_ROUND;
-  stroke_properties.miterLimit = 10.0f;
-  stroke_properties.dashStyle = D2D1_DASH_STYLE_SOLID;
-  stroke_properties.dashOffset = 0.0f;
-  ID2D1Factory_CreateStrokeStyle(
-    this->d2_factory, &stroke_properties, null, null, &stroke_style
-  );
-  // draw
-  ID2D1RenderTarget_DrawEllipse(
-    this->d2_render_target, (D2D1_ELLIPSE*)props, (ID2D1Brush*)brush,
-    stroke_width, stroke_style
-  );
-  // free resources
-  ID2D1SolidColorBrush_Release(brush);
-  ID2D1StrokeStyle_Release(stroke_style);
-}
-void gfx_bitmap_constructor(bitmap_t* this, window_t* window, const wchar_t* path) {
+bitmap_t* gfx_bitmap_new(window_t* window, const wchar_t* path) {
+  ID2D1Bitmap* this;
   HRESULT result;
   IWICImagingFactory* wic_factory;
   IWICBitmapDecoder* decoder;
@@ -469,7 +512,7 @@ void gfx_bitmap_constructor(bitmap_t* this, window_t* window, const wchar_t* pat
   result = CoInitialize(NULL);
   if (FAILED(result)) {
     error("CoInitialize", result);
-    return;
+    return 0;
   }
   CLSID clsid = CLSID_WICImagingFactory;
   IID iid = IID_IWICImagingFactory;
@@ -508,7 +551,7 @@ void gfx_bitmap_constructor(bitmap_t* this, window_t* window, const wchar_t* pat
     goto frame_decode_free;
   }
   result = window->d2_render_target->lpVtbl->CreateBitmapFromWicBitmap(
-    window->d2_render_target, (IWICBitmapSource*)converter, NULL, &this->bitmap
+    window->d2_render_target, (IWICBitmapSource*)converter, NULL, &this
   );
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
@@ -519,11 +562,12 @@ decoder_free:
   decoder->lpVtbl->Release(decoder);
 wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
+  return (bitmap_t*)this;
 }
 void gfx_bitmap_free(bitmap_t* this) {
   ID2D1Bitmap_Release((ID2D1Bitmap*)this);
 }
-void gfx_draw_bitmap(window_t* this, bitmap_props_t* props) {
+void gfx_draw_bitmap(window_t* this, gfx_bitmap_t* props) {
   // draw
   (this->d2_render_target)->lpVtbl->DrawBitmap(
     this->d2_render_target, (ID2D1Bitmap*)props->image, (D2D1_RECT_F*)&props->rect, 1.f,

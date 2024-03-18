@@ -3,15 +3,20 @@
 #include <sdk/types.h>
 #include <sdk/queue.h>
 
+typedef struct game_t game_t;
 typedef struct routine_t routine_t;
-
-typedef void (*routine_start_cb)(routine_t*);
-typedef void (*routine_update_cb)(routine_t*, f32 elapsed_time);
 
 typedef struct routine_t {
   queue_t queue;
-  // bool started;
+  game_t* context;
   bool completed;
-  routine_start_cb start;
-  routine_update_cb update;
+  void (*onupdate)(routine_t*);
 } routine_t;
+
+void routines_run(queue_t* routines) {
+  routine_t* it = (routine_t*)routines->next;
+  while (it != (routine_t*)it->queue.next) {
+    it->onupdate(it);
+    it = (routine_t*)it->queue.next;
+  }
+}

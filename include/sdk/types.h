@@ -43,22 +43,22 @@ typedef u16 wchar_t;
 // Inlining
 #if defined(__clang__) || defined(__gcc__)
 /** @brief Inline qualifier */
-#define INLINE __attribute__((always_inline)) inline
+#define sdk_inline __attribute__((always_inline)) inline
 
 /** @brief No-inline qualifier */
-#define NO_INLINE __attribute__((noinline))
+#define sdk_no_inline __attribute__((noinline))
 #elif defined(_MSC_VER)
 
 /** @brief Inline qualifier */
-#define INLINE __forceinline
+#define sdk_inline __forceinline
 
 /** @brief No-inline qualifier */
-#define NO_INLINE __declspec(noinline)
+#define sdk_no_inline __declspec(noinline)
 #else
 
 /** @brief Inline qualifier */
-#define INLINE static inline
+#define sdk_inline static inline
 
 /** @brief No-inline qualifier */
-#define NO_INLINE
+#define sdk_no_inline
 #endif

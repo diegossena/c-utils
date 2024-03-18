@@ -21,6 +21,10 @@ void rect_set_size(rect_t* this, f32 size) {
   rect_set_width(this, size);
   rect_set_height(this, size);
 }
+bool rect_pointin(const rect_t* this, vector2d_t point) {
+  return point.x >= this->left_top.x && point.x <= this->right_bottom.x &&
+    point.y >= this->left_top.y && point.y <= this->right_bottom.y;
+}
 
 overlap_2d_t overlap_rect_rect(const rect_t* rect1, const rect_t* rect2) {
   overlap_2d_t result;

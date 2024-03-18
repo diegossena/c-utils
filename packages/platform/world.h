@@ -78,7 +78,7 @@ void world_render(world_t* this) {
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
       char tile_id = get_tile(this, x + this->offset_x, y + this->offset_y);
-      rect_props_t tile_props = {
+      gfx_rect_t tile_props = {
         .rect = {
           x * world_tile_size - tile_world_offset_x,
           y * world_tile_size - tile_world_offset_y,

@@ -3,9 +3,9 @@
 #include <sdk/keyboard.h>
 
 f64 last_update;
-rect_props_t rect = { .color = COLOR_BLACK };
+gfx_rect_t rect = { .color = COLOR_BLACK };
 
-rect_props_t rect_ = {
+gfx_rect_t rect_ = {
   .rect.left_top.x = 200,
   .rect.left_top.y = 200,
   .color = COLOR_ORANGE

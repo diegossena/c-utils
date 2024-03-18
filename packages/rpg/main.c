@@ -1,16 +1,22 @@
-#include "./game/game_context.h"
+#include "./game/game.h"
 
 void oncreate(window_t* this) {
-  game_context_t* context = game_new(this);
-  window_set_context(this, context);
+  this->context = game_new(this);
 }
 void onupdate(window_t* this) {
-  game_context_t* context = window_get_context(this);
-  game_update(context);
+  game_onupdate(this->context);
+}
+void onmousemove(window_t* this, vector2d_t cursor) {
+  game_onmousemove(this->context, cursor);
+}
+void onmouseup(window_t* this, vector2d_t cursor) {
+  game_onmouseup(this->context, cursor);
+}
+void onmousedown(window_t* this, vector2d_t cursor) {
+  game_onmousedown(this->context, cursor);
 }
 void onclose(window_t* this) {
-  game_context_t* context = window_get_context(this);
-  game_free(context);
+  game_free(this->context);
 }
 
 i32 main() {
@@ -22,8 +28,12 @@ i32 main() {
     .height = 600,
     .x = 0,
     .y = 0,
+    .flags = WINDOW_NO_RESIZABLE | WINDOW_NO_MAXIMIZE,
     .oncreate = oncreate,
     .onupdate = onupdate,
+    .onmousemove = onmousemove,
+    .onmouseup = onmouseup,
+    .onmousedown = onmousedown,
     .onclose = onclose
   };
   window_startup(&app, &options);

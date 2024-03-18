@@ -7,14 +7,14 @@ typedef struct vector2d_t {
   f32 x, y;
 } vector2d_t;
 // Dot product
-INLINE f32 vector2d_dot(const vector2d_t, const vector2d_t);
-INLINE vector2d_t vector2d_sum(const vector2d_t, const vector2d_t);
-INLINE vector2d_t vector2d_mul(const vector2d_t, const vector2d_t);
-INLINE vector2d_t vector2d_mul_scalar(const vector2d_t, f32);
-INLINE vector2d_t vector2d_sub(const vector2d_t, const vector2d_t);
-INLINE vector2d_t vector2d_div(const vector2d_t, const vector2d_t);
-INLINE f32 vector2d_distance(const vector2d_t, const vector2d_t);
-INLINE void vec2_normalize(vector2d_t);
+f32 vector2d_dot(const vector2d_t, const vector2d_t);
+vector2d_t vector2d_sum(const vector2d_t, const vector2d_t);
+vector2d_t vector2d_mul(const vector2d_t, const vector2d_t);
+vector2d_t vector2d_mul_scalar(const vector2d_t, f32);
+vector2d_t vector2d_sub(const vector2d_t, const vector2d_t);
+vector2d_t vector2d_div(const vector2d_t, const vector2d_t);
+f32 vector2d_distance(const vector2d_t, const vector2d_t);
+void vec2_normalize(vector2d_t);
 
 typedef struct rect_t {
   /**
@@ -23,9 +23,11 @@ typedef struct rect_t {
    */
   vector2d_t left_top, right_bottom;
 } rect_t;
-INLINE void rect_set_width(rect_t*, f32);
-INLINE void rect_set_height(rect_t*, f32);
-INLINE void rect_set_size(rect_t*, f32);
+void rect_set_width(rect_t*, f32);
+void rect_set_height(rect_t*, f32);
+void rect_set_size(rect_t*, f32);
+
+bool rect_pointin(const rect_t*, vector2d_t);
 
 typedef struct overlap_2d_t {
   vector2d_t axis;

@@ -1,6 +1,5 @@
 #include <sdk/application.h>
 #include <sdk/memory.h>
-#include <sdk/assert.h>
 #ifdef SDK_WINDOW_H
 #include <sdk/window.h>
 #endif
@@ -12,14 +11,11 @@
 #endif
 
 void app_constructor(application_t* this) {
-  this->__tasks.next = &this->__tasks;
-  this->__tasks.prev = &this->__tasks;
-  console_log("constructor=%d", &this->__tasks);
+  queue_head(&this->__tasks);
 }
 
 i32 app_run(application_t* this) {
   task_t* it = (task_t*)this->__tasks.next;
-  console_log("it=%d, tasks=%d", it, &this->__tasks);
   while ((queue_t*)it != ((queue_t*)it)->next) {
     task_t* next = (task_t*)it->queue.next;
     switch (it->type) {

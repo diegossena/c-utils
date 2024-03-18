@@ -100,7 +100,7 @@ void player_update(player_t* this, f32 elapsed) {
 }
 
 void player_render(player_t* this) {
-  rect_props_t player_props = {
+  gfx_rect_t player_props = {
     .rect = {
       .left = (this->x - this->world->offset_x) * world_tile_size,
       .top = (this->y - this->world->offset_y) * world_tile_size,

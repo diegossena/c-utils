@@ -1,5 +1,10 @@
 #include <sdk/queue.h>
 
+
+void queue_head(queue_t* this) {
+  this->next = this;
+  this->prev = this;
+}
 void queue_push(queue_t* head, queue_t* this) {
   this->next = head;
   this->prev = head->prev;
