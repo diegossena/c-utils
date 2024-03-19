@@ -30,11 +30,18 @@ typedef struct game_t {
   window_t* window;
   // timer
   f64 last_update;
+
   // events
+
+  // game_update_event_t
   queue_t onupdate;
+  // game_mouse_event_t
   queue_t onmousemove;
+  // game_mouse_event_t
   queue_t onmousedown;
+  // game_mouse_event_t
   queue_t onmouseup;
+  // game_mouse_event_t
   queue_t ondestroy;
 } game_t;
 

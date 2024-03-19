@@ -65,21 +65,31 @@ void title_screen_load(game_t* game) {
   title_screen_t* this = memory_alloc0(sizeof(title_screen_t));
   window_t* window = game->window;
   this->game = game;
-  // events
-  this->ondestroy.context = this;
-  this->onupdate.context = this;
-  this->onmousemove.context = this;
-  this->onmousedown.context = this;
-  this->onmouseup.context = this;
-  this->ondestroy.callback = (game_onevent_cb)titlescreen_ondestroy;
-  this->onupdate.callback = (game_onupdate_cb)titlescreen_onupdate;
-  this->onmousemove.callback = (game_onmouse_cb)titlescreen_onmousemove;
-  this->onmousedown.callback = (game_onmouse_cb)titlescreen_onmousedown;
-  this->onmouseup.callback = (game_onmouse_cb)titlescreen_onmouseup;
-  queue_push(&game->onupdate, &this->onupdate.queue);
+  // register events
+  this->ondestroy = (game_event_t) {
+    .callback = titlescreen_ondestroy,
+    .context = this
+  };
   queue_push(&game->ondestroy, &this->ondestroy.queue);
+  this->onupdate = (game_update_event_t) {
+    .callback = titlescreen_onupdate,
+    .context = this
+  };
+  queue_push(&game->onupdate, &this->onupdate.queue);
+  this->onmousemove = (game_mouse_event_t) {
+    .callback = titlescreen_onmousemove,
+    .context = this
+  };
   queue_push(&game->onmousemove, &this->onmousemove.queue);
+  this->onmousedown = (game_mouse_event_t) {
+    .callback = titlescreen_onmousedown,
+    .context = this
+  };
   queue_push(&game->onmousedown, &this->onmousedown.queue);
+  this->onmouseup = (game_mouse_event_t) {
+    .callback = titlescreen_onmouseup,
+    .context = this
+  };
   queue_push(&game->onmouseup, &this->onmouseup.queue);
   // styles
   this->stroke_solid = gfx_stroke_new(window, (stroke_t) { BORDER_STYLE_SOLID });
