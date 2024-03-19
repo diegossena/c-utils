@@ -46,7 +46,6 @@ typedef struct game_t {
 } game_t;
 
 #include "./entities/entity.h"
-#include "./routines/routines.h"
 #include "./tilemaps/tilemap.h"
 #include "./scene/title_screen.h"
 
