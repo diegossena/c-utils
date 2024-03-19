@@ -58,6 +58,7 @@ void string_append_str(string_t* this, const char* cstr, u64 length) {
   __string_mutate(this, total_length + 1);
   memory_copy(this->__data + this->__length, cstr, length);
   this->__length = total_length;
+  this->__data[this->__length] = '\0';
 }
 void string_append_string(string_t* this, string_t* src) {
   string_append_str(this, src->__data, src->__length);

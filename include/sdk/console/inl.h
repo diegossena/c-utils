@@ -1,4 +1,4 @@
-#include <sdk/console/console.h>
+#include <sdk/console.h>
 #include <sdk/string.h>
 // __builtin_va_list, va_start, va_end
 #include <stdarg.h>

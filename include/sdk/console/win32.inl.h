@@ -2,8 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/console/console.h>
-#include <windows.h>
+#include <sdk/console.h>
 
 bool console_has_ansi = false;
 

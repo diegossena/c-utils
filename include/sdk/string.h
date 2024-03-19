@@ -46,4 +46,4 @@ i32 cstr_format_v(char* this, const char* format, void* va_list_p);
 i32 cstr_format(char*, const char* format, ...);
 u64 cstr_length(const char*);
 
-#include <sdk/string/string.inl.h>
+#include <sdk/string/inl.h>

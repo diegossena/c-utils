@@ -41,7 +41,6 @@
 }
 
 typedef struct window_t {
-  task_t task;
   void* context;
   // window
   HWND handle;
@@ -172,7 +171,6 @@ void window_free(window_t* this) {
   ID3D11Device_Release(this->device);
   IDXGISwapChain_Release(this->swapchain);
   // window_t
-  task_unregister(&this->task);
   this->handle = 0;
   memory_free(this);
 }
@@ -283,7 +281,6 @@ void window_startup(application_t* app, window_options_t* options) {
     return;
   }
   window_t* this = memory_alloc0(sizeof(window_t));
-  this->task.type = TASK_WINDOW;
   // RegisterWindowClass
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -392,19 +389,22 @@ void window_startup(application_t* app, window_options_t* options) {
   }
   __window_mouse_tracking(this);
   SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
-  task_register(this, app);
   return;
 clear:
   memory_free(this);
 }
 
-void window_pooling() {
+bool window_pooling() {
   MSG msg;
   WINBOOL result = PeekMessageA(&msg, 0, 0, 0, PM_REMOVE);
   if (result) {
     TranslateMessage(&msg);
     DispatchMessageA(&msg);
+    if (msg.message == WM_QUIT) {
+      return false;
+    }
   }
+  return true;
 }
 gfx_stroke_t* gfx_stroke_new(window_t* window, stroke_t props) {
   D2D1_STROKE_STYLE_PROPERTIES stroke_properties;

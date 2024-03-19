@@ -28,6 +28,8 @@ typedef u8 byte;
 
 typedef u16 wchar_t;
 
+typedef void (*fn_any_t)();
+
 #define MAX_I16 32767
 #define MIN_I16 -32768
 #define MAX_U16 0xffffU

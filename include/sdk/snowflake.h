@@ -4,4 +4,4 @@
 
 u64 snowflake_uid();
 
-#include <sdk/snowflake/snowflake.inl.h>
+#include <sdk/snowflake/inl.h>

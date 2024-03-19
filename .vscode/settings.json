@@ -20,6 +20,8 @@
     "tuple": "c",
     "type_traits": "c",
     "utility": "c",
-    "io_context": "c"
+    "io_context": "c",
+    "optional": "c",
+    "system_error": "c"
   }
 }

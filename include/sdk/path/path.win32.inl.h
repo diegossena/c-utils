@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/path/path.h>
+#include <sdk/path.h>
 
 static const char path_sep = '\\';
 

@@ -1,4 +1,5 @@
-#include <sdk/sdk.h>
+#include <sdk/process.h>
+
 void process_test() {
   string_t execpath;
   process_execpath(&execpath);

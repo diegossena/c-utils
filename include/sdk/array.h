@@ -8,6 +8,7 @@
 }
 #define array_constructor(this, type) \
   _array_constructor(this, sizeof(type))
+  
 #define array_at(this, type, index) \
   (*(type*)_array_at(this, index))
 
@@ -27,4 +28,4 @@ void array_reserve(array_t*, u64 size);
 u64 array_capacity(array_t*);
 void _array_push(array_t*, const void* value);
 
-#include <sdk/array/array.inl.h>
+#include <sdk/array/inl.h>

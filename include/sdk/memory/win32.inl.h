@@ -4,8 +4,6 @@
 
 #include <sdk/memory.h>
 #include <sdk/error.h>
-// GetProcessHeap, HeapReAlloc, HeapAlloc, HEAP_ZERO_MEMORY
-#include <heapapi.h>
 
 static i64 memory_counter = 0;
 

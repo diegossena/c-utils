@@ -6,30 +6,28 @@
 
 typedef struct net_tcp_client_t net_tcp_client_t;
 
+typedef void (*net_tcp_on_connection_cb)(net_tcp_client_t*);
+typedef void (*net_tcp_client_on_write_cb)(net_tcp_client_t* this, const void* context);
+typedef void (*net_tcp_client_on_read_cb)(net_tcp_client_t* this, const byte* data, u64 length, const void* context);
+
 /** @brief Represents a TCP stream or TCP server.
- *
  */
 typedef struct net_tcp_server_t {
-  task_t task;
+  event_listener_t __listener;
   application_t* app;
   u64 socket;
   u64 client_count;
   net_tcp_on_connection_cb handle;
 } net_tcp_server_t;
 typedef struct net_tcp_client_t {
-  // extends net_tcp_t
-  task_t task;
+  event_listener_t __listener;
   stream_t stream;
   u64 socket;
-  task_handle handle;
+  fn_any_t handle;
   // fields
   net_addr_t addr;
   net_tcp_server_t* server;
 } net_tcp_client_t;
-
-typedef void (*net_tcp_on_connection_cb)(net_tcp_client_t*);
-typedef void (*net_tcp_client_on_write_cb)(net_tcp_client_t* this, const void* context);
-typedef void (*net_tcp_client_on_read_cb)(net_tcp_client_t* this, const byte* data, u64 length, const void* context);
 
 /** @brief Externally-defined function to create a net_tcp, provided by the consumer
  * of this library.
@@ -50,7 +48,7 @@ void net_tcp_client_free(net_tcp_client_t*);
 void net_tcp_client_read_handle(net_tcp_client_t*);
 void net_tcp_client_write_handle(net_tcp_client_t*);
 
-#include <sdk/net/tcp.server.win32.inl.h>
-#include <sdk/net/net.tcp.server.inl.h>
+#include <sdk/net/tcp/server/win32.inl.h>
+#include <sdk/net/tcp/server/inl.h>
 
 #endif

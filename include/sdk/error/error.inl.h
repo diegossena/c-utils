@@ -1,5 +1,5 @@
 #include <sdk/error.h>
-#include <sdk/console/console.h>
+#include <sdk/console.h>
 
 const char* error_code_cstr(i64 code) {
   switch (code) {

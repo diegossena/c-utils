@@ -1,7 +1,10 @@
-#include <sdk/sdk.h>
-
-#include "window.test.h"
+#include <sdk/net/tcp/server.h>
 #include "net.tcp.test.h"
+
+#include <sdk/assert.h>
+#include <sdk/array.h>
+#include <sdk/snowflake.h>
+#include <sdk/map.h>
 #include "path.test.h"
 #include "process.test.h"
 
@@ -12,7 +15,6 @@ void string_test() {
   string_constructor(&str1);
   string_constructor(&str2);
   string_append_cstr(&str1, "test");
-  console_log_cstr("LINE");
   assert(string_equal_cstr(&str1, "test") == true);
   string_append_char(&str1, '1');
   assert(string_equal_cstr(&str1, "test1") == true);
@@ -35,11 +37,11 @@ void array_test() {
   assert(array_at(&arr, u64, 2) == 12);
   assert(array_length(&arr) == 3);
   assert(array_capacity(&arr) == 4);
+  array_deconstructor(&arr);
 }
 void date_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "DATE" CONSOLE_RESET);
   assert(date_now() > 0);
-  console_log("%llu", date_now);
 }
 void snowflake_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "SNOWFLAKE" CONSOLE_RESET);
@@ -47,12 +49,13 @@ void snowflake_test() {
 }
 void map_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "MAP" CONSOLE_RESET);
-  map_t* map_u64 = map_new(u64);
-  map_set_cstr(map_u64, "key1", (u64)10);
-  assert(map_get_cstr(map_u64, u64, "key1") == 10);
-  map_delete_cstr(map_u64, "key1");
-  assert(map_get_cstr_p(map_u64, u64, "key1") == 0);
-  map_free(map_u64);
+  map_t map_u64;
+  map_constructor(&map_u64, u64);
+  map_set_cstr(&map_u64, "key1", (u64)10);
+  assert(map_get_cstr(&map_u64, u64, "key1") == 10);
+  map_delete_cstr(&map_u64, "key1");
+  assert(map_get_cstr_p(&map_u64, u64, "key1") == 0);
+  map_deconstructor(&map_u64);
 }
 
 void tcp_server_on_write(net_tcp_client_t* this, const void* context) {}
@@ -80,11 +83,10 @@ i32 main() {
   // array_test();
   // date_test();
   // snowflake_test();
-  // map_test();
+  map_test();
   // net_tcp_test();
   // net_tcp_server_test();
   // path_test();
-  window_test(&app);
   // process_test();
 
   app_run(&app);

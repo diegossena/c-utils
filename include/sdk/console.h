@@ -91,5 +91,5 @@ void console_startup();
 i32 console_write(log_level_t, const char* message, ...);
 i32 console_write_str(log_level_t, const char* message, u64 length);
 
-#include <sdk/console/console.inl.h>
-#include <sdk/console/console.win32.inl.h>
+#include <sdk/console/inl.h>
+#include <sdk/console/win32.inl.h>

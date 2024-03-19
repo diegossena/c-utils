@@ -1,27 +1,29 @@
 #ifndef SDK_NET_TCP_H
 #define SDK_NET_TCP_H
 
-#include <sdk/net/net.h>
+#include <sdk/net.h>
 #include <sdk/error.h>
 #include <sdk/stream.h>
 #include <sdk/application.h>
+#include <sdk/events.h>
 
-typedef struct application_t application_t;
+typedef struct net_tcp_t net_tcp_t;
+
+typedef void (*net_tcp_on_connect_cb)(net_tcp_t*);
+typedef void (*net_tcp_on_write_cb)(net_tcp_t*, const void* context);
+typedef void (*net_tcp_on_read_cb)(net_tcp_t*, const byte* data, u64 length, const void* context);
 
 /** @brief Represents a TCP socket.
- *
  */
 typedef struct net_tcp_t {
-  task_t __task;
+  event_listener_t __listener;
+  fn_any_t __handle;
   stream_t __stream;
   u64 __socket;
-  task_handle __handle;
   u64 __updatedAt;
+  void* context;
 } net_tcp_t;
 
-typedef void (*net_tcp_on_connect_cb)(net_tcp_t* this);
-typedef void (*net_tcp_on_write_cb)(net_tcp_t* this, const void* context);
-typedef void (*net_tcp_on_read_cb)(net_tcp_t* this, const byte* data, u64 length, const void* context);
 /** @brief Externally-defined function to create a net_tcp, provided by the consumer
  * of this library.
  * @param this A pointer which holds the created net_tcp object.
@@ -49,7 +51,7 @@ void net_tcp_connect_handle(net_tcp_t*);
 void net_tcp_read_handle(net_tcp_t*);
 void net_tcp_write_handle(net_tcp_t*);
 
-#include <sdk/net/tcp.win32.inl.h>
-#include <sdk/net/tcp.inl.h>
+#include <sdk/net/tcp/win32.inl.h>
+#include <sdk/net/tcp/inl.h>
 
 #endif

@@ -2,7 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/process/process.h>
+#include <sdk/process.h>
 
 void process_execpath(string_t* this) {
   __string_mutate(this, MAX_PATH);

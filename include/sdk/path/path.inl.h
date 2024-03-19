@@ -1,4 +1,4 @@
-#include <sdk/path/path.h>
+#include <sdk/path.h>
 
 void path_join(string_t* this, const char* path, u64 length) {
   char* ptr = this->__data + this->__length - 1;

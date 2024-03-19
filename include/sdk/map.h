@@ -5,7 +5,7 @@
 
 #define map_hash(data) math_jenkins_hash(data, sizeof(data))
 
-#define map_new(type) _map_new(sizeof(type))
+#define map_constructor(this, type) _map_constructor(this, sizeof(type))
 #define map_set_cstr(this, key, value) { \
   typeof(value) tmp = value;      \
   map_set(this, math_hash_jenkins(key, sizeof(key)), &tmp);         \
@@ -23,18 +23,18 @@ typedef struct map_entry {
   void* __value;
   map_entry* __next;
 } map_entry;
-typedef struct tilemap_t {
+typedef struct map_t {
   u64 __length;
-  u64 __stride;
+  u32 __stride;
   map_entry** __buckets;
   u64 __buckets_length;
-} tilemap_t;
+} map_t;
 
-tilemap_t* _map_new(u64 stride);
-void map_free(tilemap_t*);
+void _map_constructor(map_t*, u32 stride);
+void map_deconstructor(map_t*);
 
-void* map_get(const tilemap_t*, const u64 hash);
-void map_set(tilemap_t*, const u64 hash, const void* value);
-bool map_delete(tilemap_t*, const u64 hash);
+void* map_get(const map_t*, const u64 hash);
+void map_set(map_t*, const u64 hash, const void* value);
+bool map_delete(map_t*, const u64 hash);
 
-#include <sdk/map/map.inl.h>
+#include <sdk/map/inl.h>

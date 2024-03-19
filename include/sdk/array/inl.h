@@ -1,4 +1,4 @@
-#include <sdk/array/array.h>
+#include <sdk/array.h>
 
 bool __array_resize(array_t* this, u64 capacity) {
   this->__data = memory_realloc(this->__data, capacity * this->__stride);
@@ -6,6 +6,9 @@ bool __array_resize(array_t* this, u64 capacity) {
 }
 
 void _array_constructor(array_t* this, u64 stride) {
+  this->__length = 0;
+  this->__capacity = 0;
+  this->__data = 0;
   this->__stride = stride;
 }
 void array_deconstructor(array_t* this) {

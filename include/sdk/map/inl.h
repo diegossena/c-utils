@@ -1,9 +1,9 @@
-#include <sdk/map/map.h>
+#include <sdk/map.h>
 
 #define MIN_HASH_SIZE 512ULL // table size when first created
 #define OCCUPANCY_PCT 0.5 // large PCT means smaller and slower
 
-void __map_rehash(tilemap_t* this, u64 bucket_length) {
+void __map_rehash(map_t* this, u64 bucket_length) {
   map_entry** old_it = this->__buckets;
   this->__buckets = memory_alloc0(bucket_length);
   if (this->__length) {
@@ -26,15 +26,13 @@ void __map_rehash(tilemap_t* this, u64 bucket_length) {
   this->__buckets_length = bucket_length;
 }
 
-tilemap_t* _map_new(u64 stride) {
-  tilemap_t* this = memory_alloc(sizeof(tilemap_t));
+void _map_constructor(map_t* this, u32 stride) {
   this->__buckets = memory_alloc0(sizeof(this->__buckets) * MIN_HASH_SIZE);
   this->__buckets_length = MIN_HASH_SIZE;
-  this->__length = 0;
   this->__stride = stride;
-  return this;
+  this->__length = 0;
 }
-void map_free(tilemap_t* this) {
+void map_deconstructor(map_t* this) {
   map_entry** it = this->__buckets;
   while (true) {
     map_entry* node = *it;
@@ -50,10 +48,9 @@ void map_free(tilemap_t* this) {
     ++it;
   }
   memory_free(this->__buckets);
-  memory_free(this);
 }
 
-void* map_get(const tilemap_t* this, const u64 hash) {
+void* map_get(const map_t* this, const u64 hash) {
   map_entry* node = *(this->__buckets + hash % this->__buckets_length);
   while (node) {
     if (hash == node->__hash) {
@@ -63,7 +60,7 @@ void* map_get(const tilemap_t* this, const u64 hash) {
   }
   return 0;
 }
-void map_set(tilemap_t* this, const u64 hash, const void* value) {
+void map_set(map_t* this, const u64 hash, const void* value) {
   map_entry** it = this->__buckets;
   it += hash % this->__buckets_length;
   while (true) {
@@ -71,9 +68,9 @@ void map_set(tilemap_t* this, const u64 hash, const void* value) {
       // new entry
       *it = memory_alloc(sizeof(map_entry));
       (*it)->__hash = hash;
+      (*it)->__next = 0;
       (*it)->__value = memory_alloc(this->__stride);
       memory_copy((*it)->__value, value, this->__stride);
-      (*it)->__next = 0;
       ++this->__length;
       break;
     } else if ((*it)->__hash == hash) {
@@ -88,7 +85,7 @@ void map_set(tilemap_t* this, const u64 hash, const void* value) {
     __map_rehash(this, new_length);
   }
 }
-bool map_delete(tilemap_t* this, const u64 hash) {
+bool map_delete(map_t* this, const u64 hash) {
   if (!this->__length)
     return false;
   map_entry** it = this->__buckets;

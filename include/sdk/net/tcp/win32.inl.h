@@ -3,12 +3,13 @@
 #if PLATFORM_WINDOWS
 
 #include <sdk/net/tcp.h>
-#include <sdk/date/date.h>
+#include <sdk/date.h>
+#include <sdk/assert.h>
+#include <sdk/map.h>
 
 void net_tcp_free(net_tcp_t* this) {
-  shutdown(this->__socket, FD_WRITE | FD_READ);
   closesocket((SOCKET)this->__socket);
-  task_unregister(this);
+  emitter_off(&this->__listener);
   memory_free(this);
 }
 
@@ -52,7 +53,7 @@ error_code net_tcp_ip4_connect(net_tcp_t* this, const char* host, u16 port, net_
       goto onerror;
     }
   }
-  this->__task.type = TASK_TCP_CONNECTING;
+  this->__listener.callback = (listener_t)net_tcp_connect_handle;
   this->__handle = callback;
   this->__stream.updatedAt = date_now();
   return ERR_SUCCESS;
@@ -68,9 +69,9 @@ void net_tcp_connect_handle(net_tcp_t* this) {
   error_last = select(__application_max_fd, null, &writable, null, &timeout);
   if (error_last > 0) {
     // connected
-    this->__task.type = TASK_TCP_CLOSING;
+    this->__listener.callback = (listener_t)net_tcp_free;
     this->__handle(this);
-    if (this->__task.type == TASK_TCP_CLOSING) {
+    if (this->__listener.callback == (listener_t)net_tcp_free) {
       net_tcp_free(this);
     } else {
       this->__stream.updatedAt = date_now();
@@ -99,9 +100,9 @@ void net_tcp_write_handle(net_tcp_t* this) {
     this->__stream.processed += sent;
     if (this->__stream.length == this->__stream.processed) {
       memory_free(this->__stream.writable);
-      this->__task.type = TASK_TCP_CLOSING;
+      this->__listener.callback = (listener_t)net_tcp_free;
       this->__handle(this, this->__stream.context);
-      if (this->__task.type == TASK_TCP_CLOSING) {
+      if (this->__listener.callback == (listener_t)net_tcp_free) {
         net_tcp_free(this);
       } else {
         this->__stream.processed = 0;
@@ -110,7 +111,6 @@ void net_tcp_write_handle(net_tcp_t* this) {
     return;
   }
   u64 deltaTime = date_now() - this->__stream.updatedAt;
-  console_log("deltaTime=%llu", deltaTime);
   if (deltaTime > DEFAULT_TIMEOUT) {
     error_last = ERR_ETIMEDOUT;
   } else if (error_last < 0) {
@@ -147,10 +147,10 @@ void net_tcp_read_handle(net_tcp_t* this) {
   // onerror
   error("recv", ERR_ETIMEDOUT);
 readend:
-  this->__task.type = TASK_TCP_CLOSING;
+  this->__listener.callback = (listener_t)net_tcp_free;
   this->__handle(this, this->__stream.readable, this->__stream.processed, this->__stream.context);
   memory_free(this->__stream.readable);
-  if (this->__task.type == TASK_TCP_CLOSING) {
+  if (this->__listener.callback == (listener_t)net_tcp_free) {
     net_tcp_free(this);
   } else {
     this->__stream.processed = 0;

@@ -3,7 +3,6 @@
 #if PLATFORM_WINDOWS
 
 #include <sdk/time.h>
-#include <windows.h>
 
 f64 __time_clock_frequency;
 LARGE_INTEGER __time_start;

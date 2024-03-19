@@ -1,4 +1,4 @@
-#include <sdk/sdk.h>
+#include <sdk/path.h>
 
 void path_test() {
   string_t path;

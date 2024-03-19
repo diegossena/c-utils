@@ -2,11 +2,11 @@
 
 #if PLATFORM_WINDOWS
 
-#include <sdk/net/net.tcp.server.h>
+#include <sdk/net/tcp/server.h>
 
 void net_tcp_server_free(net_tcp_server_t* this) {
   closesocket(this->socket);
-  task_unregister(this);
+  emitter_off(&this->__listener);
   memory_free(this);
 }
 
@@ -30,7 +30,7 @@ error_code net_tcp_server_ip4_listen(net_tcp_server_t* this, u16 port, net_tcp_o
     error("listen", WSAGetLastError());
     goto onerror;
   }
-  this->task.type = TASK_TCP_SERVER_LISTENING;
+  this->__listener.callback = (listener_t)net_tcp_server_listen_handle;
   this->handle = (void*)callback;
   // Aceitar conexões e lidar com elas
   return ERR_SUCCESS;
@@ -66,20 +66,21 @@ void net_tcp_server_listen_handle(net_tcp_server_t* this) {
     net_tcp_client_t* client = memory_alloc0(sizeof(net_tcp_client_t));
     client->server = this;
     client->socket = client_socket;
-    client->task.type = TASK_TCP_CLIENT_CLOSING;
+    client->__listener.callback = (listener_t)net_tcp_client_free;
     this->handle(client);
-    if (client->task.type == TASK_TCP_CLIENT_CLOSING) {
+    if (client->__listener.callback == (listener_t)net_tcp_client_free) {
       closesocket(client_socket);
       memory_free(client);
     } else {
+      client->__listener.context = client;
       ++this->client_count;
-      task_register(client, this->app);
+      emitter_on(&this->app->__tasks, &client->__listener);
     }
   }
 }
 void net_tcp_client_free(net_tcp_client_t* this) {
   shutdown(this->socket, FD_WRITE | FD_READ);
-  task_unregister(this);
+  emitter_off(&this->__listener);
   closesocket(this->socket);
   --this->server->client_count;
   memory_free(this);
@@ -104,10 +105,10 @@ void net_tcp_client_read_handle(net_tcp_client_t* this) {
       error("recv", error_last);
     }
   }
-  this->task.type = TASK_TCP_CLIENT_CLOSING;
+  this->__listener.callback = (listener_t)net_tcp_client_free;
   this->handle(this, this->stream.readable, this->stream.processed, this->stream.context);
   memory_free(this->stream.readable);
-  if (this->task.type == TASK_TCP_CLIENT_CLOSING) {
+  if (this->__listener.callback == (listener_t)net_tcp_client_free) {
     net_tcp_client_free(this);
   } else {
     this->stream.processed = 0;
@@ -123,9 +124,9 @@ void net_tcp_client_write_handle(net_tcp_client_t* this) {
     if (this->stream.length == this->stream.processed) {
       memory_free(this->stream.writable);
       this->stream.processed = 0;
-      this->task.type = TASK_TCP_CLIENT_CLOSING;
+      this->__listener.callback = (listener_t)net_tcp_client_free;
       this->handle(this, this->stream.context);
-      if (this->task.type == TASK_TCP_CLIENT_CLOSING) {
+      if (this->__listener.callback == (listener_t)net_tcp_client_free) {
         net_tcp_client_free(this);
       } else {
         this->stream.processed = 0;

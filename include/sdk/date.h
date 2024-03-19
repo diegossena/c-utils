@@ -4,4 +4,4 @@
 
 u64 date_now();
 
-#include <sdk/date/date.inl.h>
+#include <sdk/date/inl.h>

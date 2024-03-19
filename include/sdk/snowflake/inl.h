@@ -1,5 +1,5 @@
-#include <sdk/snowflake/snowflake.h>
-#include <sdk/date/date.h>
+#include <sdk/snowflake.h>
+#include <sdk/date.h>
 
 #define SNOWFLAKE_MAX_SEQUENCE 1023ULL
 

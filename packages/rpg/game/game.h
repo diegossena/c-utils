@@ -32,7 +32,6 @@ typedef struct game_t {
   f64 last_update;
 
   // events
-
   // game_update_event_t
   queue_t onupdate;
   // game_mouse_event_t

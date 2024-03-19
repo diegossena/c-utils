@@ -116,9 +116,9 @@ bitmap_t* gfx_bitmap_new(window_t*, const wchar_t* path);
 void gfx_bitmap_free(bitmap_t*);
 
 void window_free(window_t*);
-void window_pooling();
+bool window_pooling();
 
-#include <sdk/window/window.win32.inl.h>
-#include <sdk/window/window.inl.h>
+#include <sdk/window/win32.inl.h>
+#include <sdk/window/inl.h>
 
 #endif
