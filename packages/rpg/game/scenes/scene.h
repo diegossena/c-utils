@@ -10,4 +10,5 @@ typedef struct scene_t {
   void (*onmousemove)(game_t*, vector2d_t cursor);
   void (*onmouseup)(game_t*, vector2d_t cursor);
   void (*onmousedown)(game_t*, vector2d_t cursor);
+  void (*destroy)(game_t*);
 } scene_t;

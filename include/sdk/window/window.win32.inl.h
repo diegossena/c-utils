@@ -72,9 +72,10 @@ typedef struct window_t {
   ID2D1RenderTarget* d2_render_target;
   IDWriteFactory* d2_write_factory;
 } window_t;
-typedef struct bitmap_t {
-  ID2D1Bitmap* bitmap;
-} bitmap_t;
+typedef struct gfx_text_style_t {
+  IDWriteTextFormat* data;
+  f32 font_size;
+} gfx_text_style_t;
 
 u16 window_get_width(window_t* this) {
   RECT rect;
@@ -335,9 +336,6 @@ void window_startup(application_t* app, window_options_t* options) {
     error("CreateWindowExA", ERR_UNKNOWN);
     goto clear;
   }
-  if (this->oncreate) {
-    this->oncreate(this);
-  }
   // renderer
   HRESULT result = D2D1CreateFactory(
     D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
@@ -379,7 +377,7 @@ void window_startup(application_t* app, window_options_t* options) {
     &this->device_context
   );
   if (FAILED(result)) {
-    console_log("D3D11CreateDeviceAndSwapChain %x", result);
+    console_warn("D3D11CreateDeviceAndSwapChain %x", result);
     exit(1);
   }
   window_set_viewport(this, width, height);
@@ -389,6 +387,9 @@ void window_startup(application_t* app, window_options_t* options) {
   };
   ID3D11Device_CreateRasterizerState(this->device, &rasterizer_desc, &this->rasterizer_state);
   // events
+  if (this->oncreate) {
+    this->oncreate(this);
+  }
   __window_mouse_tracking(this);
   SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
   task_register(this, app);
@@ -405,10 +406,7 @@ void window_pooling() {
     DispatchMessageA(&msg);
   }
 }
-void gfx_draw_rect(window_t* this, gfx_rect_t* props) {
-  ID2D1StrokeStyle* stroke;
-  ID2D1SolidColorBrush* brush;
-  // stroke
+gfx_stroke_t* gfx_stroke_new(window_t* window, stroke_t props) {
   D2D1_STROKE_STYLE_PROPERTIES stroke_properties;
   stroke_properties.startCap = D2D1_CAP_STYLE_ROUND;
   stroke_properties.endCap = D2D1_CAP_STYLE_ROUND;
@@ -424,52 +422,58 @@ void gfx_draw_rect(window_t* this, gfx_rect_t* props) {
   stroke_properties.miterLimit = 10.f;
   stroke_properties.dashStyle = D2D1_DASH_STYLE_SOLID;
   stroke_properties.dashOffset = 0.f;
+  ID2D1StrokeStyle* this;
   ID2D1Factory_CreateStrokeStyle(
-    this->d2_factory, &stroke_properties, null, null, &stroke
+    window->d2_factory, &stroke_properties, null, null,
+    (ID2D1StrokeStyle**)&this
   );
-  // brush
-  ID2D1RenderTarget_CreateSolidColorBrush(
-    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null,
-    &brush
-  );
-  // draw
-  D2D1_ROUNDED_RECT rect = {
-    {
-      props->rect.left_top.x, props->rect.left_top.y,
-      props->rect.right_bottom.x, props->rect.right_bottom.y
-    },
-    props->border.radius, props->border.radius
-  };
-  if (props->border.width) {
-    ID2D1RenderTarget_DrawRoundedRectangle(
-      this->d2_render_target, &rect, (ID2D1Brush*)brush, props->border.width, stroke
+  return this;
+}
+void gfx_stroke_free(gfx_stroke_t* this) {
+  ID2D1StrokeStyle_Release((ID2D1StrokeStyle*)this);
+}
+void gfx_draw_rect(window_t* this, gfx_rect_t* props) {
+  if (props->border_radius) {
+    D2D1_ROUNDED_RECT rect = {
+      {
+        props->rect.left_top.x, props->rect.left_top.y,
+        props->rect.right_bottom.x, props->rect.right_bottom.y
+      },
+      props->border_radius, props->border_radius
+    };
+    if (props->border_width >= 0) {
+      ID2D1RenderTarget_DrawRoundedRectangle(
+        this->d2_render_target, (D2D1_ROUNDED_RECT*)&rect, (ID2D1Brush*)props->color,
+        props->border_width, (ID2D1StrokeStyle*)props->stroke
+      );
+    } else {
+      ID2D1RenderTarget_FillRoundedRectangle(
+        this->d2_render_target, (D2D1_ROUNDED_RECT*)&rect, (ID2D1Brush*)props->color
+      );
+    }
+  } else if (props->border_width >= 0) {
+    ID2D1RenderTarget_DrawRectangle(
+      this->d2_render_target, (D2D1_RECT_F*)&props->rect, (ID2D1Brush*)props->color,
+      props->border_width, (ID2D1StrokeStyle*)props->stroke
     );
   } else {
-    ID2D1RenderTarget_FillRoundedRectangle(
-      this->d2_render_target, &rect, (ID2D1Brush*)brush
+    ID2D1RenderTarget_FillRectangle(
+      this->d2_render_target, (D2D1_RECT_F*)&props->rect, (ID2D1Brush*)props->color
     );
   }
-// release resources
-  ID2D1StrokeStyle_Release(stroke);
-  ID2D1SolidColorBrush_Release(brush);
 }
 void gfx_draw_fill_rect(window_t* this, gfx_rect_t* props) {
-  ID2D1SolidColorBrush* brush;
-  ID2D1RenderTarget_CreateSolidColorBrush(
-    this->d2_render_target, (D2D1_COLOR_F*)&props->color, null, &brush
-  );
   ID2D1RenderTarget_FillRectangle(
-    this->d2_render_target, (D2D1_RECT_F*)&props->rect, (ID2D1Brush*)brush
+    this->d2_render_target, (D2D1_RECT_F*)&props->rect,
+    (ID2D1Brush*)props->color
   );
-  ID2D1SolidColorBrush_Release(brush);
 }
-void gfx_draw_text(const window_t* this, const gfx_textnode_t* props) {
-  IDWriteTextFormat* text_format;
-  ID2D1SolidColorBrush* brush;
-  // text_format
+gfx_text_style_t* gfx_text_style_new(window_t* window, text_style_props_t props) {
+  gfx_text_style_t* this = memory_alloc(sizeof(gfx_text_style_t));
+  this->font_size = props.size;
   DWRITE_FONT_WEIGHT font_weight;
   DWRITE_FONT_STYLE font_style;
-  switch (props->style->weight) {
+  switch (props.weight) {
     case FONT_WEIGHT_NORMAL:
       font_weight = DWRITE_FONT_WEIGHT_NORMAL;
       break;
@@ -477,29 +481,41 @@ void gfx_draw_text(const window_t* this, const gfx_textnode_t* props) {
       font_weight = DWRITE_FONT_WEIGHT_BOLD;
       break;
   }
-  switch (props->style->style) {
+  switch (props.style) {
     case FONT_STYLE_NORMAL:
       font_style = DWRITE_FONT_STYLE_NORMAL;
       break;
   }
   IDWriteFactory_CreateTextFormat(
-    this->d2_write_factory, props->style->family, null, font_weight,
-    font_style, DWRITE_FONT_STRETCH_NORMAL, props->style->size, L"en-US",
-    &text_format
+    window->d2_write_factory, props.family, null, font_weight, font_style,
+    DWRITE_FONT_STRETCH_NORMAL, props.size, L"en-US", &this->data
   );
-  // brush
+  return this;
+}
+void gfx_text_style_free(gfx_text_style_t* this) {
+  IDWriteTextFormat_Release(this->data);
+  memory_free(this);
+}
+gfx_color_t* gfx_color_new(window_t* window, color_t color) {
+  ID2D1SolidColorBrush* this;
   ID2D1RenderTarget_CreateSolidColorBrush(
-    this->d2_render_target, (D2D1_COLOR_F*)&props->style->color, null, (ID2D1SolidColorBrush**)&brush
+    window->d2_render_target, (D2D1_COLOR_F*)&color, null,
+    (ID2D1SolidColorBrush**)&this
   );
-  // draw
+  return this;
+}
+void gfx_color_free(gfx_color_t* this) {
+  ID2D1SolidColorBrush_Release((ID2D1SolidColorBrush*)this);
+}
+void gfx_draw_text(const window_t* this, const gfx_text_t* props) {
+  D2D1_RECT_F rect = { props->position.x, props->position.y };
+  rect.bottom = props->style->font_size;
+  rect.right = rect.bottom * props->length;
   ID2D1RenderTarget_DrawText(
-    this->d2_render_target, props->text, props->length, text_format,
-    (D2D1_RECT_F*)props->parent, (ID2D1Brush*)brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
+    this->d2_render_target, props->text, props->length, props->style->data,
+    &rect, (ID2D1Brush*)props->color, D2D1_DRAW_TEXT_OPTIONS_NONE,
     DWRITE_MEASURING_MODE_NATURAL
   );
-  // free resources
-  IDWriteTextFormat_Release(text_format);
-  ID2D1SolidColorBrush_Release(brush);
 }
 bitmap_t* gfx_bitmap_new(window_t* window, const wchar_t* path) {
   ID2D1Bitmap* this;
@@ -508,7 +524,6 @@ bitmap_t* gfx_bitmap_new(window_t* window, const wchar_t* path) {
   IWICBitmapDecoder* decoder;
   IWICBitmapFrameDecode* frame_decode;
   IWICFormatConverter* converter;
-
   result = CoInitialize(NULL);
   if (FAILED(result)) {
     error("CoInitialize", result);

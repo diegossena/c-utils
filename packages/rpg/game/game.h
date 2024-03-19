@@ -35,7 +35,7 @@ game_t* game_new(window_t* window) {
   title_screen_load(this);
   return this;
 }
-void game_onupdate(game_t* this) {
+void game_render(game_t* this) {
   // timer
   f64 now = time_absolute();
   this->elapsed_time = now - this->last_update;
@@ -44,7 +44,7 @@ void game_onupdate(game_t* this) {
   routine_t* routine_it = (routine_t*)this->routines.next;
   while (routine_it != (routine_t*)&this->routines) {
     routine_t* next = (routine_t*)routine_it->queue.next;
-    routine_it->onupdate(routine_it);
+    routine_it->render(routine_it);
     routine_it = next;
   }
   this->scene->onupdate(this);
@@ -59,6 +59,6 @@ void game_onmousedown(game_t* this, vector2d_t cursor) {
   this->scene->onmousedown(this, cursor);
 }
 void game_free(game_t* this) {
-  memory_free(this->scene);
+  this->scene->destroy(this);
   memory_free(this);
 }

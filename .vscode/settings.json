@@ -4,6 +4,12 @@
     "*.h": "c",
     "random": "c",
     "executor": "c",
-    "string_view": "c"
+    "string_view": "c",
+    "array": "c",
+    "string": "c",
+    "buffer": "c",
+    "internet": "c",
+    "socket": "c",
+    "ranges": "c"
   }
 }
