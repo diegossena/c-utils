@@ -5,10 +5,10 @@
 typedef struct title_screen_t {
   game_t* game;
   // events
-  game_update_event_t onupdate;
-  game_mouse_event_t onmousemove;
-  game_mouse_event_t onmousedown;
-  game_mouse_event_t onmouseup;
+  game_update_ev_t onupdate;
+  game_mouse_ev_t onmousemove;
+  game_mouse_ev_t onmousedown;
+  game_mouse_ev_t onmouseup;
   game_event_t ondestroy;
   // styles
   gfx_color_t* color_black;
@@ -61,8 +61,8 @@ void titlescreen_ondestroy(title_screen_t* this) {
   gfx_text_style_free(this->text_style);
   memory_free(this);
 }
-void title_screen_load(game_t* game) {
-  title_screen_t* this = memory_alloc0(sizeof(title_screen_t));
+void titlescreen_load(game_t* game) {
+  title_screen_t* this = memory_alloc(sizeof(title_screen_t));
   window_t* window = game->window;
   this->game = game;
   // register events
@@ -71,22 +71,22 @@ void title_screen_load(game_t* game) {
     .context = this
   };
   queue_push(&game->ondestroy, &this->ondestroy.queue);
-  this->onupdate = (game_update_event_t) {
+  this->onupdate = (game_update_ev_t) {
     .callback = (game_onupdate_cb)titlescreen_onupdate,
     .context = this
   };
   queue_push(&game->onupdate, &this->onupdate.queue);
-  this->onmousemove = (game_mouse_event_t) {
+  this->onmousemove = (game_mouse_ev_t) {
     .callback = (game_onmouse_cb)titlescreen_onmousemove,
     .context = this
   };
   queue_push(&game->onmousemove, &this->onmousemove.queue);
-  this->onmousedown = (game_mouse_event_t) {
+  this->onmousedown = (game_mouse_ev_t) {
     .callback = (game_onmouse_cb)titlescreen_onmousedown,
     .context = this
   };
   queue_push(&game->onmousedown, &this->onmousedown.queue);
-  this->onmouseup = (game_mouse_event_t) {
+  this->onmouseup = (game_mouse_ev_t) {
     .callback = (game_onmouse_cb)titlescreen_onmouseup,
     .context = this
   };
