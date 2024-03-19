@@ -6,59 +6,81 @@
 #include <sdk/memory.h>
 #include <sdk/time.h>
 
-typedef struct game_t game_t;
-typedef struct scene_t scene_t;
+typedef void (*game_onupdate_cb)(void* context, f32 elapsed_time);
+typedef void (*game_onmouse_cb)(void* context, vector2d_t cursor);
+typedef void (*game_onevent_cb)(void* context);
+
+typedef struct game_update_event_t {
+  queue_t queue;
+  void* context;
+  game_onupdate_cb callback;
+} game_update_event_t;
+typedef struct game_mouse_event_t {
+  queue_t queue;
+  void* context;
+  game_onmouse_cb callback;
+} game_mouse_event_t;
+typedef struct game_event_t {
+  queue_t queue;
+  void* context;
+  game_onevent_cb callback;
+} game_event_t;
 
 typedef struct game_t {
   window_t* window;
-  queue_t routines;
-  // queue_t objects;
-  scene_t* scene;
   // timer
   f64 last_update;
-  f32 elapsed_time;
+  // events
+  queue_t onupdate;
+  queue_t onmousemove;
+  queue_t onmousedown;
+  queue_t onmouseup;
+  queue_t ondestroy;
 } game_t;
 
-#include "./scenes/scene.h"
 #include "./entities/entity.h"
 #include "./routines/routines.h"
 #include "./tilemaps/tilemap.h"
-#include "./scenes/title_screen.h"
+#include "./scene/title_screen.h"
 
 game_t* game_new(window_t* window) {
   game_t* this = memory_alloc(sizeof(game_t));
-  // queue_head(&this->entities);
+  queue_head(&this->onupdate);
+  queue_head(&this->onmousemove);
+  queue_head(&this->onmousedown);
+  queue_head(&this->onmouseup);
+  queue_head(&this->ondestroy);
   this->window = window;
   this->last_update = time_absolute();
-  queue_head(&this->routines);
-  // queue_head(&this->objects);
   title_screen_load(this);
   return this;
 }
-void game_render(game_t* this) {
-  // timer
+void game_onupdate(game_t* this) {
   f64 now = time_absolute();
-  this->elapsed_time = now - this->last_update;
+  f32 elapsed_time = now - this->last_update;
   this->last_update = now;
-  // routines
-  routine_t* routine_it = (routine_t*)this->routines.next;
-  while (routine_it != (routine_t*)&this->routines) {
-    routine_t* next = (routine_t*)routine_it->queue.next;
-    routine_it->render(routine_it);
-    routine_it = next;
+  queue_foreach(game_update_event_t, this->onupdate, it, it->queue.next) {
+    it->callback(it->context, elapsed_time);
   }
-  this->scene->onupdate(this);
 }
 void game_onmousemove(game_t* this, vector2d_t cursor) {
-  this->scene->onmousemove(this, cursor);
+  queue_foreach(game_mouse_event_t, this->onmousemove, it, it->queue.next) {
+    it->callback(it->context, cursor);
+  }
 }
 void game_onmouseup(game_t* this, vector2d_t cursor) {
-  this->scene->onmouseup(this, cursor);
+  queue_foreach(game_mouse_event_t, this->onmouseup, it, it->queue.next) {
+    it->callback(it->context, cursor);
+  }
 }
 void game_onmousedown(game_t* this, vector2d_t cursor) {
-  this->scene->onmousedown(this, cursor);
+  queue_foreach(game_mouse_event_t, this->onmousedown, it, it->queue.next) {
+    it->callback(it->context, cursor);
+  }
 }
 void game_free(game_t* this) {
-  this->scene->destroy(this);
+  queue_foreach(game_event_t, this->ondestroy, it, it->queue.next) {
+    it->callback(it->context);
+  }
   memory_free(this);
 }

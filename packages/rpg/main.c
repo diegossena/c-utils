@@ -4,7 +4,7 @@ void oncreate(window_t* this) {
   this->context = game_new(this);
 }
 void onupdate(window_t* this) {
-  game_render(this->context);
+  game_onupdate(this->context);
 }
 void onmousemove(window_t* this, vector2d_t cursor) {
   game_onmousemove(this->context, cursor);

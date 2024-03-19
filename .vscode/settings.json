@@ -10,6 +10,16 @@
     "buffer": "c",
     "internet": "c",
     "socket": "c",
-    "ranges": "c"
+    "ranges": "c",
+    "chrono": "c",
+    "compare": "c",
+    "functional": "c",
+    "istream": "c",
+    "ostream": "c",
+    "ratio": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c",
+    "io_context": "c"
   }
 }
