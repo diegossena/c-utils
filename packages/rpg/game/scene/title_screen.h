@@ -105,12 +105,12 @@ void titlescreen_load(game_t* game) {
     .stroke = this->stroke_solid,
     .border_width = 1.f
   };
+  rect_set_width(&this->container.rect, 280.f);
+  rect_set_height(&this->container.rect, 42.f);
   this->title = (gfx_text_t) {
     gfx_textnode_cwstr(L"DreamShifters"),
     .style = this->text_style,
     .position = this->container.rect.left_top,
     .color = this->color_black
   };
-  rect_set_width(&this->container.rect, 280.f);
-  rect_set_height(&this->container.rect, 42.f);
 }
