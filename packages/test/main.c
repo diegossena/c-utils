@@ -83,8 +83,8 @@ i32 main() {
   // array_test();
   // date_test();
   // snowflake_test();
-  map_test();
-  // net_tcp_test();
+  // map_test();
+  net_tcp_test();
   // net_tcp_server_test();
   // path_test();
   // process_test();
