@@ -79,15 +79,15 @@ i32 main() {
   application_t app;
   app_constructor(&app);
 
-  // string_test();
-  // array_test();
-  // date_test();
-  // snowflake_test();
-  // map_test();
-  // net_tcp_test(&app);
+  string_test();
+  array_test();
+  date_test();
+  snowflake_test();
+  map_test();
+  net_tcp_test(&app);
   // net_tcp_server_test(&app);
-  // path_test();
-  // process_test();
+  path_test();
+  process_test();
 
   app_run(&app);
   console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_FORE_GREEN CONSOLE_RESET);
