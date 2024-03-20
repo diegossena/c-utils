@@ -4,7 +4,7 @@
 #include "../entities/entity.h"
 
 typedef struct moveto_t {
-  game_update_ev_t onupdate;
+  update_listener_t onupdate;
   event_listener_t ondestroy;
   // props
   game_t* game;
@@ -17,6 +17,7 @@ typedef struct moveto_t {
 
 
 void routine_moveto_destroy(moveto_t* this) {
+  console_log("routine_moveto_destroy");
   queue_remove(&this->onupdate.queue);
   queue_remove(&this->ondestroy.queue);
   memory_free(this);
@@ -26,8 +27,8 @@ void routine_moveto_update(moveto_t* this, f32 elapsed_time) {
   f32 tick = this->timer / this->duration;
   if (tick > 1.f) tick = 1.f;
 
-  this->position->x = (this->target.x - this->start.x) * tick + this->start.x;
-  this->position->y = (this->target.y - this->start.y) * tick + this->start.y;
+  this->position->x = this->start.x + tick * (this->target.x - this->start.x);
+  this->position->y = this->start.y + tick * (this->target.y - this->start.y);
 
   if (this->timer >= this->duration) {
     this->position->x = this->target.x;
@@ -44,14 +45,14 @@ void routine_moveto(game_t* game, vector2d_t* position, vector2d_t target, f32 d
   this->target = target;
   this->duration = duration;
   // register
-  this->onupdate = (game_update_ev_t) {
-    .callback = routine_moveto_update,
+  this->onupdate = (update_listener_t) {
+    .callback = (onupdate_callback_t)routine_moveto_update,
     .context = this,
   };
-  queue_push(&game->onupdate, &this->onupdate.queue);
+  queue_unshift(&game->onupdate, &this->onupdate.queue);
   this->ondestroy = (event_listener_t) {
-    .callback = routine_moveto_destroy,
+    .callback = (listener_t)routine_moveto_destroy,
     .context = this,
   };
-  queue_push(&game->ondestroy, &this->ondestroy.queue);
+  queue_unshift(&game->ondestroy, &this->ondestroy.queue);
 }

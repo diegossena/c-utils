@@ -499,7 +499,7 @@ void gfx_color_free(gfx_color_t* this) {
 }
 void gfx_draw_text(const window_t* this, const gfx_text_t* props) {
   D2D1_RECT_F rect = { props->position.x, props->position.y };
-  rect.bottom = props->style->font_size;
+  rect.bottom = props->position.y + props->style->font_size;
   rect.right = rect.bottom * props->length;
   ID2D1RenderTarget_DrawText(
     this->d2_render_target, props->text, props->length, props->style->data,

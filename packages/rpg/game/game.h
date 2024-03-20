@@ -7,19 +7,19 @@
 #include <sdk/queue.h>
 #include <sdk/events.h>
 
-typedef void (*update_listener_t)(void* context, f32 elapsed_time);
-typedef void (*mouse_listener_t)(void* context, vector2d_t cursor);
+typedef void (*onupdate_callback_t)(void* context, f32 elapsed_time);
+typedef void (*onmouse_callback_t)(void* context, vector2d_t cursor);
 
-typedef struct game_update_ev_t {
+typedef struct update_listener_t {
   queue_t queue;
   void* context;
-  update_listener_t callback;
-} game_update_ev_t;
-typedef struct game_mouse_ev_t {
+  onupdate_callback_t callback;
+} update_listener_t;
+typedef struct mouse_listener_t {
   queue_t queue;
   void* context;
-  mouse_listener_t callback;
-} game_mouse_ev_t;
+  onmouse_callback_t callback;
+} mouse_listener_t;
 
 typedef struct game_t {
   window_t* window;
@@ -27,15 +27,16 @@ typedef struct game_t {
   f64 last_update;
 
   // events
-  // game_update_event_t
+
+  // update_listener_t
   queue_t onupdate;
-  // game_mouse_event_t
+  // mouse_listener_t
   queue_t onmousemove;
-  // game_mouse_event_t
+  // mouse_listener_t
   queue_t onmousedown;
-  // game_mouse_event_t
+  // mouse_listener_t
   queue_t onmouseup;
-  // game_mouse_event_t
+  // listener_t
   queue_t ondestroy;
 } game_t;
 
@@ -59,22 +60,22 @@ void game_onupdate(game_t* this) {
   f64 now = time_absolute();
   f32 elapsed_time = now - this->last_update;
   this->last_update = now;
-  queue_foreach(game_update_ev_t, this->onupdate, it, it->queue.next) {
+  queue_foreach(update_listener_t, this->onupdate, it, it->queue.next) {
     it->callback(it->context, elapsed_time);
   }
 }
 void game_onmousemove(game_t* this, vector2d_t cursor) {
-  queue_foreach(game_mouse_ev_t, this->onmousemove, it, it->queue.next) {
+  queue_foreach(mouse_listener_t, this->onmousemove, it, it->queue.next) {
     it->callback(it->context, cursor);
   }
 }
 void game_onmouseup(game_t* this, vector2d_t cursor) {
-  queue_foreach(game_mouse_ev_t, this->onmouseup, it, it->queue.next) {
+  queue_foreach(mouse_listener_t, this->onmouseup, it, it->queue.next) {
     it->callback(it->context, cursor);
   }
 }
 void game_onmousedown(game_t* this, vector2d_t cursor) {
-  queue_foreach(game_mouse_ev_t, this->onmousedown, it, it->queue.next) {
+  queue_foreach(mouse_listener_t, this->onmousedown, it, it->queue.next) {
     it->callback(it->context, cursor);
   }
 }

@@ -1,14 +1,15 @@
 #pragma once
 
 #include "../game.h"
+#include "../routines/moveto.h"
 
 typedef struct title_screen_t {
   game_t* game;
   // events
-  game_update_ev_t onupdate;
-  game_mouse_ev_t onmousemove;
-  game_mouse_ev_t onmousedown;
-  game_mouse_ev_t onmouseup;
+  update_listener_t onupdate;
+  mouse_listener_t onmousemove;
+  mouse_listener_t onmousedown;
+  mouse_listener_t onmouseup;
   event_listener_t ondestroy;
   // styles
   gfx_color_t* color_black;
@@ -70,23 +71,23 @@ void titlescreen_load(game_t* game) {
     .context = this
   };
   emitter_on(&game->ondestroy, &this->ondestroy);
-  this->onupdate = (game_update_ev_t) {
-    .callback = (update_listener_t)titlescreen_onupdate,
+  this->onupdate = (update_listener_t) {
+    .callback = (onupdate_callback_t)titlescreen_onupdate,
     .context = this
   };
   queue_push(&game->onupdate, &this->onupdate.queue);
-  this->onmousemove = (game_mouse_ev_t) {
-    .callback = (mouse_listener_t)titlescreen_onmousemove,
+  this->onmousemove = (mouse_listener_t) {
+    .callback = (onmouse_callback_t)titlescreen_onmousemove,
     .context = this
   };
   queue_push(&game->onmousemove, &this->onmousemove.queue);
-  this->onmousedown = (game_mouse_ev_t) {
-    .callback = (mouse_listener_t)titlescreen_onmousedown,
+  this->onmousedown = (mouse_listener_t) {
+    .callback = (onmouse_callback_t)titlescreen_onmousedown,
     .context = this
   };
   queue_push(&game->onmousedown, &this->onmousedown.queue);
-  this->onmouseup = (game_mouse_ev_t) {
-    .callback = (mouse_listener_t)titlescreen_onmouseup,
+  this->onmouseup = (mouse_listener_t) {
+    .callback = (onmouse_callback_t)titlescreen_onmouseup,
     .context = this
   };
   queue_push(&game->onmouseup, &this->onmouseup.queue);
@@ -112,4 +113,21 @@ void titlescreen_load(game_t* game) {
     .position = this->container.rect.left_top,
     .color = this->color_black
   };
+  vector2d_t target = {
+    this->container.rect.left_top.x,
+    this->container.rect.left_top.y + 100.f
+  };
+  routine_moveto(
+    game, &this->container.rect.left_top, target, 1.f
+  );
+  routine_moveto(
+    game, &this->title.position, target, 1.f
+  );
+  target = (vector2d_t) {
+    this->container.rect.right_bottom.x,
+    this->container.rect.right_bottom.y + 100.f
+  };
+  routine_moveto(
+    game, &this->container.rect.right_bottom, target, 1.f
+  );
 }
