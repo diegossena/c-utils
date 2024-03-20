@@ -23,6 +23,7 @@
     "io_context": "c",
     "optional": "c",
     "system_error": "c",
-    "vector": "c"
+    "vector": "c",
+    "initializer_list": "c"
   }
 }

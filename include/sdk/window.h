@@ -17,10 +17,11 @@
 
 typedef struct application_t application_t;
 typedef struct window_t window_t; // defined based on platform
-typedef void bitmap_t;
-typedef struct gfx_text_style_t gfx_text_style_t;
-typedef void gfx_color_t;
-typedef void gfx_stroke_t;
+typedef struct bitmap_t bitmap_t;
+typedef struct gfx_font_t gfx_font_t;
+typedef struct gfx_color_t gfx_color_t;
+typedef struct gfx_stroke_t gfx_stroke_t;
+typedef struct gfx_text_t gfx_text_t;
 
 typedef void (*window_event_cb)(window_t* this);
 typedef void (*update_event_cb)(window_t* this);
@@ -65,12 +66,6 @@ typedef struct color_t { f32 r, g, b, a; } color_t;
 typedef struct stroke_t {
   border_style_t style;
 } stroke_t;
-typedef struct text_style_props_t {
-  const wchar_t* family;
-  font_weight_t weight;
-  font_style_t style;
-  float size;
-} text_style_props_t;
 typedef struct gfx_bitmap_t {
   rect_t rect;
   bitmap_t* image;
@@ -82,13 +77,13 @@ typedef struct gfx_rect_t {
   f32 border_width;
   f32 border_radius;
 } gfx_rect_t;
-typedef struct gfx_text_t {
+typedef struct text_t {
   const wchar_t* text;
   u64 length;
   vector2d_t position;
   gfx_color_t* color;
-  gfx_text_style_t* style;
-} gfx_text_t;
+  gfx_font_t* font;
+} text_t;
 
 void window_startup(application_t*, window_options_t*);
 
@@ -99,20 +94,26 @@ u16 window_get_height(window_t*);
 void window_set_size(window_t*, i32 width, i32 height);
 vector2d_t window_get_cursor(window_t*);
 
+void gfx_text_new(gfx_text_t*, window_t*, text_t);
+void gfx_text_free(gfx_text_t*);
+void gfx_text_set_size(gfx_text_t*, f32);
+void gfx_text_set_weight(gfx_text_t*, font_weight_t);
+
+void gfx_stroke_new(gfx_stroke_t*, window_t*, stroke_t);
+void gfx_stroke_free(gfx_stroke_t*);
+
+void gfx_color_new(gfx_color_t*, window_t*, color_t);
+void gfx_color_free(gfx_color_t*);
+
 void gfx_draw_text(const window_t*, const gfx_text_t*);
 void gfx_draw_rect(window_t*, gfx_rect_t*);
 void gfx_draw_bitmap(window_t*, gfx_bitmap_t*);
 
-gfx_stroke_t* gfx_stroke_new(window_t*, stroke_t);
-void gfx_stroke_free(gfx_stroke_t*);
+void gfx_font_new(gfx_font_t*, window_t*, const wchar_t* family);
+void gfx_font_load(gfx_font_t*, window_t*, const wchar_t* path);
+void gfx_font_free(gfx_font_t*);
 
-gfx_color_t* gfx_color_new(window_t*, color_t);
-void gfx_color_free(gfx_color_t*);
-
-gfx_text_style_t* gfx_text_style_new(window_t*, text_style_props_t);
-void gfx_text_style_free(gfx_text_style_t*);
-
-bitmap_t* gfx_bitmap_new(window_t*, const wchar_t* path);
+void gfx_bitmap_new(bitmap_t*, window_t*, const wchar_t* path);
 void gfx_bitmap_free(bitmap_t*);
 
 void window_free(window_t*);

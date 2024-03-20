@@ -12,22 +12,23 @@ typedef struct title_screen_t {
   mouse_listener_t onmouseup;
   event_listener_t ondestroy;
   // styles
-  gfx_color_t* color_black;
-  gfx_color_t* color_green;
-  gfx_stroke_t* stroke_solid;
-  gfx_text_style_t* text_style;
+  gfx_color_t color_black;
+  gfx_color_t color_green;
+  gfx_stroke_t stroke_solid;
+  gfx_font_t font;
   // elements
   gfx_rect_t container;
   bool container_clicking;
   gfx_text_t title;
+  gfx_text_t press_space;
 } title_screen_t;
 
 void titlescreen_onmousemove(title_screen_t* this, vector2d_t cursor) {
   window_t* window = this->game->window;
   if (rect_pointin(&this->container.rect, cursor)) {
-    this->title.color = this->color_green;
+    this->title.color = &this->color_green;
   } else {
-    this->title.color = this->color_black;
+    this->title.color = &this->color_black;
   }
 }
 void titlescreen_onmousedown(title_screen_t* this, vector2d_t cursor) {
@@ -47,6 +48,7 @@ void titlescreen_onupdate(title_screen_t* this) {
   window_t* window = this->game->window;
   gfx_draw_rect(window, &this->container);
   gfx_draw_text(window, &this->title);
+  gfx_draw_text(window, &this->press_space);
 }
 void titlescreen_ondestroy(title_screen_t* this) {
   window_t* window = this->game->window;
@@ -55,10 +57,10 @@ void titlescreen_ondestroy(title_screen_t* this) {
   queue_remove(&this->onmousemove.queue);
   queue_remove(&this->onmousedown.queue);
   queue_remove(&this->onmouseup.queue);
-  gfx_stroke_free(this->stroke_solid);
-  gfx_color_free(this->color_black);
-  gfx_color_free(this->color_green);
-  gfx_text_style_free(this->text_style);
+  gfx_stroke_free(&this->stroke_solid);
+  gfx_color_free(&this->color_black);
+  gfx_color_free(&this->color_green);
+  gfx_font_free(&this->font);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
@@ -92,42 +94,31 @@ void titlescreen_load(game_t* game) {
   };
   queue_push(&game->onmouseup, &this->onmouseup.queue);
   // styles
-  this->stroke_solid = gfx_stroke_new(window, (stroke_t) { BORDER_STYLE_SOLID });
-  this->color_black = gfx_color_new(window, COLOR_BLACK);
-  this->color_green = gfx_color_new(window, COLOR_GREEN);
-  this->text_style = gfx_text_style_new(window, (text_style_props_t) {
-    .size = 40, .family = L"Arial", .weight = FONT_WEIGHT_BOLD
-  });
+  gfx_stroke_new(&this->stroke_solid, window, (stroke_t) { BORDER_STYLE_SOLID });
+  gfx_color_new(&this->color_black, window, COLOR_BLACK);
+  gfx_color_new(&this->color_green, window, COLOR_GREEN);
+  gfx_font_new(&this->font, window, L"Arial");
   // elements
   this->container = (gfx_rect_t) {
     .rect = { 230.f },
-    .color = this->color_black,
-    .stroke = this->stroke_solid,
+    .color = &this->color_black,
+    .stroke = &this->stroke_solid,
     .border_width = 1.f
   };
   rect_set_width(&this->container.rect, 280.f);
   rect_set_height(&this->container.rect, 42.f);
-  this->title = (gfx_text_t) {
+  gfx_text_new(&this->title, window, (text_t) {
     gfx_textnode_cwstr(L"DreamShifters"),
-    .style = this->text_style,
-    .position = this->container.rect.left_top,
-    .color = this->color_black
-  };
-  vector2d_t target = {
-    this->container.rect.left_top.x,
-    this->container.rect.left_top.y + 100.f
-  };
-  routine_moveto(
-    game, &this->container.rect.left_top, target, 1.f
-  );
-  routine_moveto(
-    game, &this->title.position, target, 1.f
-  );
-  target = (vector2d_t) {
-    this->container.rect.right_bottom.x,
-    this->container.rect.right_bottom.y + 100.f
-  };
-  routine_moveto(
-    game, &this->container.rect.right_bottom, target, 1.f
-  );
+      .font = &this->font,
+      .position = this->container.rect.left_top,
+      .color = &this->color_black
+  });
+  gfx_text_set_size(&this->title, 30.f);
+  gfx_text_set_weight(&this->title, FONT_WEIGHT_BOLD);
+  gfx_text_new(&this->press_space, window, (text_t) {
+    gfx_textnode_cwstr(L"Press Space"),
+      .font = &this->font,
+      .position = { 100.f, 100.f },
+      .color = &this->color_black
+  });
 }
