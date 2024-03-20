@@ -20,11 +20,6 @@ typedef struct game_mouse_ev_t {
   void* context;
   mouse_listener_t callback;
 } game_mouse_ev_t;
-typedef struct game_event_t {
-  queue_t queue;
-  void* context;
-  listener_t callback;
-} game_event_t;
 
 typedef struct game_t {
   window_t* window;
@@ -84,8 +79,6 @@ void game_onmousedown(game_t* this, vector2d_t cursor) {
   }
 }
 void game_free(game_t* this) {
-  queue_foreach(game_event_t, this->ondestroy, it, it->queue.next) {
-    it->callback(it->context);
-  }
+  emitter_emit(&this->ondestroy);
   memory_free(this);
 }

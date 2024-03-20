@@ -9,7 +9,7 @@ typedef struct title_screen_t {
   game_mouse_ev_t onmousemove;
   game_mouse_ev_t onmousedown;
   game_mouse_ev_t onmouseup;
-  game_event_t ondestroy;
+  event_listener_t ondestroy;
   // styles
   gfx_color_t* color_black;
   gfx_color_t* color_green;
@@ -49,7 +49,7 @@ void titlescreen_onupdate(title_screen_t* this) {
 }
 void titlescreen_ondestroy(title_screen_t* this) {
   window_t* window = this->game->window;
-  queue_remove(&this->ondestroy.queue);
+  emitter_off(&this->ondestroy);
   queue_remove(&this->onupdate.queue);
   queue_remove(&this->onmousemove.queue);
   queue_remove(&this->onmousedown.queue);
@@ -65,11 +65,11 @@ void titlescreen_load(game_t* game) {
   window_t* window = game->window;
   this->game = game;
   // register events
-  this->ondestroy = (game_event_t) {
+  this->ondestroy = (event_listener_t) {
     .callback = (listener_t)titlescreen_ondestroy,
     .context = this
   };
-  queue_push(&game->ondestroy, &this->ondestroy.queue);
+  emitter_on(&game->ondestroy, &this->ondestroy);
   this->onupdate = (game_update_ev_t) {
     .callback = (update_listener_t)titlescreen_onupdate,
     .context = this

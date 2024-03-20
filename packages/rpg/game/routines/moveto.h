@@ -5,7 +5,7 @@
 
 typedef struct moveto_t {
   game_update_ev_t onupdate;
-  game_event_t ondestroy;
+  event_listener_t ondestroy;
   // props
   game_t* game;
   vector2d_t* position;
@@ -49,7 +49,7 @@ void routine_moveto(game_t* game, vector2d_t* position, vector2d_t target, f32 d
     .context = this,
   };
   queue_push(&game->onupdate, &this->onupdate.queue);
-  this->ondestroy = (game_event_t) {
+  this->ondestroy = (event_listener_t) {
     .callback = routine_moveto_destroy,
     .context = this,
   };
