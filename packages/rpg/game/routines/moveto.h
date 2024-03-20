@@ -16,9 +16,8 @@ typedef struct moveto_t {
 
 
 void routine_moveto_destroy(moveto_t* this) {
-  console_log("routine_moveto_destroy");
   queue_remove(&this->onupdate.queue);
-  queue_remove(&this->ondestroy.queue);
+  emitter_off(&this->ondestroy);
   memory_free(this);
 }
 void routine_moveto_update(moveto_t* this, f32 elapsed_time) {
