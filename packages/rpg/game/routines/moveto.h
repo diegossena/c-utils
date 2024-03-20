@@ -31,8 +31,8 @@ void routine_moveto_update(moveto_t* this, f32 elapsed_time) {
   this->position->y = this->start.y + tick * (this->target.y - this->start.y);
 
   if (this->timer >= this->duration) {
-    this->position->x = this->target.x;
-    this->position->y = this->target.y;
+    // this->position->x = this->target.x;
+    // this->position->y = this->target.y;
     routine_moveto_destroy(this);
   }
 }
