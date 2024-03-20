@@ -99,7 +99,7 @@ void titlescreen_load(game_t* game) {
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
   gfx_font_load(
     &this->font, window, L"TLOZ Minish Cap/A Link to the Past/Four Sword",
-    L"C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\zelda-font.ttf"
+    L".\\assets\\fonts\\zelda-font.ttf"
   );
   // gfx_font_load(
   //   &this->font, window, L"MegaMan 2",
