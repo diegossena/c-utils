@@ -482,7 +482,7 @@ void gfx_font_load(gfx_font_t* this, window_t* window, const wchar_t* family, co
   );
   FontCollectionLoader_Inicialize(&collection_loader, font_file);
   window->d2_write_factory->lpVtbl->RegisterFontCollectionLoader(
-    window->d2_write_factory, &collection_loader
+    window->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
   );
   window->d2_write_factory->lpVtbl->CreateCustomFontCollection(
     window->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,

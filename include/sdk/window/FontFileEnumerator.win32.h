@@ -37,5 +37,4 @@ void FontFileEnumerator_Inicialize(
 ) {
   This->lpVtbl = (IDWriteFontFileEnumeratorVtbl*)&g_FontFileEnumeratorVtbl;
   This->__font_file = font_file;
-  return This;
 }

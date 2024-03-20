@@ -15,14 +15,14 @@ HRESULT STDMETHODCALLTYPE FontCollectionLoader_CreateEnumeratorFromKey(
   SDK_FontCollectionLoader* This, IDWriteFactory* factory, const void* key,
   UINT32 key_size, IDWriteFontFileEnumerator** enumerator
 ) {
-  *enumerator = &This->__enumerator;
+  *enumerator = (IDWriteFontFileEnumerator*)&This->__enumerator;
   return S_OK;
 }
 static const IDWriteFontCollectionLoaderVtbl g_FontCollectionLoaderVtbl = {
-  FontCollectionLoader_QueryInterface,
-  IUnknown_AddRef,
-  IUnknown_Release,
-  FontCollectionLoader_CreateEnumeratorFromKey
+  (void*)FontCollectionLoader_QueryInterface,
+  (void*)IUnknown_AddRef,
+  (void*)IUnknown_Release,
+  (void*)FontCollectionLoader_CreateEnumeratorFromKey
 };
 void FontCollectionLoader_Inicialize(SDK_FontCollectionLoader* This, IDWriteFontFile* font_file) {
   This->lpVtbl = (IDWriteFontCollectionLoaderVtbl*)&g_FontCollectionLoaderVtbl;
