@@ -5,6 +5,7 @@
 #include <sdk/window.h>
 #include <sdk/application.h>
 #include <sdk/error.h>
+#include <sdk/window/FontCollectionLoader.win32.h>
 
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \
@@ -209,6 +210,7 @@ void __window_update_handler(HWND handle, UINT unused1, UINT_PTR unused2, DWORD 
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
+  const char* font_path = "C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\zelda-font.ttf";
   switch (message) {
     case WM_MOUSELEAVE:
       if (this->onmousemove) {
@@ -259,6 +261,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       }
       return 0;
     case WM_CREATE: {
+      SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
@@ -389,11 +392,11 @@ void window_startup(application_t* app, window_options_t* options) {
   };
   ID3D11Device_CreateRasterizerState(this->device, &rasterizer_desc, &this->rasterizer_state);
   // events
+  __window_mouse_tracking(this);
+  SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
   if (this->oncreate) {
     this->oncreate(this);
   }
-  __window_mouse_tracking(this);
-  SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
   return;
 clear:
   memory_free(this);
@@ -469,42 +472,35 @@ void gfx_draw_rect(window_t* this, gfx_rect_t* props) {
     );
   }
 }
-void gfx_font_load(gfx_font_t* this, window_t* window, const wchar_t* path) {
-  HRESULT result;
+
+void gfx_font_load(gfx_font_t* this, window_t* window, const wchar_t* family, const wchar_t* path) {
   IDWriteFontFile* font_file;
-  result = IDWriteFactory_CreateFontFileReference(
+  SDK_FontCollectionLoader collection_loader;
+  IDWriteFontCollection* collection;
+  window->d2_write_factory->lpVtbl->CreateFontFileReference(
     window->d2_write_factory, path, 0, &font_file
   );
-  if (FAILED(result)) {
-    error("IDWriteFactory_CreateFontFileReference", result);
-    return;
-  }
-  IDWriteFontFace* font_face;
-  IDWriteFactory_CreateFontFace(
-    window->d2_write_factory, DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, &font_file,
-    0, DWRITE_FONT_SIMULATIONS_NONE, &font_face
+  FontCollectionLoader_Inicialize(&collection_loader, font_file);
+  window->d2_write_factory->lpVtbl->RegisterFontCollectionLoader(
+    window->d2_write_factory, &collection_loader
   );
-  IDWriteFontFile_Release(font_file);
-  if (FAILED(result)) {
-    error("IDWriteFactory_CreateFontFace", result);
-    return;
-  }
+  window->d2_write_factory->lpVtbl->CreateCustomFontCollection(
+    window->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
+    0, 0, &collection
+  );
   IDWriteFactory_CreateTextFormat(
-    window->d2_write_factory, path, (IDWriteFontCollection*)font_face, DWRITE_FONT_WEIGHT_NORMAL,
+    window->d2_write_factory, family, collection, DWRITE_FONT_WEIGHT_NORMAL,
     DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 16.f, L"",
     &this->__format
   );
-  IDWriteFontFace_Release(font_face);
-  if (FAILED(result)) {
-    error("IDWriteFactory_CreateTextFormat", result);
-    return;
-  }
+  // IDWriteFontFile_Release(font_file);
+  IDWriteFontCollection_Release(collection);
 }
 void gfx_font_new(gfx_font_t* this, window_t* window, const wchar_t* family) {
-  IDWriteFactory_CreateTextFormat(
+  HRESULT result = IDWriteFactory_CreateTextFormat(
     window->d2_write_factory, family, null, DWRITE_FONT_WEIGHT_NORMAL,
-    DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 16.f, L"en-US",
-    (IDWriteTextFormat**)&this->__format
+    DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 16.f, L"",
+    &this->__format
   );
 }
 void gfx_font_free(gfx_font_t* this) {

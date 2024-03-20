@@ -110,8 +110,8 @@ void gfx_draw_rect(window_t*, gfx_rect_t*);
 void gfx_draw_bitmap(window_t*, gfx_bitmap_t*);
 
 void gfx_font_new(gfx_font_t*, window_t*, const wchar_t* family);
-void gfx_font_load(gfx_font_t*, window_t*, const wchar_t* path);
 void gfx_font_free(gfx_font_t*);
+void gfx_font_load(gfx_font_t*, window_t*, const wchar_t* family, const wchar_t* path);
 
 void gfx_bitmap_new(bitmap_t*, window_t*, const wchar_t* path);
 void gfx_bitmap_free(bitmap_t*);

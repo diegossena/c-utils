@@ -97,7 +97,16 @@ void titlescreen_load(game_t* game) {
   gfx_stroke_new(&this->stroke_solid, window, (stroke_t) { BORDER_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
-  gfx_font_new(&this->font, window, L"Arial");
+  gfx_font_load(
+    &this->font, window, L"TLOZ Minish Cap/A Link to the Past/Four Sword",
+    L"C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\zelda-font.ttf"
+  );
+  // gfx_font_load(
+  //   &this->font, window, L"MegaMan 2",
+  //   L"C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\megaman_2.ttf"
+  // );
+  gfx_color_new(&this->color_green, window, COLOR_GREEN);
+  // gfx_font_new(&this->font, window, L"TLOZ Minish Cap/A Link to the Past/Four Sword");
   // elements
   this->container = (gfx_rect_t) {
     .rect = { 230.f },
@@ -113,7 +122,7 @@ void titlescreen_load(game_t* game) {
       .position = this->container.rect.left_top,
       .color = &this->color_black
   });
-  gfx_text_set_size(&this->title, 30.f);
+  gfx_text_set_size(&this->title, 32.f);
   gfx_text_set_weight(&this->title, FONT_WEIGHT_BOLD);
   gfx_text_new(&this->press_space, window, (text_t) {
     gfx_textnode_cwstr(L"Press Space"),
