@@ -23,7 +23,7 @@ i32 app_run(application_t* this) {
     for (i = 0; i < 8; i++) {
       if (it == head) {
         it = (event_listener_t*)this->__tasks.next;
-        if (it == head) {
+        if (it == (event_listener_t*)head) {
           break;
         }
       }
@@ -35,9 +35,9 @@ i32 app_run(application_t* this) {
 #else
   while (true) {
 #endif
-    if (it == head) {
-      it = (event_listener_t*)this->__tasks.next;
-      if (it == head) {
+    if (it == (event_listener_t*)head) {
+      it = (event_listener_t*)head->next;
+      if (it == (event_listener_t*)head) {
         break;
       }
     }
