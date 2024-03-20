@@ -5,7 +5,7 @@
 #include <sdk/window.h>
 #include <sdk/application.h>
 #include <sdk/error.h>
-#include <sdk/window/FontCollectionLoader.win32.h>
+#include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \

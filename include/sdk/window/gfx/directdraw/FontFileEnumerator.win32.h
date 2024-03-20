@@ -2,7 +2,7 @@
 #include <sdk/window.h>
 #include <sdk/platform.h>
 #include <sdk/memory.h>
-#include <sdk/window/IUnknown.h>
+#include <sdk/window/gfx/directdraw/IUnknown.win32.h>
 
 typedef struct SDK_FontFileEnumerator {
   IDWriteFontFileEnumeratorVtbl* lpVtbl;

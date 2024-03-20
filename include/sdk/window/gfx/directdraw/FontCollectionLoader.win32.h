@@ -1,8 +1,8 @@
 #pragma once
 #include <sdk/window.h>
 #include <sdk/platform.h>
-#include <sdk/window/IUnknown.h>
-#include <sdk/window/FontFileEnumerator.win32.h>
+#include <sdk/window/gfx/directdraw/IUnknown.win32.h>
+#include <sdk/window/gfx/directdraw/FontFileEnumerator.win32.h>
 
 typedef struct SDK_FontCollectionLoader {
   IDWriteFontCollectionLoaderVtbl* lpVtbl;
