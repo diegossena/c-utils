@@ -106,7 +106,6 @@ void titlescreen_load(game_t* game) {
   //   L"C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\megaman_2.ttf"
   // );
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
-  // gfx_font_new(&this->font, window, L"TLOZ Minish Cap/A Link to the Past/Four Sword");
   // elements
   this->container = (gfx_rect_t) {
     .rect = { 230.f },

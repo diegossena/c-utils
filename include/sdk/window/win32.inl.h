@@ -493,7 +493,6 @@ void gfx_font_load(gfx_font_t* this, window_t* window, const wchar_t* family, co
     DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 16.f, L"",
     &this->__format
   );
-  // IDWriteFontFile_Release(font_file);
   IDWriteFontCollection_Release(collection);
 }
 void gfx_font_new(gfx_font_t* this, window_t* window, const wchar_t* family) {
