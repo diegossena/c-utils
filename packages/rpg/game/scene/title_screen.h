@@ -39,7 +39,6 @@ void titlescreen_onmouseup(title_screen_t* this, vector2d_t cursor) {
   window_t* window = this->game->window;
   if (this->container_clicking
     && rect_pointin(&this->container.rect, cursor)) {
-    console_log("onclick");
   }
   this->container_clicking = false;
 }

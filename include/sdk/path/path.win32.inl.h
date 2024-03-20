@@ -11,7 +11,7 @@ void path_resolve(string_t* this) {
   u32 length = GetFullPathNameA(this->__data, MAX_PATH, buffer, NULL);
   if (length) {
     u64 capacity = length + 1;
-    this->__data = memory_realloc(this->__data, capacity);
+    __string_mutate(this, MAX_PATH);
     this->__length = length;
     memory_copy(this->__data, buffer, capacity);
   } else {

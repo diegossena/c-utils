@@ -6,7 +6,7 @@ void path_join(string_t* this, const char* path, u64 length) {
     *++ptr = path_sep;
     ++this->__length;
   }
-  this->__data = memory_realloc(this->__data, this->__length + length + 1);
+  __string_mutate(this, MAX_PATH);
   ptr = this->__data + this->__length;
   memory_copy(ptr, path, length);
   ptr += length;
@@ -19,5 +19,5 @@ void path_dirname(string_t* this) {
     --ptr;
   }
   *ptr = '\0';
-  this->__data = memory_realloc(this->__data, this->__length + 1);
+  __string_mutate(this, MAX_PATH);
 }

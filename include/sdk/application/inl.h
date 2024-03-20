@@ -10,13 +10,38 @@ void app_constructor(application_t* this) {
 }
 
 i32 app_run(application_t* this) {
+  event_listener_t* head = (event_listener_t*)&this->__tasks;
   event_listener_t* it = (event_listener_t*)this->__tasks.next;
-  while (
+  event_listener_t* next;
 #ifdef SDK_WINDOW_H
-    window_pooling() &&
+  i32 i = 1;
+  while (i && window_pool()) {
+    /**
+     * Process immediate callbacks (e.g. write_cb) a small fixed number of
+     * times to avoid loop starvation.
+     */
+    for (i = 0; i < 8; i++) {
+      if (it == head) {
+        it = (event_listener_t*)this->__tasks.next;
+        if (it == head) {
+          break;
+        }
+      }
+      next = (event_listener_t*)it->queue.next;
+      it->callback(it->context);
+      it = next;
+    }
+  }
+#else
+  while (true) {
 #endif
-    it != (event_listener_t*)this->__tasks.next) {
-    event_listener_t* next = (event_listener_t*)it->queue.next;
+    if (it == head) {
+      it = (event_listener_t*)this->__tasks.next;
+      if (it == head) {
+        break;
+      }
+    }
+    next = (event_listener_t*)it->queue.next;
     it->callback(it->context);
     it = next;
   }
