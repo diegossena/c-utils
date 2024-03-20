@@ -103,7 +103,7 @@ void titlescreen_load(game_t* game) {
   );
   // gfx_font_load(
   //   &this->font, window, L"MegaMan 2",
-  //   L"C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\megaman_2.ttf"
+  //   L".\\assets\\fonts\\megaman_2.ttf"
   // );
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
   // elements
