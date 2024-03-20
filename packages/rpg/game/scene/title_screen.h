@@ -46,7 +46,7 @@ void titlescreen_onmouseup(title_screen_t* this, vector2d_t cursor) {
 }
 void titlescreen_onupdate(title_screen_t* this) {
   window_t* window = this->game->window;
-  gfx_draw_rect(window, &this->container);
+  // gfx_draw_rect(window, &this->container);
   gfx_draw_text(window, &this->title);
   gfx_draw_text(window, &this->press_space);
 }
