@@ -1,29 +1,29 @@
 #pragma once
 
-#include <sdk/types.h>
 #include <sdk/window.h>
 #include <sdk/keyboard.h>
 #include <sdk/memory.h>
 #include <sdk/time.h>
+#include <sdk/queue.h>
+#include <sdk/events.h>
 
-typedef void (*game_onupdate_cb)(void* context, f32 elapsed_time);
-typedef void (*game_onmouse_cb)(void* context, vector2d_t cursor);
-typedef void (*game_onevent_cb)(void* context);
+typedef void (*update_listener_t)(void* context, f32 elapsed_time);
+typedef void (*mouse_listener_t)(void* context, vector2d_t cursor);
 
 typedef struct game_update_ev_t {
   queue_t queue;
   void* context;
-  game_onupdate_cb callback;
+  update_listener_t callback;
 } game_update_ev_t;
 typedef struct game_mouse_ev_t {
   queue_t queue;
   void* context;
-  game_onmouse_cb callback;
+  mouse_listener_t callback;
 } game_mouse_ev_t;
 typedef struct game_event_t {
   queue_t queue;
   void* context;
-  game_onevent_cb callback;
+  listener_t callback;
 } game_event_t;
 
 typedef struct game_t {

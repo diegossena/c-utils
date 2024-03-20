@@ -66,27 +66,27 @@ void titlescreen_load(game_t* game) {
   this->game = game;
   // register events
   this->ondestroy = (game_event_t) {
-    .callback = (game_onevent_cb)titlescreen_ondestroy,
+    .callback = (listener_t)titlescreen_ondestroy,
     .context = this
   };
   queue_push(&game->ondestroy, &this->ondestroy.queue);
   this->onupdate = (game_update_ev_t) {
-    .callback = (game_onupdate_cb)titlescreen_onupdate,
+    .callback = (update_listener_t)titlescreen_onupdate,
     .context = this
   };
   queue_push(&game->onupdate, &this->onupdate.queue);
   this->onmousemove = (game_mouse_ev_t) {
-    .callback = (game_onmouse_cb)titlescreen_onmousemove,
+    .callback = (mouse_listener_t)titlescreen_onmousemove,
     .context = this
   };
   queue_push(&game->onmousemove, &this->onmousemove.queue);
   this->onmousedown = (game_mouse_ev_t) {
-    .callback = (game_onmouse_cb)titlescreen_onmousedown,
+    .callback = (mouse_listener_t)titlescreen_onmousedown,
     .context = this
   };
   queue_push(&game->onmousedown, &this->onmousedown.queue);
   this->onmouseup = (game_mouse_ev_t) {
-    .callback = (game_onmouse_cb)titlescreen_onmouseup,
+    .callback = (mouse_listener_t)titlescreen_onmouseup,
     .context = this
   };
   queue_push(&game->onmouseup, &this->onmouseup.queue);

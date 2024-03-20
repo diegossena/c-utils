@@ -13,28 +13,14 @@ i32 app_run(application_t* this) {
   queue_t* head = &this->__tasks;
   event_listener_t* it = (event_listener_t*)this->__tasks.next;
   event_listener_t* next;
+  while (
 #ifdef SDK_WINDOW_H
-  i32 i = 1;
-  while (i && window_pool()) {
-    /**
-     * Process immediate callbacks (e.g. write_cb) a small fixed number of
-     * times to avoid loop starvation.
-     */
-    for (i = 0; i < 8; i++) {
-      if (it == head) {
-        it = (event_listener_t*)this->__tasks.next;
-        if (it == (event_listener_t*)head) {
-          break;
-        }
-      }
-      next = (event_listener_t*)it->queue.next;
-      it->callback(it->context);
-      it = next;
-    }
-  }
+    window_pooling()
 #else
-  while (true) {
+    true
 #endif
+    ) {
+#ifdef SDK_NET
     if (it == (event_listener_t*)head) {
       it = (event_listener_t*)head->next;
       if (it == (event_listener_t*)head) {
@@ -44,6 +30,7 @@ i32 app_run(application_t* this) {
     next = (event_listener_t*)it->queue.next;
     it->callback(it->context);
     it = next;
+#endif
   }
 #ifdef SDK_NET_H
   net_shutdown();

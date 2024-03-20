@@ -13,10 +13,13 @@
 #endif
 #include <windows.h>
 #ifdef SDK_WINDOW_H
+#include <windowsx.h>
+#include <winuser.h>
 #define COBJMACROS 1
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <initguid.h>
+#include <wincodec.h>
 #include <d2d1.h>
 #include <dwrite.h>
 #undef COBJMACROS

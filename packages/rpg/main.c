@@ -37,7 +37,8 @@ i32 main() {
     .onclose = onclose
   };
   window_startup(&app, &options);
-  return app_run(&app);
+  app_run(&app);
+  console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_RESET);
 }
 
 // utils
