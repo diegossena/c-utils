@@ -10,7 +10,7 @@ void app_constructor(application_t* this) {
 }
 
 i32 app_run(application_t* this) {
-  event_listener_t* head = (event_listener_t*)&this->__tasks;
+  queue_t* head = &this->__tasks;
   event_listener_t* it = (event_listener_t*)this->__tasks.next;
   event_listener_t* next;
 #ifdef SDK_WINDOW_H
