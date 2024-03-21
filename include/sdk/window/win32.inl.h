@@ -253,12 +253,12 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       if (this->onclose) {
         this->onclose(this);
       }
-      IDWriteFontCollection_Release(this->__collection);
       DestroyWindow(handle);
       return 0;
     case WM_DESTROY:
       KillTimer(handle, 0);
       PostQuitMessage(0);
+      IDWriteFontCollection_Release(this->__collection);
       window_free(this);
       return 0;
   }
@@ -382,6 +382,7 @@ void window_startup(application_t* app, window_options_t* options) {
   if (this->onload) {
     queue_head(&this->__fonts);
     this->onload(this);
+    // fonts
     SDK_FontCollectionLoader collection_loader;
     FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
     this->__d2d_write_factory->lpVtbl->RegisterFontCollectionLoader(
