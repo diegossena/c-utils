@@ -145,7 +145,7 @@ void titlescreen_load(game_t* game) {
   this->to_play = (gfx_text_t) {
     .window = window,
     gfx_text_cwstr(L"to start"),
-    .position = { 540.f, 530.f },
+    .position = { 545.f, 530.f },
     .format = &this->play_style,
     .color = &this->color_black,
   };
