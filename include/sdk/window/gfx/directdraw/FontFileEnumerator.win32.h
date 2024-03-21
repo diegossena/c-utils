@@ -4,23 +4,29 @@
 #include <sdk/memory.h>
 #include <sdk/window/gfx/directdraw/IUnknown.win32.h>
 
+typedef struct __font_queue_t {
+  queue_t queue;
+  IDWriteFontFile* file;
+} __font_queue_t;
+
 typedef struct SDK_FontFileEnumerator {
   IDWriteFontFileEnumeratorVtbl* lpVtbl;
-  IDWriteFontFile* __font_file;
+  queue_t* queue; // __font_queue_t
+  queue_t* it;
 } SDK_FontFileEnumerator;
 
 HRESULT STDMETHODCALLTYPE FontFileEnumerator_QueryInterface(SDK_FontFileEnumerator* This, REFIID riid, void** ppvObject) {
   return IUnknown_QueryInterface((SDK_IUnknown*)This, &IID_IDWriteFontFileEnumerator, riid, ppvObject);
 }
 HRESULT STDMETHODCALLTYPE FontFileEnumerator_MoveNext(SDK_FontFileEnumerator* This, WINBOOL* has_current_file) {
-  *has_current_file = !!This->__font_file;
+  This->it = This->it->next;
+  *has_current_file = This->it != This->queue;
   return S_OK;
 }
 HRESULT STDMETHODCALLTYPE FontFileEnumerator_GetCurrentFontFile(
   SDK_FontFileEnumerator* This, IDWriteFontFile** font_file
 ) {
-  *font_file = This->__font_file;
-  This->__font_file = 0;
+  *font_file = ((__font_queue_t*)This->it)->file;
   return S_OK;
 }
 static const IDWriteFontFileEnumeratorVtbl g_FontFileEnumeratorVtbl = {
@@ -33,8 +39,9 @@ static const IDWriteFontFileEnumeratorVtbl g_FontFileEnumeratorVtbl = {
 
 void FontFileEnumerator_Inicialize(
   SDK_FontFileEnumerator* This,
-  IDWriteFontFile* font_file
+  queue_t* queue
 ) {
   This->lpVtbl = (IDWriteFontFileEnumeratorVtbl*)&g_FontFileEnumeratorVtbl;
-  This->__font_file = font_file;
+  This->queue = queue;
+  This->it = queue;
 }

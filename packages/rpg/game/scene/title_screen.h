@@ -15,12 +15,11 @@ typedef struct title_screen_t {
   gfx_color_t color_black;
   gfx_color_t color_green;
   gfx_stroke_t stroke_solid;
-  gfx_font_t font;
-  // elements
+  gfx_textformat_t title_format, press_space_format;
+ // elements
   gfx_rect_t container;
   bool container_clicking;
-  gfx_text_t title;
-  gfx_text_t press_space;
+  gfx_text_t title, press_space;
 } title_screen_t;
 
 void titlescreen_onmousemove(title_screen_t* this, vector2d_t cursor) {
@@ -46,7 +45,7 @@ void titlescreen_onmouseup(title_screen_t* this, vector2d_t cursor) {
 }
 void titlescreen_onupdate(title_screen_t* this) {
   window_t* window = this->game->window;
-  // gfx_draw_rect(window, &this->container);
+  gfx_draw_rect(window, &this->container);
   gfx_draw_text(window, &this->title);
   gfx_draw_text(window, &this->press_space);
 }
@@ -60,7 +59,8 @@ void titlescreen_ondestroy(title_screen_t* this) {
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_black);
   gfx_color_free(&this->color_green);
-  gfx_font_free(&this->font);
+  gfx_textformat_free(&this->title_format);
+  gfx_textformat_free(&this->press_space_format);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
@@ -97,14 +97,6 @@ void titlescreen_load(game_t* game) {
   gfx_stroke_new(&this->stroke_solid, window, (stroke_t) { BORDER_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
-  gfx_font_load(
-    &this->font, window, L"TLOZ Minish Cap/A Link to the Past/Four Sword",
-    L".\\assets\\fonts\\zelda-font.ttf"
-  );
-  // gfx_font_load(
-  //   &this->font, window, L"MegaMan 2",
-  //   L".\\assets\\fonts\\megaman_2.ttf"
-  // );
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
   // elements
   this->container = (gfx_rect_t) {
@@ -115,18 +107,32 @@ void titlescreen_load(game_t* game) {
   };
   rect_set_width(&this->container.rect, 280.f);
   rect_set_height(&this->container.rect, 42.f);
-  gfx_text_new(&this->title, window, (text_t) {
+
+  gfx_textformat_new(&this->title_format, (gfx_textformat_props_t) {
+    .window = window,
+      .family = L"TLOZ Minish Cap/A Link to the Past/Four Sword",
+      .size = 32.f,
+      .style = FONT_STYLE_NORMAL,
+      .weight = FONT_WEIGHT_BOLD
+  });
+  this->title = (gfx_text_t) {
     gfx_textnode_cwstr(L"DreamShifters"),
-      .font = &this->font,
-      .position = this->container.rect.left_top,
-      .color = &this->color_black
+    .position = this->container.rect.left_top,
+    .color = &this->color_black,
+    .format = &this->title_format
+  };
+
+  gfx_textformat_new(&this->press_space_format, (gfx_textformat_props_t) {
+    .window = window,
+      .family = L"MegaMan 2",
+      .size = 26.f,
+      .style = FONT_STYLE_NORMAL,
+      .weight = FONT_WEIGHT_BOLD
   });
-  gfx_text_set_size(&this->title, 32.f);
-  gfx_text_set_weight(&this->title, FONT_WEIGHT_BOLD);
-  gfx_text_new(&this->press_space, window, (text_t) {
+  this->press_space = (gfx_text_t) {
     gfx_textnode_cwstr(L"Press Space"),
-      .font = &this->font,
-      .position = { 100.f, 100.f },
-      .color = &this->color_black
-  });
+    .position = { 500.f, 500.f },
+    .format = &this->press_space_format,
+    .color = &this->color_black,
+  };
 }

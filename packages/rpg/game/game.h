@@ -53,8 +53,16 @@ game_t* game_new(window_t* window) {
   queue_head(&this->ondestroy);
   this->window = window;
   this->last_update = time_absolute();
-  titlescreen_load(this);
+  gfx_font_load(
+    window, L".\\assets\\fonts\\zelda-font.ttf"
+  );
+  gfx_font_load(
+    window, L".\\assets\\fonts\\megaman_2.ttf"
+  );
   return this;
+}
+void game_oncreate(game_t* this) {
+  titlescreen_load(this);
 }
 void game_onupdate(game_t* this) {
   f64 now = time_absolute();

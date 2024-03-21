@@ -30,12 +30,14 @@
   u64 __cstrw_length = sizeof(cstrw) / 2 - 2; \
   wpath_join(this, length, cstrw, __cstrw_length) \
 }
-
 typedef struct window_t {
   void* context;
   // window
   HWND handle;
   bool mouse_is_tracking;
+  // fonts
+  queue_t __fonts; // __font_queue_t
+  IDWriteFontCollection* __collection;
   // events
   update_event_cb onupdate;
   mouse_event_cb onmousemove;
@@ -45,6 +47,7 @@ typedef struct window_t {
   keyboard_event_cb onkeydown;
   keyboard_event_cb onkeyup;
   ui_event_cb onresize;
+  window_event_cb onload;
   window_event_cb oncreate;
   window_event_cb onclose;
   // 3d_renderer
@@ -62,19 +65,12 @@ typedef struct window_t {
   ID2D1RenderTarget* d2_render_target;
   IDWriteFactory* d2_write_factory;
 } window_t;
-
-typedef struct gfx_text_t {
-  vector2d_t position;
-  gfx_color_t* color;
-  u64 __length;
-  IDWriteTextLayout* __layout;
-} gfx_text_t;
 typedef struct bitmap_t {
   ID2D1Bitmap* __bitmap;
 } bitmap_t;
-typedef struct gfx_font_t {
+typedef struct gfx_textformat_t {
   IDWriteTextFormat* __format;
-} gfx_font_t;
+} gfx_textformat_t;
 typedef struct gfx_color_t {
   ID2D1SolidColorBrush* __brush;
 } gfx_color_t;
@@ -261,7 +257,6 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       }
       return 0;
     case WM_CREATE: {
-      SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
@@ -270,6 +265,10 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_CLOSE:
       if (this->onclose) {
         this->onclose(this);
+      }
+      IDWriteFontCollection_Release(this->__collection);
+      queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
+        memory_free(it);
       }
       DestroyWindow(handle);
       return 0;
@@ -289,6 +288,10 @@ void window_startup(application_t* app, window_options_t* options) {
     return;
   }
   window_t* this = memory_alloc0(sizeof(window_t));
+  if (!this) {
+    error("alloc::window_t", ERR_NOT_ENOUGH_MEMORY);
+    return;
+  }
   // RegisterWindowClass
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -322,6 +325,7 @@ void window_startup(application_t* app, window_options_t* options) {
   this->onkeyup = options->onkeyup;
   this->ondblclick = options->ondblclick;
   this->onresize = options->onresize;
+  this->onload = options->onload;
   this->oncreate = options->oncreate;
   this->onclose = options->onclose;
   // CreateWindow
@@ -391,12 +395,28 @@ void window_startup(application_t* app, window_options_t* options) {
     .CullMode = D3D11_CULL_NONE
   };
   ID3D11Device_CreateRasterizerState(this->device, &rasterizer_desc, &this->rasterizer_state);
+  if (this->onload) {
+    queue_head(&this->__fonts);
+    this->onload(this);
+    SDK_FontCollectionLoader collection_loader;
+    FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
+    this->d2_write_factory->lpVtbl->RegisterFontCollectionLoader(
+      this->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
+    );
+    this->d2_write_factory->lpVtbl->CreateCustomFontCollection(
+      this->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
+      0, 0, &this->__collection
+    );
+    this->d2_write_factory->lpVtbl->UnregisterFontCollectionLoader(
+      this->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
+    );
+  }
   // events
-  __window_mouse_tracking(this);
-  SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
   if (this->oncreate) {
     this->oncreate(this);
   }
+  __window_mouse_tracking(this);
+  SetTimer(this->handle, 0, 1000 / 60, __window_update_handler);
   return;
 clear:
   memory_free(this);
@@ -473,37 +493,12 @@ void gfx_draw_rect(window_t* this, gfx_rect_t* props) {
   }
 }
 
-void gfx_font_load(gfx_font_t* this, window_t* window, const wchar_t* family, const wchar_t* path) {
-  IDWriteFontFile* font_file;
-  SDK_FontCollectionLoader collection_loader;
-  IDWriteFontCollection* collection;
-  window->d2_write_factory->lpVtbl->CreateFontFileReference(
-    window->d2_write_factory, path, 0, &font_file
+void gfx_font_load(window_t* this, const wchar_t* path) {
+  __font_queue_t* item = (__font_queue_t*)memory_alloc(sizeof(__font_queue_t));
+  this->d2_write_factory->lpVtbl->CreateFontFileReference(
+    this->d2_write_factory, path, 0, &item->file
   );
-  FontCollectionLoader_Inicialize(&collection_loader, font_file);
-  window->d2_write_factory->lpVtbl->RegisterFontCollectionLoader(
-    window->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
-  );
-  window->d2_write_factory->lpVtbl->CreateCustomFontCollection(
-    window->d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
-    0, 0, &collection
-  );
-  IDWriteFactory_CreateTextFormat(
-    window->d2_write_factory, family, collection, DWRITE_FONT_WEIGHT_NORMAL,
-    DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 16.f, L"",
-    &this->__format
-  );
-  IDWriteFontCollection_Release(collection);
-}
-void gfx_font_new(gfx_font_t* this, window_t* window, const wchar_t* family) {
-  HRESULT result = IDWriteFactory_CreateTextFormat(
-    window->d2_write_factory, family, null, DWRITE_FONT_WEIGHT_NORMAL,
-    DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 16.f, L"",
-    &this->__format
-  );
-}
-void gfx_font_free(gfx_font_t* this) {
-  IDWriteTextFormat_Release(this->__format);
+  queue_push(&this->__fonts, (queue_t*)item);
 }
 void gfx_color_new(gfx_color_t* this, window_t* window, color_t color) {
   ID2D1RenderTarget_CreateSolidColorBrush(
@@ -514,37 +509,32 @@ void gfx_color_new(gfx_color_t* this, window_t* window, color_t color) {
 void gfx_color_free(gfx_color_t* this) {
   ID2D1SolidColorBrush_Release(this->__brush);
 }
-void gfx_text_new(gfx_text_t* this, window_t* window, text_t props) {
-  this->position = props.position;
-  this->color = props.color;
-  this->__length = props.length;
-  IDWriteFactory_CreateTextLayout(
-    window->d2_write_factory, props.text, props.length, props.font->__format,
-    300.f, 100.f, &this->__layout
+void gfx_textformat_new(gfx_textformat_t* this, gfx_textformat_props_t props) {
+  IDWriteFactory* factory = props.window->d2_write_factory;
+  IDWriteFontCollection* collection = props.window->__collection;
+  IDWriteFactory_CreateTextFormat(
+    factory, props.family, collection, props.weight,
+    props.style, DWRITE_FONT_STRETCH_NORMAL, props.size, L"",
+    &this->__format
   );
 }
-void gfx_text_free(gfx_text_t* this) {
-  IDWriteTextLayout_Release(this->__layout);
+void gfx_textformat_set_family(gfx_textformat_t* this, const wchar_t* family) {
 }
-void gfx_text_set_weight(gfx_text_t* this, font_weight_t weight) {
-  DWRITE_FONT_WEIGHT font_weight;
-  switch (weight) {
-    case FONT_WEIGHT_NORMAL: font_weight = DWRITE_FONT_WEIGHT_NORMAL; break;
-    case FONT_WEIGHT_BOLD: font_weight = DWRITE_FONT_WEIGHT_BOLD; break;
-  }
-  (this->__layout)->lpVtbl->SetFontWeight(
-    this->__layout, font_weight, (DWRITE_TEXT_RANGE) { 0, this->__length }
-  );
-}
-void gfx_text_set_size(gfx_text_t* this, f32 size) {
-  (this->__layout)->lpVtbl->SetFontSize(
-    this->__layout, size, (DWRITE_TEXT_RANGE) { 0, this->__length }
-  );
+void gfx_textformat_free(gfx_textformat_t* this) {
+  IDWriteTextFormat_Release(this->__format);
 }
 void gfx_draw_text(const window_t* this, const gfx_text_t* props) {
-  this->d2_render_target->lpVtbl->DrawTextLayout(
-    this->d2_render_target, *(D2D1_POINT_2F*)&props->position, props->__layout,
-    (ID2D1Brush*)props->color->__brush, D2D1_DRAW_TEXT_OPTIONS_NONE
+  IDWriteTextFormat* text_format = props->format->__format;
+  f32 font_size = text_format->lpVtbl->GetFontSize(text_format);
+  D2D1_RECT_F rect = {
+    props->position.x, props->position.y,
+    props->position.x + font_size * props->length,
+    props->position.y + font_size
+  };
+  this->d2_render_target->lpVtbl->DrawTextA(
+    this->d2_render_target, props->text, props->length, props->format->__format,
+    &rect, (ID2D1Brush*)props->color->__brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
+    DWRITE_MEASURING_MODE_NATURAL
   );
 }
 void gfx_bitmap_new(bitmap_t* this, window_t* window, const wchar_t* path) {

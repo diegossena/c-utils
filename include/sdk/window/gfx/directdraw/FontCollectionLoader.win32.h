@@ -24,7 +24,7 @@ static const IDWriteFontCollectionLoaderVtbl g_FontCollectionLoaderVtbl = {
   (void*)IUnknown_Release,
   (void*)FontCollectionLoader_CreateEnumeratorFromKey
 };
-void FontCollectionLoader_Inicialize(SDK_FontCollectionLoader* This, IDWriteFontFile* font_file) {
+void FontCollectionLoader_Inicialize(SDK_FontCollectionLoader* This, queue_t* queue) {
   This->lpVtbl = (IDWriteFontCollectionLoaderVtbl*)&g_FontCollectionLoaderVtbl;
-  FontFileEnumerator_Inicialize(&This->__enumerator, font_file);
+  FontFileEnumerator_Inicialize(&This->__enumerator, queue);
 }
