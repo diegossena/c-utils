@@ -155,14 +155,15 @@ error_backbuffer_release:
   return false;
 }
 void window_free(window_t* this) {
+  // fonts
   if (this->__collection) {
     IDWriteFontCollection_Release(this->__collection);
   }
-  // D2D
+  // d2d
   ID2D1RenderTarget_Release(this->__d2d_render_target);
   IDXGISurface_Release(this->__d2d_surface);
   ID2D1Factory_Release(this->__d2d_factory);
-  // D3D
+  // d3d
   if (this->__d3d_input_layout) {
     ID3D11PixelShader_Release(this->__d3d_pixel_shader);
     ID3D11InputLayout_Release(this->__d3d_input_layout);
