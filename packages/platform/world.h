@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sdk/window.h>
+#include <sdk/window/gfx/rect.h>
 
 const i32 world_tile_size = 32;
 typedef struct world_t {
