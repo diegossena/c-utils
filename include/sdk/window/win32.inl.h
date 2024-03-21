@@ -194,7 +194,6 @@ void __window_update_handler(HWND handle, UINT unused1, UINT_PTR unused2, DWORD 
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
-  const char* font_path = "C:\\Users\\Diego\\Documents\\Projects\\c-utils\\assets\\fonts\\zelda-font.ttf";
   switch (message) {
     case WM_MOUSELEAVE:
       if (this->onmousemove) {

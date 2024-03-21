@@ -63,6 +63,7 @@ void gfx_bitmap_new(bitmap_t* this, const wchar_t* path, const window_t* window)
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
+  ++memory_leaks;
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:
@@ -72,7 +73,9 @@ wic_factory_free:
 }
 void gfx_bitmap_free(bitmap_t* this) {
   ID2D1Bitmap_Release(this->__bitmap);
+  --memory_leaks;
 }
+
 void gfx_bitmap_draw(const gfx_bitmap_t* this) {
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   ID2D1RenderTarget_DrawBitmap(
