@@ -391,11 +391,13 @@ void window_startup(application_t* app, window_options_t* options) {
   if (!window_set_viewport(this, width, height)) {
     goto d2d_factory_release;
   }
-  D3D11_RASTERIZER_DESC rasterizer_desc = {
+  D3D11_RASTERIZER_DESC rasterizer_props = {
     .FillMode = D3D11_FILL_SOLID,
     .CullMode = D3D11_CULL_NONE
   };
-  result = ID3D11Device_CreateRasterizerState(this->__d3d_device, &rasterizer_desc, &this->__d3d_rasterizer);
+  result = ID3D11Device_CreateRasterizerState(
+    this->__d3d_device, &rasterizer_props, &this->__d3d_rasterizer
+  );
   if (FAILED(result)) {
     goto d2d_factory_release;
   }
