@@ -46,8 +46,8 @@ void titlescreen_onmouseup(title_screen_t* this, vector2d_t cursor) {
 void titlescreen_onupdate(title_screen_t* this) {
   window_t* window = this->game->window;
   gfx_draw_rect(window, &this->container);
-  gfx_draw_text(window, &this->title);
-  gfx_draw_text(window, &this->press_space);
+  gfx_text_draw(window, &this->title);
+  gfx_text_draw(window, &this->press_space);
 }
 void titlescreen_ondestroy(title_screen_t* this) {
   window_t* window = this->game->window;
@@ -116,7 +116,7 @@ void titlescreen_load(game_t* game) {
       .weight = FONT_WEIGHT_BOLD
   });
   this->title = (gfx_text_t) {
-    gfx_textnode_cwstr(L"DreamShifters"),
+    gfx_text_cwstr(L"DreamShifters"),
     .position = this->container.rect.left_top,
     .color = &this->color_black,
     .format = &this->title_format
@@ -130,7 +130,7 @@ void titlescreen_load(game_t* game) {
       .weight = FONT_WEIGHT_BOLD
   });
   this->press_space = (gfx_text_t) {
-    gfx_textnode_cwstr(L"Press Space"),
+    gfx_text_cwstr(L"Press Space"),
     .position = { 500.f, 500.f },
     .format = &this->press_space_format,
     .color = &this->color_black,

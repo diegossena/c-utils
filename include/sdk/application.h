@@ -9,8 +9,11 @@ typedef struct application_t {
 
 static u64 __application_max_fd = 0;
 
-void app_constructor(application_t*);
-// run main loop and free on exit
+void app_new(application_t*);
+/**
+ * @brief run main loop and free on exit
+ * @return exit code
+ */
 i32 app_run(application_t*);
 
 #include <sdk/application/inl.h>

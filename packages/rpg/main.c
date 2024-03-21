@@ -25,7 +25,7 @@ void onclose(window_t* this) {
 i32 main() {
   console_startup();
   application_t app;
-  app_constructor(&app);
+  app_new(&app);
   window_options_t options = {
     .name = "Platform",
     .width = 800,

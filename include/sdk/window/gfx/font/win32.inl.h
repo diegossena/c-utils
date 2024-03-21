@@ -1,0 +1,16 @@
+#include <sdk/window.h>
+#include <sdk/platform.h>
+
+#if PLATFORM_WINDOWS
+
+#include <sdk/window/gfx/font.h>
+
+void gfx_font_load(window_t* this, const wchar_t* path) {
+  __font_queue_t* item = (__font_queue_t*)memory_alloc(sizeof(__font_queue_t));
+  this->__d2_write_factory->lpVtbl->CreateFontFileReference(
+    this->__d2_write_factory, path, 0, &item->file
+  );
+  queue_push(&this->__fonts, (queue_t*)item);
+}
+
+#endif

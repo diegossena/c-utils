@@ -77,7 +77,7 @@ i32 main() {
   console_startup();
   net_startup();
   application_t app;
-  app_constructor(&app);
+  app_new(&app);
 
   string_test();
   array_test();

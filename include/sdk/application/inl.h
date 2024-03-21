@@ -5,7 +5,7 @@
 #include <sdk/window.h>
 #endif
 
-void app_constructor(application_t* this) {
+void app_new(application_t* this) {
   queue_head(&this->__tasks);
 }
 
