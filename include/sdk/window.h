@@ -25,10 +25,6 @@ typedef enum window_flags_t {
   WINDOW_NO_MAXIMIZE = 4,
 } window_flags_t;
 
-typedef enum border_style_t {
-  BORDER_STYLE_SOLID
-} border_style_t;
-
 typedef struct window_options_t {
   const char* name;
   i32 x, y, width, height;

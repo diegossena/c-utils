@@ -1,7 +1,11 @@
 #pragma once
 
+typedef enum stroke_style_t {
+  STROKE_STYLE_SOLID
+} stroke_style_t;
+
 typedef struct gfx_stroke_props_t {
-  border_style_t style;
+  stroke_style_t style;
 } gfx_stroke_props_t;
 
 typedef struct gfx_stroke_t gfx_stroke_t;
