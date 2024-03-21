@@ -3,11 +3,7 @@
 #include <sdk/platform.h>
 #include <sdk/memory.h>
 #include <sdk/window/gfx/directdraw/IUnknown.win32.h>
-
-typedef struct __font_queue_t {
-  queue_t queue;
-  IDWriteFontFile* file;
-} __font_queue_t;
+#include <sdk/window/gfx/font.h>
 
 typedef struct SDK_FontFileEnumerator {
   IDWriteFontFileEnumeratorVtbl* lpVtbl;

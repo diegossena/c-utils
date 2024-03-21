@@ -3,9 +3,7 @@
 #if PLATFORM_WINDOWS
 
 #include <sdk/window.h>
-#include <sdk/application.h>
 #include <sdk/error.h>
-#include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \
@@ -66,6 +64,8 @@ typedef struct window_t {
   ID2D1RenderTarget* __d2d_render_target;
   IDWriteFactory* __d2d_write_factory;
 } window_t;
+
+#include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
 u16 window_get_width(window_t* this) {
   RECT rect;
@@ -254,9 +254,6 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
         this->onclose(this);
       }
       IDWriteFontCollection_Release(this->__collection);
-      queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
-        memory_free(it);
-      }
       DestroyWindow(handle);
       return 0;
     case WM_DESTROY:
@@ -397,6 +394,9 @@ void window_startup(application_t* app, window_options_t* options) {
     this->__d2d_write_factory->lpVtbl->UnregisterFontCollectionLoader(
       this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
     );
+    queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
+      memory_free(it);
+    }
   }
   // events
   if (this->oncreate) {
