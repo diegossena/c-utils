@@ -15,7 +15,7 @@ typedef struct title_screen_t {
   gfx_color_t color_black;
   gfx_color_t color_green;
   gfx_stroke_t stroke_solid;
-  gfx_textformat_t title_format, press_space_format;
+  gfx_style_t title_format, press_space_format;
  // elements
   gfx_rect_t container;
   bool container_clicking;
@@ -59,8 +59,8 @@ void titlescreen_ondestroy(title_screen_t* this) {
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_black);
   gfx_color_free(&this->color_green);
-  gfx_textformat_free(&this->title_format);
-  gfx_textformat_free(&this->press_space_format);
+  gfx_style_free(&this->title_format);
+  gfx_style_free(&this->press_space_format);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
@@ -108,7 +108,7 @@ void titlescreen_load(game_t* game) {
   rect_set_width(&this->container.rect, 280.f);
   rect_set_height(&this->container.rect, 42.f);
 
-  gfx_textformat_new(&this->title_format, (gfx_textformat_props_t) {
+  gfx_style_new(&this->title_format, (gfx_style_props_t) {
     .window = window,
       .family = L"TLOZ Minish Cap/A Link to the Past/Four Sword",
       .size = 32.f,
@@ -122,7 +122,7 @@ void titlescreen_load(game_t* game) {
     .format = &this->title_format
   };
 
-  gfx_textformat_new(&this->press_space_format, (gfx_textformat_props_t) {
+  gfx_style_new(&this->press_space_format, (gfx_style_props_t) {
     .window = window,
       .family = L"MegaMan 2",
       .size = 26.f,

@@ -68,9 +68,9 @@ typedef struct window_t {
 typedef struct bitmap_t {
   ID2D1Bitmap* __bitmap;
 } bitmap_t;
-typedef struct gfx_textformat_t {
+typedef struct gfx_style_t {
   IDWriteTextFormat* __format;
-} gfx_textformat_t;
+} gfx_style_t;
 typedef struct gfx_color_t {
   ID2D1SolidColorBrush* __brush;
 } gfx_color_t;
@@ -509,7 +509,7 @@ void gfx_color_new(gfx_color_t* this, window_t* window, color_t color) {
 void gfx_color_free(gfx_color_t* this) {
   ID2D1SolidColorBrush_Release(this->__brush);
 }
-void gfx_textformat_new(gfx_textformat_t* this, gfx_textformat_props_t props) {
+void gfx_style_new(gfx_style_t* this, gfx_style_props_t props) {
   IDWriteFactory* factory = props.window->d2_write_factory;
   IDWriteFontCollection* collection = props.window->__collection;
   IDWriteFactory_CreateTextFormat(
@@ -518,9 +518,9 @@ void gfx_textformat_new(gfx_textformat_t* this, gfx_textformat_props_t props) {
     &this->__format
   );
 }
-void gfx_textformat_set_family(gfx_textformat_t* this, const wchar_t* family) {
+void gfx_style_set_family(gfx_style_t* this, const wchar_t* family) {
 }
-void gfx_textformat_free(gfx_textformat_t* this) {
+void gfx_style_free(gfx_style_t* this) {
   IDWriteTextFormat_Release(this->__format);
 }
 void gfx_draw_text(const window_t* this, const gfx_text_t* props) {

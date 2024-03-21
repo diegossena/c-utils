@@ -20,7 +20,7 @@ typedef struct window_t window_t; // defined based on platform
 typedef struct bitmap_t bitmap_t;
 typedef struct gfx_color_t gfx_color_t;
 typedef struct gfx_stroke_t gfx_stroke_t;
-typedef struct gfx_textformat_t gfx_textformat_t;
+typedef struct gfx_style_t gfx_style_t;
 
 typedef void (*window_event_cb)(window_t* this);
 typedef void (*update_event_cb)(window_t* this);
@@ -85,19 +85,19 @@ typedef struct gfx_rect_t {
   f32 border_width;
   f32 border_radius;
 } gfx_rect_t;
-typedef struct gfx_textformat_props_t {
+typedef struct gfx_style_props_t {
   window_t* window;
   f32 size;
   const wchar_t* family;
   font_weight_t weight;
   font_style_t style;
-} gfx_textformat_props_t;
+} gfx_style_props_t;
 typedef struct gfx_text_t {
   const wchar_t* text;
   u64 length;
   vector2d_t position;
   gfx_color_t* color;
-  gfx_textformat_t* format;
+  gfx_style_t* format;
 } gfx_text_t;
 
 void window_startup(application_t*, window_options_t*);
@@ -119,9 +119,9 @@ void gfx_draw_text(const window_t*, const gfx_text_t*);
 void gfx_draw_rect(window_t*, gfx_rect_t*);
 void gfx_draw_bitmap(window_t*, gfx_bitmap_t*);
 
-void gfx_textformat_new(gfx_textformat_t* this, gfx_textformat_props_t);
-void gfx_textformat_set_family(gfx_textformat_t*, const wchar_t*);
-void gfx_textformat_free(gfx_textformat_t*);
+void gfx_style_new(gfx_style_t* this, gfx_style_props_t);
+void gfx_style_set_family(gfx_style_t*, const wchar_t*);
+void gfx_style_free(gfx_style_t*);
 
 void gfx_font_load(window_t*, const wchar_t* path);
 
