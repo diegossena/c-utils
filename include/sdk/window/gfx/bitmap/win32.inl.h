@@ -84,24 +84,27 @@ void gfx_bitmap_free(bitmap_t* this) {
 }
 
 void gfx_bitmap_draw(const gfx_bitmap_t* this) {
+  D2D1_RECT_F rect;
   D2D1_RECT_F position = {
     this->position.x, this->position.y,
     this->position.x + this->size.width, this->position.y + this->size.height,
   };
   switch (this->extend_mode) {
     case BITMAP_EXTEND_NO_REPEAT: {
+      rect.left = this->rect.left_top.x;
+      rect.top = this->rect.left_top.y;
+      rect.right = rect.left + this->size.width;
+      rect.bottom = rect.top + this->size.height;
       ID2D1RenderTarget_DrawBitmap(
         this->window->__d2d_render_target, (ID2D1Bitmap*)this->image->__bitmap,
-        (D2D1_RECT_F*)&this->rect, 1.f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+        &rect, 1.f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
         &position
       );
     } break;
     default: {
       // repeat
-      D2D1_RECT_F rect = {
-        .top = this->rect.left_top.y,
-        .bottom = this->rect.left_top.y + this->size.height,
-      };
+      rect.top = this->rect.left_top.y;
+      rect.bottom = this->rect.left_top.y + this->size.height;
       f32 rect_right_start = rect.left + this->size.width;
       f32 position_right_start = this->position.x + this->size.width;
       while (true) {

@@ -113,7 +113,6 @@ void titlescreen_load(game_t* game) {
     .rect = { 0, 0, window->width, window->height },
     .position = { 512, 832 },
     .size = { 96, 96 },
-    .image = &this->terrain_atlas,
-    .extend_mode = BITMAP_EXTEND_NO_REPEAT
+    .image = &this->terrain_atlas
   };
 }
