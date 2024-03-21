@@ -139,7 +139,7 @@ bool window_set_viewport(window_t* this, u32 width, u32 height) {
       .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
     }
   };
-  HRESULT result = ID2D1Factory_CreateDxgiSurfaceRenderTarget(
+  result = ID2D1Factory_CreateDxgiSurfaceRenderTarget(
     this->__d2d_factory, this->__d2d_surface, &renter_target_props,
     &this->__d2d_render_target
   );
