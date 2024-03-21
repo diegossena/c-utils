@@ -5,6 +5,7 @@
 #include <sdk/window/gfx/style.h>
 #include <sdk/window/gfx/rect.h>
 #include <sdk/window/gfx/text.h>
+#include <sdk/window/gfx/bitmap.h>
 
 #include "../game.h"
 #include "../routines/moveto.h"
@@ -14,17 +15,20 @@ typedef struct title_screen_t {
   // events
   update_listener_t onupdate;
   event_listener_t ondestroy;
-  // styles
+  // assets
+  bitmap_t terrain_atlas;
   gfx_color_t color_black;
   gfx_color_t color_green;
   gfx_stroke_t stroke_solid;
   gfx_style_t title_style, play_style;
  // elements
   bool container_clicking;
+  gfx_bitmap_t background;
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
 void titlescreen_onupdate(title_screen_t* this) {
+  gfx_bitmap_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
@@ -37,13 +41,16 @@ void titlescreen_ondestroy(title_screen_t* this) {
   gfx_color_free(&this->color_green);
   gfx_style_free(&this->title_style);
   gfx_style_free(&this->play_style);
+  gfx_bitmap_free(&this->terrain_atlas);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
   title_screen_t* this = memory_alloc(sizeof(title_screen_t));
   window_t* window = game->window;
   this->game = game;
-  // register events
+
+  // events
+
   this->ondestroy = (event_listener_t) {
     .callback = (listener_t)titlescreen_ondestroy,
     .context = this
@@ -54,11 +61,16 @@ void titlescreen_load(game_t* game) {
     .context = this
   };
   queue_push(&game->onupdate, &this->onupdate.queue);
-  // styles
+
+  // assets
+
+  gfx_bitmap_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
+
   // elements
+
   gfx_style_new(&this->title_style, (gfx_style_props_t) {
     .window = window,
       .family = L"TLOZ Minish Cap/A Link to the Past/Four Sword",
@@ -94,5 +106,13 @@ void titlescreen_load(game_t* game) {
     .position = { 545.f, 530.f },
     .format = &this->play_style,
     .color = &this->color_black,
+  };
+
+  this->background = (gfx_bitmap_t) {
+    .window = window,
+    .rect = { 0, 0, window->width, window->height },
+    .position = { 512, 832 },
+    .size = { 96, 96 },
+    .image = &this->terrain_atlas,
   };
 }

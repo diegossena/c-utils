@@ -50,7 +50,7 @@ typedef struct window_t {
   // fonts
   queue_t __fonts; // __font_queue_t
   IDWriteFontCollection* __collection;
-  // 3d_renderer
+  // d3d_renderer
   IDXGISwapChain* __d3d_swapchain;
   ID3D11Device* __d3d_device;
   ID3D11DeviceContext* __d3d_device_context;
@@ -59,7 +59,7 @@ typedef struct window_t {
   ID3D11VertexShader* __d3d_vertex_shader;
   ID3D11InputLayout* __d3d_input_layout;
   ID3D11PixelShader* __d3d_pixel_shader;
-  // 2d_renderer
+  // d2d_renderer
   ID2D1Factory* __d2d_factory;
   IDXGISurface* __d2d_surface;
   ID2D1RenderTarget* __d2d_render_target;
