@@ -252,8 +252,10 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_DESTROY:
       KillTimer(handle, 0);
       PostQuitMessage(0);
+      console_log("WM_DESTROY");
       return 0;
     case WM_CLOSE:
+      console_log("WM_CLOSE");
       if (this->onclose) {
         this->onclose(this);
       }
