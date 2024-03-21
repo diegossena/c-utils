@@ -184,7 +184,7 @@ void __window_mouse_tracking(window_t* this) {
 vector2d_t __window_mouse_event_cursor_handler(LPARAM lParam) {
   return (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 }
-void __window_update_handler(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
+void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
   ID3D11DeviceContext_ClearRenderTargetView(
@@ -407,7 +407,7 @@ void window_startup(application_t* app, window_options_t* options) {
     this->oncreate(this);
   }
   __window_mouse_tracking(this);
-  SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_handler);
+  SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);
   return;
 clear:
   memory_free(this);
