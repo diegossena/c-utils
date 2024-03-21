@@ -13,9 +13,6 @@ typedef struct title_screen_t {
   game_t* game;
   // events
   update_listener_t onupdate;
-  mouse_listener_t onmousemove;
-  mouse_listener_t onmousedown;
-  mouse_listener_t onmouseup;
   event_listener_t ondestroy;
   // styles
   gfx_color_t color_black;
@@ -28,27 +25,6 @@ typedef struct title_screen_t {
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
-void titlescreen_onmousemove(title_screen_t* this, vector2d_t cursor) {
-  window_t* window = this->game->window;
-  if (rect_pointin(&this->container.rect, cursor)) {
-    this->title.color = &this->color_green;
-  } else {
-    this->title.color = &this->color_black;
-  }
-}
-void titlescreen_onmousedown(title_screen_t* this, vector2d_t cursor) {
-  window_t* window = this->game->window;
-  if (rect_pointin(&this->container.rect, cursor)) {
-    this->container_clicking = true;
-  }
-}
-void titlescreen_onmouseup(title_screen_t* this, vector2d_t cursor) {
-  window_t* window = this->game->window;
-  if (this->container_clicking
-    && rect_pointin(&this->container.rect, cursor)) {
-  }
-  this->container_clicking = false;
-}
 void titlescreen_onupdate(title_screen_t* this) {
   gfx_rect_draw(&this->container);
   gfx_text_draw(&this->title);
@@ -58,9 +34,6 @@ void titlescreen_onupdate(title_screen_t* this) {
 void titlescreen_ondestroy(title_screen_t* this) {
   emitter_off(&this->ondestroy);
   queue_remove(&this->onupdate.queue);
-  queue_remove(&this->onmousemove.queue);
-  queue_remove(&this->onmousedown.queue);
-  queue_remove(&this->onmouseup.queue);
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_black);
   gfx_color_free(&this->color_green);
@@ -82,22 +55,6 @@ void titlescreen_load(game_t* game) {
     .callback = (onupdate_callback_t)titlescreen_onupdate,
     .context = this
   };
-  queue_push(&game->onupdate, &this->onupdate.queue);
-  this->onmousemove = (mouse_listener_t) {
-    .callback = (onmouse_callback_t)titlescreen_onmousemove,
-    .context = this
-  };
-  queue_push(&game->onmousemove, &this->onmousemove.queue);
-  this->onmousedown = (mouse_listener_t) {
-    .callback = (onmouse_callback_t)titlescreen_onmousedown,
-    .context = this
-  };
-  queue_push(&game->onmousedown, &this->onmousedown.queue);
-  this->onmouseup = (mouse_listener_t) {
-    .callback = (onmouse_callback_t)titlescreen_onmouseup,
-    .context = this
-  };
-  queue_push(&game->onmouseup, &this->onmouseup.queue);
   // styles
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);

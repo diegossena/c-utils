@@ -2,6 +2,7 @@
 
 #include <sdk/string.h>
 #include <sdk/window.h>
+#include <sdk/window/gfx/bitmap.h>
 #include "../entities/entity.h"
 
 typedef struct item_t {
