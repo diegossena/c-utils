@@ -55,6 +55,7 @@ void titlescreen_load(game_t* game) {
     .callback = (onupdate_callback_t)titlescreen_onupdate,
     .context = this
   };
+  queue_push(&game->onupdate, &this->onupdate.queue);
   // styles
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);
