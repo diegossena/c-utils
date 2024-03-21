@@ -4,9 +4,6 @@
 #include <sdk/types.h>
 #include <sdk/math/geometry_2d.h>
 
-#define gfx_text_cwstr(cwstr) \
-  .text=cwstr, .length=sizeof(cwstr) / sizeof(wchar_t) - 1
-
 #define WINDOW_POS_CENTERED MAX_U64
 
 typedef struct application_t application_t;
