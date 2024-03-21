@@ -2,6 +2,7 @@
 
 #include <sdk/window.h>
 
+#define COLOR_WHITE (color_t){ 1.f, 1.f, 1.f, 1.f }
 #define COLOR_BLACK (color_t){ 0.f, 0.f, 0.f, 1.f }
 #define COLOR_RED (color_t){ 1.f, 0.f, 0.f, 1.f }
 #define COLOR_GREEN (color_t){ 0.f, 1.f, 0.f, 1.f }

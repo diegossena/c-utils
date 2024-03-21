@@ -17,7 +17,7 @@ typedef struct title_screen_t {
   event_listener_t ondestroy;
   // assets
   bitmap_t terrain_atlas;
-  gfx_color_t color_black;
+  gfx_color_t color_white;
   gfx_color_t color_green;
   gfx_stroke_t stroke_solid;
   gfx_style_t title_style, play_style;
@@ -37,7 +37,7 @@ void titlescreen_ondestroy(title_screen_t* this) {
   emitter_off(&this->ondestroy);
   queue_remove(&this->onupdate.queue);
   gfx_stroke_free(&this->stroke_solid);
-  gfx_color_free(&this->color_black);
+  gfx_color_free(&this->color_white);
   gfx_color_free(&this->color_green);
   gfx_style_free(&this->title_style);
   gfx_style_free(&this->play_style);
@@ -66,7 +66,7 @@ void titlescreen_load(game_t* game) {
 
   gfx_bitmap_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
-  gfx_color_new(&this->color_black, window, COLOR_BLACK);
+  gfx_color_new(&this->color_white, window, COLOR_WHITE);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
 
   // elements
@@ -82,7 +82,7 @@ void titlescreen_load(game_t* game) {
     .window = window,
     gfx_text_cwstr(L"DreamShifters"),
     .position = { 250.f, 10.f },
-    .color = &this->color_black,
+    .color = &this->color_white,
     .format = &this->title_style
   };
 
@@ -98,14 +98,14 @@ void titlescreen_load(game_t* game) {
     gfx_text_cwstr(L"Press Space"),
     .position = { 500.f, 500.f },
     .format = &this->play_style,
-    .color = &this->color_black,
+    .color = &this->color_white,
   };
   this->to_play = (gfx_text_t) {
     .window = window,
     gfx_text_cwstr(L"to start"),
     .position = { 545.f, 530.f },
     .format = &this->play_style,
-    .color = &this->color_black,
+    .color = &this->color_white,
   };
 
   this->background = (gfx_bitmap_t) {
