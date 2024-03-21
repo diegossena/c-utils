@@ -27,7 +27,7 @@ i32 main() {
   application_t app;
   app_new(&app);
   window_options_t options = {
-    .name = "Platform",
+    .name = "RPG",
     .width = 800,
     .height = 600,
     .x = 0,
