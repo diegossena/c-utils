@@ -110,8 +110,8 @@ void titlescreen_load(game_t* game) {
     .stroke = &this->stroke_solid,
     .border_width = 1.f
   };
-  rect_set_width(&this->container.rect, 280.f);
-  rect_set_height(&this->container.rect, 42.f);
+  rect_set_width(&this->container.rect, 290.f);
+  rect_set_height(&this->container.rect, 70.f);
 
   gfx_style_new(&this->title_format, (gfx_style_props_t) {
     .window = window,
