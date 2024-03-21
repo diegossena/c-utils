@@ -145,6 +145,9 @@ void window_set_viewport(window_t* this, u32 width, u32 height) {
   ID3D11Texture2D_Release(backbuffer);
 }
 void window_free(window_t* this) {
+  if (this->onload) {
+    IDWriteFontCollection_Release(this->__collection);
+  }
   // D2D
   ID2D1RenderTarget_Release(this->__d2d_render_target);
   IDXGISurface_Release(this->__d2d_surface);
@@ -180,6 +183,7 @@ vector2d_t __window_mouse_event_cursor_handler(LPARAM lParam) {
   return (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 }
 void __window_update_handler(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
+  console_log("WM_TIMER");
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
   ID3D11DeviceContext_ClearRenderTargetView(
@@ -249,18 +253,15 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
       return 0;
     };
-    case WM_DESTROY:
-      KillTimer(handle, 0);
-      PostQuitMessage(0);
-      console_log("WM_DESTROY");
-      return 0;
     case WM_CLOSE:
-      console_log("WM_CLOSE");
       if (this->onclose) {
         this->onclose(this);
       }
+      KillTimer(handle, 0);
       DestroyWindow(handle);
-      IDWriteFontCollection_Release(this->__collection);
+      return 0;
+    case WM_DESTROY:
+      PostQuitMessage(0);
       window_free(this);
       return 0;
   }
