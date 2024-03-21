@@ -52,11 +52,8 @@ void world_start(world_t* this, window_t* window) {
   this->window = window;
 }
 void world_on_resize(world_t* this) {
-  u16 window_width = window_get_width(this->window);
-  u16 window_height = window_get_height(this->window);
-
-  this->visible_tiles_x = ((f32)window_width / world_tile_size) + .5f;
-  this->visible_tiles_y = ((f32)window_height / world_tile_size) + .5f;
+  this->visible_tiles_x = ((f32)this->window->width / world_tile_size) + .5f;
+  this->visible_tiles_y = ((f32)this->window->height / world_tile_size) + .5f;
 }
 void world_render(world_t* this) {
   // calculate top-leftmost visible tile

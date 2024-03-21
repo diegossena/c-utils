@@ -24,7 +24,8 @@ typedef enum window_flags_t {
 
 typedef struct window_options_t {
   const char* name;
-  i32 x, y, width, height;
+  i32 x, y;
+  u16 width, height;
   u64 flags;
   void* context;
   // events
@@ -45,8 +46,6 @@ void window_startup(application_t*, window_options_t*);
 void window_free(window_t*);
 bool window_pooling();
 
-u16 window_get_width(window_t*);
-u16 window_get_height(window_t*);
 vector2d_t window_get_cursor(window_t*);
 void window_set_size(window_t*, u32 width, u32 height);
 bool window_set_viewport(window_t* this, u32 width, u32 height);

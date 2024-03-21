@@ -31,12 +31,7 @@
 
 typedef struct window_t {
   void* context;
-  // window
-  HWND __hwnd;
-  bool __mouse_tracking;
-  // fonts
-  queue_t __fonts; // __font_queue_t
-  IDWriteFontCollection* __collection;
+  const u16 width, height;
   // events
   update_event_cb onupdate;
   mouse_event_cb onmousemove;
@@ -49,6 +44,12 @@ typedef struct window_t {
   window_event_cb onload;
   window_event_cb oncreate;
   window_event_cb onclose;
+  // window
+  HWND __hwnd;
+  bool __mouse_tracking;
+  // fonts
+  queue_t __fonts; // __font_queue_t
+  IDWriteFontCollection* __collection;
   // 3d_renderer
   IDXGISwapChain* __d3d_swapchain;
   ID3D11Device* __d3d_device;
@@ -67,16 +68,6 @@ typedef struct window_t {
 
 #include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
-u16 window_get_width(window_t* this) {
-  RECT rect;
-  GetWindowRect(this->__hwnd, &rect);
-  return rect.right - rect.left;
-}
-u16 window_get_height(window_t* this) {
-  RECT rect;
-  GetWindowRect(this->__hwnd, &rect);
-  return rect.bottom - rect.top;
-}
 void window_set_size(window_t* this, u32 width, u32 height) {
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
@@ -254,11 +245,15 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
         this->onkeyup(this);
       }
       return 0;
-    case WM_SIZE:
+    case WM_SIZE: {
+      u16 width = LOWORD(lParam);
+      u16 height = HIWORD(lParam);
+      memory_copy((u16*)&this->width, &width, sizeof(u16));
+      memory_copy((u16*)&this->height, &height, sizeof(u16));
       if (this->onresize) {
         this->onresize(this);
       }
-      return 0;
+    } return 0;
     case WM_CREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
@@ -289,6 +284,20 @@ void window_startup(application_t* app, window_options_t* options) {
     error("alloc::window_t", ERR_NOT_ENOUGH_MEMORY);
     return;
   }
+  // properties
+  memory_copy((u16*)&this->width, &options->width, sizeof(u16));
+  memory_copy((u16*)&this->height, &options->height, sizeof(u16));
+  this->onupdate = options->onupdate;
+  this->onmousemove = options->onmousemove;
+  this->onmousedown = options->onmousedown;
+  this->onmouseup = options->onmouseup;
+  this->onkeydown = options->onkeydown;
+  this->onkeyup = options->onkeyup;
+  this->ondblclick = options->ondblclick;
+  this->onresize = options->onresize;
+  this->onload = options->onload;
+  this->oncreate = options->oncreate;
+  this->onclose = options->onclose;
   // RegisterWindowClass
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -313,26 +322,12 @@ void window_startup(application_t* app, window_options_t* options) {
     window_style |= WS_MAXIMIZEBOX;
   }
   u32 window_ex_style = WS_EX_APPWINDOW;
-  // Register Events
-  this->onupdate = options->onupdate;
-  this->onmousemove = options->onmousemove;
-  this->onmousedown = options->onmousedown;
-  this->onmouseup = options->onmouseup;
-  this->onkeydown = options->onkeydown;
-  this->onkeyup = options->onkeyup;
-  this->ondblclick = options->ondblclick;
-  this->onresize = options->onresize;
-  this->onload = options->onload;
-  this->oncreate = options->oncreate;
-  this->onclose = options->onclose;
   // CreateWindow
-  RECT rect = { options->x, options->y, options->width, options->height };
+  RECT rect = { options->x, options->y, this->width, this->height };
   AdjustWindowRect(&rect, window_style, false);
-  u32 width = rect.right - rect.left;
-  u32 height = rect.bottom - rect.top;
   this->__hwnd = CreateWindowExA(
     window_ex_style, wc.lpszClassName, options->name, window_style,
-    CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+    CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
     0, // handle to parent or owner window
     0, // handle to menu, or child-window identifier
     wc.hInstance,
@@ -362,8 +357,8 @@ void window_startup(application_t* app, window_options_t* options) {
   DXGI_SWAP_CHAIN_DESC scd = { };
   scd.BufferCount = 1;                                // one back buffer
   scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // use 32-bit color
-  scd.BufferDesc.Width = width;                     // set the back buffer width
-  scd.BufferDesc.Height = height;                    // set the back buffer height
+  scd.BufferDesc.Width = this->width;                 // set the back buffer width
+  scd.BufferDesc.Height = this->height;               // set the back buffer height
   scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // how swap chain is to be used
   scd.OutputWindow = this->__hwnd;                    // the window to be used
   scd.SampleDesc.Count = 4;                           // how many multisamples
@@ -388,7 +383,7 @@ void window_startup(application_t* app, window_options_t* options) {
     console_warn("D3D11CreateDeviceAndSwapChain %x", result);
     exit(1);
   }
-  if (!window_set_viewport(this, width, height)) {
+  if (!window_set_viewport(this, this->width, this->height)) {
     goto d2d_factory_release;
   }
   D3D11_RASTERIZER_DESC rasterizer_props = {

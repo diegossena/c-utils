@@ -1,6 +1,5 @@
 #pragma once
 
-
 #define STRINGIZE_KEY(x) #x
 #define STRINGIZE(x) STRINGIZE_KEY(x)
 
@@ -38,5 +37,9 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef u8 byte;
 typedef u16 wchar_t;
+
+typedef struct size_u16_t {
+  u16 width, height;
+} size_u16_t;
 
 typedef void (*fn_any_t)();
