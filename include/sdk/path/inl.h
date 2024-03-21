@@ -1,5 +1,7 @@
 #include <sdk/path.h>
 
+static const char path_sep;
+
 void path_join(string_t* this, const char* path, u64 length) {
   char* ptr = this->__data + this->__length - 1;
   if (*ptr != '\\' && *ptr != '/') {
