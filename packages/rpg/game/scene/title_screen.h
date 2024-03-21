@@ -21,11 +21,11 @@ typedef struct title_screen_t {
   gfx_color_t color_black;
   gfx_color_t color_green;
   gfx_stroke_t stroke_solid;
-  gfx_style_t title_format, press_space_format;
+  gfx_style_t title_style, play_style;
  // elements
   gfx_rect_t container;
   bool container_clicking;
-  gfx_text_t title, press_space;
+  gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
 void titlescreen_onmousemove(title_screen_t* this, vector2d_t cursor) {
@@ -53,6 +53,7 @@ void titlescreen_onupdate(title_screen_t* this) {
   gfx_rect_draw(&this->container);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
+  gfx_text_draw(&this->to_play);
 }
 void titlescreen_ondestroy(title_screen_t* this) {
   emitter_off(&this->ondestroy);
@@ -63,8 +64,8 @@ void titlescreen_ondestroy(title_screen_t* this) {
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_black);
   gfx_color_free(&this->color_green);
-  gfx_style_free(&this->title_format);
-  gfx_style_free(&this->press_space_format);
+  gfx_style_free(&this->title_style);
+  gfx_style_free(&this->play_style);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
@@ -113,7 +114,7 @@ void titlescreen_load(game_t* game) {
   rect_set_width(&this->container.rect, 290.f);
   rect_set_height(&this->container.rect, 70.f);
 
-  gfx_style_new(&this->title_format, (gfx_style_props_t) {
+  gfx_style_new(&this->title_style, (gfx_style_props_t) {
     .window = window,
       .family = L"TLOZ Minish Cap/A Link to the Past/Four Sword",
       .size = 32.f,
@@ -125,10 +126,10 @@ void titlescreen_load(game_t* game) {
     gfx_text_cwstr(L"DreamShifters"),
     .position = this->container.rect.left_top,
     .color = &this->color_black,
-    .format = &this->title_format
+    .format = &this->title_style
   };
 
-  gfx_style_new(&this->press_space_format, (gfx_style_props_t) {
+  gfx_style_new(&this->play_style, (gfx_style_props_t) {
     .window = window,
       .family = L"MegaMan 2",
       .size = 26.f,
@@ -139,7 +140,14 @@ void titlescreen_load(game_t* game) {
     .window = window,
     gfx_text_cwstr(L"Press Space"),
     .position = { 500.f, 500.f },
-    .format = &this->press_space_format,
+    .format = &this->play_style,
+    .color = &this->color_black,
+  };
+  this->to_play = (gfx_text_t) {
+    .window = window,
+    gfx_text_cwstr(L"to start"),
+    .position = { 540.f, 530.f },
+    .format = &this->play_style,
     .color = &this->color_black,
   };
 }
