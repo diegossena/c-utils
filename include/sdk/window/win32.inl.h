@@ -401,6 +401,8 @@ void window_startup(application_t* app, window_options_t* options) {
         memory_free(it);
         queue_remove((queue_t*)it);
       }
+    } else {
+      this->__collection = 0;
     }
   }
   // events
