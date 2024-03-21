@@ -249,15 +249,15 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
       return 0;
     };
+    case WM_DESTROY:
+      KillTimer(handle, 0);
+      PostQuitMessage(0);
+      return 0;
     case WM_CLOSE:
       if (this->onclose) {
         this->onclose(this);
       }
       DestroyWindow(handle);
-      return 0;
-    case WM_DESTROY:
-      KillTimer(handle, 0);
-      PostQuitMessage(0);
       IDWriteFontCollection_Release(this->__collection);
       window_free(this);
       return 0;
