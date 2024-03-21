@@ -112,6 +112,7 @@ bool window_set_viewport(window_t* this, u32 width, u32 height) {
     this->__d3d_swapchain, 1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
   );
   if (FAILED(result)) {
+    error("IDXGISwapChain_ResizeBuffers", result);
     return false;
   }
   // get backbuffer
@@ -144,11 +145,12 @@ bool window_set_viewport(window_t* this, u32 width, u32 height) {
   );
   if (FAILED(result)) {
     error("CreateDxgiSurfaceRenderTarget", result);
+    goto error_backbuffer_release;
   }
   // free resources
   ID3D11Texture2D_Release(backbuffer);
   return true;
-
+error_backbuffer_release:
   ID3D11Texture2D_Release(backbuffer);
   return false;
 }
@@ -385,7 +387,9 @@ void window_startup(application_t* app, window_options_t* options) {
     console_warn("D3D11CreateDeviceAndSwapChain %x", result);
     exit(1);
   }
-  window_set_viewport(this, width, height);
+  if (!window_set_viewport(this, width, height)) {
+    goto d2d_factory_release;
+  }
   D3D11_RASTERIZER_DESC rasterizer_desc = {
     .FillMode = D3D11_FILL_SOLID,
     .CullMode = D3D11_CULL_NONE
