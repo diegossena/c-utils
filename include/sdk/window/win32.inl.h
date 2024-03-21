@@ -396,6 +396,7 @@ void window_startup(application_t* app, window_options_t* options) {
     );
     queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
       memory_free(it);
+      queue_remove((queue_t*)it);
     }
   }
   // events
