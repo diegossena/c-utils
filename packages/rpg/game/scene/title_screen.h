@@ -112,7 +112,7 @@ void titlescreen_load(game_t* game) {
     .window = window,
     .rect = { 0, 0, window->width, window->height },
     .position = { 512, 832 },
-    .size = { 96, 96 },
+    .size = { 95, 95 },
     .image = &this->terrain_atlas
   };
 }
