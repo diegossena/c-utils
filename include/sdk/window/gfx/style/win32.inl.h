@@ -10,7 +10,7 @@ typedef struct gfx_style_t {
 #include <sdk/window/gfx/style.h>
 
 void gfx_style_new(gfx_style_t* this, gfx_style_props_t props) {
-  IDWriteFactory* factory = props.window->__d2_write_factory;
+  IDWriteFactory* factory = props.window->__d2d_write_factory;
   IDWriteFontCollection* collection = props.window->__collection;
   IDWriteFactory_CreateTextFormat(
     factory, props.family, collection, props.weight,

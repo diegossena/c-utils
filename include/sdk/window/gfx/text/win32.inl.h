@@ -6,7 +6,7 @@
 #include <sdk/window/gfx/text.h>
 
 void gfx_text_draw(const gfx_text_t* this) {
-  window_t* window = this->window;
+  ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   IDWriteTextFormat* text_format = this->format->__format;
   f32 font_size = text_format->lpVtbl->GetFontSize(text_format);
   D2D1_RECT_F rect = {
@@ -15,7 +15,7 @@ void gfx_text_draw(const gfx_text_t* this) {
     this->position.y + font_size
   };
   ID2D1RenderTarget_DrawText(
-    window->__d2d_render_target, this->text, this->length, this->format->__format,
+    render_target, this->text, this->length, this->format->__format,
     &rect, (ID2D1Brush*)this->color->__brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
     DWRITE_MEASURING_MODE_NATURAL
   );

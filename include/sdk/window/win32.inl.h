@@ -64,7 +64,7 @@ typedef struct window_t {
   ID2D1Factory* __d2d_factory;
   IDXGISurface* __d2d_surface;
   ID2D1RenderTarget* __d2d_render_target;
-  IDWriteFactory* __d2_write_factory;
+  IDWriteFactory* __d2d_write_factory;
 } window_t;
 
 u16 window_get_width(window_t* this) {
@@ -343,7 +343,7 @@ void window_startup(application_t* app, window_options_t* options) {
   }
   result = DWriteCreateFactory(
     DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
-    (IUnknown**)&this->__d2_write_factory
+    (IUnknown**)&this->__d2d_write_factory
   );
   if (FAILED(result)) {
     error("DWriteCreateFactory", result);
@@ -388,15 +388,15 @@ void window_startup(application_t* app, window_options_t* options) {
     this->onload(this);
     SDK_FontCollectionLoader collection_loader;
     FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
-    this->__d2_write_factory->lpVtbl->RegisterFontCollectionLoader(
-      this->__d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
+    this->__d2d_write_factory->lpVtbl->RegisterFontCollectionLoader(
+      this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
     );
-    this->__d2_write_factory->lpVtbl->CreateCustomFontCollection(
-      this->__d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
+    this->__d2d_write_factory->lpVtbl->CreateCustomFontCollection(
+      this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
       0, 0, &this->__collection
     );
-    this->__d2_write_factory->lpVtbl->UnregisterFontCollectionLoader(
-      this->__d2_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
+    this->__d2d_write_factory->lpVtbl->UnregisterFontCollectionLoader(
+      this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
     );
   }
   // events

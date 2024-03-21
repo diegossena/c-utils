@@ -4,9 +4,12 @@
 #include <sdk/types.h>
 #include <sdk/math/geometry_2d.h>
 
-#define gfx_text_cwstr(text) text, sizeof(text) / sizeof(wchar_t) - 1
+#define gfx_text_cwstr(cwstr) \
+  .text=cwstr, .length=sizeof(cwstr) / sizeof(wchar_t) - 1
 
 #define WINDOW_POS_CENTERED MAX_U64
+
+typedef struct application_t application_t;
 
 typedef struct window_t window_t;
 
@@ -45,8 +48,6 @@ typedef struct window_options_t {
   window_event_cb onclose;
 } window_options_t;
 
-#include <sdk/application.h>
-
 void window_startup(application_t*, window_options_t*);
 void window_free(window_t*);
 bool window_pooling();
@@ -56,6 +57,8 @@ u16 window_get_height(window_t*);
 vector2d_t window_get_cursor(window_t*);
 void window_set_size(window_t*, u32 width, u32 height);
 void window_set_viewport(window_t* this, u32 width, u32 height);
+
+#include <sdk/application.h>
 
 #include <sdk/window/win32.inl.h>
 

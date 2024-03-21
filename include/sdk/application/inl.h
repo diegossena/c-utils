@@ -20,6 +20,7 @@ i32 app_run(application_t* this) {
     true
 #endif
     ) {
+
 #ifdef SDK_NET
     if (it == (event_listener_t*)head) {
       it = (event_listener_t*)head->next;
@@ -31,12 +32,16 @@ i32 app_run(application_t* this) {
     it->callback(it->context);
     it = next;
 #endif
+
   }
+
 #ifdef SDK_NET_H
   net_shutdown();
 #endif
-  if (memory_counter > 0) {
-    console_warn("memory_counter=%d", memory_counter);
+
+  if (memory_leaks > 0) {
+    console_warn("memory_leaks=%d", memory_leaks);
   }
+
   return 0;
 }

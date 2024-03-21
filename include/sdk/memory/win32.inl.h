@@ -5,12 +5,12 @@
 #include <sdk/memory.h>
 #include <sdk/error.h>
 
-static i64 memory_counter = 0;
+static i64 memory_leaks = 0;
 
 void* memory_alloc(u64 size) {
   void* block = HeapAlloc(GetProcessHeap(), 0, size);
   if (block) {
-    ++memory_counter;
+    ++memory_leaks;
   } else {
     error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
@@ -19,7 +19,7 @@ void* memory_alloc(u64 size) {
 void* memory_alloc0(u64 size) {
   void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
   if (block) {
-    ++memory_counter;
+    ++memory_leaks;
   } else {
     error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
@@ -27,14 +27,14 @@ void* memory_alloc0(u64 size) {
 }
 void memory_free(void* this) {
   HeapFree(GetProcessHeap(), 0, this);
-  --memory_counter;
+  --memory_leaks;
 }
 void* memory_realloc(void* this, u64 size) {
   if (this) {
     this = HeapReAlloc(GetProcessHeap(), 0, this, size);
   } else {
     this = HeapAlloc(GetProcessHeap(), 0, size);
-    ++memory_counter;
+    ++memory_leaks;
   }
   if (!this) {
     error("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
@@ -46,7 +46,7 @@ void* memory_realloc0(void* this, u64 size) {
     this = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, this, size);
   } else {
     this = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
-    ++memory_counter;
+    ++memory_leaks;
   }
   if (!this) {
     error("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);

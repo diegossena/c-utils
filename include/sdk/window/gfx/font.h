@@ -22,3 +22,5 @@ typedef enum font_style_t {
  * @brief This function should only be used in the onload event of the window_t object.
  */
 void gfx_font_load(window_t*, const wchar_t* path);
+
+#include <sdk/window/gfx/font/win32.inl.h>

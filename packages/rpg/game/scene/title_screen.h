@@ -1,5 +1,11 @@
 #pragma once
 
+#include <sdk/window/gfx/color.h>
+#include <sdk/window/gfx/stroke.h>
+#include <sdk/window/gfx/style.h>
+#include <sdk/window/gfx/rect.h>
+#include <sdk/window/gfx/text.h>
+
 #include "../game.h"
 #include "../routines/moveto.h"
 
@@ -44,13 +50,11 @@ void titlescreen_onmouseup(title_screen_t* this, vector2d_t cursor) {
   this->container_clicking = false;
 }
 void titlescreen_onupdate(title_screen_t* this) {
-  window_t* window = this->game->window;
-  gfx_draw_rect(window, &this->container);
-  gfx_text_draw(window, &this->title);
-  gfx_text_draw(window, &this->press_space);
+  gfx_rect_draw(&this->container);
+  gfx_text_draw(&this->title);
+  gfx_text_draw(&this->press_space);
 }
 void titlescreen_ondestroy(title_screen_t* this) {
-  window_t* window = this->game->window;
   emitter_off(&this->ondestroy);
   queue_remove(&this->onupdate.queue);
   queue_remove(&this->onmousemove.queue);
@@ -94,12 +98,13 @@ void titlescreen_load(game_t* game) {
   };
   queue_push(&game->onmouseup, &this->onmouseup.queue);
   // styles
-  gfx_stroke_new(&this->stroke_solid, window, (stroke_t) { BORDER_STYLE_SOLID });
+  gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { BORDER_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
   // elements
   this->container = (gfx_rect_t) {
+    .window = window,
     .rect = { 230.f },
     .color = &this->color_black,
     .stroke = &this->stroke_solid,
@@ -116,6 +121,7 @@ void titlescreen_load(game_t* game) {
       .weight = FONT_WEIGHT_BOLD
   });
   this->title = (gfx_text_t) {
+    .window = window,
     gfx_text_cwstr(L"DreamShifters"),
     .position = this->container.rect.left_top,
     .color = &this->color_black,
@@ -130,6 +136,7 @@ void titlescreen_load(game_t* game) {
       .weight = FONT_WEIGHT_BOLD
   });
   this->press_space = (gfx_text_t) {
+    .window = window,
     gfx_text_cwstr(L"Press Space"),
     .position = { 500.f, 500.f },
     .format = &this->press_space_format,
