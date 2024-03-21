@@ -32,18 +32,19 @@
 typedef struct window_t {
   void* context;
   const u16 width, height;
+  const vector2d_t cursor;
   // events
-  update_event_cb onupdate;
-  mouse_event_cb onmousemove;
-  mouse_event_cb onmousedown;
-  mouse_event_cb onmouseup;
-  mouse_event_cb ondblclick;
-  keyboard_event_cb onkeydown;
-  keyboard_event_cb onkeyup;
-  ui_event_cb onresize;
-  window_event_cb onload;
-  window_event_cb oncreate;
-  window_event_cb onclose;
+  listener_t onupdate;
+  listener_t onmousemove;
+  listener_t onmousedown;
+  listener_t onmouseup;
+  listener_t ondblclick;
+  listener_t onkeydown;
+  listener_t onkeyup;
+  listener_t onresize;
+  listener_t onload;
+  listener_t oncreate;
+  listener_t onclose;
   // window
   HWND __hwnd;
   bool __mouse_tracking;
@@ -76,12 +77,6 @@ void window_set_size(window_t* this, u32 width, u32 height) {
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
     WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME
   );
-}
-vector2d_t window_get_cursor(window_t* this) {
-  POINT point;
-  GetCursorPos(&point);
-  ScreenToClient(this->__hwnd, &point);
-  return (vector2d_t) { point.x, point.y };
 }
 bool window_set_viewport(window_t* this, u32 width, u32 height) {
   HRESULT result;
@@ -183,9 +178,6 @@ void __window_mouse_tracking(window_t* this) {
     TrackMouseEvent(&tme);
   }
 }
-vector2d_t __window_cursor_getter(LPARAM lParam) {
-  return (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-}
 void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -205,13 +197,17 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MOUSELEAVE:
       if (this->onmousemove) {
         this->__mouse_tracking = false;
-        this->onmousemove(this, (vector2d_t) { -1, -1 });
+        vector2d_t cursor = { -1, -1 };
+        memory_copy((vector2d_t*)&this->cursor, &cursor, sizeof(vector2d_t));
+        this->onmousemove(this);
       }
       return 0;
     case WM_MOUSEMOVE:
       if (this->onmousemove) {
         __window_mouse_tracking(this);
-        this->onmousemove(this, __window_cursor_getter(lParam));
+        vector2d_t cursor = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        memory_copy((vector2d_t*)&this->cursor, &cursor, sizeof(vector2d_t));
+        this->onmousemove(this);
       }
       return 0;
     case WM_LBUTTONDOWN:
@@ -219,7 +215,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MBUTTONDOWN:
     case WM_XBUTTONDOWN:
       if (this->onmousedown) {
-        this->onmousedown(this, __window_cursor_getter(lParam));
+        this->onmousedown(this);
       }
       return 0;
     case WM_LBUTTONUP:
@@ -227,12 +223,12 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MBUTTONUP:
     case WM_XBUTTONUP:
       if (this->onmouseup) {
-        this->onmouseup(this, __window_cursor_getter(lParam));
+        this->onmouseup(this);
       }
       return 0;
     case WM_LBUTTONDBLCLK:
       if (this->ondblclick) {
-        this->ondblclick(this, __window_cursor_getter(lParam));
+        this->ondblclick(this);
       }
       return 0;
     case WM_KEYDOWN:

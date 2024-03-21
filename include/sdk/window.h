@@ -3,18 +3,13 @@
 
 #include <sdk/types.h>
 #include <sdk/math/geometry_2d.h>
+#include <sdk/events.h>
 
 #define WINDOW_POS_CENTERED MAX_U64
 
 typedef struct application_t application_t;
 
 typedef struct window_t window_t;
-
-typedef void (*window_event_cb)(window_t* this);
-typedef void (*update_event_cb)(window_t* this);
-typedef void (*keyboard_event_cb)(window_t* this);
-typedef void (*ui_event_cb)(window_t* this);
-typedef void (*mouse_event_cb)(window_t* this, vector2d_t cursor);
 
 typedef enum window_flags_t {
   WINDOW_HIDDEN = 1,
@@ -29,17 +24,17 @@ typedef struct window_options_t {
   u64 flags;
   void* context;
   // events
-  update_event_cb onupdate;
-  mouse_event_cb onmousemove;
-  mouse_event_cb onmousedown;
-  mouse_event_cb onmouseup;
-  mouse_event_cb ondblclick;
-  keyboard_event_cb onkeydown;
-  keyboard_event_cb onkeyup;
-  ui_event_cb onresize;
-  window_event_cb onload;
-  window_event_cb oncreate;
-  window_event_cb onclose;
+  listener_t onupdate;
+  listener_t onmousemove;
+  listener_t onmousedown;
+  listener_t onmouseup;
+  listener_t ondblclick;
+  listener_t onkeydown;
+  listener_t onkeyup;
+  listener_t onresize;
+  listener_t onload;
+  listener_t oncreate;
+  listener_t onclose;
 } window_options_t;
 
 void window_startup(application_t*, window_options_t*);

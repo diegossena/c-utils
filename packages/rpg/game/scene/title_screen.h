@@ -13,7 +13,7 @@
 typedef struct title_screen_t {
   game_t* game;
   // events
-  update_listener_t onupdate;
+  event_listener_t onupdate;
   event_listener_t ondestroy;
   // assets
   bitmap_t terrain_atlas;
@@ -56,8 +56,8 @@ void titlescreen_load(game_t* game) {
     .context = this
   };
   emitter_on(&game->ondestroy, &this->ondestroy);
-  this->onupdate = (update_listener_t) {
-    .callback = (onupdate_callback_t)titlescreen_onupdate,
+  this->onupdate = (event_listener_t) {
+    .callback = (listener_t)titlescreen_onupdate,
     .context = this
   };
   queue_push(&game->onupdate, &this->onupdate.queue);

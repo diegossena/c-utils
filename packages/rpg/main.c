@@ -9,14 +9,14 @@ void oncreate(window_t* this) {
 void onupdate(window_t* this) {
   game_onupdate(this->context);
 }
-void onmousemove(window_t* this, vector2d_t cursor) {
-  game_onmousemove(this->context, cursor);
+void onmousemove(window_t* this) {
+  game_onmousemove(this->context);
 }
-void onmouseup(window_t* this, vector2d_t cursor) {
-  game_onmouseup(this->context, cursor);
+void onmouseup(window_t* this) {
+  game_onmouseup(this->context);
 }
-void onmousedown(window_t* this, vector2d_t cursor) {
-  game_onmousedown(this->context, cursor);
+void onmousedown(window_t* this) {
+  game_onmousedown(this->context);
 }
 void onclose(window_t* this) {
   game_free(this->context);
@@ -33,13 +33,13 @@ i32 main() {
     .x = 0,
     .y = 0,
     .flags = WINDOW_NO_RESIZABLE | WINDOW_NO_MAXIMIZE,
-    .onload = onload,
-    .oncreate = oncreate,
-    .onupdate = onupdate,
-    .onmousemove = onmousemove,
-    .onmouseup = onmouseup,
-    .onmousedown = onmousedown,
-    .onclose = onclose
+    .onload = (listener_t)onload,
+    .oncreate = (listener_t)oncreate,
+    .onupdate = (listener_t)onupdate,
+    .onmousemove = (listener_t)onmousemove,
+    .onmouseup = (listener_t)onmouseup,
+    .onmousedown = (listener_t)onmousedown,
+    .onclose = (listener_t)onclose
   };
   window_startup(&app, &options);
   app_run(&app);
