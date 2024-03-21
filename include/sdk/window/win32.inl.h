@@ -397,7 +397,7 @@ void window_startup(application_t* app, window_options_t* options) {
   };
   result = ID3D11Device_CreateRasterizerState(this->__d3d_device, &rasterizer_desc, &this->__d3d_rasterizer);
   if (FAILED(result)) {
-    goto d3d_rasterizer_release;
+    goto d2d_factory_release;
   }
   if (this->onload) {
     queue_head(&this->__fonts);
@@ -430,8 +430,6 @@ void window_startup(application_t* app, window_options_t* options) {
   __window_mouse_tracking(this);
   SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);
   return;
-d3d_rasterizer_release:
-  ID3D11RasterizerState_Release(this->__d3d_rasterizer);
 d2d_factory_release:
   IDWriteFactory_Release(this->__d2d_write_factory);
 window_release:
