@@ -181,7 +181,7 @@ void __window_mouse_tracking(window_t* this) {
     TrackMouseEvent(&tme);
   }
 }
-vector2d_t __window_mouse_event_cursor_handler(LPARAM lParam) {
+vector2d_t __window_cursor_getter(LPARAM lParam) {
   return (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 }
 void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
@@ -209,7 +209,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MOUSEMOVE:
       if (this->onmousemove) {
         __window_mouse_tracking(this);
-        this->onmousemove(this, __window_mouse_event_cursor_handler(lParam));
+        this->onmousemove(this, __window_cursor_getter(lParam));
       }
       return 0;
     case WM_LBUTTONDOWN:
@@ -217,7 +217,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MBUTTONDOWN:
     case WM_XBUTTONDOWN:
       if (this->onmousedown) {
-        this->onmousedown(this, __window_mouse_event_cursor_handler(lParam));
+        this->onmousedown(this, __window_cursor_getter(lParam));
       }
       return 0;
     case WM_LBUTTONUP:
@@ -225,12 +225,12 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MBUTTONUP:
     case WM_XBUTTONUP:
       if (this->onmouseup) {
-        this->onmouseup(this, __window_mouse_event_cursor_handler(lParam));
+        this->onmouseup(this, __window_cursor_getter(lParam));
       }
       return 0;
     case WM_LBUTTONDBLCLK:
       if (this->ondblclick) {
-        this->ondblclick(this, __window_mouse_event_cursor_handler(lParam));
+        this->ondblclick(this, __window_cursor_getter(lParam));
       }
       return 0;
     case WM_KEYDOWN:
