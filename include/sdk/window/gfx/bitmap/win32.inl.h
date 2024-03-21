@@ -105,7 +105,7 @@ void gfx_bitmap_draw(const gfx_bitmap_t* this) {
       // repeat
       rect.top = this->rect.left_top.y;
       rect.bottom = this->rect.left_top.y + this->size.height;
-      f32 rect_right_start = rect.left + this->size.width;
+      f32 rect_right_start = this->rect.left_top.x + this->size.width;
       f32 position_right_start = this->position.x + this->size.width;
       while (true) {
         if (rect.bottom > this->rect.right_bottom.y) {
