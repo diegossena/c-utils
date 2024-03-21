@@ -50,14 +50,14 @@ typedef struct window_t {
   window_event_cb oncreate;
   window_event_cb onclose;
   // 3d_renderer
-  IDXGISwapChain* __swapchain;
-  ID3D11Device* __device;
-  ID3D11DeviceContext* __device_context;
-  ID3D11RenderTargetView* __backbuffer;
-  ID3D11RasterizerState* __rasterizer_state;
-  ID3D11VertexShader* __vertex_shader;
-  ID3D11InputLayout* __input_layout;
-  ID3D11PixelShader* __pixel_shader;
+  IDXGISwapChain* __d3d_swapchain;
+  ID3D11Device* __d3d_device;
+  ID3D11DeviceContext* __d3d_device_context;
+  ID3D11RenderTargetView* __d3d_backbuffer;
+  ID3D11RasterizerState* __d3d_rasterizer_state;
+  ID3D11VertexShader* __d3d_vertex_shader;
+  ID3D11InputLayout* __d3d_input_layout;
+  ID3D11PixelShader* __d3d_pixel_shader;
   // 2d_renderer
   ID2D1Factory* __d2d_factory;
   IDXGISurface* __d2d_surface;
@@ -93,10 +93,10 @@ vector2d_t window_get_cursor(window_t* this) {
   return (vector2d_t) { point.x, point.y };
 }
 void window_set_viewport(window_t* this, u32 width, u32 height) {
-  if (this->__backbuffer) {
+  if (this->__d3d_backbuffer) {
     ID2D1RenderTarget_Release(this->__d2d_render_target);
     IDXGISurface_Release(this->__d2d_surface);
-    ID3D11RenderTargetView_Release(this->__backbuffer);
+    ID3D11RenderTargetView_Release(this->__d3d_backbuffer);
   }
   D3D11_VIEWPORT viewport = {
     .TopLeftX = 0.f,
@@ -106,22 +106,22 @@ void window_set_viewport(window_t* this, u32 width, u32 height) {
     .MinDepth = 0.f,
     .MaxDepth = 1.f,
   };
-  ID3D11DeviceContext_RSSetViewports(this->__device_context, 1, &viewport);
+  ID3D11DeviceContext_RSSetViewports(this->__d3d_device_context, 1, &viewport);
   IDXGISwapChain_ResizeBuffers(
-    this->__swapchain, 1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
+    this->__d3d_swapchain, 1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
   );
   // get backbuffer
   ID3D11Texture2D* backbuffer;
-  IDXGISwapChain_GetBuffer(this->__swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
+  IDXGISwapChain_GetBuffer(this->__d3d_swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
   /**
    * use the back buffer address to create the render target
    * set the render target as the back buffer
    */
   ID3D11Device_CreateRenderTargetView(
-    this->__device, (ID3D11Resource*)backbuffer, null, &this->__backbuffer
+    this->__d3d_device, (ID3D11Resource*)backbuffer, null, &this->__d3d_backbuffer
   );
   ID3D11DeviceContext_OMSetRenderTargets(
-    this->__device_context, 1, &this->__backbuffer, 0
+    this->__d3d_device_context, 1, &this->__d3d_backbuffer, 0
   );
   // set d2_render_target
   ID3D11Texture2D_QueryInterface(
@@ -145,7 +145,7 @@ void window_set_viewport(window_t* this, u32 width, u32 height) {
   ID3D11Texture2D_Release(backbuffer);
 }
 void window_free(window_t* this) {
-  if (this->onload) {
+  if (this->__collection) {
     IDWriteFontCollection_Release(this->__collection);
   }
   // D2D
@@ -153,16 +153,16 @@ void window_free(window_t* this) {
   IDXGISurface_Release(this->__d2d_surface);
   ID2D1Factory_Release(this->__d2d_factory);
   // D3D
-  if (this->__input_layout) {
-    ID3D11PixelShader_Release(this->__pixel_shader);
-    ID3D11InputLayout_Release(this->__input_layout);
-    ID3D11VertexShader_Release(this->__vertex_shader);
+  if (this->__d3d_input_layout) {
+    ID3D11PixelShader_Release(this->__d3d_pixel_shader);
+    ID3D11InputLayout_Release(this->__d3d_input_layout);
+    ID3D11VertexShader_Release(this->__d3d_vertex_shader);
   }
-  ID3D11RasterizerState_Release(this->__rasterizer_state);
-  ID3D11RenderTargetView_Release(this->__backbuffer);
-  ID3D11DeviceContext_Release(this->__device_context);
-  ID3D11Device_Release(this->__device);
-  IDXGISwapChain_Release(this->__swapchain);
+  ID3D11RasterizerState_Release(this->__d3d_rasterizer_state);
+  ID3D11RenderTargetView_Release(this->__d3d_backbuffer);
+  ID3D11DeviceContext_Release(this->__d3d_device_context);
+  ID3D11Device_Release(this->__d3d_device);
+  IDXGISwapChain_Release(this->__d3d_swapchain);
   // window_t
   KillTimer(this->__hwnd, 0);
   DestroyWindow(this->__hwnd);
@@ -188,14 +188,14 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
   ID3D11DeviceContext_ClearRenderTargetView(
-    this->__device_context, this->__backbuffer, background_color
+    this->__d3d_device_context, this->__d3d_backbuffer, background_color
   );
   ID2D1RenderTarget_BeginDraw(this->__d2d_render_target);
   if (this->onupdate) {
     this->onupdate(this);
   }
   ID2D1RenderTarget_EndDraw(this->__d2d_render_target, null, null);
-  IDXGISwapChain_Present(this->__swapchain, 1, 0);
+  IDXGISwapChain_Present(this->__d3d_swapchain, 1, 0);
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
@@ -366,10 +366,10 @@ void window_startup(application_t* app, window_options_t* options) {
     0,
     D3D11_SDK_VERSION,
     &scd,
-    &this->__swapchain,
-    &this->__device,
+    &this->__d3d_swapchain,
+    &this->__d3d_device,
     0,
-    &this->__device_context
+    &this->__d3d_device_context
   );
   if (FAILED(result)) {
     console_warn("D3D11CreateDeviceAndSwapChain %x", result);
@@ -380,26 +380,27 @@ void window_startup(application_t* app, window_options_t* options) {
     .FillMode = D3D11_FILL_SOLID,
     .CullMode = D3D11_CULL_NONE
   };
-  ID3D11Device_CreateRasterizerState(this->__device, &rasterizer_desc, &this->__rasterizer_state);
+  ID3D11Device_CreateRasterizerState(this->__d3d_device, &rasterizer_desc, &this->__d3d_rasterizer_state);
   if (this->onload) {
     queue_head(&this->__fonts);
     this->onload(this);
-    // fonts
-    SDK_FontCollectionLoader collection_loader;
-    FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
-    this->__d2d_write_factory->lpVtbl->RegisterFontCollectionLoader(
-      this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
-    );
-    this->__d2d_write_factory->lpVtbl->CreateCustomFontCollection(
-      this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
-      0, 0, &this->__collection
-    );
-    this->__d2d_write_factory->lpVtbl->UnregisterFontCollectionLoader(
-      this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
-    );
-    queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
-      memory_free(it);
-      queue_remove((queue_t*)it);
+    if (&this->__fonts != this->__fonts.next) {
+      SDK_FontCollectionLoader collection_loader;
+      FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
+      this->__d2d_write_factory->lpVtbl->RegisterFontCollectionLoader(
+        this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
+      );
+      this->__d2d_write_factory->lpVtbl->CreateCustomFontCollection(
+        this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader,
+        0, 0, &this->__collection
+      );
+      this->__d2d_write_factory->lpVtbl->UnregisterFontCollectionLoader(
+        this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
+      );
+      queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
+        memory_free(it);
+        queue_remove((queue_t*)it);
+      }
     }
   }
   // events
