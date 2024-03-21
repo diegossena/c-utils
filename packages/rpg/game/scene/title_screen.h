@@ -102,7 +102,6 @@ void titlescreen_load(game_t* game) {
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { BORDER_STYLE_SOLID });
   gfx_color_new(&this->color_black, window, COLOR_BLACK);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
-  gfx_color_new(&this->color_green, window, COLOR_GREEN);
   // elements
   this->container = (gfx_rect_t) {
     .window = window,

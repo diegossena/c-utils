@@ -17,10 +17,12 @@ void gfx_style_new(gfx_style_t* this, gfx_style_props_t props) {
     props.style, DWRITE_FONT_STRETCH_NORMAL, props.size, L"",
     &this->__format
   );
+  ++memory_leaks;
 }
 
 void gfx_style_free(gfx_style_t* this) {
   IDWriteTextFormat_Release(this->__format);
+  --memory_leaks;
 }
 
 #endif
