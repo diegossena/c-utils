@@ -54,7 +54,7 @@ typedef struct window_t {
   ID3D11Device* __d3d_device;
   ID3D11DeviceContext* __d3d_device_context;
   ID3D11RenderTargetView* __d3d_backbuffer;
-  ID3D11RasterizerState* __d3d_rasterizer_state;
+  ID3D11RasterizerState* __d3d_rasterizer;
   ID3D11VertexShader* __d3d_vertex_shader;
   ID3D11InputLayout* __d3d_input_layout;
   ID3D11PixelShader* __d3d_pixel_shader;
@@ -92,7 +92,8 @@ vector2d_t window_get_cursor(window_t* this) {
   ScreenToClient(this->__hwnd, &point);
   return (vector2d_t) { point.x, point.y };
 }
-void window_set_viewport(window_t* this, u32 width, u32 height) {
+bool window_set_viewport(window_t* this, u32 width, u32 height) {
+  HRESULT result;
   if (this->__d3d_backbuffer) {
     ID2D1RenderTarget_Release(this->__d2d_render_target);
     IDXGISurface_Release(this->__d2d_surface);
@@ -107,9 +108,12 @@ void window_set_viewport(window_t* this, u32 width, u32 height) {
     .MaxDepth = 1.f,
   };
   ID3D11DeviceContext_RSSetViewports(this->__d3d_device_context, 1, &viewport);
-  IDXGISwapChain_ResizeBuffers(
+  result = IDXGISwapChain_ResizeBuffers(
     this->__d3d_swapchain, 1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
   );
+  if (FAILED(result)) {
+    return false;
+  }
   // get backbuffer
   ID3D11Texture2D* backbuffer;
   IDXGISwapChain_GetBuffer(this->__d3d_swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
@@ -143,6 +147,10 @@ void window_set_viewport(window_t* this, u32 width, u32 height) {
   }
   // free resources
   ID3D11Texture2D_Release(backbuffer);
+  return true;
+
+  ID3D11Texture2D_Release(backbuffer);
+  return false;
 }
 void window_free(window_t* this) {
   if (this->__collection) {
@@ -158,7 +166,7 @@ void window_free(window_t* this) {
     ID3D11InputLayout_Release(this->__d3d_input_layout);
     ID3D11VertexShader_Release(this->__d3d_vertex_shader);
   }
-  ID3D11RasterizerState_Release(this->__d3d_rasterizer_state);
+  ID3D11RasterizerState_Release(this->__d3d_rasterizer);
   ID3D11RenderTargetView_Release(this->__d3d_backbuffer);
   ID3D11DeviceContext_Release(this->__d3d_device_context);
   ID3D11Device_Release(this->__d3d_device);
@@ -289,7 +297,7 @@ void window_startup(application_t* app, window_options_t* options) {
   };
   if (!RegisterClassExA(&wc)) {
     error("RegisterClassExA", ERR_UNKNOWN);
-    goto clear;
+    goto window_release;
   }
   u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
   if (!(options->flags & WINDOW_HIDDEN)) {
@@ -329,7 +337,7 @@ void window_startup(application_t* app, window_options_t* options) {
   );
   if (!this->__hwnd) {
     error("CreateWindowExA", ERR_UNKNOWN);
-    goto clear;
+    goto window_release;
   }
   // renderer
   HRESULT result = D2D1CreateFactory(
@@ -338,6 +346,7 @@ void window_startup(application_t* app, window_options_t* options) {
   );
   if (FAILED(result)) {
     error("D2D1CreateFactory", result);
+    goto window_release;
   }
   result = DWriteCreateFactory(
     DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
@@ -345,6 +354,7 @@ void window_startup(application_t* app, window_options_t* options) {
   );
   if (FAILED(result)) {
     error("DWriteCreateFactory", result);
+    goto d2d_factory_release;
   }
   DXGI_SWAP_CHAIN_DESC scd = { };
   scd.BufferCount = 1;                                // one back buffer
@@ -380,7 +390,10 @@ void window_startup(application_t* app, window_options_t* options) {
     .FillMode = D3D11_FILL_SOLID,
     .CullMode = D3D11_CULL_NONE
   };
-  ID3D11Device_CreateRasterizerState(this->__d3d_device, &rasterizer_desc, &this->__d3d_rasterizer_state);
+  result = ID3D11Device_CreateRasterizerState(this->__d3d_device, &rasterizer_desc, &this->__d3d_rasterizer);
+  if (FAILED(result)) {
+    goto d3d_rasterizer_release;
+  }
   if (this->onload) {
     queue_head(&this->__fonts);
     this->onload(this);
@@ -412,7 +425,11 @@ void window_startup(application_t* app, window_options_t* options) {
   __window_mouse_tracking(this);
   SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);
   return;
-clear:
+d3d_rasterizer_release:
+  ID3D11RasterizerState_Release(this->__d3d_rasterizer);
+d2d_factory_release:
+  IDWriteFactory_Release(this->__d2d_write_factory);
+window_release:
   memory_free(this);
 }
 

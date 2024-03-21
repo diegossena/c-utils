@@ -49,7 +49,7 @@ u16 window_get_width(window_t*);
 u16 window_get_height(window_t*);
 vector2d_t window_get_cursor(window_t*);
 void window_set_size(window_t*, u32 width, u32 height);
-void window_set_viewport(window_t* this, u32 width, u32 height);
+bool window_set_viewport(window_t* this, u32 width, u32 height);
 
 #include <sdk/application.h>
 
