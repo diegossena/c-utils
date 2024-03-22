@@ -31,7 +31,6 @@ void titlescreen_load(game_t*);
 void titlescreen_ondestroy(title_screen_t*);
 
 void titlescreen_onupdate(title_screen_t* this) {
-  console_log("titlescreen_onupdate");
   gfx_bitmap_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
@@ -47,10 +46,9 @@ void titlescreen_onkeydown(title_screen_t* this) {
   }
 }
 void titlescreen_ondestroy(title_screen_t* this) {
-  console_log("titlescreen_ondestroy");
   emitter_off(&this->ondestroy);
   emitter_off(&this->onupdate);
-  console_log("!titlescreen_ondestroy");
+  emitter_off(&this->onkeydown);
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_white);
   gfx_color_free(&this->color_green);
@@ -60,7 +58,6 @@ void titlescreen_ondestroy(title_screen_t* this) {
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
-  console_log("titlescreen_load");
   title_screen_t* this = memory_alloc(sizeof(title_screen_t));
   window_t* window = game->window;
   this->game = game;

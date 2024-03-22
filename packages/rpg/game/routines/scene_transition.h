@@ -34,9 +34,9 @@ void scene_transition_update(scene_transition_t* this) {
   if (progress > 1.f) {
     progress = 1.f;
   }
-  color_t color = { 1.f, 1.f, 1.f };
+  f32 opacity;
   if (this->loading) {
-    color.a = progress;
+    opacity = progress;
     if (this->timer >= duration) {
       callback_emit(&this->scene_destroy);
       callback_emit(&this->scene_load);
@@ -44,13 +44,13 @@ void scene_transition_update(scene_transition_t* this) {
       this->loading = false;
     }
   } else {
-    color.a = 1.f - progress;
+    opacity = 1.f - progress;
     if (this->timer >= duration) {
       scene_transition_destroy(this);
     }
   }
   gfx_color_t gfx_color;
-  gfx_color_new(&gfx_color, window, color);
+  gfx_color_new(&gfx_color, window, (color_t) { 1.f, 1.f, 1.f, opacity });
   this->background.color = &gfx_color;
   gfx_rect_draw(&this->background);
   gfx_color_free(&gfx_color);
