@@ -77,7 +77,7 @@ void scene_transition(scene_transition_props_t props) {
   this->timer = 0.f;
   this->scene_destroy = props.scene_destroy;
   this->scene_load = props.scene_load;
-  // properties
+  // init
   this->loading = true;
   this->background = (gfx_rect_t) {
     .window = window,

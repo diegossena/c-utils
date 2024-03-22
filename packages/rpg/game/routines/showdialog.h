@@ -7,8 +7,9 @@
 #include <sdk/window/gfx/rect.h>
 
 typedef struct showdialog_t {
-  // initial_props
+  // new
   game_t* game;
+  // props
   wstring_t text;
   vector2d_t position;
   // private
@@ -36,6 +37,7 @@ void showdialog_update(showdialog_t* this) {
 void showdialog_new(showdialog_t* this) {
   game_t* game = this->game;
   window_t* window = game->window;
+  wstring_new(&this->text);
   this->__text.window = window;
   this->__text.style = &game->dialog_style;
   this->__text.color = &game->white;
