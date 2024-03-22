@@ -17,28 +17,20 @@ typedef enum window_flags_t {
   WINDOW_NO_MAXIMIZE = 4,
 } window_flags_t;
 
-typedef struct window_options_t {
+typedef void (*window_load_listener_t)(window_t* context);
+
+typedef struct window_props_t {
   const char* name;
   i32 x, y;
   u16 width, height;
   u64 flags;
   void* context;
   // events
-  listener_t onupdate;
-  listener_t ondraw;
-  listener_t onmousemove;
-  listener_t onmousedown;
-  listener_t onmouseup;
-  listener_t ondblclick;
-  listener_t onkeydown;
-  listener_t onkeyup;
-  listener_t onresize;
-  listener_t onpreload;
-  listener_t onload;
-  listener_t onclose;
-} window_options_t;
+  window_load_listener_t onpreload;
+  window_load_listener_t onload;
+} window_props_t;
 
-void window_startup(application_t*, window_options_t*);
+void window_startup(application_t*, window_props_t*);
 void window_free(window_t*);
 bool window_pooling();
 

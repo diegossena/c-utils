@@ -27,7 +27,9 @@ void string_new(string_t* this) {
   this->__data = this->__small_string;
 }
 void string_free(string_t* this) {
-  memory_free(this->__data);
+  if (this->__data != this->__small_string) {
+    memory_free(this->__data);
+  }
 }
 
 const char* string_cstr(const string_t* this) {

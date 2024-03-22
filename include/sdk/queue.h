@@ -19,5 +19,6 @@ void queue_head(queue_t*);
 void queue_push(queue_t* head, queue_t*);
 void queue_remove(queue_t*);
 void queue_unshift(queue_t* head, queue_t*);
+bool queue_empty(queue_t* head);
 
 #include <sdk/queue/inl.h>

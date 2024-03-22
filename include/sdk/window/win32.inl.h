@@ -4,6 +4,7 @@
 
 #include <sdk/window.h>
 #include <sdk/error.h>
+#include <sdk/time.h>
 
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \
@@ -31,21 +32,22 @@
 
 typedef struct window_t {
   void* context;
-  const u16 width, height;
+  u16 width, height;
   vector2d_t cursor;
-  // events
-  listener_t onupdate;
-  listener_t ondraw;
-  listener_t onmousemove;
-  listener_t onmousedown;
-  listener_t onmouseup;
-  listener_t ondblclick;
-  listener_t onkeydown;
-  listener_t onkeyup;
-  listener_t onresize;
-  listener_t onpreload;
-  listener_t onload;
-  listener_t onclose;
+  // timer
+  f64 __last_update;
+  f32 elapsed_time;
+  // event_listener_t
+  queue_t onupdate;
+  queue_t ondraw;
+  queue_t onmousemove;
+  queue_t onmousedown;
+  queue_t onmouseup;
+  queue_t ondblclick;
+  queue_t onkeydown;
+  queue_t onkeyup;
+  queue_t onresize;
+  queue_t onclose;
   // window
   HWND __hwnd;
   bool __mouse_tracking;
@@ -164,11 +166,10 @@ void window_free(window_t* this) {
   // window_t
   KillTimer(this->__hwnd, 0);
   DestroyWindow(this->__hwnd);
-  this->__hwnd = 0;
   memory_free(this);
 }
 void __window_mouse_tracking(window_t* this) {
-  if (!this->__mouse_tracking && this->onmousemove) {
+  if (!this->__mouse_tracking) {
     this->__mouse_tracking = true;
     TRACKMOUSEEVENT tme = {
       .dwHoverTime = 800,
@@ -181,9 +182,10 @@ void __window_mouse_tracking(window_t* this) {
 }
 void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
-  if (this->onupdate) {
-    this->onupdate(this);
-  }
+  f64 now = time_absolute();
+  this->elapsed_time = now - this->__last_update;
+  this->__last_update = now;
+  emitter_emit(&this->onupdate);
 }
 void window_render(window_t* this) {
   RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
@@ -192,71 +194,59 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
     case WM_PAINT:
-      if (this->ondraw) {
+      if (!queue_empty(&this->ondraw)) {
         // static const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
         // ID3D11DeviceContext_ClearRenderTargetView(
         //   this->__d3d_device_context, this->__d3d_backbuffer, background_color
         // );
         ID2D1RenderTarget_BeginDraw(this->__d2d_render_target);
-        this->ondraw(this);
+        emitter_emit(&this->ondraw);
         ID2D1RenderTarget_EndDraw(this->__d2d_render_target, null, null);
         IDXGISwapChain_Present(this->__d3d_swapchain, 0, 0);
       }
       break;
     case WM_MOUSELEAVE:
-      if (this->onmousemove) {
+      if (!queue_empty(&this->ondraw)) {
         this->__mouse_tracking = false;
         this->cursor = (vector2d_t) { -1, -1 };
-        this->onmousemove(this);
+        emitter_emit(&this->onmousemove);
       }
       return 0;
     case WM_MOUSEMOVE:
-      if (this->onmousemove) {
+      if (!queue_empty(&this->onmousemove)) {
         __window_mouse_tracking(this);
         this->cursor = (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        this->onmousemove(this);
+        emitter_emit(&this->onmousemove);
       }
       return 0;
     case WM_LBUTTONDOWN:
     case WM_RBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_XBUTTONDOWN:
-      if (this->onmousedown) {
-        this->onmousedown(this);
-      }
+      emitter_emit(&this->onmousedown);
       return 0;
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
     case WM_MBUTTONUP:
     case WM_XBUTTONUP:
-      if (this->onmouseup) {
-        this->onmouseup(this);
-      }
+      emitter_emit(&this->onmouseup);
       return 0;
     case WM_LBUTTONDBLCLK:
-      if (this->ondblclick) {
-        this->ondblclick(this);
-      }
+      emitter_emit(&this->ondblclick);
       return 0;
     case WM_KEYDOWN:
-      if (this->onkeydown) {
-        this->onkeydown(this);
-      }
+      emitter_emit(&this->onkeydown);
       return 0;
     case WM_KEYUP:
-      if (this->onkeyup) {
-        this->onkeyup(this);
+      emitter_emit(&this->onkeyup);
+      return 0;
+    case WM_SIZE:
+      if (!queue_empty(&this->onresize)) {
+        this->width = LOWORD(lParam);
+        this->height = HIWORD(lParam);
+        emitter_emit(&this->onresize);
       }
       return 0;
-    case WM_SIZE: {
-      u16 width = LOWORD(lParam);
-      u16 height = HIWORD(lParam);
-      *(u16*)&this->width = width;
-      *(u16*)&this->height = height;
-      if (this->onresize) {
-        this->onresize(this);
-      }
-    } return 0;
     case WM_CREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
@@ -264,9 +254,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       return 0;
     };
     case WM_CLOSE:
-      if (this->onclose) {
-        this->onclose(this);
-      }
+      emitter_emit(&this->onclose);
       window_free(this);
       return 0;
     case WM_DESTROY:
@@ -276,7 +264,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
   return DefWindowProc(handle, message, wParam, lParam);
 }
 
-void window_startup(application_t* app, window_options_t* options) {
+void window_startup(application_t* app, window_props_t* options) {
   LPCSTR class_name = "MainWClass";
   if (FindWindowA(class_name, null)) {
     error("FindWindowA", ERR_UNKNOWN);
@@ -287,21 +275,17 @@ void window_startup(application_t* app, window_options_t* options) {
     error("alloc::window_t", ERR_NOT_ENOUGH_MEMORY);
     return;
   }
-  // properties
-  *(u16*)&this->width = options->width;
-  *(u16*)&this->height = options->height;
-  this->onupdate = options->onupdate;
-  this->ondraw = options->ondraw;
-  this->onmousemove = options->onmousemove;
-  this->onmousedown = options->onmousedown;
-  this->onmouseup = options->onmouseup;
-  this->onkeydown = options->onkeydown;
-  this->onkeyup = options->onkeyup;
-  this->ondblclick = options->ondblclick;
-  this->onresize = options->onresize;
-  this->onpreload = options->onpreload;
-  this->onload = options->onload;
-  this->onclose = options->onclose;
+  // event_listener_t
+  queue_head(&this->onupdate);
+  queue_head(&this->ondraw);
+  queue_head(&this->onmousemove);
+  queue_head(&this->onmousedown);
+  queue_head(&this->onmouseup);
+  queue_head(&this->onkeydown);
+  queue_head(&this->onclose);
+  queue_head(&this->ondblclick);
+  queue_head(&this->onkeyup);
+  queue_head(&this->onresize);
   // RegisterWindowClass
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -327,7 +311,7 @@ void window_startup(application_t* app, window_options_t* options) {
   }
   u32 window_ex_style = WS_EX_APPWINDOW;
   // CreateWindow
-  RECT rect = { options->x, options->y, this->width, this->height };
+  RECT rect = { options->x, options->y, options->width, options->height };
   AdjustWindowRect(&rect, window_style, false);
   this->__hwnd = CreateWindowExA(
     window_ex_style, wc.lpszClassName, options->name, window_style,
@@ -361,8 +345,8 @@ void window_startup(application_t* app, window_options_t* options) {
   DXGI_SWAP_CHAIN_DESC scd = { };
   scd.BufferCount = 1;                                // one back buffer
   scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // use 32-bit color
-  scd.BufferDesc.Width = this->width;                 // set the back buffer width
-  scd.BufferDesc.Height = this->height;               // set the back buffer height
+  scd.BufferDesc.Width = options->width;                 // set the back buffer width
+  scd.BufferDesc.Height = options->height;               // set the back buffer height
   scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // how swap chain is to be used
   scd.OutputWindow = this->__hwnd;                    // the window to be used
   scd.SampleDesc.Count = 4;                           // how many multisamples
@@ -387,7 +371,7 @@ void window_startup(application_t* app, window_options_t* options) {
     console_warn("D3D11CreateDeviceAndSwapChain %x", result);
     exit(1);
   }
-  if (!window_set_viewport(this, this->width, this->height)) {
+  if (!window_set_viewport(this, options->width, options->height)) {
     goto d2d_factory_release;
   }
   D3D11_RASTERIZER_DESC rasterizer_props = {
@@ -400,11 +384,16 @@ void window_startup(application_t* app, window_options_t* options) {
   if (FAILED(result)) {
     goto d2d_factory_release;
   }
-    // load
-  if (this->onpreload) {
+  // properties
+  this->width = options->width;
+  this->height = options->height;
+  // timer
+  this->__last_update = time_absolute();
+  // preload
+  if (options->onpreload) {
     queue_head(&this->__fonts);
-    this->onpreload(this);
-    if (&this->__fonts != this->__fonts.next) {
+    options->onpreload(this);
+    if (this->__fonts.next != &this->__fonts) {
       __FontCollectionLoader collection_loader;
       __FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
       this->__d2d_write_factory->lpVtbl->RegisterFontCollectionLoader(
@@ -425,11 +414,10 @@ void window_startup(application_t* app, window_options_t* options) {
       this->__collection = 0;
     }
   }
-  // events
-  if (this->onload) {
-    this->onload(this);
+  // load
+  if (options->onload) {
+    options->onload(this);
   }
-  __window_mouse_tracking(this);
   SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);
   return;
 d2d_factory_release:

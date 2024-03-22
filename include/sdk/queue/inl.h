@@ -21,3 +21,6 @@ void queue_unshift(queue_t* head, queue_t* q) {
   q->next->prev = q;
   head->next = q;
 }
+bool queue_empty(queue_t* head) {
+  return head == head->next;
+}

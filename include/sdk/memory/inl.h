@@ -1,7 +1,7 @@
 #include <sdk/memory.h>
 
 void* memory_fill(void* block, byte value, u64 size) {
-  u8* c = (u8*)block;
+  byte* c = (byte*)block;
   while (size) {
     *c = value;
     --size;
@@ -9,53 +9,31 @@ void* memory_fill(void* block, byte value, u64 size) {
   }
   return block;
 }
-void* memory_copy_64(void* dest, const void* src, u64 size) {
-  u64* dest_ptr = dest;
-  const u64* src_ptr = src;
-  while (size > 0) {
-    *dest_ptr = *src_ptr;
-    ++dest_ptr; ++src_ptr;
+void* memory_copy(void* dest, const void* src, u64 size) {
+  void* start = dest;
+  while (size >= sizeof(u64)) {
+    *(u64*)dest = *(u64*)src;
+    dest += sizeof(u64);
+    src += sizeof(u64);
     size -= sizeof(u64);
   }
-  return dest;
-}
-void* memory_copy_32(void* dest, const void* src, u64 size) {
-  u32* dest_ptr = dest;
-  const u32* src_ptr = src;
-  while (size > 0) {
-    *dest_ptr = *src_ptr;
-    ++dest_ptr; ++src_ptr;
+  while (size >= sizeof(u32)) {
+    *(u32*)dest = *(u32*)src;
+    dest += sizeof(u32);
+    src += sizeof(u32);
     size -= sizeof(u32);
   }
-  return dest;
-}
-void* memory_copy_16(void* dest, const void* src, u64 size) {
-  u16* dest_ptr = dest;
-  const u16* src_ptr = src;
-  while (size > 0) {
-    *dest_ptr = *src_ptr;
-    ++dest_ptr; ++src_ptr;
+  while (size >= sizeof(u16)) {
+    *(u16*)dest = *(u16*)src;
+    dest += sizeof(u16);
+    src += sizeof(u16);
     size -= sizeof(u16);
   }
-  return dest;
-}
-void* memory_copy_8(void* dest, const void* src, u64 size) {
-  byte* dest_ptr = dest;
-  const byte* src_ptr = src;
-  while (size > 0) {
-    *dest_ptr = *src_ptr;
-    ++dest_ptr; ++src_ptr; --size;
+  while (size >= sizeof(byte)) {
+    *(byte*)dest = *(byte*)src;
+    dest += sizeof(byte);
+    src += sizeof(byte);
+    size -= sizeof(byte);
   }
-}
-void* memory_copy(void* dest, const void* src, u64 size) {
-  switch (size % sizeof(u64)) {
-    case 0:
-      return memory_copy_64(dest, src, size);
-    case 4:
-      return memory_copy_32(dest, src, size);
-    case 2:
-      return memory_copy_16(dest, src, size);
-    default:
-      return memory_copy_8(dest, src, size);
-  }
+  return start;
 }

@@ -32,7 +32,7 @@ void onupdate(window_t* this) {
 i32 main() {
   application_t app;
   app_new(&app);
-  window_options_t options = {
+  window_props_t options = {
     .name = "Platform",
     .width = 800,
     .height = 600,

@@ -27,14 +27,14 @@ void scene_transition_destroy(scene_transition_t* this) {
   emitter_off(&this->onupdate);
   emitter_off(&this->ondraw);
   emitter_off(&this->ondestroy);
-  memory_free(this);
   this->game->__in_transition = false;
+  memory_free(this);
 }
 void scene_transition_update(scene_transition_t* this) {
   static const f32 duration = .85f;
   game_t* game = this->game;
   window_t* window = game->window;
-  this->timer += game->elapsed_time;
+  this->timer += window->elapsed_time;
   f32 progress = this->timer / duration;
   if (progress > 1.f) {
     progress = 1.f;
@@ -45,7 +45,7 @@ void scene_transition_update(scene_transition_t* this) {
       callback_emit(&this->scene_destroy);
       callback_emit(&this->scene_load);
       emitter_off(&this->ondraw);
-      emitter_on(&game->ondraw, &this->ondraw);
+      emitter_on(&window->ondraw, &this->ondraw);
       this->timer = 0.f;
       this->loading = false;
     }
@@ -87,11 +87,11 @@ void scene_transition(scene_transition_props_t props) {
   // register
   this->onupdate.callback = (listener_t)scene_transition_update;
   this->onupdate.context = this;
-  emitter_on(&game->onupdate, &this->onupdate);
+  emitter_on(&window->onupdate, &this->onupdate);
   this->ondestroy.callback = (listener_t)scene_transition_destroy;
   this->ondestroy.context = this;
-  emitter_on(&game->ondestroy, &this->ondestroy);
+  emitter_on(&window->onclose, &this->ondestroy);
   this->ondraw.callback = (listener_t)scene_transition_draw;
   this->ondraw.context = this;
-  emitter_on(&game->ondraw, &this->ondraw);
+  emitter_on(&window->ondraw, &this->ondraw);
 }
