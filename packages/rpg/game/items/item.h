@@ -9,6 +9,6 @@ typedef struct item_t {
   queue_t queue;
   string_t name;
   string_t description;
-  bitmap_t* sprite;
+  image_t* sprite;
   void (*onuse)(entity_t*);
 } item_t;

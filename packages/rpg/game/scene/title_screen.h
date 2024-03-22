@@ -3,7 +3,7 @@
 #include <sdk/window/gfx/style.h>
 #include <sdk/window/gfx/rect.h>
 #include <sdk/window/gfx/text.h>
-#include <sdk/window/gfx/bitmap.h>
+#include <sdk/window/gfx/image.h>
 
 #include "../game.h"
 #include "../routines/scene_transition.h"
@@ -16,10 +16,10 @@ typedef struct title_screen_t {
   event_listener_t onkeydown;
   event_listener_t destroy;
   // assets
-  bitmap_t terrain_atlas;
+  image_src_t terrain_atlas;
   gfx_style_t title_style, play_style;
   // elements
-  gfx_bitmap_t background;
+  gfx_image_t background;
   gfx_text_t title, press_space, to_play;
   showdialog_t hp_display;
 } title_screen_t;
@@ -117,12 +117,12 @@ void titlescreen_load(game_t* game) {
   };
   gfx_text_adjust(&this->to_play);
   // background
-  this->background = (gfx_bitmap_t) {
+  this->background = (gfx_image_t) {
     .window = window,
     .rect = { 0, 0, .width = window->width, .height = window->height },
     .position = { 512, 832 },
     .size = { 95, 95 },
-    .image = &this->terrain_atlas
+    .src = &this->terrain_atlas
   };
   rect_update_size(&this->background.rect);
   // hp_display

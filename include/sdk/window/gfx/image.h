@@ -9,20 +9,21 @@ typedef enum bitmap_extend_t {
   BITMAP_EXTEND_COVER
 } bitmap_extend_t;
 
-typedef struct bitmap_t bitmap_t;
+typedef struct image_src_t image_src_t;
 
-typedef struct gfx_bitmap_t {
+typedef struct gfx_image_t {
   const window_t* window;
-  bitmap_t* image;
+  image_src_t* src;
   rect_t rect;
   vector2d_t position;
   size_u16_t size;
+  // optional
   bitmap_extend_t extend_mode;
-} gfx_bitmap_t;
+} gfx_image_t;
 
-void gfx_bitmap_new(bitmap_t*, const wchar_t* path, const window_t*);
-void gfx_bitmap_free(bitmap_t*);
+void gfx_image_new(image_src_t*, const wchar_t* path, const window_t*);
+void gfx_image_free(image_src_t*);
 
-void gfx_bitmap_draw(const gfx_bitmap_t*);
+void gfx_image_draw(const gfx_image_t*);
 
-#include <sdk/window/gfx/bitmap/win32.inl.h>
+#include <sdk/window/gfx/image/win32.inl.h>
