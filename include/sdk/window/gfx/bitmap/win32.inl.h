@@ -79,6 +79,7 @@ void gfx_bitmap_free(bitmap_t* this) {
 }
 
 void gfx_bitmap_draw(const gfx_bitmap_t* this) {
+  const window_t* window = this->window;
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   ID2D1Bitmap* bitmap = this->image->__bitmap;
   D2D1_RECT_F rect;
@@ -112,26 +113,27 @@ void gfx_bitmap_draw(const gfx_bitmap_t* this) {
           position.bottom = position.top + y_remaining;
           rect.bottom = this->rect.right_bottom.y;
         }
-        console_log("rect.bottom=%f", rect.bottom);
-        // reset x
-        rect.left = this->rect.left_top.x;
-        rect.right = rect_right_start;
-        position.right = position_right_start;
-        while (true) {
-          if (rect.right > this->rect.right_bottom.x) {
-            f32 x_remaining = this->rect.right_bottom.x - rect.left;
-            if (x_remaining < 0) {
-              break;
+        if (rect.bottom >= 0 && rect.top <= window->height) {
+          // reset x
+          rect.left = this->rect.left_top.x;
+          rect.right = rect_right_start;
+          position.right = position_right_start;
+          while (true) {
+            if (rect.right > this->rect.right_bottom.x) {
+              f32 x_remaining = this->rect.right_bottom.x - rect.left;
+              if (x_remaining < 0) {
+                break;
+              }
+              position.right = position.left + x_remaining;
+              rect.right = this->rect.right_bottom.x;
             }
-            position.right = position.left + x_remaining;
-            rect.right = this->rect.right_bottom.x;
+            ID2D1RenderTarget_DrawBitmap(
+              render_target, bitmap, &rect, 1.f,
+              D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+            );
+            rect.left += this->size.width;
+            rect.right += this->size.width;
           }
-          ID2D1RenderTarget_DrawBitmap(
-            render_target, bitmap, &rect, 1.f,
-            D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
-          );
-          rect.left += this->size.width;
-          rect.right += this->size.width;
         }
         rect.top += this->size.height;
         rect.bottom += this->size.height;

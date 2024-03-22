@@ -35,7 +35,6 @@ void titlescreen_onupdate(title_screen_t* this) {
   gfx_text_draw(&this->to_play);
 }
 void titlescreen_background_onmove(title_screen_t* this) {
-  console_log("titlescreen_background_onmove");
   rect_update_size(&this->background.rect);
 }
 void titlescreen_background_ondestroy(title_screen_t* this) {
