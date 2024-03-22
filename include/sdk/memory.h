@@ -11,6 +11,9 @@ void* memory_realloc(void* this, u64 size);
 void* memory_realloc0(void* this, u64 size);
 void* memory_fill(void* this, byte value, u64 size);
 void* memory_copy(void* this, const void* src, u64 size);
+void* memory_copy_64(void* this, const void* src, u64 size);
+void* memory_copy_32(void* this, const void* src, u64 size);
+void* memory_copy_16(void* this, const void* src, u64 size);
 void memory_free(void*);
 
 #include <sdk/memory/inl.h>

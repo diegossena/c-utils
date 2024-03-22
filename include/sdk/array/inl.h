@@ -1,5 +1,7 @@
 #include <sdk/array.h>
 
+#include <sdk/memory.h>
+
 bool __array_resize(array_t* this, u64 capacity) {
   this->__data = memory_realloc(this->__data, capacity * this->__stride);
   this->__capacity = capacity;

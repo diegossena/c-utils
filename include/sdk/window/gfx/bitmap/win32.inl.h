@@ -65,11 +65,6 @@ void gfx_bitmap_new(bitmap_t* this, const wchar_t* path, const window_t* window)
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
-  // D2D1_SIZE_U image_size = this->__bitmap->lpVtbl->GetPixelSize(this->__bitmap);
-  // u16 image_width = image_size.width;
-  // u16 image_height = image_size.height;
-  // memory_copy((u16*)&this->width, &image_width, sizeof(u16));
-  // memory_copy((u16*)&this->width, &image_height, sizeof(u16));
   ++memory_leaks;
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);

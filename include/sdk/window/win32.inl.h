@@ -197,16 +197,14 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MOUSELEAVE:
       if (this->onmousemove) {
         this->__mouse_tracking = false;
-        vector2d_t cursor = { -1, -1 };
-        memory_copy((vector2d_t*)&this->cursor, &cursor, sizeof(vector2d_t));
+        *(vector2d_t*)&this->cursor = (vector2d_t) { -1, -1 };
         this->onmousemove(this);
       }
       return 0;
     case WM_MOUSEMOVE:
       if (this->onmousemove) {
         __window_mouse_tracking(this);
-        vector2d_t cursor = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        memory_copy((vector2d_t*)&this->cursor, &cursor, sizeof(vector2d_t));
+        *(vector2d_t*)&this->cursor = (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         this->onmousemove(this);
       }
       return 0;
@@ -244,8 +242,8 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_SIZE: {
       u16 width = LOWORD(lParam);
       u16 height = HIWORD(lParam);
-      memory_copy((u16*)&this->width, &width, sizeof(u16));
-      memory_copy((u16*)&this->height, &height, sizeof(u16));
+      *(u16*)&this->width = width;
+      *(u16*)&this->height = height;
       if (this->onresize) {
         this->onresize(this);
       }
