@@ -14,6 +14,7 @@ typedef struct title_screen_t {
   game_t* game;
   // events
   event_listener_t onupdate;
+  event_listener_t onkeydown;
   event_listener_t ondestroy;
   // assets
   bitmap_t terrain_atlas;
@@ -32,6 +33,11 @@ void titlescreen_onupdate(title_screen_t* this) {
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
+}
+void titlescreen_onkeydown(title_screen_t* this) {
+  if (keyboard_pressed(KEY_SPACE)) {
+    console_log("titlescreen_onkeydown");
+  }
 }
 void titlescreen_ondestroy(title_screen_t* this) {
   emitter_off(&this->ondestroy);
@@ -60,7 +66,12 @@ void titlescreen_load(game_t* game) {
     .callback = (listener_t)titlescreen_onupdate,
     .context = this
   };
-  queue_push(&game->onupdate, &this->onupdate.queue);
+  emitter_on(&game->onupdate, &this->onupdate);
+  this->onkeydown = (event_listener_t) {
+    .callback = (listener_t)titlescreen_onkeydown,
+    .context = this
+  };
+  emitter_on(&game->onkeydown, &this->onkeydown);
 
   // assets
 

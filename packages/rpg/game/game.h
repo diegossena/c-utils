@@ -17,6 +17,7 @@ typedef struct game_t {
   queue_t onmousemove;
   queue_t onmousedown;
   queue_t onmouseup;
+  queue_t onkeydown;
   queue_t ondestroy;
 } game_t;
 
@@ -30,6 +31,7 @@ game_t* game_new(window_t* window) {
   queue_head(&this->onmousemove);
   queue_head(&this->onmousedown);
   queue_head(&this->onmouseup);
+  queue_head(&this->onkeydown);
   queue_head(&this->ondestroy);
   this->window = window;
   this->__last_update = time_absolute();
@@ -64,6 +66,11 @@ void game_onmouseup(game_t* this) {
 }
 void game_onmousedown(game_t* this) {
   queue_foreach(event_listener_t, this->onmousedown, it, it->queue.next) {
+    it->callback(it->context);
+  }
+}
+void game_onkeydown(game_t* this) {
+  queue_foreach(event_listener_t, this->onkeydown, it, it->queue.next) {
     it->callback(it->context);
   }
 }

@@ -18,6 +18,9 @@ void onmouseup(window_t* this) {
 void onmousedown(window_t* this) {
   game_onmousedown(this->context);
 }
+void onkeydown(window_t* this) {
+  game_onkeydown(this->context);
+}
 void onclose(window_t* this) {
   game_free(this->context);
 }
@@ -39,6 +42,7 @@ i32 main() {
     .onmousemove = (listener_t)onmousemove,
     .onmouseup = (listener_t)onmouseup,
     .onmousedown = (listener_t)onmousedown,
+    .onkeydown = (listener_t)onkeydown,
     .onclose = (listener_t)onclose
   };
   window_startup(&app, &options);
