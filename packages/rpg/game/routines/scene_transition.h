@@ -28,9 +28,9 @@ void scene_transition_destroy(scene_transition_t* this) {
   this->game->__in_transition = false;
 }
 void scene_transition_update(scene_transition_t* this) {
+  static const f32 duration = .8f;
   game_t* game = this->game;
   window_t* window = game->window;
-  static const f32 duration = .8f;
   this->timer += game->elapsed_time;
   f32 progress = this->timer / duration;
   if (progress > 1.f) {
