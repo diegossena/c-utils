@@ -167,6 +167,9 @@ void window_free(window_t* this) {
   KillTimer(this->__hwnd, 0);
   DestroyWindow(this->__hwnd);
   memory_free(this);
+  if (queue_count > 0) {
+    console_warn("queue_count=%d", queue_count);
+  }
 }
 void __window_mouse_tracking(window_t* this) {
   if (!this->__mouse_tracking) {

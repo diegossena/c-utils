@@ -37,6 +37,7 @@ void game_ondestroy(game_t* this) {
   gfx_color_free((gfx_color_t*)&this->green);
   gfx_color_free((gfx_color_t*)&this->darkblue);
   gfx_bitmap_free(&this->terrain_atlas);
+  emitter_off(&this->ondestroy);
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
