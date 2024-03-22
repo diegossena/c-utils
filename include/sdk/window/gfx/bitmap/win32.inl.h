@@ -79,6 +79,8 @@ void gfx_bitmap_free(bitmap_t* this) {
 }
 
 void gfx_bitmap_draw(const gfx_bitmap_t* this) {
+  ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
+  ID2D1Bitmap* bitmap = this->image->__bitmap;
   D2D1_RECT_F rect;
   D2D1_RECT_F position = {
     this->position.x, this->position.y,
@@ -91,9 +93,8 @@ void gfx_bitmap_draw(const gfx_bitmap_t* this) {
       rect.right = rect.left + this->size.width;
       rect.bottom = rect.top + this->size.height;
       ID2D1RenderTarget_DrawBitmap(
-        this->window->__d2d_render_target, (ID2D1Bitmap*)this->image->__bitmap,
-        &rect, 1.f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-        &position
+        render_target, bitmap, &rect, 1.f,
+        D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
       );
     } break;
     default: {
@@ -125,8 +126,8 @@ void gfx_bitmap_draw(const gfx_bitmap_t* this) {
             rect.right = this->rect.right_bottom.x;
           }
           ID2D1RenderTarget_DrawBitmap(
-            this->window->__d2d_render_target, (ID2D1Bitmap*)this->image->__bitmap,
-            &rect, 1.f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+            render_target, bitmap, &rect, 1.f,
+            D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
           );
           rect.left += this->size.width;
           rect.right += this->size.width;
