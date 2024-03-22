@@ -31,13 +31,13 @@ typedef struct game_t {
 #include "./scene/title_screen.h"
 
 void game_ondestroy(game_t* this) {
+  emitter_off(&this->ondestroy);
   gfx_style_free((gfx_style_t*)&this->dialog_style);
   gfx_stroke_free((gfx_stroke_t*)&this->stroke_solid);
   gfx_color_free((gfx_color_t*)&this->white);
   gfx_color_free((gfx_color_t*)&this->green);
   gfx_color_free((gfx_color_t*)&this->darkblue);
   gfx_bitmap_free(&this->terrain_atlas);
-  emitter_off(&this->ondestroy);
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
