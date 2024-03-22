@@ -12,7 +12,7 @@ typedef struct gfx_text_t {
   const wchar_t* text;
   u64 length;
   rect_t rect;
-  const gfx_style_t* format;
+  const gfx_style_t* style;
   const gfx_color_t* color;
 } gfx_text_t;
 

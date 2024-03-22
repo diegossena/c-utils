@@ -6,7 +6,7 @@
 #include <sdk/window/gfx/text.h>
 
 void gfx_text_auto_size(gfx_text_t* this) {
-  IDWriteTextFormat* text_format = this->format->__format;
+  IDWriteTextFormat* text_format = this->style->__format;
   IDWriteFactory* factory = this->window->__d2d_write_factory;
   IDWriteTextLayout* text_layout;
   DWRITE_TEXT_METRICS metrics;
@@ -22,9 +22,9 @@ void gfx_text_auto_size(gfx_text_t* this) {
 
 void gfx_text_draw(const gfx_text_t* this) {
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
-  IDWriteTextFormat* text_format = this->format->__format;
+  IDWriteTextFormat* text_format = this->style->__format;
   ID2D1RenderTarget_DrawText(
-    render_target, this->text, this->length, this->format->__format,
+    render_target, this->text, this->length, this->style->__format,
     (D2D1_RECT_F*)&this->rect, (ID2D1Brush*)this->color->__brush,
     D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
   );

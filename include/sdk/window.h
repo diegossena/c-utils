@@ -25,6 +25,7 @@ typedef struct window_options_t {
   void* context;
   // events
   listener_t onupdate;
+  listener_t ondraw;
   listener_t onmousemove;
   listener_t onmousedown;
   listener_t onmouseup;
@@ -32,8 +33,8 @@ typedef struct window_options_t {
   listener_t onkeydown;
   listener_t onkeyup;
   listener_t onresize;
+  listener_t onpreload;
   listener_t onload;
-  listener_t oncreate;
   listener_t onclose;
 } window_options_t;
 
@@ -41,6 +42,7 @@ void window_startup(application_t*, window_options_t*);
 void window_free(window_t*);
 bool window_pooling();
 
+void window_render(window_t*);
 vector2d_t window_get_cursor(window_t*);
 void window_set_size(window_t*, u32 width, u32 height);
 bool window_set_viewport(window_t* this, u32 width, u32 height);

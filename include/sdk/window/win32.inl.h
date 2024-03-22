@@ -35,6 +35,7 @@ typedef struct window_t {
   const vector2d_t cursor;
   // events
   listener_t onupdate;
+  listener_t ondraw;
   listener_t onmousemove;
   listener_t onmousedown;
   listener_t onmouseup;
@@ -42,8 +43,8 @@ typedef struct window_t {
   listener_t onkeydown;
   listener_t onkeyup;
   listener_t onresize;
+  listener_t onpreload;
   listener_t onload;
-  listener_t oncreate;
   listener_t onclose;
   // window
   HWND __hwnd;
@@ -180,20 +181,29 @@ void __window_mouse_tracking(window_t* this) {
 }
 void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
-  const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  ID3D11DeviceContext_ClearRenderTargetView(
-    this->__d3d_device_context, this->__d3d_backbuffer, background_color
-  );
-  ID2D1RenderTarget_BeginDraw(this->__d2d_render_target);
   if (this->onupdate) {
     this->onupdate(this);
   }
-  ID2D1RenderTarget_EndDraw(this->__d2d_render_target, null, null);
-  IDXGISwapChain_Present(this->__d3d_swapchain, 1, 0);
+}
+void window_render(window_t* this) {
+  RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
+    case WM_PAINT:
+      console_log("WM_PAINT");
+      if (this->ondraw) {
+        static const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        ID3D11DeviceContext_ClearRenderTargetView(
+          this->__d3d_device_context, this->__d3d_backbuffer, background_color
+        );
+        ID2D1RenderTarget_BeginDraw(this->__d2d_render_target);
+        this->ondraw(this);
+        ID2D1RenderTarget_EndDraw(this->__d2d_render_target, null, null);
+        IDXGISwapChain_Present(this->__d3d_swapchain, 0, 0);
+      }
+      break;
     case WM_MOUSELEAVE:
       if (this->onmousemove) {
         this->__mouse_tracking = false;
@@ -282,6 +292,7 @@ void window_startup(application_t* app, window_options_t* options) {
   *(u16*)&this->width = options->width;
   *(u16*)&this->height = options->height;
   this->onupdate = options->onupdate;
+  this->ondraw = options->ondraw;
   this->onmousemove = options->onmousemove;
   this->onmousedown = options->onmousedown;
   this->onmouseup = options->onmouseup;
@@ -289,8 +300,8 @@ void window_startup(application_t* app, window_options_t* options) {
   this->onkeyup = options->onkeyup;
   this->ondblclick = options->ondblclick;
   this->onresize = options->onresize;
+  this->onpreload = options->onpreload;
   this->onload = options->onload;
-  this->oncreate = options->oncreate;
   this->onclose = options->onclose;
   // RegisterWindowClass
   WNDCLASSEXA wc = {
@@ -391,9 +402,9 @@ void window_startup(application_t* app, window_options_t* options) {
     goto d2d_factory_release;
   }
     // load
-  if (this->onload) {
+  if (this->onpreload) {
     queue_head(&this->__fonts);
-    this->onload(this);
+    this->onpreload(this);
     if (&this->__fonts != this->__fonts.next) {
       __FontCollectionLoader collection_loader;
       __FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
@@ -416,8 +427,8 @@ void window_startup(application_t* app, window_options_t* options) {
     }
   }
   // events
-  if (this->oncreate) {
-    this->oncreate(this);
+  if (this->onload) {
+    this->onload(this);
   }
   __window_mouse_tracking(this);
   SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);

@@ -1,13 +1,16 @@
 #include "./game/game.h"
 
-void onload(window_t* this) {
+void onpreload(window_t* this) {
   this->context = game_new(this);
 }
-void oncreate(window_t* this) {
-  game_oncreate(this->context);
+void onload(window_t* this) {
+  game_onload(this->context);
 }
 void onupdate(window_t* this) {
   game_onupdate(this->context);
+}
+void ondraw(window_t* this) {
+  game_ondraw(this->context);
 }
 void onmousemove(window_t* this) {
   game_onmousemove(this->context);
@@ -36,9 +39,10 @@ i32 main() {
     .x = 0,
     .y = 0,
     .flags = WINDOW_NO_RESIZABLE | WINDOW_NO_MAXIMIZE,
+    .onpreload = (listener_t)onpreload,
     .onload = (listener_t)onload,
-    .oncreate = (listener_t)oncreate,
     .onupdate = (listener_t)onupdate,
+    .ondraw = (listener_t)ondraw,
     .onmousemove = (listener_t)onmousemove,
     .onmouseup = (listener_t)onmouseup,
     .onmousedown = (listener_t)onmousedown,

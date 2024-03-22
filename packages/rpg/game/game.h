@@ -18,6 +18,7 @@ typedef struct game_t {
   f32 elapsed_time;
   // listeners
   queue_t onupdate;
+  queue_t ondraw;
   queue_t onmousemove;
   queue_t onmousedown;
   queue_t onmouseup;
@@ -42,6 +43,7 @@ game_t* game_new(window_t* window) {
   this->__in_transition = false;
   // event_listeners
   queue_head(&this->onupdate);
+  queue_head(&this->ondraw);
   queue_head(&this->onmousemove);
   queue_head(&this->onmousedown);
   queue_head(&this->onmouseup);
@@ -66,11 +68,11 @@ game_t* game_new(window_t* window) {
   gfx_color_new((gfx_color_t*)&this->darkblue, window, COLOR_DARKBLUE);
   return this;
 }
-void game_oncreate(game_t* this) {
+void game_onload(game_t* this) {
   window_t* window = this->window;
   gfx_style_new((gfx_style_t*)&this->dialog_style, (gfx_style_props_t) {
     .window = window,
-      .size = 18.f,
+      .size = 28.f,
       .family = this->font_megaman_family,
       .weight = FONT_WEIGHT_NORMAL
   });
@@ -81,6 +83,11 @@ void game_onupdate(game_t* this) {
   this->elapsed_time = now - this->__last_update;
   this->__last_update = now;
   queue_foreach(event_listener_t, this->onupdate) {
+    it->callback(it->context);
+  }
+}
+void game_ondraw(game_t* this) {
+  queue_foreach(event_listener_t, this->ondraw) {
     it->callback(it->context);
   }
 }

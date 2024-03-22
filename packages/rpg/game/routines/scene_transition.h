@@ -5,12 +5,14 @@
 #include <sdk/events.h>
 
 typedef struct scene_transition_t {
-  event_listener_t onupdate;
-  event_listener_t ondestroy;
   game_t* game;
+  event_listener_t onupdate;
+  event_listener_t ondraw;
+  event_listener_t ondestroy;
   callback_t scene_destroy;
   callback_t scene_load;
-  f32 timer;
+  // private
+  f32 timer, opacity;
   bool loading;
   gfx_rect_t background;
 } scene_transition_t;
@@ -23,6 +25,7 @@ typedef struct scene_transition_props_t {
 
 void scene_transition_destroy(scene_transition_t* this) {
   emitter_off(&this->onupdate);
+  emitter_off(&this->ondraw);
   emitter_off(&this->ondestroy);
   memory_free(this);
   this->game->__in_transition = false;
@@ -36,25 +39,28 @@ void scene_transition_update(scene_transition_t* this) {
   if (progress > 1.f) {
     progress = 1.f;
   }
-  f32 opacity;
   if (this->loading) {
-    opacity = progress;
+    this->opacity = progress;
     if (this->timer >= duration) {
       callback_emit(&this->scene_destroy);
       callback_emit(&this->scene_load);
-      emitter_off(&this->onupdate);
-      emitter_on(&game->onupdate, &this->onupdate);
+      emitter_off(&this->ondraw);
+      emitter_on(&game->ondraw, &this->ondraw);
       this->timer = 0.f;
       this->loading = false;
     }
   } else {
-    opacity = 1.f - progress;
+    this->opacity = 1.f - progress;
     if (this->timer >= duration) {
-      scene_transition_destroy(this);
+      return scene_transition_destroy(this);
     }
   }
+  window_render(window);
+}
+void scene_transition_draw(scene_transition_t* this) {
+  window_t* window = this->game->window;
   gfx_color_t gfx_color;
-  gfx_color_new(&gfx_color, window, (color_t) { 1.f, 1.f, 1.f, opacity });
+  gfx_color_new(&gfx_color, window, (color_t) { 1.f, 1.f, 1.f, this->opacity });
   this->background.color = &gfx_color;
   gfx_rect_draw(&this->background);
   gfx_color_free(&gfx_color);
@@ -85,4 +91,7 @@ void scene_transition(scene_transition_props_t props) {
   this->ondestroy.callback = (listener_t)scene_transition_destroy;
   this->ondestroy.context = this;
   emitter_on(&game->ondestroy, &this->ondestroy);
+  this->ondraw.callback = (listener_t)scene_transition_draw;
+  this->ondraw.context = this;
+  emitter_on(&game->ondraw, &this->ondraw);
 }

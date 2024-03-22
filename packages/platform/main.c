@@ -8,7 +8,7 @@ f64 last_update;
 world_t world;
 player_t player;
 
-void oncreate(window_t* this) {
+void onload(window_t* this) {
   world_start(&world, this);
   player_start(&player, &world);
   last_update = time_absolute();
@@ -38,7 +38,7 @@ i32 main() {
     .height = 600,
     .x = 0,
     .y = 0,
-    .oncreate = oncreate,
+    .onload = onload,
     .onupdate = onupdate,
     .onresize = onresize
   };
