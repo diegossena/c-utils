@@ -48,12 +48,14 @@ void* memory_copy_8(void* dest, const void* src, u64 size) {
   }
 }
 void* memory_copy(void* dest, const void* src, u64 size) {
-  if (size % sizeof(u64) == 0) {
-    return memory_copy_64(dest, src, size);
-  } else if (size % sizeof(u32) == 0) {
-    return memory_copy_32(dest, src, size);
-  } else if (size % sizeof(u16) == 0) {
-    return memory_copy_16(dest, src, size);
+  switch (size % sizeof(u64)) {
+    case 0:
+      return memory_copy_64(dest, src, size);
+    case 4:
+      return memory_copy_32(dest, src, size);
+    case 2:
+      return memory_copy_16(dest, src, size);
+    default:
+      return memory_copy_8(dest, src, size);
   }
-  return memory_copy_8(dest, src, size);
 }
