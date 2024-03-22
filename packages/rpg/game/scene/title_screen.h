@@ -126,9 +126,11 @@ void titlescreen_load(game_t* game) {
   };
   rect_update_size(&this->background.rect);
   // hp_display
-  showdialog_new(&this->hp_display, game);
-  wstring_append_cwstr(&this->hp_display.text, L"HP: 9/10");
+  wstring_new(&this->hp_display.text);
+  this->hp_display.game = game;
   this->hp_display.position.x = 10.f;
   this->hp_display.position.y = 10.f;
+  showdialog_new(&this->hp_display);
+  wstring_append_cwstr(&this->hp_display.text, L"HP: 9/10");
   showdialog_update(&this->hp_display);
 }

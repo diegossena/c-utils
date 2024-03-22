@@ -7,10 +7,11 @@
 #include <sdk/window/gfx/rect.h>
 
 typedef struct showdialog_t {
+  // initial_props
+  game_t* game;
   wstring_t text;
   vector2d_t position;
   // private
-  game_t* __game;
   gfx_text_t __text;
   gfx_rect_t __background, __border;
 } showdialog_t;
@@ -32,10 +33,9 @@ void showdialog_update(showdialog_t* this) {
   this->__border.rect.right_bottom.x = this->__text.rect.right_bottom.x + 2;
   this->__border.rect.right_bottom.y = this->__text.rect.right_bottom.y + 2;
 }
-void showdialog_new(showdialog_t* this, game_t* game) {
+void showdialog_new(showdialog_t* this) {
+  game_t* game = this->game;
   window_t* window = game->window;
-  wstring_new(&this->text);
-  this->__game = game;
   this->__text.window = window;
   this->__text.style = &game->dialog_style;
   this->__text.color = &game->white;
