@@ -53,7 +53,6 @@ void scene_transition_update(scene_transition_t* this) {
       scene_transition_destroy(this);
     }
   }
-  console_log("opacity=%f", opacity);
   gfx_color_t gfx_color;
   gfx_color_new(&gfx_color, window, (color_t) { 1.f, 1.f, 1.f, opacity });
   this->background.color = &gfx_color;
