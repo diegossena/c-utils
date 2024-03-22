@@ -32,7 +32,7 @@
 typedef struct window_t {
   void* context;
   const u16 width, height;
-  const vector2d_t cursor;
+  vector2d_t cursor;
   // events
   listener_t onupdate;
   listener_t ondraw;
@@ -206,14 +206,14 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_MOUSELEAVE:
       if (this->onmousemove) {
         this->__mouse_tracking = false;
-        *(vector2d_t*)&this->cursor = (vector2d_t) { -1, -1 };
+        this->cursor = (vector2d_t) { -1, -1 };
         this->onmousemove(this);
       }
       return 0;
     case WM_MOUSEMOVE:
       if (this->onmousemove) {
         __window_mouse_tracking(this);
-        *(vector2d_t*)&this->cursor = (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        this->cursor = (vector2d_t) { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         this->onmousemove(this);
       }
       return 0;
