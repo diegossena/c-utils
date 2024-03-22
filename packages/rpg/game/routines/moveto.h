@@ -7,8 +7,8 @@
 typedef struct moveto_t {
   event_listener_t onupdate;
   event_listener_t ondestroy;
-  fn_any_t destroy_callback;
-  fn_any_t update_callback;
+  callback_t destroy_listener;
+  callback_t update_listener;
   game_t* game;
   vector2d_t* position;
   vector2d_t distance;
@@ -22,10 +22,9 @@ typedef struct moveto_props_t {
   vector2d_t* position;
   vector2d_t target;
   f32 duration;
-  f32 timer;
   // optional
-  fn_any_t onupdate;
-  fn_any_t ondestroy;
+  callback_t onupdate;
+  callback_t ondestroy;
 } moveto_props_t;
 
 void routine_moveto_destroy(moveto_t* this) {
@@ -39,8 +38,8 @@ void routine_moveto_update(moveto_t* this) {
   this->position->x += tick * this->distance.x;
   this->position->y += tick * this->distance.y;
   if (this->timer >= this->duration) {
-    if (this->destroy_callback) {
-      this->destroy_callback();
+    if (this->destroy_listener.callback) {
+      this->destroy_listener.callback(this->destroy_listener.context);
     }
     routine_moveto_destroy(this);
   }
@@ -54,15 +53,13 @@ void routine_moveto(moveto_props_t props) {
   this->distance.y = props.target.y - props.position->y;
   this->duration = math_max(props.duration, .001f);
   this->timer = 0.f;
-  this->destroy_callback = props.ondestroy;
-  this->update_callback = props.onupdate;
+  this->destroy_listener = props.ondestroy;
+  this->update_listener = props.onupdate;
   // register
   this->onupdate.callback = (listener_t)routine_moveto_update;
   this->onupdate.context = this;
   emitter_prepend(&props.game->onupdate, &this->onupdate);
-  this->ondestroy = (event_listener_t) {
-    .callback = (listener_t)routine_moveto_destroy,
-    .context = this,
-  };
+  this->ondestroy.callback = (listener_t)routine_moveto_destroy;
+  this->ondestroy.context = this;
   emitter_prepend(&props.game->ondestroy, &this->ondestroy);
 }

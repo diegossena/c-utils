@@ -2,8 +2,12 @@
 
 #include <sdk/queue.h>
 
-
 typedef void (*listener_t)(void* context);
+
+typedef struct callback_t {
+  listener_t callback;
+  void* context;
+} callback_t;
 
 typedef struct event_listener_t {
   queue_t queue;
