@@ -28,8 +28,6 @@ void titlescreen_load(game_t*);
 void titlescreen_destroy(title_screen_t*);
 
 void titlescreen_ondraw(title_screen_t* this) {
-  game_t* game = this->game;
-  window_t* window = game->window;
   gfx_bitmap_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
