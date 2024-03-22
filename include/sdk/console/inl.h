@@ -8,7 +8,7 @@ i32 console_write(log_level_t level, const char* message, ...) {
 
   __builtin_va_list args;
   va_start(args, message);
-  i32 length = cstr_format_v(out_message, message, args);
+  i32 length = cstr_format_va(out_message, message, args);
   va_end(args);
   if (length < 0)
     return length;

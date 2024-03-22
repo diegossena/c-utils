@@ -4,7 +4,7 @@
 
 #include <sdk/path.h>
 
-const char path_sep = '\\';
+static const char path_sep = '\\';
 
 void path_resolve(string_t* this) {
   char buffer[MAX_PATH] = "";

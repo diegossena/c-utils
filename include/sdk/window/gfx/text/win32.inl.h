@@ -5,19 +5,28 @@
 
 #include <sdk/window/gfx/text.h>
 
+void gfx_text_auto_size(gfx_text_t* this) {
+  IDWriteTextFormat* text_format = this->format->__format;
+  IDWriteFactory* factory = this->window->__d2d_write_factory;
+  IDWriteTextLayout* text_layout;
+  DWRITE_TEXT_METRICS metrics;
+  IDWriteFactory_CreateTextLayout(
+    factory, this->text, this->length, text_format, MAX_F32, MAX_F32,
+    &text_layout
+  );
+  IDWriteTextLayout_GetMetrics(text_layout, &metrics);
+  IDWriteTextLayout_Release(text_layout);
+  this->rect.right_bottom.x = this->rect.left_top.x + metrics.width;
+  this->rect.right_bottom.y = this->rect.left_top.y + metrics.height;
+}
+
 void gfx_text_draw(const gfx_text_t* this) {
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   IDWriteTextFormat* text_format = this->format->__format;
-  f32 font_size = text_format->lpVtbl->GetFontSize(text_format);
-  D2D1_RECT_F rect = {
-    this->position.x, this->position.y,
-    this->position.x + font_size * this->length,
-    this->position.y + font_size
-  };
   ID2D1RenderTarget_DrawText(
     render_target, this->text, this->length, this->format->__format,
-    &rect, (ID2D1Brush*)this->color->__brush, D2D1_DRAW_TEXT_OPTIONS_NONE,
-    DWRITE_MEASURING_MODE_NATURAL
+    (D2D1_RECT_F*)&this->rect, (ID2D1Brush*)this->color->__brush,
+    D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
   );
 }
 

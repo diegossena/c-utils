@@ -10,6 +10,7 @@
 #define COLOR_CYAN (color_t){ 0.f, 1.f, 1.f, 1.f }
 #define COLOR_YELLOW (color_t){ 1.f, 1.f, 0.f, 1.f }
 #define COLOR_ORANGE (color_t){ 1.f, .4f, 0.f, 1.f }
+#define COLOR_DARKBLUE (color_t){ .0f, .0f, .55f, 1.f }
 
 typedef struct gfx_color_t gfx_color_t;
 

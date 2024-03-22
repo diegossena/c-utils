@@ -2,11 +2,11 @@
 
 #include <sdk/types.h>
 
-#define queue_foreach(type, head, it, get_next) \
+#define queue_foreach(type, head) \
   for ( \
-    type* it = (type*)head.next, *it_next = (type*)get_next; \
+    type* it = (type*)head.next, *it_next = (type*)it->queue.next; \
     it != (type*)&head; \
-    it = it_next, it_next = (type*)get_next \
+    it = it_next, it_next = (type*)it->queue.next \
   )
 
 typedef struct queue_t queue_t;

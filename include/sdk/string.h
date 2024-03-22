@@ -25,8 +25,8 @@ typedef struct string_t {
   };
 } string_t;
 
-void string_constructor(string_t*);
-void string_deconstructor(string_t*);
+void string_new(string_t*);
+void string_free(string_t*);
 
 const char* string_cstr(const string_t*);
 u64 string_length(const string_t*);
@@ -42,8 +42,10 @@ i16 string_compare(const string_t*, const string_t*);
 
 i16 cstr_compare(const char*, const char*);
 bool cstr_equal(const char*, const char*);
-i32 cstr_format_v(char* this, const char* format, void* va_list_p);
+i32 cstr_format_va(char* this, const char* format, void* va_list_p);
 i32 cstr_format(char*, const char* format, ...);
 u64 cstr_length(const char*);
 
 #include <sdk/string/inl.h>
+
+#undef SMALL_STRING_SIZE

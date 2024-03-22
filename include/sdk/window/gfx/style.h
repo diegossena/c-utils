@@ -6,10 +6,12 @@
 typedef struct gfx_style_t gfx_style_t;
 
 typedef struct gfx_style_props_t {
+  // required
   const window_t* window;
   f32 size;
   const wchar_t* family;
   font_weight_t weight;
+  // optional
   font_style_t style;
 } gfx_style_props_t;
 

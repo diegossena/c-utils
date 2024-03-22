@@ -1,5 +1,6 @@
 #include <sdk/window.h>
 #include <sdk/platform.h>
+#include <sdk/assert.h>
 
 #if PLATFORM_WINDOWS
 

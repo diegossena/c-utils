@@ -11,5 +11,5 @@ void process_test() {
   console_log("execpath='%s'", string_cstr(&execpath));
   path_resolve(&execpath);
   console_log("execpath='%s'", string_cstr(&execpath));
-  string_deconstructor(&execpath);
+  string_free(&execpath);
 }

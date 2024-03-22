@@ -7,14 +7,16 @@
   .text=cwstr, .length=sizeof(cwstr) / sizeof(wchar_t) - 1
 
 typedef struct gfx_text_t {
+  // required
   const window_t* window;
-  wchar_t* text;
+  const wchar_t* text;
   u64 length;
-  vector2d_t position;
-  gfx_color_t* color;
-  gfx_style_t* format;
+  rect_t rect;
+  const gfx_style_t* format;
+  const gfx_color_t* color;
 } gfx_text_t;
 
+void gfx_text_auto_size(gfx_text_t*);
 void gfx_text_draw(const gfx_text_t*);
 
 #include <sdk/window/gfx/text/win32.inl.h>

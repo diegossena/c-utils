@@ -390,6 +390,7 @@ void window_startup(application_t* app, window_options_t* options) {
   if (FAILED(result)) {
     goto d2d_factory_release;
   }
+    // load
   if (this->onload) {
     queue_head(&this->__fonts);
     this->onload(this);
@@ -406,7 +407,7 @@ void window_startup(application_t* app, window_options_t* options) {
       this->__d2d_write_factory->lpVtbl->UnregisterFontCollectionLoader(
         this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
       );
-      queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
+      queue_foreach(__font_queue_t, this->__fonts) {
         queue_remove((queue_t*)it);
         memory_free(it);
       }

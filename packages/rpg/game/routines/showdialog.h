@@ -1,15 +1,14 @@
 #pragma once
 
 #include "../entities/entity.h"
+#include <sdk/string.h>
 
 typedef struct showdialog_t {
-  // splited by '\n' and end with '\0'
-  char* lines;
-} showdialog_t;
+  string_t text;
+  vector2d_t position;
 
-// void title_screen_push(game_context_t* context) {
-//   routine_t* this = memory_alloc(sizeof(routine_t));
-//   this->context = context;
-//   this->update = title_screen_update;
-//   queue_push(&context->routines, &this->queue);
-// }
+} showdialog_props_t;
+
+void showdialog_render() {
+
+}

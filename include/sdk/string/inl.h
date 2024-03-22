@@ -20,13 +20,13 @@ void __string_mutate(string_t* this, u64 size) {
   }
 }
 
-void string_constructor(string_t* this) {
+void string_new(string_t* this) {
   this->__data = 0;
   this->__length = 0;
   *this->__small_string = '\0';
   this->__data = this->__small_string;
 }
-void string_deconstructor(string_t* this) {
+void string_free(string_t* this) {
   memory_free(this->__data);
 }
 
@@ -86,7 +86,7 @@ bool cstr_equal(const char* s1, const char* s2) {
 /*
 @returns i32 - length
 */
-i32 cstr_format_v(char* stream, const char* format, void* args) {
+i32 cstr_format_va(char* stream, const char* format, void* args) {
   i32 length = vsnprintf(stream, MAX_BUFSIZ, format, args);
   stream[length] = '\0';
   if (length < 0) {
@@ -100,7 +100,7 @@ i32 cstr_format_v(char* stream, const char* format, void* args) {
 i32 cstr_format(char* stream, const char* format, ...) {
   __builtin_va_list args;
   va_start(args, format);
-  i32 length = cstr_format_v(stream, format, args);
+  i32 length = cstr_format_va(stream, format, args);
   va_end(args);
   return length;
 }
