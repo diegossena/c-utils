@@ -394,8 +394,8 @@ void window_startup(application_t* app, window_options_t* options) {
     queue_head(&this->__fonts);
     this->onload(this);
     if (&this->__fonts != this->__fonts.next) {
-      SDK_FontCollectionLoader collection_loader;
-      FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
+      __FontCollectionLoader collection_loader;
+      __FontCollectionLoader_Inicialize(&collection_loader, &this->__fonts);
       this->__d2d_write_factory->lpVtbl->RegisterFontCollectionLoader(
         this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
       );
