@@ -11,6 +11,8 @@ typedef struct moveto_t {
   callback_t update_listener;
   game_t* game;
   vector2d_t* position;
+  vector2d_t start;
+  vector2d_t target;
   vector2d_t distance;
   f32 duration;
   f32 timer;
@@ -34,9 +36,14 @@ void routine_moveto_destroy(moveto_t* this) {
 }
 void routine_moveto_update(moveto_t* this) {
   this->timer += this->game->elapsed_time;
-  f32 tick = this->game->elapsed_time / this->duration;
-  this->position->x += tick * this->distance.x;
-  this->position->y += tick * this->distance.y;
+  f32 tick = this->timer / this->duration;
+  if (tick > 1.f) {
+    tick = 1.f;
+  }
+  this->position->x = tick * this->distance.x + this->start.x;
+  this->position->y = tick * this->distance.y + this->start.y;
+
+  console_log("this->position->y=%f", this->position->y);
   if (this->timer >= this->duration) {
     if (this->destroy_listener.callback) {
       this->destroy_listener.callback(this->destroy_listener.context);
@@ -49,6 +56,8 @@ void routine_moveto(moveto_props_t props) {
   moveto_t* this = memory_alloc(sizeof(moveto_t));
   this->game = props.game;
   this->position = props.position;
+  this->start = *props.position;
+  this->target = props.target;
   this->distance.x = props.target.x - props.position->x;
   this->distance.y = props.target.y - props.position->y;
   this->duration = math_max(props.duration, .001f);

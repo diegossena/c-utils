@@ -37,18 +37,23 @@ void titlescreen_onupdate(title_screen_t* this) {
 void titlescreen_background_onmove(title_screen_t* this) {
   console_log("titlescreen_background_onmove");
 }
+void titlescreen_background_ondestroy(title_screen_t* this) {
+  console_log("titlescreen_background_ondestroy");
+  this->background.rect.left_top.y = 0;
+}
 void titlescreen_onkeydown(title_screen_t* this) {
   if (keyboard_pressed(KEY_SPACE)) {
     vector2d_t target = {
       this->background.rect.left_top.x,
-      this->background.rect.left_top.y - 100.f
+      this->background.rect.left_top.y - 10.f
     };
     routine_moveto((moveto_props_t) {
       .game = this->game,
         .duration = 2.f,
         .position = &this->background.rect.left_top,
         .target = target,
-        .onupdate = { (listener_t)titlescreen_background_onmove, this }
+        .onupdate = { (listener_t)titlescreen_background_onmove, this },
+        .ondestroy = { (listener_t)titlescreen_background_ondestroy, this }
     });
     console_log("titlescreen_onkeydown");
   }
