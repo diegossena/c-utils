@@ -6,7 +6,6 @@
 #include <sdk/window/gfx/image.h>
 
 #include "../game.h"
-#include "../routines/scene_transition.h"
 #include "../routines/showdialog.h"
 
 typedef struct local_map_t {
@@ -35,13 +34,7 @@ void localmap_ondraw(local_map_t* this) {
   showdialog_draw(&this->hp_display);
 }
 void localmap_onkeydown(local_map_t* this) {
-  if (keyboard_pressed(KEY_SPACE)) {
-    scene_transition((scene_transition_props_t) {
-      .game = this->game,
-        .scene_destroy = { (listener_t)localmap_destroy, this },
-        .scene_load = { (listener_t)localmap_load, this->game },
-    });
-  }
+
 }
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->ondraw);

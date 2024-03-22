@@ -123,7 +123,7 @@ void titlescreen_load(game_t* game) {
   // hp_display
   this->hp_display.game = game;
   showdialog_new(&this->hp_display);
-  wstring_append_cwstr(&this->hp_display.text, L"HP: 9/10");
+  wstring_append_cwstr(&this->hp_display.text, L"HP: 10/10");
   this->hp_display.position.x = 10.f;
   this->hp_display.position.y = 10.f;
   showdialog_update(&this->hp_display);
