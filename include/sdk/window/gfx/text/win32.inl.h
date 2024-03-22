@@ -5,7 +5,7 @@
 
 #include <sdk/window/gfx/text.h>
 
-void gfx_text_auto_size(gfx_text_t* this) {
+void gfx_text_adjust(gfx_text_t* this) {
   IDWriteTextFormat* text_format = this->style->__format;
   IDWriteFactory* factory = this->window->__d2d_write_factory;
   IDWriteTextLayout* text_layout;

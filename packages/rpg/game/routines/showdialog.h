@@ -20,7 +20,7 @@ void showdialog_update(showdialog_t* this) {
   this->__text.length = this->text.__length;
   this->__text.rect.left_top.x = this->position.x;
   this->__text.rect.left_top.y = this->position.y;
-  gfx_text_auto_size(&this->__text);
+  gfx_text_adjust(&this->__text);
   // background
   this->__background.rect.left_top.x = this->__text.rect.left_top.x - 1;
   this->__background.rect.left_top.y = this->__text.rect.left_top.y - 1;

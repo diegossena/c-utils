@@ -89,7 +89,7 @@ void titlescreen_load(game_t* game) {
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
-  // elements
+  // title
   this->title = (gfx_text_t) {
     .window = window,
     gfx_text_cwstr(L"DreamShifters"),
@@ -97,7 +97,8 @@ void titlescreen_load(game_t* game) {
     .color = &this->game->white,
     .style = &this->title_style
   };
-  gfx_text_auto_size(&this->title);
+  gfx_text_adjust(&this->title);
+  // press_space
   this->press_space = (gfx_text_t) {
     .window = window,
     gfx_text_cwstr(L"Press Space"),
@@ -105,7 +106,8 @@ void titlescreen_load(game_t* game) {
     .style = &this->play_style,
     .color = &this->game->white,
   };
-  gfx_text_auto_size(&this->press_space);
+  gfx_text_adjust(&this->press_space);
+  // to_play
   this->to_play = (gfx_text_t) {
     .window = window,
     gfx_text_cwstr(L"to start"),
@@ -113,7 +115,8 @@ void titlescreen_load(game_t* game) {
     .style = &this->play_style,
     .color = &this->game->white,
   };
-  gfx_text_auto_size(&this->to_play);
+  gfx_text_adjust(&this->to_play);
+  // background
   this->background = (gfx_bitmap_t) {
     .window = window,
     .rect = { 0, 0, .width = window->width, .height = window->height },
@@ -122,6 +125,7 @@ void titlescreen_load(game_t* game) {
     .image = &this->terrain_atlas
   };
   rect_update_size(&this->background.rect);
+  // hp_display
   showdialog_new(&this->hp_display, game);
   wstring_append_cwstr(&this->hp_display.text, L"HP: 9/10");
   this->hp_display.position.x = 10.f;

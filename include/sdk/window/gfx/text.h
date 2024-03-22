@@ -16,7 +16,7 @@ typedef struct gfx_text_t {
   const gfx_color_t* color;
 } gfx_text_t;
 
-void gfx_text_auto_size(gfx_text_t*);
+void gfx_text_adjust(gfx_text_t*);
 void gfx_text_draw(const gfx_text_t*);
 
 #include <sdk/window/gfx/text/win32.inl.h>
