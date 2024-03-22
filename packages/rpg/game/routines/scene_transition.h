@@ -25,12 +25,12 @@ void scene_transition_destroy(scene_transition_t* this) {
   emitter_off(&this->onupdate);
   emitter_off(&this->ondestroy);
   memory_free(this);
-  this->game->in_transition = false;
+  this->game->__in_transition = false;
 }
 void scene_transition_update(scene_transition_t* this) {
   game_t* game = this->game;
   window_t* window = game->window;
-  static const f32 duration = 1.f;
+  static const f32 duration = .8f;
   this->timer += game->elapsed_time;
   f32 progress = this->timer / duration;
   if (progress > 1.f) {
@@ -42,6 +42,8 @@ void scene_transition_update(scene_transition_t* this) {
     if (this->timer >= duration) {
       callback_emit(&this->scene_destroy);
       callback_emit(&this->scene_load);
+      emitter_off(&this->onupdate);
+      emitter_on(&game->onupdate, &this->onupdate);
       this->timer = 0.f;
       this->loading = false;
     }
@@ -51,6 +53,7 @@ void scene_transition_update(scene_transition_t* this) {
       scene_transition_destroy(this);
     }
   }
+  console_log("opacity=%f", opacity);
   gfx_color_t gfx_color;
   gfx_color_new(&gfx_color, window, (color_t) { 1.f, 1.f, 1.f, opacity });
   this->background.color = &gfx_color;
@@ -60,9 +63,9 @@ void scene_transition_update(scene_transition_t* this) {
 
 void scene_transition(scene_transition_props_t props) {
   game_t* game = props.game;
-  if (game->in_transition)
+  if (game->__in_transition)
     return;
-  game->in_transition = true;
+  game->__in_transition = true;
   scene_transition_t* this = memory_alloc(sizeof(scene_transition_t));
   window_t* window = game->window;
   // copy
