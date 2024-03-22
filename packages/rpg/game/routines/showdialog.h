@@ -38,15 +38,21 @@ void showdialog_new(showdialog_t* this) {
   game_t* game = this->game;
   window_t* window = game->window;
   wstring_new(&this->text);
-  this->__text.window = window;
-  this->__text.style = &game->dialog_style;
-  this->__text.color = &game->white;
-  this->__background.window = window;
-  this->__background.color = &game->darkblue;
-  this->__border.window = window;
-  this->__border.color = &game->white;
-  this->__border.stroke = &game->stroke_solid;
-  this->__border.border_width = 1.f;
+  this->__text = (gfx_text_t) {
+    .window = window,
+    .style = &game->dialog_style,
+    .color = &game->white,
+  };
+  this->__background = (gfx_rect_t) {
+    .window = window,
+    .color = &game->darkblue,
+  };
+  this->__border = (gfx_rect_t) {
+    .window = window,
+    .color = &game->white,
+    .stroke = &game->stroke_solid,
+    .border_width = 1.f
+  };
 }
 void showdialog_free(showdialog_t* this) {
   wstring_free(&this->text);

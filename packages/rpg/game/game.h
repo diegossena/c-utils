@@ -9,19 +9,21 @@
 #include <sdk/window/gfx/color.h>
 #include <sdk/window/gfx/stroke.h>
 #include <sdk/window/gfx/style.h>
+#include <sdk/window/gfx/image.h>
 
 typedef struct game_t {
   window_t* window;
   bool __in_transition;
   event_listener_t ondestroy;
   // assets
+  image_src_t terrain_atlas;
+  gfx_style_t dialog_style;
+  gfx_stroke_t stroke_solid;
+  gfx_color_t white;
+  gfx_color_t green;
+  gfx_color_t darkblue;
   const wchar_t* font_zelda_family;
   const wchar_t* font_megaman_family;
-  const gfx_style_t dialog_style;
-  const gfx_stroke_t stroke_solid;
-  const gfx_color_t white;
-  const gfx_color_t green;
-  const gfx_color_t darkblue;
 } game_t;
 
 #include "./entities/entity.h"
@@ -34,6 +36,7 @@ void game_ondestroy(game_t* this) {
   gfx_color_free((gfx_color_t*)&this->white);
   gfx_color_free((gfx_color_t*)&this->green);
   gfx_color_free((gfx_color_t*)&this->darkblue);
+  gfx_bitmap_free(&this->terrain_atlas);
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
@@ -57,11 +60,6 @@ void game_onpreload(window_t* window) {
     window, L".\\assets\\fonts\\megaman_2.ttf"
   );
   this->font_megaman_family = L"MegaMan 2";
-  // assets
-  gfx_stroke_new((gfx_stroke_t*)&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
-  gfx_color_new((gfx_color_t*)&this->white, window, COLOR_WHITE);
-  gfx_color_new((gfx_color_t*)&this->green, window, COLOR_GREEN);
-  gfx_color_new((gfx_color_t*)&this->darkblue, window, COLOR_DARKBLUE);
 }
 void game_onload(window_t* window) {
   game_t* this = (game_t*)window->context;
@@ -71,5 +69,10 @@ void game_onload(window_t* window) {
       .family = this->font_megaman_family,
       .weight = FONT_WEIGHT_NORMAL
   });
+  gfx_bitmap_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
+  gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
+  gfx_color_new(&this->white, window, COLOR_WHITE);
+  gfx_color_new(&this->green, window, COLOR_GREEN);
+  gfx_color_new(&this->darkblue, window, COLOR_DARKBLUE);
   titlescreen_load(this);
 }

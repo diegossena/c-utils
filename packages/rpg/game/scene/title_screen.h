@@ -1,9 +1,7 @@
 #pragma once
 
-#include <sdk/window/gfx/style.h>
 #include <sdk/window/gfx/rect.h>
 #include <sdk/window/gfx/text.h>
-#include <sdk/window/gfx/image.h>
 
 #include "../game.h"
 #include "../routines/scene_transition.h"
@@ -16,7 +14,6 @@ typedef struct title_screen_t {
   event_listener_t onkeydown;
   event_listener_t destroy;
   // assets
-  image_src_t terrain_atlas;
   gfx_style_t title_style, play_style;
   // elements
   gfx_image_t background;
@@ -50,7 +47,6 @@ void titlescreen_destroy(title_screen_t* this) {
   showdialog_free(&this->hp_display);
   gfx_style_free(&this->title_style);
   gfx_style_free(&this->play_style);
-  gfx_bitmap_free(&this->terrain_atlas);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
@@ -74,7 +70,6 @@ void titlescreen_load(game_t* game) {
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
   // assets
-  gfx_bitmap_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
   gfx_style_new(&this->title_style, (gfx_style_props_t) {
     .window = window,
       .family = game->font_zelda_family,
@@ -122,15 +117,14 @@ void titlescreen_load(game_t* game) {
     .rect = { 0, 0, .width = window->width, .height = window->height },
     .position = { 512, 832 },
     .size = { 95, 95 },
-    .src = &this->terrain_atlas
+    .src = &game->terrain_atlas
   };
   rect_update_size(&this->background.rect);
   // hp_display
-  wstring_new(&this->hp_display.text);
   this->hp_display.game = game;
-  this->hp_display.position.x = 10.f;
-  this->hp_display.position.y = 10.f;
   showdialog_new(&this->hp_display);
   wstring_append_cwstr(&this->hp_display.text, L"HP: 9/10");
+  this->hp_display.position.x = 10.f;
+  this->hp_display.position.y = 10.f;
   showdialog_update(&this->hp_display);
 }
