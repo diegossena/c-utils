@@ -112,6 +112,7 @@ void gfx_bitmap_draw(const gfx_bitmap_t* this) {
           position.bottom = position.top + y_remaining;
           rect.bottom = this->rect.right_bottom.y;
         }
+        console_log("rect.bottom=%f", rect.bottom);
         // reset x
         rect.left = this->rect.left_top.x;
         rect.right = rect_right_start;

@@ -37,11 +37,6 @@ void titlescreen_onupdate(title_screen_t* this) {
 void titlescreen_background_onmove(title_screen_t* this) {
   console_log("titlescreen_background_onmove");
   rect_update_size(&this->background.rect);
-  console_log(
-    "%f %f %f %f",
-    this->background.rect.left_top.x, this->background.rect.left_top.y,
-    this->background.rect.right_bottom.x, this->background.rect.right_bottom.y
-  );
 }
 void titlescreen_background_ondestroy(title_screen_t* this) {
   this->background.rect.left_top.y = 0;
