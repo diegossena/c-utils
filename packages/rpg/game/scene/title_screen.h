@@ -50,6 +50,7 @@ void titlescreen_ondestroy(title_screen_t* this) {
   console_log("titlescreen_ondestroy");
   emitter_off(&this->ondestroy);
   emitter_off(&this->onupdate);
+  console_log("!titlescreen_ondestroy");
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_white);
   gfx_color_free(&this->color_green);
