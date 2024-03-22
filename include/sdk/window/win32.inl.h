@@ -407,8 +407,8 @@ void window_startup(application_t* app, window_options_t* options) {
         this->__d2d_write_factory, (IDWriteFontCollectionLoader*)&collection_loader
       );
       queue_foreach(__font_queue_t, this->__fonts, it, it->queue.next) {
-        memory_free(it);
         queue_remove((queue_t*)it);
+        memory_free(it);
       }
     } else {
       this->__collection = 0;

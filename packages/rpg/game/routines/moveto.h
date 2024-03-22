@@ -28,7 +28,7 @@ typedef struct moveto_props_t {
 } moveto_props_t;
 
 void routine_moveto_destroy(moveto_t* this) {
-  queue_remove(&this->onupdate.queue);
+  emitter_off(&this->onupdate);
   emitter_off(&this->ondestroy);
   memory_free(this);
 }
