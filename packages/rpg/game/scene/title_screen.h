@@ -79,9 +79,6 @@ void titlescreen_load(game_t* game) {
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
   gfx_color_new(&this->color_white, window, COLOR_WHITE);
   gfx_color_new(&this->color_green, window, COLOR_GREEN);
-
-  // elements
-
   gfx_style_new(&this->title_style, (gfx_style_props_t) {
     .window = window,
       .family = L"TLOZ Minish Cap/A Link to the Past/Four Sword",
@@ -89,14 +86,6 @@ void titlescreen_load(game_t* game) {
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
-  this->title = (gfx_text_t) {
-    .window = window,
-    gfx_text_cwstr(L"DreamShifters"),
-    .position = { 250.f, 10.f },
-    .color = &this->color_white,
-    .format = &this->title_style
-  };
-
   gfx_style_new(&this->play_style, (gfx_style_props_t) {
     .window = window,
       .family = L"MegaMan 2",
@@ -104,6 +93,16 @@ void titlescreen_load(game_t* game) {
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
+
+  // elements
+
+  this->title = (gfx_text_t) {
+    .window = window,
+    gfx_text_cwstr(L"DreamShifters"),
+    .position = { 250.f, 10.f },
+    .color = &this->color_white,
+    .format = &this->title_style
+  };
   this->press_space = (gfx_text_t) {
     .window = window,
     gfx_text_cwstr(L"Press Space"),
@@ -118,7 +117,6 @@ void titlescreen_load(game_t* game) {
     .format = &this->play_style,
     .color = &this->color_white,
   };
-
   this->background = (gfx_bitmap_t) {
     .window = window,
     .rect = { 0, 0, window->width, window->height },
