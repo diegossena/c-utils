@@ -59,10 +59,10 @@ void routine_moveto(moveto_props_t props) {
   // register
   this->onupdate.callback = (listener_t)routine_moveto_update;
   this->onupdate.context = this;
-  event_prepend(&props.game->onupdate, &this->onupdate);
+  emitter_prepend(&props.game->onupdate, &this->onupdate);
   this->ondestroy = (event_listener_t) {
     .callback = (listener_t)routine_moveto_destroy,
     .context = this,
   };
-  event_prepend(&props.game->ondestroy, &this->ondestroy);
+  emitter_prepend(&props.game->ondestroy, &this->ondestroy);
 }
