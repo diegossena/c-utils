@@ -9,16 +9,6 @@ void* memory_fill(void* block, byte value, u64 size) {
   }
   return block;
 }
-void* memory_copy(void* dest, const void* src, u64 size) {
-  byte* dest_ptr = dest;
-  const byte* src_ptr = src;
-  while (size > 0) {
-    *dest_ptr = *src_ptr;
-    ++dest_ptr; ++src_ptr;
-    --size;
-  }
-  return dest;
-}
 void* memory_copy_64(void* dest, const void* src, u64 size) {
   u64* dest_ptr = dest;
   const u64* src_ptr = src;
@@ -48,4 +38,22 @@ void* memory_copy_16(void* dest, const void* src, u64 size) {
     size -= sizeof(u16);
   }
   return dest;
+}
+void* memory_copy_8(void* dest, const void* src, u64 size) {
+  byte* dest_ptr = dest;
+  const byte* src_ptr = src;
+  while (size > 0) {
+    *dest_ptr = *src_ptr;
+    ++dest_ptr; ++src_ptr; --size;
+  }
+}
+void* memory_copy(void* dest, const void* src, u64 size) {
+  if (size % sizeof(u64) == 0) {
+    return memory_copy_64(dest, src, size);
+  } else if (size % sizeof(u32) == 0) {
+    return memory_copy_32(dest, src, size);
+  } else if (size % sizeof(u16) == 0) {
+    return memory_copy_16(dest, src, size);
+  }
+  return memory_copy_8(dest, src, size);
 }
