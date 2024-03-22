@@ -41,7 +41,7 @@ void titlescreen_onkeydown(title_screen_t* this) {
 }
 void titlescreen_ondestroy(title_screen_t* this) {
   emitter_off(&this->ondestroy);
-  queue_remove(&this->onupdate.queue);
+  emitter_off(&this->onupdate);
   gfx_stroke_free(&this->stroke_solid);
   gfx_color_free(&this->color_white);
   gfx_color_free(&this->color_green);
