@@ -2,6 +2,7 @@
 
 #include "../game.h"
 #include "../entities/entity.h"
+#include <sdk/events.h>
 
 typedef struct moveto_t {
   event_listener_t onupdate;
@@ -53,17 +54,15 @@ void routine_moveto(moveto_props_t props) {
   this->distance.y = props.target.y - props.position->y;
   this->duration = math_max(props.duration, .001f);
   this->timer = 0.f;
-  this->destroy_callback;
-  this->update_callback;
+  this->destroy_callback = props.ondestroy;
+  this->update_callback = props.onupdate;
   // register
-  this->onupdate = (event_listener_t) {
-    .callback = (listener_t)routine_moveto_update,
-    .context = this,
-  };
-  queue_unshift(&props.game->onupdate, &this->onupdate.queue);
+  this->onupdate.callback = (listener_t)routine_moveto_update;
+  this->onupdate.context = this;
+  event_prepend(&props.game->onupdate, &this->onupdate);
   this->ondestroy = (event_listener_t) {
     .callback = (listener_t)routine_moveto_destroy,
     .context = this,
   };
-  queue_unshift(&props.game->ondestroy, &this->ondestroy.queue);
+  event_prepend(&props.game->ondestroy, &this->ondestroy);
 }

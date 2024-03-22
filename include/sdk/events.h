@@ -14,6 +14,9 @@ typedef struct event_listener_t {
 void emitter_on(queue_t* emitter, event_listener_t* listener) {
   queue_push(emitter, &listener->queue);
 }
+void emitter_prepend(queue_t* emitter, event_listener_t* listener) {
+  queue_unshift(emitter, &listener->queue);
+}
 void emitter_off(event_listener_t* listener) {
   queue_remove(&listener->queue);
 }
