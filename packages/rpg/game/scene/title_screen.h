@@ -36,16 +36,22 @@ void titlescreen_onupdate(title_screen_t* this) {
 }
 void titlescreen_background_onmove(title_screen_t* this) {
   console_log("titlescreen_background_onmove");
+  rect_update_size(&this->background.rect);
+  console_log(
+    "%f %f %f %f",
+    this->background.rect.left_top.x, this->background.rect.left_top.y,
+    this->background.rect.right_bottom.x, this->background.rect.right_bottom.y
+  );
 }
 void titlescreen_background_ondestroy(title_screen_t* this) {
-  console_log("titlescreen_background_ondestroy");
   this->background.rect.left_top.y = 0;
+  rect_update_size(&this->background.rect);
 }
 void titlescreen_onkeydown(title_screen_t* this) {
   if (keyboard_pressed(KEY_SPACE)) {
     vector2d_t target = {
       this->background.rect.left_top.x,
-      this->background.rect.left_top.y - 10.f
+      this->background.rect.left_top.y - this->game->window->height
     };
     routine_moveto((moveto_props_t) {
       .game = this->game,
@@ -55,7 +61,6 @@ void titlescreen_onkeydown(title_screen_t* this) {
         .onupdate = { (listener_t)titlescreen_background_onmove, this },
         .ondestroy = { (listener_t)titlescreen_background_ondestroy, this }
     });
-    console_log("titlescreen_onkeydown");
   }
 }
 void titlescreen_ondestroy(title_screen_t* this) {
@@ -138,9 +143,10 @@ void titlescreen_load(game_t* game) {
   };
   this->background = (gfx_bitmap_t) {
     .window = window,
-    .rect = { 0, 0, window->width, window->height },
+    .rect = { 0, 0, .width = window->width, .height = window->height },
     .position = { 512, 832 },
     .size = { 95, 95 },
     .image = &this->terrain_atlas
   };
+  rect_update_size(&this->background.rect);
 }

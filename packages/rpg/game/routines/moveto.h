@@ -47,6 +47,10 @@ void routine_moveto_update(moveto_t* this) {
       this->destroy_listener.callback(this->destroy_listener.context);
     }
     routine_moveto_destroy(this);
+  } else {
+    if (this->update_listener.callback) {
+      this->update_listener.callback(this->update_listener.context);
+    }
   }
 }
 

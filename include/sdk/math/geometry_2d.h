@@ -22,10 +22,11 @@ typedef struct rect_t {
    * bottom right corner [window.height, window.width]
    */
   vector2d_t left_top, right_bottom;
+  f32 width, height;
 } rect_t;
-void rect_set_width(rect_t*, f32);
-void rect_set_height(rect_t*, f32);
-void rect_set_size(rect_t*, f32);
+void rect_update_width(rect_t*);
+void rect_update_height(rect_t*);
+void rect_update_size(rect_t*);
 
 bool rect_pointin(const rect_t*, vector2d_t);
 
