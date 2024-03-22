@@ -5,6 +5,13 @@ void queue_head(queue_t* this) {
   this->next = this;
   this->prev = this;
 }
+void queue_forward(queue_t* q) {
+  q->prev->next = q->next;
+  q->next = q->next->next;
+  q->prev->next->next = q;
+  q->prev->next->prev = q->prev;
+  q->prev = q->prev->next;
+}
 void queue_push(queue_t* head, queue_t* this) {
   this->next = head;
   this->prev = head->prev;

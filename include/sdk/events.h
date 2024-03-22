@@ -21,6 +21,9 @@ void emitter_on(queue_t* emitter, event_listener_t* listener) {
 void emitter_prepend(queue_t* emitter, event_listener_t* listener) {
   queue_unshift(emitter, &listener->queue);
 }
+void emitter_forward(event_listener_t* listener) {
+  queue_forward(&listener->queue);
+}
 void emitter_off(event_listener_t* listener) {
   queue_remove(&listener->queue);
 }

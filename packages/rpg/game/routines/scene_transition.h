@@ -44,8 +44,7 @@ void scene_transition_update(scene_transition_t* this) {
     if (this->timer >= duration) {
       callback_emit(&this->scene_destroy);
       callback_emit(&this->scene_load);
-      emitter_off(&this->ondraw);
-      emitter_on(&window->ondraw, &this->ondraw);
+      emitter_forward(&this->ondraw);
       this->timer = 0.f;
       this->loading = false;
     }

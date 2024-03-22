@@ -16,6 +16,7 @@ typedef struct queue_t {
 } queue_t;
 
 void queue_head(queue_t*);
+void queue_forward(queue_t*);
 void queue_push(queue_t* head, queue_t*);
 void queue_remove(queue_t*);
 void queue_unshift(queue_t* head, queue_t*);
