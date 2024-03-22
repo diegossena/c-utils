@@ -36,14 +36,12 @@ void routine_moveto_destroy(moveto_t* this) {
 }
 void routine_moveto_update(moveto_t* this) {
   this->timer += this->game->elapsed_time;
-  f32 tick = this->timer / this->duration;
-  if (tick > 1.f) {
-    tick = 1.f;
+  f32 progress = this->timer / this->duration;
+  if (progress > 1.f) {
+    progress = 1.f;
   }
-  this->position->x = tick * this->distance.x + this->start.x;
-  this->position->y = tick * this->distance.y + this->start.y;
-
-  console_log("this->position->y=%f", this->position->y);
+  this->position->x = progress * this->distance.x + this->start.x;
+  this->position->y = progress * this->distance.y + this->start.y;
   if (this->timer >= this->duration) {
     if (this->destroy_listener.callback) {
       this->destroy_listener.callback(this->destroy_listener.context);
