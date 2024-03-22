@@ -43,14 +43,10 @@ void routine_moveto_update(moveto_t* this) {
   this->position->x = progress * this->distance.x + this->start.x;
   this->position->y = progress * this->distance.y + this->start.y;
   if (this->timer >= this->duration) {
-    if (this->destroy_listener.callback) {
-      this->destroy_listener.callback(this->destroy_listener.context);
-    }
+    callback_emit(&this->destroy_listener);
     routine_moveto_destroy(this);
   } else {
-    if (this->update_listener.callback) {
-      this->update_listener.callback(this->update_listener.context);
-    }
+    callback_emit(&this->update_listener);
   }
 }
 

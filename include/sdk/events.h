@@ -32,3 +32,8 @@ void emitter_emit(queue_t* emitter) {
     it = next;
   }
 }
+void callback_emit(callback_t* this) {
+  if (this->callback) {
+    this->callback(this->context);
+  }
+}

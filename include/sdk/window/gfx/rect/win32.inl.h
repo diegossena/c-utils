@@ -7,6 +7,8 @@
 
 void gfx_rect_draw(const gfx_rect_t* this) {
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
+  ID2D1Brush* brush = (ID2D1Brush*)this->color->__brush;
+  ID2D1StrokeStyle* stroke = this->stroke ? this->stroke->__stroke : 0;
   if (this->border_radius) {
     D2D1_ROUNDED_RECT rect = {
       {
@@ -17,26 +19,22 @@ void gfx_rect_draw(const gfx_rect_t* this) {
     };
     if (this->border_width >= 0) {
       ID2D1RenderTarget_DrawRoundedRectangle(
-        render_target, (D2D1_ROUNDED_RECT*)&rect,
-        (ID2D1Brush*)this->color->__brush, this->border_width,
-        this->stroke->__stroke
+        render_target, (D2D1_ROUNDED_RECT*)&rect, brush, this->border_width,
+        stroke
       );
     } else {
       ID2D1RenderTarget_FillRoundedRectangle(
-        render_target, (D2D1_ROUNDED_RECT*)&rect,
-        (ID2D1Brush*)this->color->__brush
+        render_target, (D2D1_ROUNDED_RECT*)&rect, brush
       );
     }
-  } else if (this->border_width >= 0) {
+  } else if (this->border_width > 0) {
     ID2D1RenderTarget_DrawRectangle(
-      render_target, (D2D1_RECT_F*)&this->rect,
-      (ID2D1Brush*)this->color->__brush, this->border_width,
-      this->stroke->__stroke
+      render_target, (D2D1_RECT_F*)&this->rect, brush, this->border_width,
+      stroke
     );
   } else {
     ID2D1RenderTarget_FillRectangle(
-      render_target, (D2D1_RECT_F*)&this->rect,
-      (ID2D1Brush*)this->color->__brush
+      render_target, (D2D1_RECT_F*)&this->rect, brush
     );
   }
 }

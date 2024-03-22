@@ -1,5 +1,6 @@
 #pragma once
 
+#define CONCAT(a, b) a##b
 #define STRINGIZE_KEY(x) #x
 #define STRINGIZE(x) STRINGIZE_KEY(x)
 

@@ -8,7 +8,7 @@
 #include <sdk/window/gfx/bitmap.h>
 
 #include "../game.h"
-#include "../routines/moveto.h"
+#include "../routines/scene_transition.h"
 
 typedef struct title_screen_t {
   game_t* game;
@@ -22,42 +22,32 @@ typedef struct title_screen_t {
   gfx_color_t color_green;
   gfx_stroke_t stroke_solid;
   gfx_style_t title_style, play_style;
- // elements
-  bool container_clicking;
+  // elements
   gfx_bitmap_t background;
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
+void titlescreen_load(game_t*);
+void titlescreen_ondestroy(title_screen_t*);
+
 void titlescreen_onupdate(title_screen_t* this) {
+  console_log("titlescreen_onupdate");
   gfx_bitmap_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
 }
-void titlescreen_background_onmove(title_screen_t* this) {
-  rect_update_size(&this->background.rect);
-}
-void titlescreen_background_ondestroy(title_screen_t* this) {
-  this->background.rect.left_top.y = 0;
-  rect_update_size(&this->background.rect);
-}
 void titlescreen_onkeydown(title_screen_t* this) {
   if (keyboard_pressed(KEY_SPACE)) {
-    vector2d_t target = {
-      this->background.rect.left_top.x,
-      this->background.rect.left_top.y - this->game->window->height
-    };
-    routine_moveto((moveto_props_t) {
+    scene_transition((scene_transition_props_t) {
       .game = this->game,
-        .duration = 2.f,
-        .position = &this->background.rect.left_top,
-        .target = target,
-        .onupdate = { (listener_t)titlescreen_background_onmove, this },
-        .ondestroy = { (listener_t)titlescreen_background_ondestroy, this }
+        .scene_destroy = { (listener_t)titlescreen_ondestroy, this },
+        .scene_load = { (listener_t)titlescreen_load, this->game },
     });
   }
 }
 void titlescreen_ondestroy(title_screen_t* this) {
+  console_log("titlescreen_ondestroy");
   emitter_off(&this->ondestroy);
   emitter_off(&this->onupdate);
   gfx_stroke_free(&this->stroke_solid);
@@ -69,6 +59,7 @@ void titlescreen_ondestroy(title_screen_t* this) {
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
+  console_log("titlescreen_load");
   title_screen_t* this = memory_alloc(sizeof(title_screen_t));
   window_t* window = game->window;
   this->game = game;

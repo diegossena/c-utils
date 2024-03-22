@@ -127,10 +127,12 @@ void gfx_bitmap_draw(const gfx_bitmap_t* this) {
               position.right = position.left + x_remaining;
               rect.right = this->rect.right_bottom.x;
             }
-            ID2D1RenderTarget_DrawBitmap(
-              render_target, bitmap, &rect, 1.f,
-              D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
-            );
+            if (rect.right >= 0 && rect.left <= window->width) {
+              ID2D1RenderTarget_DrawBitmap(
+                render_target, bitmap, &rect, 1.f,
+                D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+              );
+            }
             rect.left += this->size.width;
             rect.right += this->size.width;
           }
