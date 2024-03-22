@@ -279,8 +279,8 @@ void window_startup(application_t* app, window_options_t* options) {
     return;
   }
   // properties
-  memory_copy((u16*)&this->width, &options->width, sizeof(u16));
-  memory_copy((u16*)&this->height, &options->height, sizeof(u16));
+  *(u16*)&this->width = options->width;
+  *(u16*)&this->height = options->height;
   this->onupdate = options->onupdate;
   this->onmousemove = options->onmousemove;
   this->onmousedown = options->onmousedown;
