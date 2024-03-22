@@ -9,6 +9,7 @@
 
 typedef struct game_t {
   window_t* window;
+  bool in_transition;
   // timer
   f64 __last_update;
   f32 elapsed_time;
