@@ -192,12 +192,11 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
     case WM_PAINT:
-      console_log("WM_PAINT");
       if (this->ondraw) {
-        static const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        ID3D11DeviceContext_ClearRenderTargetView(
-          this->__d3d_device_context, this->__d3d_backbuffer, background_color
-        );
+        // static const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        // ID3D11DeviceContext_ClearRenderTargetView(
+        //   this->__d3d_device_context, this->__d3d_backbuffer, background_color
+        // );
         ID2D1RenderTarget_BeginDraw(this->__d2d_render_target);
         this->ondraw(this);
         ID2D1RenderTarget_EndDraw(this->__d2d_render_target, null, null);
