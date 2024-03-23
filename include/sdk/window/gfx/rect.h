@@ -7,8 +7,8 @@
 typedef struct gfx_rect_t {
   // required
   const window_t* window;
-  rect_t rect;
   const gfx_color_t* color;
+  rect_t rect;
   // optional
   const gfx_stroke_t* stroke;
   f32 border_width;

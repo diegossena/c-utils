@@ -21,7 +21,9 @@ typedef struct local_map_t {
   event_listener_t destroy;
   // camera
   u8 visible_tiles_x, visible_tiles_y;
-  f32 offset_limit_x, offset_limit_y;
+  vector2d_t offset;
+  vector2d_t tile_offset;
+  vector2d_t offset_limit;
   vector2d_t camera;
   vector2d_t screen_padding;
   // data
@@ -42,8 +44,8 @@ void localmap_onresize(local_map_t* this) {
   f32 visible_tiles_y = (f32)window->height / TILE_SIZE;
   this->visible_tiles_x = math_ceil(visible_tiles_x);
   this->visible_tiles_y = math_ceil(visible_tiles_y);
-  this->offset_limit_x = (f32)TILEMAP_WIDTH - visible_tiles_x;
-  this->offset_limit_y = (f32)TILEMAP_WIDTH - visible_tiles_y;
+  this->offset_limit.x = (f32)TILEMAP_WIDTH - visible_tiles_x;
+  this->offset_limit.y = (f32)TILEMAP_WIDTH - visible_tiles_y;
 }
 char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
   if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
@@ -54,19 +56,6 @@ char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
 void tilemap_draw(local_map_t* this, const byte* layer) {
   game_t* game = this->game;
   window_t* window = game->window;
-  // calculate top-leftmost visible tile
-  this->camera.x = math_clamp(this->camera.x, 0.f, this->offset_limit_x);
-  this->camera.y = math_clamp(this->camera.y, 0.f, this->offset_limit_y);
-  vector2d_t offset = {
-    this->camera.x - (f32)this->visible_tiles_x / 2.f,
-    this->camera.y - (f32)this->visible_tiles_y / 2.f
-  };
-  // clamp camera to game boudaries
-  offset.x = math_clamp(offset.x, 0.f, this->offset_limit_x);
-  offset.y = math_clamp(offset.y, 0.f, this->offset_limit_y);
-  // Get offsets for smooth movement
-  f32 tile_offset_x = (offset.x - (i32)offset.x) * TILE_SIZE;
-  f32 tile_offset_y = (offset.y - (i32)offset.y) * TILE_SIZE;
   // draw
   gfx_image_t tile = {
     .window = window,
@@ -76,7 +65,7 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
   };
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
-      char tile_id = tilemap_tiles_get(layer, x + offset.x, y + offset.y);
+      char tile_id = tilemap_tiles_get(layer, x + this->offset.x, y + this->offset.y);
       switch (tile_id) {
         case 'T': // Tree
           tile.position.x = 417;
@@ -99,17 +88,42 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
         default:
           continue;
       }
-      tile.rect.left_top.x = x * TILE_SIZE - math_round(tile_offset_x);
-      tile.rect.left_top.y = y * TILE_SIZE - math_round(tile_offset_y);
+      tile.rect.left_top.x = x * TILE_SIZE - math_round(this->tile_offset.x);
+      tile.rect.left_top.y = y * TILE_SIZE - math_round(this->tile_offset.y);
       rect_update_size(&tile.rect);
       gfx_image_draw(&tile);
     }
   }
 }
 void localmap_draw(local_map_t* this) {
+  game_t* game = this->game;
+  window_t* window = game->window;
+  // calculate top-leftmost visible tile
+  this->camera.x = math_clamp(this->camera.x, 0.f, this->offset_limit.x);
+  this->camera.y = math_clamp(this->camera.y, 0.f, this->offset_limit.y);
+  this->offset.x = this->camera.x - (f32)this->visible_tiles_x / 2.f;
+  this->offset.y = this->camera.y - (f32)this->visible_tiles_y / 2.f;
+  // clamp camera to game boudaries
+  this->offset.x = math_clamp(this->offset.x, 0.f, this->offset_limit.x);
+  this->offset.y = math_clamp(this->offset.y, 0.f, this->offset_limit.y);
+  // Get offsets for smooth movement
+  this->tile_offset.x = (this->offset.x - (i32)this->offset.x) * TILE_SIZE;
+  this->tile_offset.y = (this->offset.y - (i32)this->offset.y) * TILE_SIZE;
+  // render
   tilemap_draw(this, this->bg0);
   tilemap_draw(this, this->bg1);
   showdialog_draw(&this->hp_display);
+  gfx_rect_t tile = {
+    .window = window,
+    .color = &game->darkblue,
+    .rect = {
+      (this->camera.x - this->offset.x) * TILE_SIZE,
+      (this->camera.y - this->offset.y) * TILE_SIZE,
+      .width = TILE_SIZE, .height = TILE_SIZE
+    },
+  };
+  rect_update_size(&tile.rect);
+  gfx_rect_draw(&tile);
 }
 void localmap_onupdate(local_map_t* this) {
   f32 velocity = 4.f * this->game->window->elapsed_time;
@@ -128,9 +142,7 @@ void localmap_onupdate(local_map_t* this) {
     window_render(this->game->window);
   }
 }
-void localmap_onkeydown(local_map_t* this) {
-
-}
+void localmap_onkeydown(local_map_t* this) {}
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->onupdate);
   emitter_off(&this->ondraw);
