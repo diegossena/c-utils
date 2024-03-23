@@ -23,9 +23,9 @@ typedef struct rect_t {
    */
   vector2d_t left_top, right_bottom;
 } rect_t;
-void rect_set_width(rect_t*, f32);
-void rect_set_height(rect_t*, f32);
-void rect_set_size(rect_t*, f32);
+void rect_set_width(rect_t*, u16);
+void rect_set_height(rect_t*, u16);
+void rect_set_size(rect_t*, u16);
 
 bool rect_pointin(const rect_t*, vector2d_t);
 

@@ -11,13 +11,13 @@ f32 vector2d_dot(const vector2d_t this, const vector2d_t right) {
   return this.x * right.x + this.y * right.y;
 }
 
-void rect_set_width(rect_t* this, f32 value) {
+void rect_set_width(rect_t* this, u16 value) {
   this->right_bottom.x = this->left_top.x + value;
 }
-void rect_set_height(rect_t* this, f32 value) {
+void rect_set_height(rect_t* this, u16 value) {
   this->right_bottom.y = this->left_top.y + value;
 }
-void rect_set_size(rect_t* this, f32 value) {
+void rect_set_size(rect_t* this, u16 value) {
   rect_set_width(this, value);
   rect_set_height(this, value);
 }
