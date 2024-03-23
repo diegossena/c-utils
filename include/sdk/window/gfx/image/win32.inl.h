@@ -91,7 +91,7 @@ void gfx_image_draw(const gfx_image_t* this) {
     case BITMAP_EXTEND_COVER:
       ID2D1RenderTarget_DrawBitmap(
         render_target, bitmap, (D2D1_RECT_F*)&this->rect, 1.f,
-        D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+        D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, &position
       );
       break;
     case BITMAP_EXTEND_NO_REPEAT: {
@@ -101,7 +101,7 @@ void gfx_image_draw(const gfx_image_t* this) {
       rect.bottom = rect.top + this->size.height;
       ID2D1RenderTarget_DrawBitmap(
         render_target, bitmap, &rect, 1.f,
-        D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+        D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, &position
       );
     } break;
     default: {
@@ -136,7 +136,7 @@ void gfx_image_draw(const gfx_image_t* this) {
             if (rect.right >= 0 && rect.left <= window->width) {
               ID2D1RenderTarget_DrawBitmap(
                 render_target, bitmap, &rect, 1.f,
-                D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+                D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, &position
               );
             }
             rect.left += this->size.width;

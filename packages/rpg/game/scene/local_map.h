@@ -15,6 +15,7 @@
 typedef struct local_map_t {
   game_t* game;
   // event_listener_t
+  event_listener_t onupdate;
   event_listener_t ondraw;
   event_listener_t onkeydown;
   event_listener_t destroy;
@@ -54,6 +55,8 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
   game_t* game = this->game;
   window_t* window = game->window;
   // calculate top-leftmost visible tile
+  this->camera.x = math_clamp(this->camera.x, 0.f, this->offset_limit_x);
+  this->camera.y = math_clamp(this->camera.y, 0.f, this->offset_limit_y);
   vector2d_t offset = {
     this->camera.x - (f32)this->visible_tiles_x / 2.f,
     this->camera.y - (f32)this->visible_tiles_y / 2.f
@@ -68,24 +71,17 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
       char tile_id = tilemap_tiles_get(layer, x + offset.x, y + offset.y);
-      static const f32 sprite_tile_size = 32.f;
-      u8 tile_x = 0, tile_y = 0;
       gfx_image_t tile = {
         .window = window,
         .rect = {
-          x * TILE_SIZE - tile_offset_x,
-          y * TILE_SIZE - tile_offset_y,
+          x * TILE_SIZE - math_round(tile_offset_x),
+          y * TILE_SIZE - math_round(tile_offset_y),
           .width = TILE_SIZE, .height = TILE_SIZE
         },
         .src = &game->terrain_atlas,
         .extend_mode = BITMAP_EXTEND_COVER,
       };
       rect_update_size(&tile.rect);
-      tile.position.x = 1;
-      tile.position.y = 801;
-      tile.size.width = 1;
-      tile.size.height = 1;
-      gfx_image_draw(&tile);
       switch (tile_id) {
         case 'T': // Tree
           tile.position.x = 417;
@@ -100,10 +96,10 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.size.height = 77;
           break;
         case '.':
-          tile.position.x = 0;
-          tile.position.y = 800;
-          tile.size.width = 31;
-          tile.size.height = 31;
+          tile.position.x = 2;
+          tile.position.y = 802;
+          tile.size.width = 2;
+          tile.size.height = 2;
           break;
       }
       gfx_image_draw(&tile);
@@ -115,21 +111,28 @@ void localmap_draw(local_map_t* this) {
   tilemap_draw(this, this->bg1);
   showdialog_draw(&this->hp_display);
 }
-void localmap_onkeydown(local_map_t* this) {
-  f32 velocity = 25.f * this->game->window->elapsed_time;
+void localmap_onupdate(local_map_t* this) {
+  f32 velocity = 4.f * this->game->window->elapsed_time;
   if (keyboard_pressed(KEY_UP)) {
     this->camera.y -= velocity;
+    window_render(this->game->window);
   } else if (keyboard_pressed(KEY_DOWN)) {
     this->camera.y += velocity;
+    window_render(this->game->window);
   }
   if (keyboard_pressed(KEY_RIGHT)) {
     this->camera.x += velocity;
+    window_render(this->game->window);
   } else if (keyboard_pressed(KEY_LEFT)) {
     this->camera.x -= velocity;
+    window_render(this->game->window);
   }
-  window_render(this->game->window);
+}
+void localmap_onkeydown(local_map_t* this) {
+
 }
 void localmap_destroy(local_map_t* this) {
+  emitter_off(&this->onupdate);
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeydown);
   emitter_off(&this->destroy);
@@ -144,6 +147,11 @@ void localmap_load(game_t* game) {
   localmap_onresize(this);
   tilemap_introduction_load(this);
   // register
+  this->onupdate = (event_listener_t) {
+    .callback = (listener_t)localmap_onupdate,
+    .context = this
+  };
+  emitter_on(&window->onupdate, &this->onupdate);
   this->ondraw = (event_listener_t) {
     .callback = (listener_t)localmap_draw,
     .context = this
