@@ -68,20 +68,15 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
   f32 tile_offset_x = (offset.x - (i32)offset.x) * TILE_SIZE;
   f32 tile_offset_y = (offset.y - (i32)offset.y) * TILE_SIZE;
   // draw
+  gfx_image_t tile = {
+    .window = window,
+    .src = &game->terrain_atlas,
+    .extend_mode = BITMAP_EXTEND_COVER,
+    .rect = {.width = TILE_SIZE, .height = TILE_SIZE }
+  };
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
       char tile_id = tilemap_tiles_get(layer, x + offset.x, y + offset.y);
-      gfx_image_t tile = {
-        .window = window,
-        .rect = {
-          x * TILE_SIZE - math_round(tile_offset_x),
-          y * TILE_SIZE - math_round(tile_offset_y),
-          .width = TILE_SIZE, .height = TILE_SIZE
-        },
-        .src = &game->terrain_atlas,
-        .extend_mode = BITMAP_EXTEND_COVER,
-      };
-      rect_update_size(&tile.rect);
       switch (tile_id) {
         case 'T': // Tree
           tile.position.x = 417;
@@ -101,7 +96,12 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.size.width = 2;
           tile.size.height = 2;
           break;
+        default:
+          continue;
       }
+      tile.rect.left_top.x = x * TILE_SIZE - math_round(tile_offset_x);
+      tile.rect.left_top.y = y * TILE_SIZE - math_round(tile_offset_y);
+      rect_update_size(&tile.rect);
       gfx_image_draw(&tile);
     }
   }
