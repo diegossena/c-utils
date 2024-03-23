@@ -81,7 +81,8 @@ void window_set_size(window_t* this, u32 width, u32 height) {
     WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME
   );
 }
-bool window_set_viewport(window_t* this, u32 width, u32 height) {
+bool __window_set_viewport(window_t* this) {
+  console_log("__window_set_viewport");
   HRESULT result;
   if (this->__d3d_backbuffer) {
     ID2D1RenderTarget_Release(this->__d2d_render_target);
@@ -91,14 +92,14 @@ bool window_set_viewport(window_t* this, u32 width, u32 height) {
   D3D11_VIEWPORT viewport = {
     .TopLeftX = 0.f,
     .TopLeftY = 0.f,
-    .Width = (f32)width,
-    .Height = (f32)height,
+    .Width = (f32)this->width,
+    .Height = (f32)this->height,
     .MinDepth = 0.f,
     .MaxDepth = 1.f,
   };
   ID3D11DeviceContext_RSSetViewports(this->__d3d_device_context, 1, &viewport);
   result = IDXGISwapChain_ResizeBuffers(
-    this->__d3d_swapchain, 1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
+    this->__d3d_swapchain, 1, this->width, this->height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
   );
   if (FAILED(result)) {
     error("IDXGISwapChain_ResizeBuffers", result);
@@ -195,10 +196,10 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
   switch (message) {
     case WM_PAINT:
       if (!queue_empty(&this->ondraw)) {
-        // static const FLOAT background_color [] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        // ID3D11DeviceContext_ClearRenderTargetView(
-        //   this->__d3d_device_context, this->__d3d_backbuffer, background_color
-        // );
+        static const FLOAT background_color [] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        ID3D11DeviceContext_ClearRenderTargetView(
+          this->__d3d_device_context, this->__d3d_backbuffer, background_color
+        );
         ID2D1RenderTarget_BeginDraw(this->__d2d_render_target);
         emitter_emit(&this->ondraw);
         ID2D1RenderTarget_EndDraw(this->__d2d_render_target, null, null);
@@ -241,9 +242,10 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       emitter_emit(&this->onkeyup);
       return 0;
     case WM_SIZE:
+      this->width = LOWORD(lParam);
+      this->height = HIWORD(lParam);
+      __window_set_viewport(this);
       if (!queue_empty(&this->onresize)) {
-        this->width = LOWORD(lParam);
-        this->height = HIWORD(lParam);
         emitter_emit(&this->onresize);
       }
       return 0;
@@ -251,6 +253,60 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;
       SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)this);
+      // renderer
+      HRESULT result = D2D1CreateFactory(
+        D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
+        (void**)&this->__d2d_factory
+      );
+      if (FAILED(result)) {
+        error("D2D1CreateFactory", result);
+      }
+      result = DWriteCreateFactory(
+        DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
+        (IUnknown**)&this->__d2d_write_factory
+      );
+      if (FAILED(result)) {
+        error("DWriteCreateFactory", result);
+      }
+      DXGI_SWAP_CHAIN_DESC scd = { };
+      scd.BufferCount = 1;                                // one back buffer
+      scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // use 32-bit color
+      scd.BufferDesc.Width = this->width;                 // set the back buffer width
+      scd.BufferDesc.Height = this->height;               // set the back buffer height
+      scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // how swap chain is to be used
+      scd.OutputWindow = handle;                          // the window to be used
+      scd.SampleDesc.Count = 4;                           // how many multisamples
+      scd.Windowed = TRUE;                                // windowed/full-screen mode
+      scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // allow full-screen switching
+      result = D3D11CreateDeviceAndSwapChain(
+        0,
+        D3D_DRIVER_TYPE_HARDWARE,
+        0,
+        // Required for Direct2D interoperability with Direct3D resources.
+        D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+        0,
+        0,
+        D3D11_SDK_VERSION,
+        &scd,
+        &this->__d3d_swapchain,
+        &this->__d3d_device,
+        0,
+        &this->__d3d_device_context
+      );
+      if (FAILED(result)) {
+        error("D3D11CreateDeviceAndSwapChain", result);
+        exit(1);
+      }
+      D3D11_RASTERIZER_DESC rasterizer_props = {
+        .FillMode = D3D11_FILL_SOLID,
+        .CullMode = D3D11_CULL_NONE
+      };
+      result = ID3D11Device_CreateRasterizerState(
+        this->__d3d_device, &rasterizer_props, &this->__d3d_rasterizer
+      );
+      if (FAILED(result)) {
+        error("ID3D11Device_CreateRasterizerState", result);
+      }
       return 0;
     };
     case WM_CLOSE:
@@ -275,6 +331,11 @@ void window_startup(application_t* app, window_props_t* options) {
     error("alloc::window_t", ERR_NOT_ENOUGH_MEMORY);
     return;
   }
+   // properties
+  this->width = options->width;
+  this->height = options->height;
+  // timer
+  this->__last_update = time_absolute();
   // event_listener_t
   queue_head(&this->onupdate);
   queue_head(&this->ondraw);
@@ -311,7 +372,7 @@ void window_startup(application_t* app, window_props_t* options) {
   }
   u32 window_ex_style = WS_EX_APPWINDOW;
   // CreateWindow
-  RECT rect = { options->x, options->y, options->width, options->height };
+  RECT rect = { 0, 0, options->width, options->height };
   AdjustWindowRect(&rect, window_style, false);
   this->__hwnd = CreateWindowExA(
     window_ex_style, wc.lpszClassName, options->name, window_style,
@@ -325,70 +386,6 @@ void window_startup(application_t* app, window_props_t* options) {
     error("CreateWindowExA", ERR_UNKNOWN);
     goto window_release;
   }
-  // renderer
-  HRESULT result = D2D1CreateFactory(
-    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, null,
-    (void**)&this->__d2d_factory
-  );
-  if (FAILED(result)) {
-    error("D2D1CreateFactory", result);
-    goto window_release;
-  }
-  result = DWriteCreateFactory(
-    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
-    (IUnknown**)&this->__d2d_write_factory
-  );
-  if (FAILED(result)) {
-    error("DWriteCreateFactory", result);
-    goto d2d_factory_release;
-  }
-  DXGI_SWAP_CHAIN_DESC scd = { };
-  scd.BufferCount = 1;                                // one back buffer
-  scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // use 32-bit color
-  scd.BufferDesc.Width = options->width;                 // set the back buffer width
-  scd.BufferDesc.Height = options->height;               // set the back buffer height
-  scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // how swap chain is to be used
-  scd.OutputWindow = this->__hwnd;                    // the window to be used
-  scd.SampleDesc.Count = 4;                           // how many multisamples
-  scd.Windowed = TRUE;                                // windowed/full-screen mode
-  scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // allow full-screen switching
-  result = D3D11CreateDeviceAndSwapChain(
-    0,
-    D3D_DRIVER_TYPE_HARDWARE,
-    0,
-    // Required for Direct2D interoperability with Direct3D resources.
-    D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-    0,
-    0,
-    D3D11_SDK_VERSION,
-    &scd,
-    &this->__d3d_swapchain,
-    &this->__d3d_device,
-    0,
-    &this->__d3d_device_context
-  );
-  if (FAILED(result)) {
-    console_warn("D3D11CreateDeviceAndSwapChain %x", result);
-    exit(1);
-  }
-  if (!window_set_viewport(this, options->width, options->height)) {
-    goto d2d_factory_release;
-  }
-  D3D11_RASTERIZER_DESC rasterizer_props = {
-    .FillMode = D3D11_FILL_SOLID,
-    .CullMode = D3D11_CULL_NONE
-  };
-  result = ID3D11Device_CreateRasterizerState(
-    this->__d3d_device, &rasterizer_props, &this->__d3d_rasterizer
-  );
-  if (FAILED(result)) {
-    goto d2d_factory_release;
-  }
-  // properties
-  this->width = options->width;
-  this->height = options->height;
-  // timer
-  this->__last_update = time_absolute();
   // preload
   if (options->onpreload) {
     queue_head(&this->__fonts);

@@ -21,8 +21,8 @@ typedef struct gfx_image_t {
   bitmap_extend_t extend_mode;
 } gfx_image_t;
 
-void gfx_image_new(image_src_t*, const wchar_t* path, const window_t*);
-void gfx_image_free(image_src_t*);
+void gfx_image_src_new(image_src_t*, const wchar_t* path, const window_t*);
+void gfx_image_src_free(image_src_t*);
 
 void gfx_image_draw(const gfx_image_t*);
 

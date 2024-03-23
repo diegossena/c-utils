@@ -8,6 +8,8 @@
 #define math_clamp(value, min, max) (math_min(math_max(value, min), max))
 #define math_abs(value) (value < 0 ? -(value) : value)
 
+i64 math_ceil(f64);
+i64 math_round(f64);
 u64 math_next2pow(u64 number);
 u64 math_hash_jenkins(const byte* data, u64 size);
 

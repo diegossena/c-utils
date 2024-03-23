@@ -3,12 +3,6 @@
 /** @brief An approximate representation of PI. */
 #define K_PI 3.14159265358979323846f
 
-f32 math_min_f32(f32 a, f32 b) { return math_min(a, b); }
-f32 math_max_f32(f32 a, f32 b) { return math_max(a, b); }
-f32 math_clamp_f32(f32 value, f32 min, f32 max) {
-  f32 higher = math_max(value, min);
-  return math_min(higher, max);
-}
 u64 math_next2pow(u64 number) {
   if (!number)
     return 1;
@@ -32,4 +26,19 @@ u64 math_hash_jenkins(const byte* data, u64 size) {
   hash ^= hash >> 11;
   hash += hash << 15;
   return hash;
+}
+i64 math_ceil(f64 number) {
+  i64 integer = (i64)number;
+  if (number > 0 && number != integer) {
+    ++integer;
+  }
+  return integer;
+}
+i64 math_round(f64 number) {
+  i64 integer = number;
+  f64 decimals = number - integer;
+  if (decimals < .5) {
+    return integer;
+  }
+  return integer + 1;
 }

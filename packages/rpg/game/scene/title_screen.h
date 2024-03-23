@@ -6,6 +6,7 @@
 #include "../game.h"
 #include "../routines/scene_transition.h"
 #include "../routines/showdialog.h"
+#include "./local_map.h"
 
 typedef struct title_screen_t {
   game_t* game;
@@ -24,7 +25,7 @@ void titlescreen_load(game_t*);
 void titlescreen_destroy(title_screen_t*);
 
 void titlescreen_ondraw(title_screen_t* this) {
-  gfx_bitmap_draw(&this->background);
+  gfx_image_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
@@ -34,7 +35,7 @@ void titlescreen_onkeydown(title_screen_t* this) {
     scene_transition((scene_transition_props_t) {
       .game = this->game,
         .scene_destroy = { (listener_t)titlescreen_destroy, this },
-        .scene_load = { (listener_t)titlescreen_load, this->game },
+        .scene_load = { (listener_t)localmap_load, this->game },
     });
   }
 }

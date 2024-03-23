@@ -36,7 +36,7 @@ void game_destroy(game_t* this) {
   gfx_color_free((gfx_color_t*)&this->white);
   gfx_color_free((gfx_color_t*)&this->green);
   gfx_color_free((gfx_color_t*)&this->darkblue);
-  gfx_bitmap_free(&this->terrain_atlas);
+  gfx_image_src_free(&this->terrain_atlas);
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
@@ -69,7 +69,7 @@ void game_onload(window_t* window) {
       .family = this->font_megaman_family,
       .weight = FONT_WEIGHT_NORMAL
   });
-  gfx_bitmap_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
+  gfx_image_src_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
   gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
   gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_color_new(&this->green, window, COLOR_GREEN);

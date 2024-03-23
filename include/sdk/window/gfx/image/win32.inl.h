@@ -10,7 +10,7 @@ typedef struct image_src_t {
   const u16 width, height;
 } image_src_t;
 
-void gfx_bitmap_new(image_src_t* this, const wchar_t* path, const window_t* window) {
+void gfx_image_src_new(image_src_t* this, const wchar_t* path, const window_t* window) {
   HRESULT result;
   IWICImagingFactory* wic_factory;
   IWICBitmapDecoder* decoder;
@@ -73,12 +73,12 @@ decoder_free:
 wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
 }
-void gfx_bitmap_free(image_src_t* this) {
+void gfx_image_src_free(image_src_t* this) {
   ID2D1Bitmap_Release(this->__bitmap);
   --memory_leaks;
 }
 
-void gfx_bitmap_draw(const gfx_image_t* this) {
+void gfx_image_draw(const gfx_image_t* this) {
   const window_t* window = this->window;
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   ID2D1Bitmap* bitmap = this->src->__bitmap;
@@ -88,6 +88,12 @@ void gfx_bitmap_draw(const gfx_image_t* this) {
     this->position.x + this->size.width, this->position.y + this->size.height,
   };
   switch (this->extend_mode) {
+    case BITMAP_EXTEND_COVER:
+      ID2D1RenderTarget_DrawBitmap(
+        render_target, bitmap, (D2D1_RECT_F*)&this->rect, 1.f,
+        D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, &position
+      );
+      break;
     case BITMAP_EXTEND_NO_REPEAT: {
       rect.left = this->rect.left_top.x;
       rect.top = this->rect.left_top.y;
