@@ -99,8 +99,8 @@ void localmap_draw(local_map_t* this) {
   game_t* game = this->game;
   window_t* window = game->window;
   // calculate top-leftmost visible tile
-  this->camera.x = math_clamp(this->camera.x, 0.f, this->offset_limit.x);
-  this->camera.y = math_clamp(this->camera.y, 0.f, this->offset_limit.y);
+  this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
+  this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
   this->offset.x = this->camera.x - (f32)this->visible_tiles_x / 2.f;
   this->offset.y = this->camera.y - (f32)this->visible_tiles_y / 2.f;
   // clamp camera to game boudaries
