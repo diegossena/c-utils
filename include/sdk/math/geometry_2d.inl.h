@@ -11,15 +11,15 @@ f32 vector2d_dot(const vector2d_t this, const vector2d_t right) {
   return this.x * right.x + this.y * right.y;
 }
 
-void rect_update_width(rect_t* this) {
-  this->right_bottom.x = this->left_top.x + this->width;
+void rect_set_width(rect_t* this, f32 value) {
+  this->right_bottom.x = this->left_top.x + value;
 }
-void rect_update_height(rect_t* this) {
-  this->right_bottom.y = this->left_top.y + this->height;
+void rect_set_height(rect_t* this, f32 value) {
+  this->right_bottom.y = this->left_top.y + value;
 }
-void rect_update_size(rect_t* this) {
-  rect_update_width(this);
-  rect_update_height(this);
+void rect_set_size(rect_t* this, f32 value) {
+  rect_set_width(this, value);
+  rect_set_height(this, value);
 }
 bool rect_pointin(const rect_t* this, vector2d_t point) {
   return point.x >= this->left_top.x && point.x <= this->right_bottom.x &&

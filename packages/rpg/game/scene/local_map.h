@@ -60,8 +60,7 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
   gfx_image_t tile = {
     .window = window,
     .src = &game->terrain_atlas,
-    .extend_mode = BITMAP_EXTEND_COVER,
-    .rect = {.width = TILE_SIZE, .height = TILE_SIZE }
+    .extend_mode = BITMAP_EXTEND_COVER
   };
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
@@ -90,7 +89,7 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
       }
       tile.rect.left_top.x = x * TILE_SIZE - math_round(this->tile_offset.x);
       tile.rect.left_top.y = y * TILE_SIZE - math_round(this->tile_offset.y);
-      rect_update_size(&tile.rect);
+      rect_set_size(&tile.rect, TILE_SIZE);
       gfx_image_draw(&tile);
     }
   }
@@ -119,10 +118,9 @@ void localmap_draw(local_map_t* this) {
     .rect = {
       (this->camera.x - this->offset.x) * TILE_SIZE,
       (this->camera.y - this->offset.y) * TILE_SIZE,
-      .width = TILE_SIZE, .height = TILE_SIZE
     },
   };
-  rect_update_size(&tile.rect);
+  rect_set_size(&tile.rect, TILE_SIZE);
   gfx_rect_draw(&tile);
 }
 void localmap_onupdate(local_map_t* this) {
