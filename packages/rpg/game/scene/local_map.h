@@ -36,8 +36,6 @@ typedef struct local_map_t {
 
 #include "../maps/introduction.h"
 
-// void localmap_load(game_t*);
-// void localmap_destroy(local_map_t*);
 void localmap_onresize(local_map_t* this) {
   window_t* window = this->game->window;
   f32 visible_tiles_x = (f32)window->width / TILE_SIZE;
