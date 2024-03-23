@@ -27,10 +27,9 @@ typedef struct game_t {
 } game_t;
 
 #include "./entities/entity.h"
-#include "./tilemaps/tilemap.h"
 #include "./scene/title_screen.h"
 
-void game_ondestroy(game_t* this) {
+void game_destroy(game_t* this) {
   emitter_off(&this->ondestroy);
   gfx_style_free((gfx_style_t*)&this->dialog_style);
   gfx_stroke_free((gfx_stroke_t*)&this->stroke_solid);
@@ -48,7 +47,7 @@ void game_onpreload(window_t* window) {
   this->__in_transition = false;
   // register
   this->ondestroy = (event_listener_t) {
-    .callback = (listener_t)game_ondestroy,
+    .callback = (listener_t)game_destroy,
     .context = this
   };
   emitter_on(&window->onclose, &this->ondestroy);

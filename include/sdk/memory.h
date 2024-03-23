@@ -3,7 +3,7 @@
 
 #define MAX_BUFSIZ 65535
 
-static i64 memory_leaks;
+static i32 memory_leaks = 0;
 
 void* memory_alloc0(u64 size);
 void* memory_alloc(u64 size);
