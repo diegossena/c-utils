@@ -18,7 +18,6 @@ typedef struct title_screen_t {
   // elements
   gfx_image_t background;
   gfx_text_t title, press_space, to_play;
-  showdialog_t hp_display;
 } title_screen_t;
 
 void titlescreen_load(game_t*);
@@ -29,7 +28,6 @@ void titlescreen_ondraw(title_screen_t* this) {
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
-  showdialog_draw(&this->hp_display);
 }
 void titlescreen_onkeydown(title_screen_t* this) {
   if (keyboard_pressed(KEY_SPACE)) {
@@ -44,12 +42,12 @@ void titlescreen_destroy(title_screen_t* this) {
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeydown);
   emitter_off(&this->destroy);
-  showdialog_free(&this->hp_display);
   gfx_style_free(&this->title_style);
   gfx_style_free(&this->play_style);
   memory_free(this);
 }
 void titlescreen_load(game_t* game) {
+  // init
   title_screen_t* this = memory_alloc(sizeof(title_screen_t));
   window_t* window = game->window;
   this->game = game;
@@ -69,6 +67,7 @@ void titlescreen_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
+
   // assets
   gfx_style_new(&this->title_style, (gfx_style_props_t) {
     .window = window,
@@ -84,6 +83,9 @@ void titlescreen_load(game_t* game) {
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
+
+  // elements
+
   // title
   this->title = (gfx_text_t) {
     .window = window,
@@ -120,11 +122,4 @@ void titlescreen_load(game_t* game) {
     .src = &game->terrain_atlas
   };
   rect_update_size(&this->background.rect);
-  // hp_display
-  this->hp_display.game = game;
-  showdialog_new(&this->hp_display);
-  wstring_append_cwstr(&this->hp_display.text, L"HP: 10/10");
-  this->hp_display.position.x = 10.f;
-  this->hp_display.position.y = 10.f;
-  showdialog_update(&this->hp_display);
 }

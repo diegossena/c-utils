@@ -23,18 +23,18 @@ typedef struct map_entry {
   void* __value;
   map_entry* __next;
 } map_entry;
-typedef struct map_t {
+typedef struct tilemap_t {
   u64 __length;
   u32 __stride;
   map_entry** __buckets;
   u64 __buckets_length;
-} map_t;
+} tilemap_t;
 
-void _map_constructor(map_t*, u32 stride);
-void map_deconstructor(map_t*);
+void _map_constructor(tilemap_t*, u32 stride);
+void map_deconstructor(tilemap_t*);
 
-void* map_get(const map_t*, const u64 hash);
-void map_set(map_t*, const u64 hash, const void* value);
-bool map_delete(map_t*, const u64 hash);
+void* map_get(const tilemap_t*, const u64 hash);
+void map_set(tilemap_t*, const u64 hash, const void* value);
+bool map_delete(tilemap_t*, const u64 hash);
 
 #include <sdk/map/inl.h>

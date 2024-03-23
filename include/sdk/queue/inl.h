@@ -1,6 +1,6 @@
 #include <sdk/queue.h>
 
-static i64 queue_count = 0;
+static i32 queue_count = 0;
 
 void queue_head(queue_t* this) {
   this->next = this;

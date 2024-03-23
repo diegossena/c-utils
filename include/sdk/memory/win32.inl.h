@@ -5,7 +5,7 @@
 #include <sdk/memory.h>
 #include <sdk/error.h>
 
-static i64 memory_leaks = 0;
+static i32 memory_leaks = 0;
 
 void* memory_alloc(u64 size) {
   void* block = HeapAlloc(GetProcessHeap(), 0, size);

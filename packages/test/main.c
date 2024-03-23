@@ -49,7 +49,7 @@ void snowflake_test() {
 }
 void map_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "MAP" CONSOLE_RESET);
-  map_t map_u64;
+  tilemap_t map_u64;
   map_constructor(&map_u64, u64);
   map_set_cstr(&map_u64, "key1", (u64)10);
   assert(map_get_cstr(&map_u64, u64, "key1") == 10);
