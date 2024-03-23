@@ -13,4 +13,6 @@ char tilemap_tile_get(tilemap_t* this, i32 layer_index, i32 x, i32 y) {
   }
   return '\0';
 }
-void tilemap_draw(tilemap_t* this, u64 layer_index);
+void tilemap_draw(tilemap_t* this, u64 layer_index) {
+
+}

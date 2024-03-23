@@ -1,11 +1,11 @@
 #pragma once
 
-#include "./tilemap.h"
+#include "../scene/local_map.h"
 
-void tilemap_introduction_load(tilemap_t* this) {
-  this->width = 64;
-  this->height = 15;
-  this->layers = (
+void tilemap_introduction_load(local_map_t* this) {
+  this->tilemap.width = 64;
+  this->tilemap.height = 15;
+  this->tilemap.layers = (
     "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
     "TTBTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
     "TTBTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"

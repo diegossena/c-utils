@@ -15,6 +15,7 @@ typedef struct local_map_t {
   event_listener_t onkeydown;
   event_listener_t destroy;
   // elements
+  tilemap_t tilemap;
   showdialog_t hp_display;
 } local_map_t;
 
