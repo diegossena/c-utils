@@ -82,7 +82,6 @@ void window_set_size(window_t* this, u32 width, u32 height) {
   );
 }
 bool __window_set_viewport(window_t* this) {
-  console_log("__window_set_viewport");
   HRESULT result;
   if (this->__d3d_backbuffer) {
     ID2D1RenderTarget_Release(this->__d2d_render_target);
