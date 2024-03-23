@@ -188,7 +188,7 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   emitter_emit(&this->onupdate);
 }
 void window_render(window_t* this) {
-  RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+  RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE);
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
