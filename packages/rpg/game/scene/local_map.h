@@ -77,10 +77,10 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.size.height = 77;
           break;
         case '.':
-          tile.position.x = 2;
-          tile.position.y = 802;
-          tile.size.width = 2;
-          tile.size.height = 2;
+          tile.position.x = 0;
+          tile.position.y = 800;
+          tile.size.width = 1;
+          tile.size.height = 1;
           break;
         default:
           continue;
