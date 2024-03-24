@@ -21,8 +21,17 @@ typedef struct title_screen_t {
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
-void scene_titlescreen_load(game_t*);
-void titlescreen_destroy(title_screen_t*);
+void titlescreen_destroy(title_screen_t* this) {
+  emitter_off(&this->ondraw);
+  emitter_off(&this->onkeydown);
+  emitter_off(&this->destroy);
+  gfx_text_free(&this->title);
+  gfx_text_free(&this->press_space);
+  gfx_text_free(&this->to_play);
+  gfx_style_free(&this->title_style);
+  gfx_style_free(&this->play_style);
+  memory_free(this);
+}
 
 void titlescreen_ondraw(title_screen_t* this) {
   gfx_image_draw(&this->background);
@@ -38,17 +47,6 @@ void titlescreen_onkeydown(title_screen_t* this) {
         .scene_load = { (listener_t)scene_localmap_load, this->game },
     });
   }
-}
-void titlescreen_destroy(title_screen_t* this) {
-  emitter_off(&this->ondraw);
-  emitter_off(&this->onkeydown);
-  emitter_off(&this->destroy);
-  gfx_text_free(&this->title);
-  gfx_text_free(&this->press_space);
-  gfx_text_free(&this->to_play);
-  gfx_style_free(&this->title_style);
-  gfx_style_free(&this->play_style);
-  memory_free(this);
 }
 void scene_titlescreen_load(game_t* game) {
   // init
