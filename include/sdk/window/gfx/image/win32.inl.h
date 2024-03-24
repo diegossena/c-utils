@@ -5,12 +5,12 @@
 
 #include <sdk/window/gfx/image.h>
 
-typedef struct image_src_t {
+typedef struct gfx_image_src_t {
   ID2D1Bitmap* __bitmap;
   const u16 width, height;
-} image_src_t;
+} gfx_image_src_t;
 
-void gfx_image_src_new(image_src_t* this, const wchar_t* path, const window_t* window) {
+void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_t* window) {
   assert(path);
   assert(window);
   HRESULT result;
@@ -75,7 +75,7 @@ decoder_free:
 wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
 }
-void gfx_image_src_free(image_src_t* this) {
+void gfx_image_src_free(gfx_image_src_t* this) {
   ID2D1Bitmap_Release(this->__bitmap);
   --memory_leaks;
 }

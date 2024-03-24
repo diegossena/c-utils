@@ -12,8 +12,8 @@ typedef struct title_screen_t {
   game_t* game;
   // events
   event_listener_t ondraw;
-  event_listener_t onkeydown;
   event_listener_t destroy;
+  event_listener_t onkeydown;
   // assets
   gfx_style_t title_style, play_style;
   // elements
@@ -21,21 +21,18 @@ typedef struct title_screen_t {
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
-void titlescreen_load(game_t*);
+void scene_titlescreen_load(game_t*);
 void titlescreen_destroy(title_screen_t*);
 
 void titlescreen_ondraw(title_screen_t* this) {
   gfx_image_draw(&this->background);
-  gfx_text_draw(&this->title);
-  gfx_text_draw(&this->press_space);
-  gfx_text_draw(&this->to_play);
 }
 void titlescreen_onkeydown(title_screen_t* this) {
   if (keyboard_pressed(KEY_SPACE)) {
     scene_transition((scene_transition_props_t) {
       .game = this->game,
         .scene_destroy = { (listener_t)titlescreen_destroy, this },
-        .scene_load = { (listener_t)localmap_load, this->game },
+        .scene_load = { (listener_t)scene_localmap_load, this->game },
     });
   }
 }
@@ -43,11 +40,14 @@ void titlescreen_destroy(title_screen_t* this) {
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeydown);
   emitter_off(&this->destroy);
+  gfx_text_free(&this->title);
+  gfx_text_free(&this->press_space);
+  gfx_text_free(&this->to_play);
   gfx_style_free(&this->title_style);
   gfx_style_free(&this->play_style);
   memory_free(this);
 }
-void titlescreen_load(game_t* game) {
+void scene_titlescreen_load(game_t* game) {
   // init
   title_screen_t* this = memory_alloc(sizeof(title_screen_t));
   window_t* window = game->window;
@@ -70,14 +70,14 @@ void titlescreen_load(game_t* game) {
   emitter_on(&window->onkeydown, &this->onkeydown);
 
   // assets
-  gfx_style_new(&this->title_style, (gfx_style_props_t) {
+  gfx_style_new(&this->title_style, (style_props_t) {
     .window = window,
       .family = game->font_zelda_family,
       .size = 32.f,
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
-  gfx_style_new(&this->play_style, (gfx_style_props_t) {
+  gfx_style_new(&this->play_style, (style_props_t) {
     .window = window,
       .family = game->font_megaman_family,
       .size = 26.f,
@@ -90,29 +90,32 @@ void titlescreen_load(game_t* game) {
   // title
   this->title = (gfx_text_t) {
     .window = window,
-    gfx_text_cwstr(L"DreamShifters"),
     .rect = { 250.f, 10.f },
     .color = &this->game->white,
     .style = &this->title_style
   };
+  gfx_text_new(&this->title);
+  wstring_append_cwstr(&this->title.text, L"DreamShifters");
   gfx_text_adjust(&this->title);
   // press_space
   this->press_space = (gfx_text_t) {
     .window = window,
-    gfx_text_cwstr(L"Press Space"),
     .rect = { 500.f, 500.f },
     .style = &this->play_style,
     .color = &this->game->white,
   };
+  gfx_text_new(&this->press_space);
+  wstring_append_cwstr(&this->press_space.text, L"Press Space");
   gfx_text_adjust(&this->press_space);
   // to_play
   this->to_play = (gfx_text_t) {
     .window = window,
-    gfx_text_cwstr(L"to start"),
     .rect = { 545.f, 530.f },
     .style = &this->play_style,
     .color = &this->game->white,
   };
+  gfx_text_new(&this->to_play);
+  wstring_append_cwstr(&this->to_play.text, L"to start");
   gfx_text_adjust(&this->to_play);
   // background
   this->background = (gfx_image_t) {

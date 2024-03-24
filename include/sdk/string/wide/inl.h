@@ -80,7 +80,7 @@ void wstring_append_wchar(wstring_t* this, const wchar_t ch) {
     return;
   wstring_append_wstr(this, &ch, 1);
 }
-void string_format(wstring_t* this, const wchar_t* format, ...) {
+void wstring_format(wstring_t* this, const wchar_t* format, ...) {
   u64 capacity = this->__data == this->__small_string
     ? SMALL_STRING_SIZE
     : this->__capacity;

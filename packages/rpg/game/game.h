@@ -16,7 +16,7 @@ typedef struct game_t {
   bool __in_transition;
   event_listener_t ondestroy;
   // assets
-  image_src_t terrain_atlas;
+  gfx_image_src_t terrain_atlas;
   gfx_style_t dialog_style;
   gfx_stroke_t stroke_solid;
   gfx_color_t white;
@@ -63,7 +63,7 @@ void game_onpreload(window_t* window) {
 }
 void game_onload(window_t* window) {
   game_t* this = window->context;
-  gfx_style_new((gfx_style_t*)&this->dialog_style, (gfx_style_props_t) {
+  gfx_style_new((gfx_style_t*)&this->dialog_style, (style_props_t) {
     .window = window,
       .size = 28.f,
       .family = this->font_megaman_family,
@@ -71,13 +71,10 @@ void game_onload(window_t* window) {
   });
   gfx_image_src_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
   gfx_stroke_new(&this->stroke_solid, (gfx_stroke_props_t) {
-    window,
-      STROKE_STYLE_SOLID
+    window, STROKE_STYLE_SOLID
   });
   gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_color_new(&this->green, window, COLOR_GREEN);
   gfx_color_new(&this->darkblue, window, COLOR_DARKBLUE);
-
-  // titlescreen_load(this);
-  localmap_load(this);
+  scene_titlescreen_load(this);
 }

@@ -10,7 +10,7 @@ typedef struct gfx_style_t {
 
 #include <sdk/window/gfx/style.h>
 
-void gfx_style_new(gfx_style_t* this, gfx_style_props_t props) {
+void gfx_style_new(gfx_style_t* this, style_props_t props) {
   assert(props.window);
   assert(props.size > 0);
   assert(props.family);

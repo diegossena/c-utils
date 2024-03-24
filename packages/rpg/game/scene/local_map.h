@@ -151,7 +151,7 @@ void localmap_onkeydown(local_map_t* this) {
     } else {
       this->health = 10;
     }
-    string_format(&this->hp_display.text, L"HP: %hu/10", this->health);
+    wstring_format(&this->hp_display.display.text, L"HP: %hu/10", this->health);
     showdialog_update(&this->hp_display);
     window_render_request(this->game->window);
   }
@@ -164,7 +164,7 @@ void localmap_destroy(local_map_t* this) {
   showdialog_free(&this->hp_display);
   memory_free(this);
 }
-void localmap_load(game_t* game) {
+void scene_localmap_load(game_t* game) {
   assert(game);
   // init
   local_map_t* this = memory_alloc0(sizeof(local_map_t));
@@ -197,8 +197,7 @@ void localmap_load(game_t* game) {
   // hp_display
   this->hp_display.game = game;
   showdialog_new(&this->hp_display);
-  wstring_append_cwstr(&this->hp_display.text, L"HP: 10/10");
-  this->hp_display.position.x = 10.f;
-  this->hp_display.position.y = 10.f;
+  this->hp_display.display.rect = (rect_t) { 10.f, 10.f };
+  wstring_append_cwstr(&this->hp_display.display.text, L"HP: 10/10");
   showdialog_update(&this->hp_display);
 }

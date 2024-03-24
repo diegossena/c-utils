@@ -40,7 +40,7 @@ void wstring_clear(wstring_t* this);
 bool wstring_equal_cwstr(const wstring_t*, const wchar_t*);
 bool wstring_equal_wstring(const wstring_t*, const wstring_t*);
 i16 wstring_compare(const wstring_t*, const wstring_t*);
-void string_format(wstring_t*, const wchar_t* format, ...);
+void wstring_format(wstring_t*, const wchar_t* format, ...);
 
 i16 cwstr_compare(const wchar_t*, const wchar_t*);
 bool cwstr_equal(const wchar_t*, const wchar_t*);
