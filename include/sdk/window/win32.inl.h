@@ -182,7 +182,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       return 0;
     case WM_KEYDOWN:
       if (!keyboard_pressed(wParam)) {
-        __keyboard_press(wParam);
+        __keyboard_state[wParam % 8] |= wParam;
         ++__keyboard_count;
       }
       if (this->has_focus) {
@@ -190,7 +190,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       }
       return 0;
     case WM_KEYUP:
-      __keyboard_release(wParam);
+      __keyboard_state[wParam % 8] |= wParam;
       --__keyboard_count;
       if (this->has_focus) {
         emitter_emit(&this->onkeyup);

@@ -6,9 +6,3 @@ static u8 __keyboard_count = 0;
 bool keyboard_pressed(key_code_t key) {
   return __keyboard_state[key % 8] & key;
 }
-void __keyboard_press(key_code_t key) {
-  __keyboard_state[key % 8] |= key;
-}
-void __keyboard_release(key_code_t key) {
-  __keyboard_state[key % 8] &= ~key;
-}
