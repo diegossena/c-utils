@@ -146,7 +146,7 @@ void localmap_draw(local_map_t* this) {
   showdialog_draw(&this->hp_display);
 }
 void localmap_onupdate(local_map_t* this) {
-  f32 velocity = 4.f * this->game->window->elapsed_time;
+  f32 velocity = 10.f * this->game->window->elapsed_time;
   bool camera_update = false;
   if (keyboard_pressed(KEY_UP)) {
     this->camera.y -= velocity;
