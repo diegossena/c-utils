@@ -18,6 +18,6 @@ f64 time_absolute() {
   QueryPerformanceCounter(&now_time);
   return (f64)now_time.QuadPart * __time_clock_frequency;
 }
-void sleep(u64 ms) { Sleep(ms); }
+void sleep(u32 ms) { Sleep(ms); }
 
 #endif
