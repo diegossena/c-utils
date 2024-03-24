@@ -31,7 +31,6 @@ i32 app_run(application_t* this) {
       it = next;
     }
   }
-
 #ifdef SDK_NET_H
   net_shutdown();
 #endif

@@ -14,7 +14,7 @@ i32 main() {
     .onpreload = game_onpreload,
     .onload = game_onload
   };
-  window_startup(&app, &options);
+  // window_startup(&app, &options);
   app_run(&app);
   console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_RESET);
 }
