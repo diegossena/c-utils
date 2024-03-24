@@ -81,8 +81,8 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
         case '.': // Grass
           tile.position.x = 0;
           tile.position.y = 800;
-          tile.width = 1;
-          tile.height = 1;
+          tile.width = 32;
+          tile.height = 32;
           break;
         default:
           continue;
