@@ -17,6 +17,7 @@ typedef struct game_t {
   event_listener_t ondestroy;
   // assets
   gfx_image_src_t terrain_atlas;
+  gfx_image_src_t character_png;
   gfx_style_t dialog_style;
   gfx_stroke_t stroke_solid;
   gfx_color_t white;
@@ -37,6 +38,7 @@ void game_destroy(game_t* this) {
   gfx_color_free((gfx_color_t*)&this->green);
   gfx_color_free((gfx_color_t*)&this->darkblue);
   gfx_image_src_free(&this->terrain_atlas);
+  gfx_image_src_free(&this->character_png);
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
@@ -70,6 +72,7 @@ void game_onload(window_t* window) {
       .weight = FONT_WEIGHT_NORMAL
   });
   gfx_image_src_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
+  gfx_image_src_new(&this->character_png, L"./assets/sprites/amm1998/character.png", window);
   gfx_stroke_new(&this->stroke_solid, (gfx_stroke_props_t) {
     window, STROKE_STYLE_SOLID
   });
