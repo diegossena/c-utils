@@ -34,11 +34,13 @@ i32 app_run(application_t* this) {
 #ifdef SDK_NET_H
   net_shutdown();
 #endif
+#ifdef SDK_DEVELOPMENT
   if (memory_leaks > 0) {
     console_warn("memory_leaks=%d", memory_leaks);
   }
   if (queue_count > 0) {
     console_warn("queue_count=%d", queue_count);
   }
+#endif
   return 0;
 }
