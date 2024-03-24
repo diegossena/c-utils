@@ -6,20 +6,17 @@
 
 typedef struct gfx_text_t {
   // required
-  window_t* window;
+  const window_t* window;
+  wstring_t text;
   rect_t rect;
   const gfx_style_t* style;
   const gfx_color_t* color;
-  // props
-  wstring_t text;
-  // private
-  event_listener_t __ondraw;
-  event_listener_t __ondestroy;
 } gfx_text_t;
 
 void gfx_text_new(gfx_text_t*);
 void gfx_text_free(gfx_text_t*);
-void gfx_text_adjust(gfx_text_t*);
+void gfx_text_update(gfx_text_t*);
+void gfx_text_draw(const gfx_text_t*);
 
 #include <sdk/window/gfx/text/win32.inl.h>
 #include <sdk/window/gfx/text/inl.h>

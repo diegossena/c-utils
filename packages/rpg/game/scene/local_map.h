@@ -196,8 +196,9 @@ void scene_localmap_load(game_t* game) {
   emitter_on(&window->onkeydown, &this->onkeydown);
   // hp_display
   this->hp_display.game = game;
+  this->hp_display.display.rect.left_top.x = 10.f;
+  this->hp_display.display.rect.left_top.y = 10.f;
   showdialog_new(&this->hp_display);
-  this->hp_display.display.rect = (rect_t) { 10.f, 10.f };
   wstring_append_cwstr(&this->hp_display.display.text, L"HP: 10/10");
   showdialog_update(&this->hp_display);
 }

@@ -12,8 +12,8 @@ typedef struct title_screen_t {
   game_t* game;
   // events
   event_listener_t ondraw;
-  event_listener_t destroy;
   event_listener_t onkeydown;
+  event_listener_t destroy;
   // assets
   gfx_style_t title_style, play_style;
   // elements
@@ -26,6 +26,9 @@ void titlescreen_destroy(title_screen_t*);
 
 void titlescreen_ondraw(title_screen_t* this) {
   gfx_image_draw(&this->background);
+  gfx_text_draw(&this->title);
+  gfx_text_draw(&this->press_space);
+  gfx_text_draw(&this->to_play);
 }
 void titlescreen_onkeydown(title_screen_t* this) {
   if (keyboard_pressed(KEY_SPACE)) {
@@ -96,7 +99,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   gfx_text_new(&this->title);
   wstring_append_cwstr(&this->title.text, L"DreamShifters");
-  gfx_text_adjust(&this->title);
+  gfx_text_update(&this->title);
   // press_space
   this->press_space = (gfx_text_t) {
     .window = window,
@@ -106,7 +109,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   gfx_text_new(&this->press_space);
   wstring_append_cwstr(&this->press_space.text, L"Press Space");
-  gfx_text_adjust(&this->press_space);
+  gfx_text_update(&this->press_space);
   // to_play
   this->to_play = (gfx_text_t) {
     .window = window,
@@ -116,7 +119,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   gfx_text_new(&this->to_play);
   wstring_append_cwstr(&this->to_play.text, L"to start");
-  gfx_text_adjust(&this->to_play);
+  gfx_text_update(&this->to_play);
   // background
   this->background = (gfx_image_t) {
     .window = window,

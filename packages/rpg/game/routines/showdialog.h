@@ -10,13 +10,18 @@ typedef struct showdialog_t {
   // init
   game_t* game;
   // props
+
+  /**
+   * modify position and content of display
+   */
   gfx_text_t display;
+
   // private
   gfx_rect_t __background, __border;
 } showdialog_t;
 void showdialog_update(showdialog_t* this) {
   // text
-  gfx_text_adjust(&this->display);
+  gfx_text_update(&this->display);
   // background
   this->__background.rect.left_top.x = this->display.rect.left_top.x - 1;
   this->__background.rect.left_top.y = this->display.rect.left_top.y - 1;
@@ -29,14 +34,13 @@ void showdialog_update(showdialog_t* this) {
   this->__border.rect.right_bottom.y = this->display.rect.right_bottom.y + 2;
 }
 void showdialog_new(showdialog_t* this) {
+  assert(this->game);
   game_t* game = this->game;
   window_t* window = game->window;
-  // text
-  this->display = (gfx_text_t) {
-    .window = window,
-    .style = &game->dialog_style,
-    .color = &game->white,
-  };
+  // display
+  this->display.window = window;
+  this->display.style = &game->dialog_style;
+  this->display.color = &game->white;
   gfx_text_new(&this->display);
   // background
   this->__background = (gfx_rect_t) {
@@ -57,4 +61,5 @@ void showdialog_free(showdialog_t* this) {
 void showdialog_draw(showdialog_t* this) {
   gfx_rect_draw(&this->__background);
   gfx_rect_draw(&this->__border);
+  gfx_text_draw(&this->display);
 }
