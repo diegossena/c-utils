@@ -9,7 +9,7 @@ typedef struct gfx_text_t {
   window_t* window;
   wstring_t text;
   rect_t rect;
-  const gfx_textstyle_t* style;
+  const gfx_text_style_t* style;
   const gfx_color_t* color;
 } gfx_text_t;
 

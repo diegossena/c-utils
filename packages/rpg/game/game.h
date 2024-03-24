@@ -18,7 +18,7 @@ typedef struct game_t {
   // assets
   gfx_image_src_t terrain_atlas;
   gfx_image_src_t character_png;
-  gfx_textstyle_t dialog_style;
+  gfx_text_style_t dialog_style;
   gfx_stroke_t stroke_solid;
   gfx_color_t white;
   gfx_color_t green;
@@ -32,7 +32,7 @@ typedef struct game_t {
 
 void game_destroy(game_t* this) {
   emitter_off(&this->ondestroy);
-  gfx_textstyle_free((gfx_textstyle_t*)&this->dialog_style);
+  gfx_text_style_free((gfx_text_style_t*)&this->dialog_style);
   gfx_stroke_free((gfx_stroke_t*)&this->stroke_solid);
   gfx_color_free((gfx_color_t*)&this->white);
   gfx_color_free((gfx_color_t*)&this->green);
@@ -65,7 +65,7 @@ void game_onpreload(window_t* window) {
 }
 void game_onload(window_t* window) {
   game_t* this = window->context;
-  gfx_textstyle_new((gfx_textstyle_t*)&this->dialog_style, (textstyle_props_t) {
+  gfx_text_style_new((gfx_text_style_t*)&this->dialog_style, (text_style_props_t) {
     .window = window,
       .size = 28.f,
       .family = this->font_megaman_family,

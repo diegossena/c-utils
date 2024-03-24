@@ -4,13 +4,13 @@
 
 #include <sdk/assert.h>
 
-typedef struct gfx_textstyle_t {
+typedef struct gfx_text_style_t {
   IDWriteTextFormat* __format;
-} gfx_textstyle_t;
+} gfx_text_style_t;
 
 #include <sdk/window/gfx/text/style.h>
 
-void gfx_textstyle_new(gfx_textstyle_t* this, textstyle_props_t props) {
+void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t props) {
   assert(props.window);
   assert(props.size > 0);
   assert(props.family);
@@ -27,7 +27,7 @@ void gfx_textstyle_new(gfx_textstyle_t* this, textstyle_props_t props) {
 #endif
 }
 
-void gfx_textstyle_free(gfx_textstyle_t* this) {
+void gfx_text_style_free(gfx_text_style_t* this) {
   IDWriteTextFormat_Release(this->__format);
 #ifdef SDK_DEVELOPMENT
   --memory_leaks;

@@ -15,7 +15,7 @@ typedef struct title_screen_t {
   event_listener_t onkeydown;
   event_listener_t destroy;
   // assets
-  gfx_textstyle_t title_style, play_style;
+  gfx_text_style_t title_style, play_style;
   // elements
   gfx_image_t background;
   gfx_text_t title, press_space, to_play;
@@ -28,8 +28,8 @@ void titlescreen_destroy(title_screen_t* this) {
   gfx_text_free(&this->title);
   gfx_text_free(&this->press_space);
   gfx_text_free(&this->to_play);
-  gfx_textstyle_free(&this->title_style);
-  gfx_textstyle_free(&this->play_style);
+  gfx_text_style_free(&this->title_style);
+  gfx_text_style_free(&this->play_style);
   memory_free(this);
 }
 
@@ -74,14 +74,14 @@ void scene_titlescreen_load(game_t* game) {
   emitter_on(&window->onkeydown, &this->onkeydown);
 
   // assets
-  gfx_textstyle_new(&this->title_style, (textstyle_props_t) {
+  gfx_text_style_new(&this->title_style, (text_style_props_t) {
     .window = window,
       .family = game->font_zelda_family,
       .size = 32.f,
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
-  gfx_textstyle_new(&this->play_style, (textstyle_props_t) {
+  gfx_text_style_new(&this->play_style, (text_style_props_t) {
     .window = window,
       .family = game->font_megaman_family,
       .size = 26.f,
