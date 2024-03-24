@@ -45,6 +45,7 @@ typedef struct window_t {
   queue_t onmousedown;
   queue_t onmouseup;
   queue_t ondblclick;
+  queue_t onkeypress;
   queue_t onkeydown;
   queue_t onkeyup;
   queue_t onresize;
@@ -52,6 +53,8 @@ typedef struct window_t {
   // window
   HWND __hwnd;
   bool __mouse_tracking;
+  bool __keyboard[255];
+  u8 __keyboard_count;
   // fonts
   queue_t __fonts; // __font_queue_t
   IDWriteFontCollection* __collection;
@@ -188,6 +191,9 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   f64 now = time_absolute();
   this->elapsed_time = now - this->__updated_at;
   this->__updated_at = now;
+  if (this->has_focus && this->__keyboard_count) {
+    emitter_emit(&this->onkeypress);
+  }
   emitter_emit(&this->onupdate);
 }
 void window_render_request(window_t* this) {
@@ -238,11 +244,19 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       emitter_emit(&this->ondblclick);
       return 0;
     case WM_KEYDOWN:
+      if (!this->__keyboard[wParam]) {
+        this->__keyboard[wParam] = true;
+        ++this->__keyboard_count;
+      }
       if (this->has_focus) {
         emitter_emit(&this->onkeydown);
       }
       return 0;
     case WM_KEYUP:
+      if (this->__keyboard[wParam]) {
+        this->__keyboard[wParam] = false;
+        --this->__keyboard_count;
+      }
       if (this->has_focus) {
         emitter_emit(&this->onkeyup);
       }
@@ -346,7 +360,6 @@ void window_startup(application_t* app, window_props_t* options) {
    // properties
   this->width = options->width;
   this->height = options->height;
-  // timer
   this->__updated_at = time_absolute();
   // event_listener_t
   queue_head(&this->onupdate);
@@ -354,6 +367,7 @@ void window_startup(application_t* app, window_props_t* options) {
   queue_head(&this->onmousemove);
   queue_head(&this->onmousedown);
   queue_head(&this->onmouseup);
+  queue_head(&this->onkeypress);
   queue_head(&this->onkeydown);
   queue_head(&this->onclose);
   queue_head(&this->ondblclick);

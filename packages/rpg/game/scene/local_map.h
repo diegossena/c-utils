@@ -15,8 +15,8 @@
 typedef struct local_map_t {
   game_t* game;
   // event_listener_t
-  event_listener_t onupdate;
   event_listener_t ondraw;
+  event_listener_t onkeypress;
   event_listener_t onkeydown;
   event_listener_t destroy;
   // tilemap
@@ -145,30 +145,28 @@ void localmap_draw(local_map_t* this) {
   tilemap_draw(this, this->bg2);
   showdialog_draw(&this->hp_display);
 }
-void localmap_onupdate(local_map_t* this) {
+void localmap_onkeypress(local_map_t* this) {
   window_t* window = this->game->window;
-  if (window->has_focus) {
-    f32 velocity = 10.f * this->game->window->elapsed_time;
-    bool camera_update = false;
-    if (keyboard_pressed(KEY_UP)) {
-      this->camera.y -= velocity;
-      camera_update = true;
-    } else if (keyboard_pressed(KEY_DOWN)) {
-      this->camera.y += velocity;
-      camera_update = true;
-    }
-    if (keyboard_pressed(KEY_RIGHT)) {
-      this->camera.x += velocity;
-      camera_update = true;
-    } else if (keyboard_pressed(KEY_LEFT)) {
-      this->camera.x -= velocity;
-      camera_update = true;
-    }
-    if (camera_update) {
-      this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
-      this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
-      window_render_request(this->game->window);
-    }
+  f32 velocity = 10.f * this->game->window->elapsed_time;
+  bool camera_update = false;
+  if (keyboard_pressed(KEY_UP)) {
+    this->camera.y -= velocity;
+    camera_update = true;
+  } else if (keyboard_pressed(KEY_DOWN)) {
+    this->camera.y += velocity;
+    camera_update = true;
+  }
+  if (keyboard_pressed(KEY_RIGHT)) {
+    this->camera.x += velocity;
+    camera_update = true;
+  } else if (keyboard_pressed(KEY_LEFT)) {
+    this->camera.x -= velocity;
+    camera_update = true;
+  }
+  if (camera_update) {
+    this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
+    this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
+    window_render_request(this->game->window);
   }
 }
 void localmap_onkeydown(local_map_t* this) {
@@ -184,8 +182,8 @@ void localmap_onkeydown(local_map_t* this) {
   }
 }
 void localmap_destroy(local_map_t* this) {
-  emitter_off(&this->onupdate);
   emitter_off(&this->ondraw);
+  emitter_off(&this->onkeypress);
   emitter_off(&this->onkeydown);
   emitter_off(&this->destroy);
   showdialog_free(&this->hp_display);
@@ -201,11 +199,6 @@ void scene_localmap_load(game_t* game) {
   localmap_onresize(this);
   tilemap_introduction_load(this);
   // register
-  this->onupdate = (event_listener_t) {
-    .callback = (listener_t)localmap_onupdate,
-    .context = this
-  };
-  emitter_on(&window->onupdate, &this->onupdate);
   this->ondraw = (event_listener_t) {
     .callback = (listener_t)localmap_draw,
     .context = this
@@ -216,6 +209,11 @@ void scene_localmap_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onclose, &this->destroy);
+  this->onkeypress = (event_listener_t) {
+    .callback = (listener_t)localmap_onkeypress,
+    .context = this
+  };
+  emitter_on(&window->onkeypress, &this->onkeypress);
   this->onkeydown = (event_listener_t) {
     .callback = (listener_t)localmap_onkeydown,
     .context = this
