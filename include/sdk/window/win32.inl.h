@@ -72,6 +72,8 @@ typedef struct window_t {
 
 #include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
+static bool __window_running = false;
+
 void window_set_size(window_t* this, u16 width, u16 height) {
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
@@ -415,6 +417,7 @@ void window_startup(application_t* app, window_props_t* options) {
     options->onload(this);
   }
   SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);
+  __window_running = true;
   return;
 d2d_factory_release:
   IDWriteFactory_Release(this->__d2d_write_factory);
@@ -422,7 +425,6 @@ window_release:
   memory_free(this);
 }
 
-static bool __window_running = true;
 bool window_pooling() {
   MSG msg;
   WINBOOL result = PeekMessageA(&msg, 0, 0, 0, PM_REMOVE);
