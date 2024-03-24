@@ -34,7 +34,7 @@ void window_startup(application_t*, window_props_t*);
 void window_free(window_t*);
 bool window_pooling();
 
-void window_render(window_t*);
+void window_render_request(window_t*);
 vector2d_t window_get_cursor(window_t*);
 void window_set_size(window_t*, u32 width, u32 height);
 

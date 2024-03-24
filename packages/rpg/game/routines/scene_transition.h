@@ -54,7 +54,7 @@ void scene_transition_update(scene_transition_t* this) {
       return scene_transition_destroy(this);
     }
   }
-  window_render(window);
+  window_render_request(window);
 }
 void scene_transition_draw(scene_transition_t* this) {
   window_t* window = this->game->window;

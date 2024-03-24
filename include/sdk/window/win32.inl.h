@@ -187,7 +187,7 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   this->__last_update = now;
   emitter_emit(&this->onupdate);
 }
-void window_render(window_t* this) {
+void window_render_request(window_t* this) {
   RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE);
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {

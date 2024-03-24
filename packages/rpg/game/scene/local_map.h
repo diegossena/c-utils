@@ -141,7 +141,7 @@ void localmap_onupdate(local_map_t* this) {
   if (camera_update) {
     this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
     this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
-    window_render(this->game->window);
+    window_render_request(this->game->window);
   }
 }
 void localmap_onkeydown(local_map_t* this) {
@@ -153,7 +153,7 @@ void localmap_onkeydown(local_map_t* this) {
     }
     string_format(&this->hp_display.text, L"HP: %hu/10", this->health);
     showdialog_update(&this->hp_display);
-    window_render(this->game->window);
+    window_render_request(this->game->window);
   }
 }
 void localmap_destroy(local_map_t* this) {
