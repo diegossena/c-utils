@@ -422,6 +422,7 @@ window_release:
   memory_free(this);
 }
 
+static bool __window_running = true;
 bool window_pooling() {
   MSG msg;
   WINBOOL result = PeekMessageA(&msg, 0, 0, 0, PM_REMOVE);
@@ -429,10 +430,10 @@ bool window_pooling() {
     TranslateMessage(&msg);
     DispatchMessageA(&msg);
     if (msg.message == WM_QUIT) {
-      return false;
+      __window_running = false;
     }
   }
-  return true;
+  return __window_running;
 }
 
 #undef wpath_dirname

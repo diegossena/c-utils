@@ -4,6 +4,7 @@
 #if PLATFORM_WINDOWS
 
 #include <sdk/window/gfx/color.h>
+#include <sdk/assert.h>
 
 typedef struct gfx_color_t {
   ID2D1SolidColorBrush* __brush;
