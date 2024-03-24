@@ -19,7 +19,7 @@ typedef struct local_map_t {
   event_listener_t ondraw;
   event_listener_t onkeydown;
   event_listener_t destroy;
-  // camera
+  // tilemap
   u8 visible_tiles_x, visible_tiles_y;
   vector2d_t offset;
   u8 tile_offset_x, tile_offset_y;
