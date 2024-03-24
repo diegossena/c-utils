@@ -152,7 +152,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       }
       break;
     case WM_MOUSELEAVE:
-      if (!queue_empty(&this->ondraw)) {
+      if (!queue_empty(&this->onmousemove)) {
         this->__mouse_tracking = false;
         this->cursor = (vector2d_t) { -1, -1 };
         emitter_emit(&this->onmousemove);
@@ -261,9 +261,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       }
       // free resources
       ID3D11Texture2D_Release(backbuffer);
-      if (!queue_empty(&this->onresize)) {
-        emitter_emit(&this->onresize);
-      }
+      emitter_emit(&this->onresize);
       return 0;
     }
     case WM_CREATE: {
