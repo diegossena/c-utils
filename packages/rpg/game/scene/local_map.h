@@ -166,7 +166,7 @@ void localmap_destroy(local_map_t* this) {
 }
 void localmap_load(game_t* game) {
   // init
-  local_map_t* this = memory_alloc(sizeof(local_map_t));
+  local_map_t* this = memory_alloc0(sizeof(local_map_t));
   window_t* window = game->window;
   this->game = game;
   this->health = 10;

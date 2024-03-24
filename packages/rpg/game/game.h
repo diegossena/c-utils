@@ -74,5 +74,6 @@ void game_onload(window_t* window) {
   gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_color_new(&this->green, window, COLOR_GREEN);
   gfx_color_new(&this->darkblue, window, COLOR_DARKBLUE);
-  titlescreen_load(this);
+  // titlescreen_load(this);
+  localmap_load(this);
 }
