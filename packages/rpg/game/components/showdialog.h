@@ -9,13 +9,10 @@
 typedef struct showdialog_t {
   // init
   game_t* game;
-  // props
-
   /**
    * modify position and content of display
    */
   gfx_text_t display;
-
   // private
   gfx_rect_t __background, __border;
 } showdialog_t;
