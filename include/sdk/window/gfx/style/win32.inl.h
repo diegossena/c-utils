@@ -1,8 +1,8 @@
 #include <sdk/window.h>
 #include <sdk/platform.h>
-#include <sdk/assert.h>
-
 #if PLATFORM_WINDOWS
+
+#include <sdk/assert.h>
 
 typedef struct gfx_style_t {
   IDWriteTextFormat* __format;
@@ -11,6 +11,10 @@ typedef struct gfx_style_t {
 #include <sdk/window/gfx/style.h>
 
 void gfx_style_new(gfx_style_t* this, gfx_style_props_t props) {
+  assert(props.window);
+  assert(props.size > 0);
+  assert(props.family);
+  assert(props.weight);
   IDWriteFactory* factory = props.window->__d2d_write_factory;
   IDWriteFontCollection* collection = props.window->__collection;
   IDWriteFactory_CreateTextFormat(

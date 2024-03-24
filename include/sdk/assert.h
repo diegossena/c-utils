@@ -10,9 +10,17 @@
 // #define debugBreak() __builtin_trap()
 // #endif //_MSC_VER
 
+#ifdef SDK_DEVELOPMENT
+
 #define assert(value) { \
   if(value) { \
   } else { \
     console_error_cstr("AssertionError: " #value  " ("__FILE__ ":" STRINGIZE(__LINE__)")"); \
   } \
 }
+
+#else
+
+#define assert(value)
+
+#endif

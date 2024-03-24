@@ -4,8 +4,8 @@
 
 #include <sdk/net/tcp.h>
 #include <sdk/date.h>
-#include <sdk/assert.h>
 #include <sdk/map.h>
+#include <sdk/assert.h>
 
 void net_tcp_free(net_tcp_t* this) {
   closesocket((SOCKET)this->__socket);

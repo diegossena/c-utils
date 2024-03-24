@@ -8,7 +8,7 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
 
 SET package_name=%1
 
-SET defines=
+SET defines=-DSDK_DEVELOPMENT
 SET compiler_flags=-O3 -g
 SET include_flags=-Iinclude
 SET linker_flags=-ld3d11 -ld2d1 -lDwrite -ld3dcompiler -lole32 -lwindowscodecs -ldxguid -lgdi32 -lws2_32 

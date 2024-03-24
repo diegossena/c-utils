@@ -11,6 +11,8 @@ typedef struct image_src_t {
 } image_src_t;
 
 void gfx_image_src_new(image_src_t* this, const wchar_t* path, const window_t* window) {
+  assert(path);
+  assert(window);
   HRESULT result;
   IWICImagingFactory* wic_factory;
   IWICBitmapDecoder* decoder;
@@ -81,7 +83,6 @@ void gfx_image_draw(const gfx_image_t* this) {
   const window_t* window = this->window;
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   ID2D1Bitmap* bitmap = this->src->__bitmap;
-  D2D1_RECT_F rect;
   D2D1_RECT_F position = {
     this->position.x, this->position.y,
     this->position.x + this->width, this->position.y + this->height,
@@ -94,10 +95,12 @@ void gfx_image_draw(const gfx_image_t* this) {
       );
       break;
     case BITMAP_EXTEND_NO_REPEAT: {
-      rect.left = this->rect.left_top.x;
-      rect.top = this->rect.left_top.y;
-      rect.right = rect.left + this->width;
-      rect.bottom = rect.top + this->height;
+      D2D1_RECT_F rect = {
+        .left = this->rect.left_top.x,
+        .top = this->rect.left_top.y,
+        .right = rect.left + this->width,
+        .bottom = rect.top + this->height,
+      };
       ID2D1RenderTarget_DrawBitmap(
         render_target, bitmap, &rect, 1.f,
         D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, (D2D1_RECT_F*)&position
@@ -105,8 +108,10 @@ void gfx_image_draw(const gfx_image_t* this) {
     } break;
     default: {
       // repeat
-      rect.top = this->rect.left_top.y;
-      rect.bottom = this->rect.left_top.y + this->height;
+      D2D1_RECT_F rect = {
+        .top = this->rect.left_top.y,
+        .bottom = this->rect.left_top.y + this->height,
+      };
       f32 rect_right_start = this->rect.left_top.x + this->width;
       f32 position_right_start = position.right;
       while (true) {

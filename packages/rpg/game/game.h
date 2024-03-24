@@ -70,7 +70,10 @@ void game_onload(window_t* window) {
       .weight = FONT_WEIGHT_NORMAL
   });
   gfx_image_src_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
-  gfx_stroke_new(&this->stroke_solid, window, (gfx_stroke_props_t) { STROKE_STYLE_SOLID });
+  gfx_stroke_new(&this->stroke_solid, (gfx_stroke_props_t) {
+    // window,
+    STROKE_STYLE_SOLID
+  });
   gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_color_new(&this->green, window, COLOR_GREEN);
   gfx_color_new(&this->darkblue, window, COLOR_DARKBLUE);
