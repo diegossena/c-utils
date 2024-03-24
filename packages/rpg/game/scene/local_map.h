@@ -19,16 +19,16 @@ typedef struct local_map_t {
   event_listener_t onkeypress;
   event_listener_t onkeydown;
   event_listener_t destroy;
+  // layers
+  byte bg0[TILEMAP_SIZE];
+  byte bg1[TILEMAP_SIZE];
+  byte bg2[TILEMAP_SIZE];
   // tilemap
   u8 visible_tiles_x, visible_tiles_y;
   vector2d_t offset;
   u8 tile_offset_x, tile_offset_y;
   vector2d_t offset_limit;
   vector2d_t camera;
-  // layers
-  byte bg0[TILEMAP_SIZE];
-  byte bg1[TILEMAP_SIZE];
-  byte bg2[TILEMAP_SIZE];
   // data
   u8 health;
   // elements
@@ -147,16 +147,6 @@ void localmap_draw(local_map_t* this) {
   rect_set_height(&player.rect, TILE_SIZE);
   rect_set_width(&player.rect, 31);
   gfx_image_draw(&player);
-  // gfx_rect_t tile = {
-  //   .window = window,
-  //   .color = &game->darkblue,
-  //   .rect = {
-  //     (this->camera.x - this->offset.x) * TILE_SIZE,
-  //     (this->camera.y - this->offset.y) * TILE_SIZE,
-  //   },
-  // };
-  // rect_set_size(&tile.rect, TILE_SIZE);
-  // gfx_rect_draw(&tile);
   tilemap_draw(this, this->bg2);
   showdialog_draw(&this->hp_display);
 }

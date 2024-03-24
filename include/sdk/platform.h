@@ -6,7 +6,7 @@
 
 #if WIN32 || _WIN32 || __WIN32__
 
-#define PLATFORM_WINDOWS 1
+#define PLATFORM_WINDOWS
 
 #ifdef SDK_NET_H
 #include <winsock2.h>

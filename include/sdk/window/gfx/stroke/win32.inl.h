@@ -1,7 +1,7 @@
 #include <sdk/window.h>
 #include <sdk/platform.h>
 
-#if PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 #include <sdk/window/gfx/stroke.h>
 #include <sdk/assert.h>

@@ -1,8 +1,9 @@
 #include <sdk/platform.h>
 
-#if PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 #include <sdk/window.h>
+#include <sdk/keyboard.h>
 #include <sdk/error.h>
 #include <sdk/time.h>
 
@@ -75,8 +76,6 @@ typedef struct window_t {
 #include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
 static bool __window_running = false;
-static bool __keyboard_state[255];
-static u8 __keyboard_count;
 
 void window_set_size(window_t* this, u16 width, u16 height) {
   RECT rect = { 0, 0, width, height };
@@ -86,68 +85,6 @@ void window_set_size(window_t* this, u16 width, u16 height) {
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
     WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME
   );
-}
-bool __window_viewport_update(window_t* this) {
-  HRESULT result;
-  if (this->__d3d_backbuffer) {
-    ID2D1RenderTarget_Release(this->__d2d_render_target);
-    IDXGISurface_Release(this->__d2d_surface);
-    ID3D11RenderTargetView_Release(this->__d3d_backbuffer);
-  }
-  D3D11_VIEWPORT viewport = {
-    .TopLeftX = 0.f,
-    .TopLeftY = 0.f,
-    .Width = (f32)this->width,
-    .Height = (f32)this->height,
-    .MinDepth = 0.f,
-    .MaxDepth = 1.f,
-  };
-  ID3D11DeviceContext_RSSetViewports(this->__d3d_device_context, 1, &viewport);
-  result = IDXGISwapChain_ResizeBuffers(
-    this->__d3d_swapchain, 1, this->width, this->height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
-  );
-  if (FAILED(result)) {
-    error("IDXGISwapChain_ResizeBuffers", result);
-    return false;
-  }
-  // get backbuffer
-  ID3D11Texture2D* backbuffer;
-  IDXGISwapChain_GetBuffer(this->__d3d_swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
-  /**
-   * use the back buffer address to create the render target
-   * set the render target as the back buffer
-   */
-  ID3D11Device_CreateRenderTargetView(
-    this->__d3d_device, (ID3D11Resource*)backbuffer, null, &this->__d3d_backbuffer
-  );
-  ID3D11DeviceContext_OMSetRenderTargets(
-    this->__d3d_device_context, 1, &this->__d3d_backbuffer, 0
-  );
-  // set d2_render_target
-  ID3D11Texture2D_QueryInterface(
-    backbuffer, &IID_IDXGISurface, (void**)&this->__d2d_surface
-  );
-  D2D1_RENDER_TARGET_PROPERTIES renter_target_props = {
-    .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
-    .pixelFormat = {
-      .format = DXGI_FORMAT_UNKNOWN,
-      .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
-    }
-  };
-  result = ID2D1Factory_CreateDxgiSurfaceRenderTarget(
-    this->__d2d_factory, this->__d2d_surface, &renter_target_props,
-    &this->__d2d_render_target
-  );
-  if (FAILED(result)) {
-    error("CreateDxgiSurfaceRenderTarget", result);
-    goto error_backbuffer_release;
-  }
-  // free resources
-  ID3D11Texture2D_Release(backbuffer);
-  return true;
-error_backbuffer_release:
-  ID3D11Texture2D_Release(backbuffer);
-  return false;
 }
 void window_free(window_t* this) {
   // fonts
@@ -244,8 +181,8 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       emitter_emit(&this->ondblclick);
       return 0;
     case WM_KEYDOWN:
-      if (!__keyboard_state[wParam]) {
-        __keyboard_state[wParam] = true;
+      if (!keyboard_pressed(wParam)) {
+        __keyboard_press(wParam);
         ++__keyboard_count;
       }
       if (this->has_focus) {
@@ -253,10 +190,8 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       }
       return 0;
     case WM_KEYUP:
-      if (!__keyboard_state[wParam]) {
-        __keyboard_state[wParam] = false;
-        __keyboard_count;
-      }
+      __keyboard_release(wParam);
+      --__keyboard_count;
       if (this->has_focus) {
         emitter_emit(&this->onkeyup);
       }
@@ -267,14 +202,70 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_KILLFOCUS:
       this->has_focus = false;
       return 0;
-    case WM_SIZE:
+    case WM_SIZE: {
       this->width = LOWORD(lParam);
       this->height = HIWORD(lParam);
-      __window_viewport_update(this);
+      // viewport
+      HRESULT result;
+      if (this->__d3d_backbuffer) {
+        ID2D1RenderTarget_Release(this->__d2d_render_target);
+        IDXGISurface_Release(this->__d2d_surface);
+        ID3D11RenderTargetView_Release(this->__d3d_backbuffer);
+      }
+      D3D11_VIEWPORT viewport = {
+        .TopLeftX = 0.f,
+        .TopLeftY = 0.f,
+        .Width = (f32)this->width,
+        .Height = (f32)this->height,
+        .MinDepth = 0.f,
+        .MaxDepth = 1.f,
+      };
+      ID3D11DeviceContext_RSSetViewports(this->__d3d_device_context, 1, &viewport);
+      result = IDXGISwapChain_ResizeBuffers(
+        this->__d3d_swapchain, 1, this->width, this->height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
+      );
+      if (FAILED(result)) {
+        error("IDXGISwapChain_ResizeBuffers", result);
+        return false;
+      }
+      // get backbuffer
+      ID3D11Texture2D* backbuffer;
+      IDXGISwapChain_GetBuffer(this->__d3d_swapchain, 0, &IID_ID3D11Texture2D, (void**)&backbuffer);
+      /**
+       * use the back buffer address to create the render target
+       * set the render target as the back buffer
+       */
+      ID3D11Device_CreateRenderTargetView(
+        this->__d3d_device, (ID3D11Resource*)backbuffer, null, &this->__d3d_backbuffer
+      );
+      ID3D11DeviceContext_OMSetRenderTargets(
+        this->__d3d_device_context, 1, &this->__d3d_backbuffer, 0
+      );
+      // set d2_render_target
+      ID3D11Texture2D_QueryInterface(
+        backbuffer, &IID_IDXGISurface, (void**)&this->__d2d_surface
+      );
+      D2D1_RENDER_TARGET_PROPERTIES renter_target_props = {
+        .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
+        .pixelFormat = {
+          .format = DXGI_FORMAT_UNKNOWN,
+          .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
+        }
+      };
+      result = ID2D1Factory_CreateDxgiSurfaceRenderTarget(
+        this->__d2d_factory, this->__d2d_surface, &renter_target_props,
+        &this->__d2d_render_target
+      );
+      if (FAILED(result)) {
+        error("CreateDxgiSurfaceRenderTarget", result);
+      }
+      // free resources
+      ID3D11Texture2D_Release(backbuffer);
       if (!queue_empty(&this->onresize)) {
         emitter_emit(&this->onresize);
       }
       return 0;
+    }
     case WM_CREATE: {
       LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
       this = (window_t*)pcs->lpCreateParams;

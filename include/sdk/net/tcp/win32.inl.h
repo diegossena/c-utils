@@ -1,6 +1,6 @@
 #include <sdk/platform.h>
 
-#if PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 #include <sdk/net/tcp.h>
 #include <sdk/date.h>

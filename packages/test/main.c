@@ -12,8 +12,8 @@ void string_test() {
   console_log_cstr(CONSOLE_FORE_LIGHTBLUE "STRING" CONSOLE_RESET);
   string_t str1;
   string_t str2;
-  string_constructor(&str1);
-  string_constructor(&str2);
+  string_new(&str1);
+  string_new(&str2);
   string_append_cstr(&str1, "test");
   assert(string_equal_cstr(&str1, "test") == true);
   string_append_char(&str1, '1');
