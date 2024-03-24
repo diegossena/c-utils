@@ -72,7 +72,7 @@ typedef struct window_t {
 
 #include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
-void window_set_size(window_t* this, u32 width, u32 height) {
+void window_set_size(window_t* this, u16 width, u16 height) {
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
   SetWindowPos(
