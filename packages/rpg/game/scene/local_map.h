@@ -22,7 +22,7 @@ typedef struct local_map_t {
   // camera
   u8 visible_tiles_x, visible_tiles_y;
   vector2d_t offset;
-  vector2d_t tile_offset;
+  u8 tile_offset_x, tile_offset_y;
   vector2d_t offset_limit;
   vector2d_t camera;
   vector2d_t screen_padding;
@@ -87,8 +87,8 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
         default:
           continue;
       }
-      tile.rect.left_top.x = x * TILE_SIZE - math_round(this->tile_offset.x);
-      tile.rect.left_top.y = y * TILE_SIZE - math_round(this->tile_offset.y);
+      tile.rect.left_top.x = x * TILE_SIZE - this->tile_offset_x;
+      tile.rect.left_top.y = y * TILE_SIZE - this->tile_offset_y;
       rect_set_size(&tile.rect, TILE_SIZE);
       gfx_image_draw(&tile);
     }
@@ -104,8 +104,8 @@ void localmap_draw(local_map_t* this) {
   this->offset.x = math_clamp(this->offset.x, 0.f, this->offset_limit.x);
   this->offset.y = math_clamp(this->offset.y, 0.f, this->offset_limit.y);
   // Get offsets for smooth movement
-  this->tile_offset.x = (this->offset.x - (i32)this->offset.x) * TILE_SIZE;
-  this->tile_offset.y = (this->offset.y - (i32)this->offset.y) * TILE_SIZE;
+  this->tile_offset_x = (this->offset.x - (i32)this->offset.x) * TILE_SIZE;
+  this->tile_offset_y = (this->offset.y - (i32)this->offset.y) * TILE_SIZE;
   // render
   tilemap_draw(this, this->bg0);
   tilemap_draw(this, this->bg1);
