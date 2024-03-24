@@ -26,10 +26,12 @@ typedef struct local_map_t {
   vector2d_t offset_limit;
   vector2d_t camera;
   vector2d_t screen_padding;
-  // data
+  // layers
   byte bg0[TILEMAP_SIZE];
   byte bg1[TILEMAP_SIZE];
   byte bg2[TILEMAP_SIZE];
+  // data
+  u8 health;
   // elements
   showdialog_t hp_display;
 } local_map_t;
@@ -138,7 +140,18 @@ void localmap_onupdate(local_map_t* this) {
     window_render(this->game->window);
   }
 }
-void localmap_onkeydown(local_map_t* this) {}
+void localmap_onkeydown(local_map_t* this) {
+  if (keyboard_pressed(KEY_SPACE)) {
+    if (this->health > 0) {
+      --this->health;
+    } else {
+      this->health = 10;
+    }
+    string_format(&this->hp_display.text, L"HP: %hu/10", this->health);
+    showdialog_update(&this->hp_display);
+    window_render(this->game->window);
+  }
+}
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->onupdate);
   emitter_off(&this->ondraw);
@@ -152,6 +165,7 @@ void localmap_load(game_t* game) {
   local_map_t* this = memory_alloc(sizeof(local_map_t));
   window_t* window = game->window;
   this->game = game;
+  this->health = 10;
   localmap_onresize(this);
   tilemap_introduction_load(this);
   // register

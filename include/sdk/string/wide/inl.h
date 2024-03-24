@@ -19,6 +19,17 @@ void __wstring_mutate(wstring_t* this, u64 size) {
     this->__capacity = capacity;
   }
 }
+/*
+@returns i32 - length
+*/
+i32 __cwstr_format_va(wchar_t* stream, u64 count, const wchar_t* format, void* args) {
+  i32 length = vswprintf(stream, count, format, args);
+  // stream[length] = L'\0';
+  if (length < 0) {
+    error("vswprintf", length);
+  }
+  return length;
+}
 
 void wstring_new(wstring_t* this) {
   this->__data = 0;
@@ -69,6 +80,15 @@ void wstring_append_wchar(wstring_t* this, const wchar_t ch) {
     return;
   wstring_append_wstr(this, &ch, 1);
 }
+void string_format(wstring_t* this, const wchar_t* format, ...) {
+  u64 capacity = this->__data == this->__small_string
+    ? SMALL_STRING_SIZE
+    : this->__capacity;
+  __builtin_va_list args;
+  va_start(args, format);
+  this->__length = __cwstr_format_va(this->__data, capacity, format, args);
+  va_end(args);
+}
 
 i16 cwstr_compare(const wchar_t* s1, const wchar_t* s2) {
   while (*s1 && *s1 == *s2) { ++s1; ++s2; }
@@ -87,21 +107,10 @@ bool cwstr_equal(const wchar_t* s1, const wchar_t* s2) {
 /*
 @returns i32 - length
 */
-i32 cwstr_format_va(wchar_t* stream, const wchar_t* format, void* args) {
-  i32 length = snwprintf(stream, MAX_BUFSIZ, format, args);
-  stream[length] = L'\0';
-  if (length < 0) {
-    error("snwprintf", length);
-  }
-  return length;
-}
-/*
-@returns i32 - length
-*/
 i32 cwstr_format(wchar_t* stream, const wchar_t* format, ...) {
   __builtin_va_list args;
   va_start(args, format);
-  i32 length = cwstr_format_va(stream, format, args);
+  i32 length = __cwstr_format_va(stream, MAX_BUFSIZ, format, args);
   va_end(args);
   return length;
 }
