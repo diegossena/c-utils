@@ -67,20 +67,20 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
         case 'T': // Tree
           tile.position.x = 417;
           tile.position.y = 989;
-          tile.size.width = 30;
-          tile.size.height = 32;
+          tile.width = 30;
+          tile.height = 32;
           break;
         case 'B':
           tile.position.x = 202;
           tile.position.y = 840;
-          tile.size.width = 77;
-          tile.size.height = 77;
+          tile.width = 77;
+          tile.height = 77;
           break;
         case '.':
           tile.position.x = 0;
           tile.position.y = 800;
-          tile.size.width = 1;
-          tile.size.height = 1;
+          tile.width = 1;
+          tile.height = 1;
           break;
         default:
           continue;

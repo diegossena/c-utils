@@ -16,9 +16,10 @@ typedef struct gfx_image_t {
   image_src_t* src;
   rect_t rect;
   vector2d_t position;
-  size_u16_t size;
   // optional
   bitmap_extend_t extend_mode;
+  // generated
+  u16 width, height;
 } gfx_image_t;
 
 void gfx_image_src_new(image_src_t*, const wchar_t* path, const window_t*);

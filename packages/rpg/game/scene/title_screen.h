@@ -117,8 +117,9 @@ void titlescreen_load(game_t* game) {
   // background
   this->background = (gfx_image_t) {
     .window = window,
-    .position = { 512, 832 },
-    .size = { 95, 95 },
+    .position = { 609, 929 },
+    .width = 61,
+    .height = 57,
     .src = &game->terrain_atlas
   };
   rect_set_width(&this->background.rect, window->width);

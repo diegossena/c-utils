@@ -84,7 +84,7 @@ void gfx_image_draw(const gfx_image_t* this) {
   D2D1_RECT_F rect;
   D2D1_RECT_F position = {
     this->position.x, this->position.y,
-    this->position.x + this->size.width, this->position.y + this->size.height,
+    this->position.x + this->width, this->position.y + this->height,
   };
   switch (this->extend_mode) {
     case BITMAP_EXTEND_COVER:
@@ -96,8 +96,8 @@ void gfx_image_draw(const gfx_image_t* this) {
     case BITMAP_EXTEND_NO_REPEAT: {
       rect.left = this->rect.left_top.x;
       rect.top = this->rect.left_top.y;
-      rect.right = rect.left + this->size.width;
-      rect.bottom = rect.top + this->size.height;
+      rect.right = rect.left + this->width;
+      rect.bottom = rect.top + this->height;
       ID2D1RenderTarget_DrawBitmap(
         render_target, bitmap, &rect, 1.f,
         D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, (D2D1_RECT_F*)&position
@@ -106,8 +106,8 @@ void gfx_image_draw(const gfx_image_t* this) {
     default: {
       // repeat
       rect.top = this->rect.left_top.y;
-      rect.bottom = this->rect.left_top.y + this->size.height;
-      f32 rect_right_start = this->rect.left_top.x + this->size.width;
+      rect.bottom = this->rect.left_top.y + this->height;
+      f32 rect_right_start = this->rect.left_top.x + this->width;
       f32 position_right_start = position.right;
       while (true) {
         if (rect.bottom > this->rect.right_bottom.y) {
@@ -138,12 +138,12 @@ void gfx_image_draw(const gfx_image_t* this) {
                 D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, (D2D1_RECT_F*)&position
               );
             }
-            rect.left += this->size.width;
-            rect.right += this->size.width;
+            rect.left += this->width;
+            rect.right += this->width;
           }
         }
-        rect.top += this->size.height;
-        rect.bottom += this->size.height;
+        rect.top += this->height;
+        rect.bottom += this->height;
       }
     }
   }
