@@ -165,6 +165,7 @@ void localmap_destroy(local_map_t* this) {
   memory_free(this);
 }
 void localmap_load(game_t* game) {
+  assert(game);
   // init
   local_map_t* this = memory_alloc0(sizeof(local_map_t));
   window_t* window = game->window;
