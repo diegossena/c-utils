@@ -111,7 +111,6 @@ void localmap_draw(local_map_t* this) {
   // render
   tilemap_draw(this, this->bg0);
   tilemap_draw(this, this->bg1);
-  showdialog_draw(&this->hp_display);
   gfx_rect_t tile = {
     .window = window,
     .color = &game->darkblue,
@@ -122,6 +121,7 @@ void localmap_draw(local_map_t* this) {
   };
   rect_set_size(&tile.rect, TILE_SIZE);
   gfx_rect_draw(&tile);
+  showdialog_draw(&this->hp_display);
 }
 void localmap_onupdate(local_map_t* this) {
   f32 velocity = 4.f * this->game->window->elapsed_time;
