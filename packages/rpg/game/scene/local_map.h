@@ -83,6 +83,30 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.width = 32;
           tile.height = 32;
           break;
+        case 'q': // grass-roof (0, 0)
+          tile.position.x = 224;
+          tile.position.y = 768;
+          tile.width = 31;
+          tile.height = 31;
+          break;
+        case 'w': // grass-roof (1, 0)
+          tile.position.x = 256;
+          tile.position.y = 768;
+          tile.width = 31;
+          tile.height = 31;
+          break;
+        case 'a': // grass-roof (1, 0)
+          tile.position.x = 224;
+          tile.position.y = 800;
+          tile.width = 31;
+          tile.height = 31;
+          break;
+        case 's': // grass-roof (1, 1)
+          tile.position.x = 256;
+          tile.position.y = 800;
+          tile.width = 31;
+          tile.height = 31;
+          break;
         default:
           continue;
       }

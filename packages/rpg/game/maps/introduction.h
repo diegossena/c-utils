@@ -69,4 +69,8 @@ void tilemap_introduction_load(local_map_t* this) {
     TILEMAP_SIZE
   );
   memory_fill(this->bg2, '\0', TILEMAP_SIZE);
+  this->bg2[5 * TILEMAP_WIDTH] = 'q';
+  this->bg2[5 * TILEMAP_WIDTH + 1] = 'w';
+  this->bg2[6 * TILEMAP_WIDTH] = 'a';
+  this->bg2[6 * TILEMAP_WIDTH + 1] = 's';
 }
