@@ -5,7 +5,7 @@
 
 #include "../game.h"
 #include "../routines/scene_transition.h"
-#include "../routines/showdialog.h"
+#include "../components/showdialog.h"
 #include "./local_map.h"
 
 typedef struct title_screen_t {
