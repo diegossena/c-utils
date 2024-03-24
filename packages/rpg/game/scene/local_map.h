@@ -1,6 +1,5 @@
 #pragma once
 
-#include <sdk/window/gfx/style.h>
 #include <sdk/window/gfx/rect.h>
 #include <sdk/window/gfx/text.h>
 #include <sdk/window/gfx/image.h>

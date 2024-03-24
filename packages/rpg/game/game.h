@@ -8,7 +8,7 @@
 #include <sdk/events.h>
 #include <sdk/window/gfx/color.h>
 #include <sdk/window/gfx/stroke.h>
-#include <sdk/window/gfx/style.h>
+#include <sdk/window/gfx/text.h>
 #include <sdk/window/gfx/image.h>
 
 typedef struct game_t {
@@ -18,7 +18,7 @@ typedef struct game_t {
   // assets
   gfx_image_src_t terrain_atlas;
   gfx_image_src_t character_png;
-  gfx_style_t dialog_style;
+  gfx_textstyle_t dialog_style;
   gfx_stroke_t stroke_solid;
   gfx_color_t white;
   gfx_color_t green;
@@ -32,7 +32,7 @@ typedef struct game_t {
 
 void game_destroy(game_t* this) {
   emitter_off(&this->ondestroy);
-  gfx_style_free((gfx_style_t*)&this->dialog_style);
+  gfx_textstyle_free((gfx_textstyle_t*)&this->dialog_style);
   gfx_stroke_free((gfx_stroke_t*)&this->stroke_solid);
   gfx_color_free((gfx_color_t*)&this->white);
   gfx_color_free((gfx_color_t*)&this->green);
@@ -65,7 +65,7 @@ void game_onpreload(window_t* window) {
 }
 void game_onload(window_t* window) {
   game_t* this = window->context;
-  gfx_style_new((gfx_style_t*)&this->dialog_style, (style_props_t) {
+  gfx_textstyle_new((gfx_textstyle_t*)&this->dialog_style, (textstyle_props_t) {
     .window = window,
       .size = 28.f,
       .family = this->font_megaman_family,
