@@ -87,7 +87,7 @@ void window_set_size(window_t* this, u16 width, u16 height) {
     WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME
   );
 }
-bool __window_set_viewport(window_t* this) {
+bool __window_viewport_update(window_t* this) {
   HRESULT result;
   if (this->__d3d_backbuffer) {
     ID2D1RenderTarget_Release(this->__d2d_render_target);
@@ -270,7 +270,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_SIZE:
       this->width = LOWORD(lParam);
       this->height = HIWORD(lParam);
-      __window_set_viewport(this);
+      __window_viewport_update(this);
       if (!queue_empty(&this->onresize)) {
         emitter_emit(&this->onresize);
       }
