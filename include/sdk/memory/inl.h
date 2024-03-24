@@ -9,6 +9,30 @@ void* memory_fill(void* block, byte value, u64 size) {
   }
   return block;
 }
+void* memory_zero(void* block, u64 size) {
+  void* start = block;
+  while (size >= sizeof(u64)) {
+    *(u64*)block = 0;
+    block += sizeof(u64);
+    size -= sizeof(u64);
+  }
+  while (size >= sizeof(u32)) {
+    *(u32*)block = 0;
+    block += sizeof(u32);
+    size -= sizeof(u32);
+  }
+  while (size >= sizeof(u16)) {
+    *(u16*)block = 0;
+    block += sizeof(u16);
+    size -= sizeof(u16);
+  }
+  while (size >= sizeof(byte)) {
+    *(byte*)block = 0;
+    block += sizeof(byte);
+    size -= sizeof(byte);
+  }
+  return start;
+}
 void* memory_copy(void* dest, const void* src, u64 size) {
   void* start = dest;
   while (size >= sizeof(u64)) {
