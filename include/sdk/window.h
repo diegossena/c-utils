@@ -12,9 +12,9 @@ typedef struct application_t application_t;
 typedef struct window_t window_t;
 
 typedef enum window_flags_t {
-  WINDOW_HIDDEN = 1,
-  WINDOW_NO_RESIZABLE = 2,
-  WINDOW_NO_MAXIMIZE = 4,
+  WINDOW_FLAG_HIDDEN = 1,
+  WINDOW_FLAG_NO_RESIZABLE = 2,
+  WINDOW_FLAG_NO_MAXIMIZE = 4,
 } window_flags_t;
 
 typedef void (*window_load_listener_t)(window_t* context);

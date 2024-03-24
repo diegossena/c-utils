@@ -360,13 +360,13 @@ void window_startup(application_t* app, window_props_t* options) {
     goto window_release;
   }
   u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
-  if (!(options->flags & WINDOW_HIDDEN)) {
+  if (!(options->flags & WINDOW_FLAG_HIDDEN)) {
     window_style |= WS_VISIBLE;
   }
-  if (!(options->flags & WINDOW_NO_RESIZABLE)) {
+  if (!(options->flags & WINDOW_FLAG_NO_RESIZABLE)) {
     window_style |= WS_THICKFRAME;
   }
-  if (!(options->flags & WINDOW_NO_MAXIMIZE)) {
+  if (!(options->flags & WINDOW_FLAG_NO_MAXIMIZE)) {
     window_style |= WS_MAXIMIZEBOX;
   }
   u32 window_ex_style = WS_EX_APPWINDOW;
