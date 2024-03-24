@@ -62,7 +62,7 @@ void game_onpreload(window_t* window) {
   this->font_megaman_family = L"MegaMan 2";
 }
 void game_onload(window_t* window) {
-  game_t* this = (game_t*)window->context;
+  game_t* this = window->context;
   gfx_style_new((gfx_style_t*)&this->dialog_style, (gfx_style_props_t) {
     .window = window,
       .size = 28.f,
@@ -74,6 +74,7 @@ void game_onload(window_t* window) {
   gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_color_new(&this->green, window, COLOR_GREEN);
   gfx_color_new(&this->darkblue, window, COLOR_DARKBLUE);
+
   // titlescreen_load(this);
   localmap_load(this);
 }
