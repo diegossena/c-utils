@@ -53,8 +53,6 @@ typedef struct window_t {
   // window
   HWND __hwnd;
   bool __mouse_tracking;
-  bool __keyboard[255];
-  u8 __keyboard_count;
   // fonts
   queue_t __fonts; // __font_queue_t
   IDWriteFontCollection* __collection;
@@ -77,6 +75,8 @@ typedef struct window_t {
 #include <sdk/window/gfx/directdraw/FontCollectionLoader.win32.h>
 
 static bool __window_running = false;
+static bool __keyboard_state[255];
+static u8 __keyboard_count;
 
 void window_set_size(window_t* this, u16 width, u16 height) {
   RECT rect = { 0, 0, width, height };
@@ -191,7 +191,7 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   f64 now = time_absolute();
   this->elapsed_time = now - this->__updated_at;
   this->__updated_at = now;
-  if (this->has_focus && this->__keyboard_count) {
+  if (this->has_focus && __keyboard_count) {
     emitter_emit(&this->onkeypress);
   }
   emitter_emit(&this->onupdate);
@@ -244,18 +244,18 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       emitter_emit(&this->ondblclick);
       return 0;
     case WM_KEYDOWN:
-      if (!this->__keyboard[wParam]) {
-        this->__keyboard[wParam] = true;
-        ++this->__keyboard_count;
+      if (!__keyboard_state[wParam]) {
+        __keyboard_state[wParam] = true;
+        ++__keyboard_count;
       }
       if (this->has_focus) {
         emitter_emit(&this->onkeydown);
       }
       return 0;
     case WM_KEYUP:
-      if (this->__keyboard[wParam]) {
-        this->__keyboard[wParam] = false;
-        --this->__keyboard_count;
+      if (!__keyboard_state[wParam]) {
+        __keyboard_state[wParam] = false;
+        __keyboard_count;
       }
       if (this->has_focus) {
         emitter_emit(&this->onkeyup);
