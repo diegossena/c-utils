@@ -34,6 +34,7 @@ typedef struct window_t {
   void* context;
   u16 width, height;
   vector2d_t cursor;
+  bool has_focus;
   // timer
   f64 __updated_at;
   f32 elapsed_time;
@@ -187,7 +188,9 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   f64 now = time_absolute();
   this->elapsed_time = now - this->__updated_at;
   this->__updated_at = now;
-  emitter_emit(&this->onupdate);
+  if (this->has_focus) {
+    emitter_emit(&this->onupdate);
+  }
 }
 void window_render_request(window_t* this) {
   RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE);
@@ -237,10 +240,20 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       emitter_emit(&this->ondblclick);
       return 0;
     case WM_KEYDOWN:
-      emitter_emit(&this->onkeydown);
+      if (this->has_focus) {
+        emitter_emit(&this->onkeydown);
+      }
       return 0;
     case WM_KEYUP:
-      emitter_emit(&this->onkeyup);
+      if (this->has_focus) {
+        emitter_emit(&this->onkeyup);
+      }
+      return 0;
+    case WM_SETFOCUS:
+      this->has_focus = true;
+      return 0;
+    case WM_KILLFOCUS:
+      this->has_focus = false;
       return 0;
     case WM_SIZE:
       this->width = LOWORD(lParam);
