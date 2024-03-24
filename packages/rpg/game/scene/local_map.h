@@ -25,7 +25,6 @@ typedef struct local_map_t {
   u8 tile_offset_x, tile_offset_y;
   vector2d_t offset_limit;
   vector2d_t camera;
-  vector2d_t screen_padding;
   // layers
   byte bg0[TILEMAP_SIZE];
   byte bg1[TILEMAP_SIZE];
