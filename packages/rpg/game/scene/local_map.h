@@ -72,13 +72,13 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.width = 30;
           tile.height = 32;
           break;
-        case 'B':
+        case 'B': // Bush
           tile.position.x = 202;
           tile.position.y = 840;
           tile.width = 77;
           tile.height = 77;
           break;
-        case '.':
+        case '.': // Grass
           tile.position.x = 0;
           tile.position.y = 800;
           tile.width = 1;
@@ -193,9 +193,6 @@ void localmap_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
-
-  // elements
-
   // hp_display
   this->hp_display.game = game;
   showdialog_new(&this->hp_display);
