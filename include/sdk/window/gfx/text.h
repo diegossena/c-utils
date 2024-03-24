@@ -6,7 +6,7 @@
 
 typedef struct gfx_text_t {
   // required
-  const window_t* window;
+  window_t* window;
   wstring_t text;
   rect_t rect;
   const gfx_style_t* style;

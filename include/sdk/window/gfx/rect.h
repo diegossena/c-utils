@@ -6,7 +6,7 @@
 
 typedef struct gfx_rect_t {
   // required
-  const window_t* window;
+  window_t* window;
   const gfx_color_t* color;
   rect_t rect;
   // optional
@@ -15,6 +15,8 @@ typedef struct gfx_rect_t {
   f32 border_radius;
 } gfx_rect_t;
 
+void gfx_rect_new(gfx_rect_t*);
+void gfx_rect_free(gfx_rect_t*);
 void gfx_rect_draw(const gfx_rect_t*);
 
 #include <sdk/window/gfx/rect/win32.inl.h>

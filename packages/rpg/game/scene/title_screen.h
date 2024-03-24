@@ -87,9 +87,16 @@ void scene_titlescreen_load(game_t* game) {
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
-
-  // elements
-
+  // background
+  this->background = (gfx_image_t) {
+    .window = window,
+    .position = { 609, 929 },
+    .width = 61,
+    .height = 57,
+    .src = &game->terrain_atlas
+  };
+  rect_set_width(&this->background.rect, window->width);
+  rect_set_height(&this->background.rect, window->height);
   // title
   this->title = (gfx_text_t) {
     .window = window,
@@ -120,14 +127,4 @@ void scene_titlescreen_load(game_t* game) {
   gfx_text_new(&this->to_play);
   wstring_append_cwstr(&this->to_play.text, L"to start");
   gfx_text_update(&this->to_play);
-  // background
-  this->background = (gfx_image_t) {
-    .window = window,
-    .position = { 609, 929 },
-    .width = 61,
-    .height = 57,
-    .src = &game->terrain_atlas
-  };
-  rect_set_width(&this->background.rect, window->width);
-  rect_set_height(&this->background.rect, window->height);
 }
