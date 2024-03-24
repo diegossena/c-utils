@@ -35,7 +35,7 @@ typedef struct window_t {
   u16 width, height;
   vector2d_t cursor;
   // timer
-  f64 __last_update;
+  f64 __updated_at;
   f32 elapsed_time;
   // event_listener_t
   queue_t onupdate;
@@ -183,8 +183,8 @@ void __window_mouse_tracking(window_t* this) {
 void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   f64 now = time_absolute();
-  this->elapsed_time = now - this->__last_update;
-  this->__last_update = now;
+  this->elapsed_time = now - this->__updated_at;
+  this->__updated_at = now;
   emitter_emit(&this->onupdate);
 }
 void window_render_request(window_t* this) {
@@ -334,7 +334,7 @@ void window_startup(application_t* app, window_props_t* options) {
   this->width = options->width;
   this->height = options->height;
   // timer
-  this->__last_update = time_absolute();
+  this->__updated_at = time_absolute();
   // event_listener_t
   queue_head(&this->onupdate);
   queue_head(&this->ondraw);
