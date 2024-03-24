@@ -71,8 +71,8 @@ void game_onload(window_t* window) {
   });
   gfx_image_src_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
   gfx_stroke_new(&this->stroke_solid, (gfx_stroke_props_t) {
-    // window,
-    STROKE_STYLE_SOLID
+    window,
+      STROKE_STYLE_SOLID
   });
   gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_color_new(&this->green, window, COLOR_GREEN);
