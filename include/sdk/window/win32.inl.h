@@ -188,9 +188,7 @@ void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD
   f64 now = time_absolute();
   this->elapsed_time = now - this->__updated_at;
   this->__updated_at = now;
-  if (this->has_focus) {
-    emitter_emit(&this->onupdate);
-  }
+  emitter_emit(&this->onupdate);
 }
 void window_render_request(window_t* this) {
   RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE);

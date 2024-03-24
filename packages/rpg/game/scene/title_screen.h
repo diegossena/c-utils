@@ -40,12 +40,15 @@ void titlescreen_ondraw(title_screen_t* this) {
   gfx_text_draw(&this->to_play);
 }
 void titlescreen_onkeydown(title_screen_t* this) {
-  if (keyboard_pressed(KEY_SPACE)) {
-    scene_transition((scene_transition_props_t) {
-      .game = this->game,
-        .scene_destroy = { (listener_t)titlescreen_destroy, this },
-        .scene_load = { (listener_t)scene_localmap_load, this->game },
-    });
+  window_t* window = this->game->window;
+  if (window->has_focus) {
+    if (keyboard_pressed(KEY_SPACE)) {
+      scene_transition((scene_transition_props_t) {
+        .game = this->game,
+          .scene_destroy = { (listener_t)titlescreen_destroy, this },
+          .scene_load = { (listener_t)scene_localmap_load, this->game },
+      });
+    }
   }
 }
 void scene_titlescreen_load(game_t* game) {

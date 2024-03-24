@@ -146,26 +146,29 @@ void localmap_draw(local_map_t* this) {
   showdialog_draw(&this->hp_display);
 }
 void localmap_onupdate(local_map_t* this) {
-  f32 velocity = 10.f * this->game->window->elapsed_time;
-  bool camera_update = false;
-  if (keyboard_pressed(KEY_UP)) {
-    this->camera.y -= velocity;
-    camera_update = true;
-  } else if (keyboard_pressed(KEY_DOWN)) {
-    this->camera.y += velocity;
-    camera_update = true;
-  }
-  if (keyboard_pressed(KEY_RIGHT)) {
-    this->camera.x += velocity;
-    camera_update = true;
-  } else if (keyboard_pressed(KEY_LEFT)) {
-    this->camera.x -= velocity;
-    camera_update = true;
-  }
-  if (camera_update) {
-    this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
-    this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
-    window_render_request(this->game->window);
+  window_t* window = this->game->window;
+  if (window->has_focus) {
+    f32 velocity = 10.f * this->game->window->elapsed_time;
+    bool camera_update = false;
+    if (keyboard_pressed(KEY_UP)) {
+      this->camera.y -= velocity;
+      camera_update = true;
+    } else if (keyboard_pressed(KEY_DOWN)) {
+      this->camera.y += velocity;
+      camera_update = true;
+    }
+    if (keyboard_pressed(KEY_RIGHT)) {
+      this->camera.x += velocity;
+      camera_update = true;
+    } else if (keyboard_pressed(KEY_LEFT)) {
+      this->camera.x -= velocity;
+      camera_update = true;
+    }
+    if (camera_update) {
+      this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
+      this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
+      window_render_request(this->game->window);
+    }
   }
 }
 void localmap_onkeydown(local_map_t* this) {
