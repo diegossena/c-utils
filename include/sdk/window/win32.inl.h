@@ -123,22 +123,22 @@ void __window_mouse_tracking(window_t* this) {
     TrackMouseEvent(&tme);
   }
 }
-void __window_update_callback(HWND handle, UINT unused1, UINT_PTR unused2, DWORD unused3) {
-  window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
-  f64 now = time_absolute();
-  this->elapsed_time = now - this->__updated_at;
-  this->__updated_at = now;
-  if (this->has_focus && __keyboard_count) {
-    emitter_emit(&this->onkeypress);
-  }
-  emitter_emit(&this->onupdate);
-}
 void window_render_request(window_t* this) {
   RedrawWindow(this->__hwnd, NULL, NULL, RDW_INVALIDATE);
 }
 LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   window_t* this = (window_t*)GetWindowLongPtrA(handle, GWLP_USERDATA);
   switch (message) {
+    case WM_TIMER: {
+      f64 now = time_absolute();
+      this->elapsed_time = now - this->__updated_at;
+      this->__updated_at = now;
+      if (this->has_focus && __keyboard_count) {
+        emitter_emit(&this->onkeypress);
+      }
+      emitter_emit(&this->onupdate);
+      return 0;
+    };
     case WM_PAINT:
       if (!queue_empty(&this->ondraw)) {
         static const FLOAT background_color [] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -432,7 +432,7 @@ void window_startup(application_t* app, window_props_t* options) {
   if (options->onload) {
     options->onload(this);
   }
-  SetTimer(this->__hwnd, 0, 1000 / 60, __window_update_callback);
+  SetTimer(this->__hwnd, 0, 1000 / 60, null);
   __window_running = true;
   return;
 d2d_factory_release:
