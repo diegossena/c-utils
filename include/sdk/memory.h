@@ -1,5 +1,7 @@
-#pragma once
-#include "SDK/types.h"
+#ifndef SDK_MEMORY_H
+#define SDK_MEMORY_H
+
+#include <sdk/types.h>
 
 #define MAX_BUFSIZ 65535
 
@@ -16,5 +18,4 @@ void* memory_fill(void* this, byte value, u64 size);
 void* memory_copy(void* this, const void* src, u64 size);
 void memory_free(void*);
 
-#include <sdk/memory/inl.h>
-#include <sdk/memory/win32.inl.h>
+#endif

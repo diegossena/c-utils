@@ -1,6 +1,5 @@
-#pragma once
-
-#include <sdk/string.h>
+#ifndef SDK_PATH_H
+#define SDK_PATH_H
 
 #define PATH_MAX 260
 
@@ -13,5 +12,4 @@ void path_resolve(string_t*);
 void path_join(string_t*, const char*, u64);
 void path_dirname(string_t*);
 
-#include <sdk/path/win32.inl.h>
-#include <sdk/path/inl.h>
+#endif

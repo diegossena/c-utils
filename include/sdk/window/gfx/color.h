@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_WINDOW_GFX_COLOR_H
+#define SDK_WINDOW_GFX_COLOR_H
 
 #include <sdk/window.h>
 
@@ -19,4 +20,4 @@ typedef struct color_t { f32 r, g, b, a; } color_t;
 void gfx_color_new(gfx_color_t*, window_t*, color_t);
 void gfx_color_free(gfx_color_t*);
 
-#include <sdk/window/gfx/color/win32.inl.h>
+#endif

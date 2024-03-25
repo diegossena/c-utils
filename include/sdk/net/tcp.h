@@ -51,7 +51,4 @@ void net_tcp_connect_handle(net_tcp_t*);
 void net_tcp_read_handle(net_tcp_t*);
 void net_tcp_write_handle(net_tcp_t*);
 
-#include <sdk/net/tcp/win32.inl.h>
-#include <sdk/net/tcp/inl.h>
-
 #endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_WINDOW_GFX_H
+#define SDK_WINDOW_GFX_H
 
 #include <sdk/window.h>
 #include <sdk/math/geometry_2d.h>
@@ -25,4 +26,4 @@ typedef struct gfx_image_t {
 void gfx_image_src_new(gfx_image_src_t*, const wchar_t* path, const window_t*);
 void gfx_image_src_free(gfx_image_src_t*);
 
-#include <sdk/window/gfx/image/win32.inl.h>
+#endif

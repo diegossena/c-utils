@@ -1,7 +1,10 @@
-#pragma once
-#pragma once
+#ifndef SDK_STRING_WIDE_H
+#define SDK_STRING_WIDE_H
+
 #include <sdk/types.h>
 #include <sdk/error.h>
+#include <sdk/memory.h>
+#include <sdk/math.h>
 
 #define SMALL_STRING_SIZE 15
 
@@ -47,6 +50,4 @@ bool cwstr_equal(const wchar_t*, const wchar_t*);
 i32 cwstr_format(wchar_t*, const wchar_t* format, ...);
 u64 cwstr_length(const wchar_t*);
 
-#include <sdk/string/wide/inl.h>
-
-#undef SMALL_STRING_SIZE
+#endif

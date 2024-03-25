@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_MAP_H
+#define SDK_MAP_H
 
 #include <sdk/types.h>
 #include <sdk/math.h>
@@ -37,4 +38,4 @@ void* map_get(const tilemap_t*, const u64 hash);
 void map_set(tilemap_t*, const u64 hash, const void* value);
 bool map_delete(tilemap_t*, const u64 hash);
 
-#include <sdk/map/inl.h>
+#endif

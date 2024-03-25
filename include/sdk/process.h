@@ -4,4 +4,4 @@
 
 void process_execpath(string_t*);
 
-#include <sdk/process/win32.inl.h>
+#include <sdk/inl.h>

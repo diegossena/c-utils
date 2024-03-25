@@ -48,7 +48,4 @@ void net_tcp_client_free(net_tcp_client_t*);
 void net_tcp_client_read_handle(net_tcp_client_t*);
 void net_tcp_client_write_handle(net_tcp_client_t*);
 
-#include <sdk/net/tcp/server/win32.inl.h>
-#include <sdk/net/tcp/server/inl.h>
-
 #endif

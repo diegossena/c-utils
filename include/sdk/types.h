@@ -1,5 +1,15 @@
 #pragma once
 
+#if WIN32 || _WIN32 || __WIN32__
+#define PLATFORM_WINDOWS
+#else
+#error "This platform is not supported"
+#endif
+
+#if _WIN64 || __x86_64__
+#define PLATFORM_X64 1
+#endif
+
 #define CONCAT(a, b) a##b
 #define STRINGIZE_KEY(x) #x
 #define STRINGIZE(x) STRINGIZE_KEY(x)

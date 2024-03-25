@@ -1,4 +1,3 @@
-#include <sdk/queue.h>
 
 #ifdef SDK_DEVELOPMENT
 static i32 queue_count = 0;

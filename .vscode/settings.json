@@ -66,6 +66,8 @@
     "streambuf": "c",
     "thread": "c",
     "cinttypes": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "win32.inl": "c",
+    "*.rh": "c"
   }
 }

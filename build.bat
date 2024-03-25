@@ -23,7 +23,6 @@ if EXIST .\bin\%package_name%.exe DEL .\bin\%package_name%.exe
 ECHO %package_name% compiling...
 gcc %compiler_flags%%cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
 IF %ERRORLEVEL% NEQ 0 (
-  ECHO gcc %compiler_flags%%cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
   GOTO :EOF
 ) 
 :: Get elapsed time:

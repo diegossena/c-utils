@@ -1,13 +1,12 @@
 #ifndef SDK_WINDOW_H
 #define SDK_WINDOW_H
 
-#include <sdk/types.h>
+#include <sdk/application.h>
 #include <sdk/math/geometry_2d.h>
 #include <sdk/events.h>
+#include <sdk/time.h>
 
 #define WINDOW_POS_CENTERED MAX_U64
-
-typedef struct application_t application_t;
 
 typedef struct window_t window_t;
 
@@ -37,9 +36,5 @@ bool window_pooling();
 void window_render_request(window_t*);
 vector2d_t window_get_cursor(window_t*);
 void window_set_size(window_t*, u16 width, u16 height);
-
-#include <sdk/application.h>
-
-#include <sdk/window/win32.inl.h>
 
 #endif

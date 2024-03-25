@@ -35,6 +35,4 @@ typedef struct overlap_2d_t {
 } overlap_2d_t;
 overlap_2d_t overlap_rect_rect(const rect_t*, const rect_t*);
 
-#include <sdk/math/geometry_2d.inl.h>
-
 #endif

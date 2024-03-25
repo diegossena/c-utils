@@ -7,3 +7,5 @@ typedef enum http_method {
   HTTP_PATCH,
   HTTP_PUT
 } http_method;
+
+#include <sdk/inl.h>

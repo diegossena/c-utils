@@ -1,17 +1,15 @@
 #pragma once
 
-#if __CYGWIN__
-#error "CYGWIN is not supported"
-#endif
-
 #if WIN32 || _WIN32 || __WIN32__
 
 #define PLATFORM_WINDOWS
 
 #ifdef SDK_NET_H
 #include <winsock2.h>
-#endif
+#endif // !SDK_NET_H
+
 #include <windows.h>
+
 #ifdef SDK_WINDOW_H
 #include <windowsx.h>
 #include <winuser.h>
@@ -23,12 +21,9 @@
 #include <d2d1.h>
 #include <dwrite.h>
 #undef COBJMACROS
-#endif
+#endif // !SDK_WINDOW_H
 
-#else
-#error "This platform is not supported"
-#endif
-
+#endif // !PLATFORM_WINDOWS
 
 #if _WIN64 || __x86_64__
 #define PLATFORM_X64 1

@@ -284,10 +284,4 @@ typedef enum key_code_t {
 
 bool keyboard_pressed(key_code_t key);
 
-#ifdef SDK_WINDOW_H
-#include <sdk/keyboard/inl.h>
-#else
-#include <sdk/keyboard/win32.inl.h>
-#endif
-
 #endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_ERROR_H
+#define SDK_ERROR_H
 
 #include <sdk/types.h>
 
@@ -65,4 +66,4 @@ static error_code error_last = 0;
 
 void error(const char* message, error_code);
 
-#include <sdk/error/error.inl.h>
+#endif

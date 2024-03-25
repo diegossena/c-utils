@@ -1,16 +1,5 @@
 #pragma once
 
-#include <sdk/window.h>
-#include <sdk/keyboard.h>
-#include <sdk/memory.h>
-#include <sdk/time.h>
-#include <sdk/queue.h>
-#include <sdk/events.h>
-#include <sdk/window/gfx/color.h>
-#include <sdk/window/gfx/stroke.h>
-#include <sdk/window/gfx/text.h>
-#include <sdk/window/gfx/image.h>
-
 typedef struct game_t {
   window_t* window;
   bool __in_transition;

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_WINDOW_GFX_RECT_H
+#define SDK_WINDOW_GFX_RECT_H
 
 #include <sdk/math/geometry_2d.h>
 #include <sdk/window/gfx/stroke.h>
@@ -19,4 +20,4 @@ void gfx_rect_new(gfx_rect_t*);
 void gfx_rect_free(gfx_rect_t*);
 void gfx_rect_draw(const gfx_rect_t*);
 
-#include <sdk/window/gfx/rect/win32.inl.h>
+#endif

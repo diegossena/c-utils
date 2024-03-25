@@ -18,3 +18,5 @@ typedef struct {
   u64 ctim;
   u64 birthtime;
 } fs_stats;
+
+#include <sdk/inl.h>

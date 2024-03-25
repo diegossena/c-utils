@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SDK_STRING_H
+#define SDK_STRING_H
+
 #include <sdk/types.h>
 #include <sdk/error.h>
 
@@ -46,6 +48,4 @@ i32 cstr_format_va(char* this, const char* format, void* va_list_p);
 i32 cstr_format(char*, const char* format, ...);
 u64 cstr_length(const char*);
 
-#include <sdk/string/inl.h>
-
-#undef SMALL_STRING_SIZE
+#endif

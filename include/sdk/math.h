@@ -1,5 +1,8 @@
-#pragma once
+#ifndef SDK_MATH_H
+#define SDK_MATH_H
+
 #include <sdk/types.h>
+#include <sdk/math.h>
 
 // macro functions to work with any type
 
@@ -18,4 +21,4 @@ f64 math_pow(f64 base, f64 exponent);
 u64 math_next2pow(u64 number);
 u64 math_hash_jenkins(const byte* data, u64 size);
 
-#include <sdk/math/math.inl.h>
+#endif

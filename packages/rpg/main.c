@@ -1,3 +1,11 @@
+#include <sdk/window.h>
+#include <sdk/window/gfx/rect.h>
+#include <sdk/window/gfx/text.h>
+#include <sdk/window/gfx/color.h>
+#include <sdk/window/gfx/stroke.h>
+#include <sdk/window/gfx/image.h>
+#include <sdk/keyboard.h>
+#include <sdk/inl.h>
 #include "./game/game.h"
 
 i32 main() {
@@ -18,5 +26,3 @@ i32 main() {
   app_run(&app);
   console_log_cstr(CONSOLE_FORE_GREEN "SUCCESS" CONSOLE_RESET);
 }
-
-// utils

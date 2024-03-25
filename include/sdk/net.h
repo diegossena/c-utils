@@ -25,6 +25,4 @@ void net_startup();
  */
 void net_shutdown();
 
-#include <sdk/net/win32.inl.h>
-
 #endif

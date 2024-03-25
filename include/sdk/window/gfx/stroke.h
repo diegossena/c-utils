@@ -1,4 +1,7 @@
-#pragma once
+#ifndef SDK_WINDOW_GFX_STROKE_H
+#define SDK_WINDOW_GFX_STROKE_H
+
+#include <sdk/window.h>
 
 typedef enum stroke_style_t {
   STROKE_STYLE_SOLID
@@ -14,4 +17,4 @@ typedef struct gfx_stroke_t gfx_stroke_t;
 void gfx_stroke_new(gfx_stroke_t*, gfx_stroke_props_t);
 void gfx_stroke_free(gfx_stroke_t*);
 
-#include <sdk/window/gfx/stroke/win32.inl.h>
+#endif
