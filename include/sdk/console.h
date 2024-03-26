@@ -3,6 +3,8 @@
 
 #include <sdk/types.h>
 
+#include <sdk/error.h>
+
 #define console_write_cstr(level, message, length) { \
   const char cstr[] = message; \
   console_write_str(level, message, length); \
@@ -86,10 +88,5 @@ typedef enum log_level_t {
   // @brief Trace log level, should be used for verbose debugging purposes.
   LOG_LEVEL_TRACE
 } log_level_t;
-
-void console_startup();
-
-i32 console_write(log_level_t, const char* message, ...);
-i32 console_write_str(log_level_t, const char* message, u64 length);
 
 #endif

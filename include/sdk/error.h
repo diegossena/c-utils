@@ -2,6 +2,13 @@
 #define SDK_ERROR_H
 
 #include <sdk/types.h>
+#include <sdk/console.h>
+
+#define error(message, code) \
+  console_error( \
+    CONSOLE_FORE_RED "Error:" CONSOLE_RESET " %s %x" message, \
+    error_code_cstr(code), code, message \
+  )
 
 typedef enum error_code {
   ERR_MIN = MIN_I16,
@@ -63,7 +70,5 @@ if(result < 0) {
 ```
 */
 static error_code error_last = 0;
-
-void error(const char* message, error_code);
 
 #endif

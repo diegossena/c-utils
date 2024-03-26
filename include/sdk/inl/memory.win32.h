@@ -3,7 +3,6 @@
 #ifdef PLATFORM_WINDOWS
 
 #include <sdk/memory.h>
-#include <sdk/error.h>
 #include <sdk/leaks.h>
 
 void* memory_alloc(u64 size) {

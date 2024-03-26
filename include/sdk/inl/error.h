@@ -1,7 +1,5 @@
 #ifdef SDK_ERROR_H
 
-#include <sdk/console.h>
-
 const char* error_code_cstr(i64 code) {
   switch (code) {
     case ERR_OUT_OF_RANGE:
@@ -84,13 +82,13 @@ const char* error_code_cstr(i64 code) {
   }
 }
 
-void error(const char* message, error_code code) {
-  const char* error_str = error_code_cstr(code);
-  error_last = code;
-  console_error(
-    CONSOLE_FORE_RED "Error:" CONSOLE_RESET " %s %x %s",
-    error_str, code, message
-  );
-}
+// void error(const char* message, error_code code) {
+//   const char* error_str = error_code_cstr(code);
+//   error_last = code;
+//   console_error(
+//     CONSOLE_FORE_RED "Error:" CONSOLE_RESET " %s %x %s",
+//     error_str, code, message
+//   );
+// }
 
 #endif

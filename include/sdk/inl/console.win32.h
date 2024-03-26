@@ -2,9 +2,9 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/error.h>
-
 static bool console_has_ansi = false;
+
+i32 console_write(log_level_t level, const char* message, ...);
 
 void console_startup() {
   OSVERSIONINFO os_version = { .dwOSVersionInfoSize = sizeof(OSVERSIONINFO) };

@@ -3,6 +3,8 @@
 
 #include <sdk/types.h>
 
+#include <sdk/error.h>
+
 #define MAX_BUFSIZ 65535
 
 #endif
