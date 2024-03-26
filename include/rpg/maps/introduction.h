@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../scene/local_map.h"
+#include <rpg/scenes/local_map.h>
 
 void tilemap_introduction_load(local_map_t* this) {
   memory_fill(this->bg0, '.', TILEMAP_SIZE);

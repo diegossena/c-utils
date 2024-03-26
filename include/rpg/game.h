@@ -16,8 +16,8 @@ typedef struct game_t {
   const wchar_t* font_megaman_family;
 } game_t;
 
-#include "./entities/entity.h"
-#include "./scene/title_screen.h"
+#include <rpg/entities/entity.h>
+#include <rpg/scenes/title_screen.h>
 
 void game_destroy(game_t* this) {
   emitter_off(&this->ondestroy);
@@ -61,7 +61,7 @@ void game_onload(window_t* window) {
       .weight = FONT_WEIGHT_NORMAL
   });
   gfx_image_src_new(&this->terrain_atlas, L"./assets/sprites/terrain_atlas.png", window);
-  gfx_image_src_new(&this->character_png, L"./assets/sprites/amm1998/character.png", window);
+  gfx_image_src_new(&this->character_png, L"./assets/sprites/character.png", window);
   gfx_stroke_new(&this->stroke_solid, (gfx_stroke_props_t) {
     window, STROKE_STYLE_SOLID
   });

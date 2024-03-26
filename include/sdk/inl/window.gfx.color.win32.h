@@ -2,7 +2,7 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/internal/window.win32.h>
+#include <sdk/window/win32.h>
 #include <sdk/assert.h>
 
 typedef struct gfx_color_t {

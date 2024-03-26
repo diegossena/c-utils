@@ -1,4 +1,4 @@
-#ifdef SDK_NET_TCP_H
+#ifdef SDK_NET_SERVER_TCP_H
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
@@ -43,7 +43,7 @@ void net_tcp_server_close_handle(net_tcp_server_t* this) {
   }
 }
 
-void CALLBACK net_tcp_client_read_handle_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags) {
+void net_tcp_client_read_handle_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags) {
   console_log_cstr("net_tcp_client_read_handle_callback");
   net_tcp_client_t* this = (net_tcp_client_t*)lpOverlapped->hEvent;
   if (dwError) {

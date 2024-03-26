@@ -2,7 +2,7 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/internal/window.win32.h>
+#include <sdk/window/win32.h>
 
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \
@@ -28,10 +28,6 @@
   wpath_join(this, length, cstrw, __cstrw_length) \
 }
 
-
-
-static bool __window_running = false;
-
 void window_set_size(window_t* this, u16 width, u16 height) {
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
@@ -43,9 +39,11 @@ void window_set_size(window_t* this, u16 width, u16 height) {
 }
 void window_free(window_t* this) {
   // fonts
+#ifdef SDK_WINDOW_GFX_TEXT_H
   if (this->__collection) {
     IDWriteFontCollection_Release(this->__collection);
   }
+#endif
   // d2d
   ID2D1RenderTarget_Release(this->__d2d_render_target);
   IDXGISurface_Release(this->__d2d_surface);
@@ -137,6 +135,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
     case WM_LBUTTONDBLCLK:
       emitter_emit(&this->ondblclick);
       return 0;
+#ifdef SDK_KEYBOARD_H      
     case WM_KEYDOWN:
       if (!keyboard_pressed(wParam)) {
         __keyboard_press(wParam);
@@ -153,6 +152,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
         emitter_emit(&this->onkeyup);
       }
       return 0;
+#endif
     case WM_SETFOCUS:
       this->has_focus = true;
       return 0;
@@ -314,8 +314,8 @@ void window_startup(application_t* app, window_props_t* options) {
   queue_head(&this->onmouseup);
 #ifdef SDK_KEYBOARD_H
   queue_head(&this->onkeypress);
-#endif
   queue_head(&this->onkeydown);
+#endif
   queue_head(&this->onclose);
   queue_head(&this->ondblclick);
   queue_head(&this->onkeyup);

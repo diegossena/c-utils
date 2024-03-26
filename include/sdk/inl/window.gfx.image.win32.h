@@ -2,7 +2,7 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/internal/window.win32.h>
+#include <sdk/window/win32.h>
 
 typedef struct gfx_image_src_t {
   ID2D1Bitmap* __bitmap;
@@ -66,7 +66,9 @@ void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
+#ifdef SDK_DEVELOPMENT
   ++memory_leaks;
+#endif
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:
@@ -76,15 +78,17 @@ wic_factory_free:
 }
 void gfx_image_src_free(gfx_image_src_t* this) {
   ID2D1Bitmap_Release(this->__bitmap);
+#ifdef SDK_DEVELOPMENT
   --memory_leaks;
+#endif
 }
 void gfx_image_draw(const gfx_image_t* this) {
   const window_t* window = this->window;
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   ID2D1Bitmap* bitmap = this->src->__bitmap;
   D2D1_RECT_F position = {
-    this->position.x, this->position.y,
-    this->position.x + this->width, this->position.y + this->height,
+    this->src_position.x, this->src_position.y,
+    this->src_position.x + this->src_width, this->src_position.y + this->src_height,
   };
   switch (this->extend_mode) {
     case BITMAP_EXTEND_COVER:
@@ -97,8 +101,8 @@ void gfx_image_draw(const gfx_image_t* this) {
       D2D1_RECT_F rect = {
         .left = this->rect.left_top.x,
         .top = this->rect.left_top.y,
-        .right = rect.left + this->width,
-        .bottom = rect.top + this->height,
+        .right = rect.left + this->src_width,
+        .bottom = rect.top + this->src_height,
       };
       ID2D1RenderTarget_DrawBitmap(
         render_target, bitmap, &rect, 1.f,
@@ -109,9 +113,9 @@ void gfx_image_draw(const gfx_image_t* this) {
       // repeat
       D2D1_RECT_F rect = {
         .top = this->rect.left_top.y,
-        .bottom = this->rect.left_top.y + this->height,
+        .bottom = this->rect.left_top.y + this->src_height,
       };
-      f32 rect_right_start = this->rect.left_top.x + this->width;
+      f32 rect_right_start = this->rect.left_top.x + this->src_width;
       f32 position_right_start = position.right;
       while (true) {
         if (rect.bottom > this->rect.right_bottom.y) {
@@ -142,12 +146,12 @@ void gfx_image_draw(const gfx_image_t* this) {
                 D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, (D2D1_RECT_F*)&position
               );
             }
-            rect.left += this->width;
-            rect.right += this->width;
+            rect.left += this->src_width;
+            rect.right += this->src_width;
           }
         }
-        rect.top += this->height;
-        rect.bottom += this->height;
+        rect.top += this->src_height;
+        rect.bottom += this->src_height;
       }
     }
   }

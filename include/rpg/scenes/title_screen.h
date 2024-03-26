@@ -3,10 +3,10 @@
 #include <sdk/window/gfx/rect.h>
 #include <sdk/window/gfx/text.h>
 
-#include "../game.h"
-#include "../routines/scene_transition.h"
-#include "../components/showdialog.h"
-#include "./local_map.h"
+#include <rpg/game.h>
+#include <rpg/routines/scene_transition.h>
+#include <rpg/components/showdialog.h>
+#include <rpg/scenes/local_map.h>
 
 typedef struct title_screen_t {
   game_t* game;
@@ -91,9 +91,9 @@ void scene_titlescreen_load(game_t* game) {
   // background
   this->background = (gfx_image_t) {
     .window = window,
-    .position = { 609, 929 },
-    .width = 61,
-    .height = 57,
+    .src_position = { 609, 929 },
+    .src_width = 61,
+    .src_height = 57,
     .src = &game->terrain_atlas
   };
   rect_set_width(&this->background.rect, window->width);

@@ -1,7 +1,6 @@
-#pragma once
+#ifdef SDK_ARRAY
 
 #include <sdk/array.h>
-
 #include <sdk/memory.h>
 
 bool __array_resize(array_t* this, u64 capacity) {
@@ -42,3 +41,5 @@ void _array_push(array_t* this, const void* value) {
   memory_copy(addr, value, this->__stride);
   ++this->__length;
 }
+
+#endif

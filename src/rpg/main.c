@@ -6,7 +6,8 @@
 #include <sdk/window/gfx/image.h>
 #include <sdk/keyboard.h>
 #include <sdk/inl.h>
-#include "./game/game.h"
+
+#include <rpg/game.h>
 
 i32 main() {
   console_startup();

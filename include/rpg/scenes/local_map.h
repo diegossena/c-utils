@@ -5,11 +5,12 @@
 #include <sdk/window/gfx/image.h>
 #include <sdk/math.h>
 
-#include "../game.h"
+#include <rpg/game.h>
+#include <rpg/components/player.h>
 
 #define TILEMAP_WIDTH 60
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
-#define TILE_SIZE 60
+#define TILE_SIZE 76
 
 typedef struct local_map_t {
   game_t* game;
@@ -17,6 +18,7 @@ typedef struct local_map_t {
   event_listener_t ondraw;
   event_listener_t onkeypress;
   event_listener_t onkeydown;
+  event_listener_t onkeyup;
   event_listener_t destroy;
   // layers
   byte bg0[TILEMAP_SIZE];
@@ -30,11 +32,12 @@ typedef struct local_map_t {
   vector2d_t camera;
   // data
   u8 health;
-  // elements
-  showdialog_t hp_display;
+  // components
+  player_t player;
 } local_map_t;
 
-#include "../maps/introduction.h"
+#include <rpg/components/player.inl.h>
+#include <rpg/maps/introduction.h>
 
 void localmap_onresize(local_map_t* this) {
   window_t* window = this->game->window;
@@ -65,46 +68,46 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
       char tile_id = tilemap_tiles_get(layer, x + this->offset.x, y + this->offset.y);
       switch (tile_id) {
         case 'T': // Tree
-          tile.position.x = 417;
-          tile.position.y = 989;
-          tile.width = 30;
-          tile.height = 32;
+          tile.src_position.x = 417;
+          tile.src_position.y = 989;
+          tile.src_width = 30;
+          tile.src_height = 32;
           break;
         case 'B': // Bush
-          tile.position.x = 202;
-          tile.position.y = 840;
-          tile.width = 77;
-          tile.height = 77;
+          tile.src_position.x = 202;
+          tile.src_position.y = 840;
+          tile.src_width = 77;
+          tile.src_height = 77;
           break;
         case '.': // Grass
-          tile.position.x = 0;
-          tile.position.y = 800;
-          tile.width = 32;
-          tile.height = 32;
+          tile.src_position.x = 0;
+          tile.src_position.y = 800;
+          tile.src_width = 32;
+          tile.src_height = 32;
           break;
         case 'q': // grass-roof (0, 0)
-          tile.position.x = 224;
-          tile.position.y = 768;
-          tile.width = 31;
-          tile.height = 31;
+          tile.src_position.x = 224;
+          tile.src_position.y = 768;
+          tile.src_width = 31;
+          tile.src_height = 31;
           break;
         case 'w': // grass-roof (1, 0)
-          tile.position.x = 256;
-          tile.position.y = 768;
-          tile.width = 31;
-          tile.height = 31;
+          tile.src_position.x = 256;
+          tile.src_position.y = 768;
+          tile.src_width = 31;
+          tile.src_height = 31;
           break;
         case 'a': // grass-roof (1, 0)
-          tile.position.x = 224;
-          tile.position.y = 800;
-          tile.width = 31;
-          tile.height = 31;
+          tile.src_position.x = 224;
+          tile.src_position.y = 800;
+          tile.src_width = 31;
+          tile.src_height = 31;
           break;
         case 's': // grass-roof (1, 1)
-          tile.position.x = 256;
-          tile.position.y = 800;
-          tile.width = 31;
-          tile.height = 31;
+          tile.src_position.x = 256;
+          tile.src_position.y = 800;
+          tile.src_width = 31;
+          tile.src_height = 31;
           break;
         default:
           continue;
@@ -131,66 +134,24 @@ void localmap_draw(local_map_t* this) {
   // render
   tilemap_draw(this, this->bg0);
   tilemap_draw(this, this->bg1);
-  gfx_image_t player = {
-    .window = window,
-    .src = &game->character_png,
-    .extend_mode = BITMAP_EXTEND_COVER,
-    .position = { 33.f, 6.f },
-    .width = 14,
-    .height = 27,
-    .rect = {
-      (this->camera.x - this->offset.x) * TILE_SIZE,
-      (this->camera.y - this->offset.y) * TILE_SIZE,
-    },
-  };
-  rect_set_height(&player.rect, TILE_SIZE);
-  rect_set_width(&player.rect, 31);
-  gfx_image_draw(&player);
+  player_draw(&this->player);
   tilemap_draw(this, this->bg2);
-  showdialog_draw(&this->hp_display);
 }
 void localmap_onkeypress(local_map_t* this) {
-  window_t* window = this->game->window;
-  f32 velocity = 10.f * this->game->window->elapsed_time;
-  bool camera_update = false;
-  if (keyboard_pressed(KEY_UP)) {
-    this->camera.y -= velocity;
-    camera_update = true;
-  } else if (keyboard_pressed(KEY_DOWN)) {
-    this->camera.y += velocity;
-    camera_update = true;
-  }
-  if (keyboard_pressed(KEY_RIGHT)) {
-    this->camera.x += velocity;
-    camera_update = true;
-  } else if (keyboard_pressed(KEY_LEFT)) {
-    this->camera.x -= velocity;
-    camera_update = true;
-  }
-  if (camera_update) {
-    this->camera.x = math_clamp(this->camera.x, 0.f, TILEMAP_WIDTH - 1);
-    this->camera.y = math_clamp(this->camera.y, 0.f, TILEMAP_WIDTH - 1);
-    window_render_request(this->game->window);
-  }
+  player_onkeypress(&this->player);
 }
 void localmap_onkeydown(local_map_t* this) {
-  if (keyboard_pressed(KEY_SPACE)) {
-    if (this->health > 0) {
-      --this->health;
-    } else {
-      this->health = 10;
-    }
-    wstring_format(&this->hp_display.display.text, L"HP: %hu/10", this->health);
-    showdialog_update(&this->hp_display);
-    window_render_request(this->game->window);
-  }
+  player_onkeydown(&this->player);
+}
+void localmap_onkeyup(local_map_t* this) {
+  player_onkeyup(&this->player);
 }
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeypress);
   emitter_off(&this->onkeydown);
+  emitter_off(&this->onkeyup);
   emitter_off(&this->destroy);
-  showdialog_free(&this->hp_display);
   memory_free(this);
 }
 void scene_localmap_load(game_t* game) {
@@ -223,11 +184,12 @@ void scene_localmap_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
-  // hp_display
-  this->hp_display.game = game;
-  this->hp_display.display.rect.left_top.x = 10.f;
-  this->hp_display.display.rect.left_top.y = 10.f;
-  showdialog_new(&this->hp_display);
-  wstring_append_cwstr(&this->hp_display.display.text, L"HP: 10/10");
-  showdialog_update(&this->hp_display);
+  this->onkeyup = (event_listener_t) {
+    .callback = (listener_t)localmap_onkeyup,
+    .context = this
+  };
+  emitter_on(&window->onkeyup, &this->onkeyup);
+  // player
+  this->player.map = this;
+  player_new(&this->player);
 }

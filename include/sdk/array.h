@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_ARRAY
+#define SDK_ARRAY
 
 #include <sdk/types.h>
 
@@ -19,11 +20,4 @@ typedef struct array_t {
   void* __data;
 } array_t;
 
-void _array_constructor(array_t*, u64 stride);
-void array_deconstructor(array_t*);
-
-void* _array_at(const array_t*, u64 index);
-u64 array_length(const array_t*);
-void array_reserve(array_t*, u64 size);
-u64 array_capacity(array_t*);
-void _array_push(array_t*, const void* value);
+#endif

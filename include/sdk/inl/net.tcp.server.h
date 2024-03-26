@@ -1,3 +1,5 @@
+#ifdef SDK_NET_TCP_SERVER
+
 #include <sdk/net/tcp/server.h>
 
 net_tcp_server_t* net_tcp_server_new(application_t* app) {
@@ -27,3 +29,5 @@ void net_tcp_client_read(net_tcp_client_t* this, u64 length, net_tcp_client_on_r
   this->handle = (void*)callback;
   this->stream.updatedAt = date_now();
 }
+
+#endif

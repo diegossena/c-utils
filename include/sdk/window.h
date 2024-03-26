@@ -29,12 +29,14 @@ typedef struct window_props_t {
   window_load_listener_t onload;
 } window_props_t;
 
-void window_startup(application_t*, window_props_t*);
-void window_free(window_t*);
-bool window_pooling();
+static bool __window_running = false;
 
-void window_render_request(window_t*);
-vector2d_t window_get_cursor(window_t*);
-void window_set_size(window_t*, u16 width, u16 height);
+// void window_startup(application_t*, window_props_t*);
+// void window_free(window_t*);
+// bool window_pooling();
+
+// void window_render_request(window_t*);
+// vector2d_t window_get_cursor(window_t*);
+// void window_set_size(window_t*, u16 width, u16 height);
 
 #endif
