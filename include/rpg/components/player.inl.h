@@ -81,8 +81,8 @@ void player_onkeypress(player_t* this) {
   if (update) {
     this->x = math_clamp(this->x, 0.f, TILEMAP_WIDTH - 1);
     this->y = math_clamp(this->y, 0.f, TILEMAP_WIDTH - 1);
-    local_map->camera.x = this->x;
-    local_map->camera.y = this->y;
+    local_map->camera.x = this->x + .5f;
+    local_map->camera.y = this->y + 1.f;
     this->walking_animation += window->elapsed_time;
     if (this->walking_animation >= .15f) {
       this->state = (++this->state) % PLAYER_STATE_MAX;
