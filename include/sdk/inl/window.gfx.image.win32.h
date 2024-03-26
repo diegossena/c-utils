@@ -66,9 +66,7 @@ void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
-#ifdef SDK_DEVELOPMENT
-  ++memory_leaks;
-#endif
+  __leaks_memory_increment();
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:
@@ -78,9 +76,7 @@ wic_factory_free:
 }
 void gfx_image_src_free(gfx_image_src_t* this) {
   ID2D1Bitmap_Release(this->__bitmap);
-#ifdef SDK_DEVELOPMENT
-  --memory_leaks;
-#endif
+  __leaks_memory_decrement();
 }
 void gfx_image_draw(const gfx_image_t* this) {
   const window_t* window = this->window;

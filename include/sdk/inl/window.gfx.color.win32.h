@@ -16,15 +16,11 @@ void gfx_color_new(gfx_color_t* this, window_t* window, color_t color) {
     window->__d2d_render_target, (D2D1_COLOR_F*)&color, null,
     (ID2D1SolidColorBrush**)&this->__brush
   );
-#ifdef SDK_DEVELOPMENT
-  ++memory_leaks;
-#endif
+  __leaks_memory_increment();
 }
 void gfx_color_free(gfx_color_t* this) {
   ID2D1SolidColorBrush_Release(this->__brush);
-#ifdef SDK_DEVELOPMENT
-  --memory_leaks;
-#endif
+  __leaks_memory_decrement();
 }
 
 #endif

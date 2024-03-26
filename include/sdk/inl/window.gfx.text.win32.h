@@ -6,6 +6,7 @@
 
 #include <sdk/window/win32.h>
 #include <sdk/assert.h>
+#include <sdk/leaks.h>
 
 typedef struct SDK_IUnknown {
   void* lpVtbl;
@@ -49,16 +50,12 @@ void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t props) {
     props.style, DWRITE_FONT_STRETCH_NORMAL, props.size, L"",
     &this->__format
   );
-#ifdef SDK_DEVELOPMENT
-  ++memory_leaks;
-#endif
+  __leaks_memory_increment();
 }
 
 void gfx_text_style_free(gfx_text_style_t* this) {
   IDWriteTextFormat_Release(this->__format);
-#ifdef SDK_DEVELOPMENT
-  --memory_leaks;
-#endif
+  __leaks_memory_decrement();
 }
 
 void gfx_text_update(gfx_text_t* this) {

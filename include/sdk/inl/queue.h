@@ -1,7 +1,4 @@
-
-#ifdef SDK_DEVELOPMENT
-static i32 queue_count = 0;
-#endif
+#include <sdk/leaks.h>
 
 void queue_head(queue_t* this) {
   this->next = this;
@@ -26,25 +23,19 @@ void queue_push(queue_t* head, queue_t* this) {
   this->prev = head->prev;
   this->prev->next = this;
   head->prev = this;
-#ifdef SDK_DEVELOPMENT
-  ++queue_count;
-#endif
+  __leaks_memory_increment();
 }
 void queue_remove(queue_t* this) {
   this->prev->next = this->next;
   this->next->prev = this->prev;
-#ifdef SDK_DEVELOPMENT
-  --queue_count;
-#endif
+  __leaks_memory_decrement();
 }
 void queue_unshift(queue_t* head, queue_t* q) {
   q->next = head->next;
   q->prev = head;
   q->next->prev = q;
   head->next = q;
-#ifdef SDK_DEVELOPMENT
-  ++queue_count;
-#endif
+  __leaks_memory_increment();
 }
 bool queue_empty(queue_t* head) {
   return head == head->next;

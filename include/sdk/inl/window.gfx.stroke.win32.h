@@ -31,11 +31,11 @@ void gfx_stroke_new(gfx_stroke_t* this, gfx_stroke_props_t props) {
     factory, &stroke_properties, null, null,
     (ID2D1StrokeStyle**)&this->__stroke
   );
-  ++memory_leaks;
+  __leaks_memory_increment();
 }
 void gfx_stroke_free(gfx_stroke_t* this) {
   ID2D1StrokeStyle_Release(this->__stroke);
-  --memory_leaks;
+  __leaks_memory_decrement();
 }
 
 #endif
