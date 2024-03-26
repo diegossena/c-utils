@@ -5,6 +5,7 @@
 #include <sdk/console.h>
 
 #define error(message, code) \
+  error_last = code; \
   console_error( \
     CONSOLE_FORE_RED "Error:" CONSOLE_RESET " %s %x" message, \
     error_code_cstr(code), code, message \
