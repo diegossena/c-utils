@@ -58,24 +58,24 @@ void player_onkeypress(player_t* this) {
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  f32 velocity = 5.f * window->elapsed_time;
+  static const f32 velocity = 5.f;
   bool update = false;
   if (keyboard_pressed(KEY_UP)) {
     this->direction = PLAYER_UP;
-    this->y -= velocity;
+    this->y -= velocity * window->elapsed_time;
     update = true;
   } else if (keyboard_pressed(KEY_DOWN)) {
     this->direction = PLAYER_DOWN;
-    this->y += velocity;
+    this->y += velocity * window->elapsed_time;
     update = true;
   }
   if (keyboard_pressed(KEY_RIGHT)) {
     this->direction = PLAYER_RIGHT;
-    this->x += velocity;
+    this->x += velocity * window->elapsed_time;
     update = true;
   } else if (keyboard_pressed(KEY_LEFT)) {
     this->direction = PLAYER_LEFT;
-    this->x -= velocity;
+    this->x -= velocity * window->elapsed_time;
     update = true;
   }
   if (update) {
