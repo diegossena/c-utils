@@ -1,6 +1,5 @@
-#pragma once
+#ifdef SDK_CONSOLE_H
 
-#include <sdk/console.h>
 #include <sdk/string.h>
 // __builtin_va_list, va_start, va_end
 #include <stdarg.h>
@@ -17,3 +16,5 @@ i32 console_write(log_level_t level, const char* message, ...) {
 
   return console_write_str(level, out_message, length);
 }
+
+#endif

@@ -4,7 +4,7 @@
 
 #include <sdk/error.h>
 
-bool console_has_ansi = false;
+static bool console_has_ansi = false;
 
 void console_startup() {
   OSVERSIONINFO os_version = { .dwOSVersionInfoSize = sizeof(OSVERSIONINFO) };
