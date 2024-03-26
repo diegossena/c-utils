@@ -10,6 +10,7 @@
 #include <rpg/game.h>
 
 i32 main() {
+  console_startup();
   application_t app;
   app_new(&app);
   window_props_t options = {
@@ -24,4 +25,5 @@ i32 main() {
   };
   window_startup(&app, &options);
   app_run(&app);
+  console_log(CONSOLE_FORE_LIGHTGREEN "SUCCESS" CONSOLE_RESET);
 }
