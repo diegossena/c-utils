@@ -83,10 +83,10 @@ void player_onkeypress(player_t* this) {
     this->y = math_clamp(this->y, 0.f, TILEMAP_WIDTH - 1);
     local_map->camera.x = this->x;
     local_map->camera.y = this->y;
-    this->timer += window->elapsed_time;
-    if (this->timer >= .15f) {
+    this->walking_animation += window->elapsed_time;
+    if (this->walking_animation >= .15f) {
       this->state = (++this->state) % PLAYER_STATE_MAX;
-      this->timer = 0;
+      this->walking_animation = 0;
     }
     window_render_request(window);
   }
@@ -98,7 +98,7 @@ void player_onkeyup(player_t* this) {
   window_t* window = game->window;
   if (this->state != PLAYER_STATE_STANDING_1) {
     this->state = PLAYER_STATE_STANDING_1;
-    this->timer = 0;
+    this->walking_animation = 0;
     window_render_request(window);
   }
 }
@@ -106,7 +106,7 @@ void player_new(player_t* this) {
   assert(this->map);
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
-  this->timer = 0;
+  this->walking_animation = 0;
 }
 void player_free(player_t* this) {
 

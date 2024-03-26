@@ -14,13 +14,3 @@ typedef struct queue_t {
   queue_t* next;
   queue_t* prev;
 } queue_t;
-
-void queue_head(queue_t*);
-void queue_forward(queue_t*);
-void queue_backward(queue_t*);
-void queue_push(queue_t* head, queue_t*);
-void queue_remove(queue_t*);
-void queue_unshift(queue_t* head, queue_t*);
-bool queue_empty(queue_t* head);
-
-#include <sdk/queue/inl.h>

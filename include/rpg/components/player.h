@@ -22,6 +22,6 @@ typedef struct player_t {
     PLAYER_STATE_WALKING_2,
     PLAYER_STATE_MAX
   } state;
-  f32 timer;
+  f32 walking_animation;
   // components
 } player_t;

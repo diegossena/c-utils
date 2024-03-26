@@ -5,7 +5,7 @@
 #include <sdk/window/gfx/stroke.h>
 #include <sdk/window/gfx/image.h>
 #include <sdk/keyboard.h>
-#include <sdk/inl.h>
+#include <sdk/sdk.h>
 
 #include <rpg/game.h>
 

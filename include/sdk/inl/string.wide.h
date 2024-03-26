@@ -30,6 +30,20 @@ i32 __cwstr_format_va(wchar_t* stream, u64 count, const wchar_t* format, void* a
   return length;
 }
 
+bool cwstr_equal(const wchar_t* s1, const wchar_t* s2) {
+  while (true) {
+    if (*s1 != *s2)
+      return false;
+    if (!*s1)
+      break;
+    ++s1; ++s2;
+  }
+  return true;
+}
+i16 cwstr_compare(const wchar_t* s1, const wchar_t* s2) {
+  while (*s1 && *s1 == *s2) { ++s1; ++s2; }
+  return (*s1 - *s2);
+}
 void wstring_new(wstring_t* this) {
   this->__data = 0;
   this->__length = 0;
@@ -87,21 +101,6 @@ void wstring_format(wstring_t* this, const wchar_t* format, ...) {
   va_start(args, format);
   this->__length = __cwstr_format_va(this->__data, capacity, format, args);
   va_end(args);
-}
-
-i16 cwstr_compare(const wchar_t* s1, const wchar_t* s2) {
-  while (*s1 && *s1 == *s2) { ++s1; ++s2; }
-  return (*s1 - *s2);
-}
-bool cwstr_equal(const wchar_t* s1, const wchar_t* s2) {
-  while (true) {
-    if (*s1 != *s2)
-      return false;
-    if (!*s1)
-      break;
-    ++s1; ++s2;
-  }
-  return true;
 }
 /*
 @returns i32 - length
