@@ -1,7 +1,7 @@
 #include <sdk/inl/queue.h>
-#include <sdk/inl/error.h>
 #include <sdk/inl/console.win32.h>
 #include <sdk/inl/console.h>
+#include <sdk/inl/error.h>
 #include <sdk/inl/memory.h>
 #include <sdk/inl/memory.win32.h>
 #include <sdk/inl/keyboard.h>
