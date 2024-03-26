@@ -15,6 +15,7 @@
 typedef struct local_map_t {
   game_t* game;
   // event_listener_t
+  event_listener_t onupdate;
   event_listener_t ondraw;
   event_listener_t onkeypress;
   event_listener_t onkeydown;
@@ -135,6 +136,9 @@ void localmap_draw(local_map_t* this) {
   player_draw(&this->player);
   tilemap_draw(this, this->bg2);
 }
+void localmap_onupdate(local_map_t* this) {
+  player_onupdate(&this->player);
+}
 void localmap_onkeypress(local_map_t* this) {
   player_onkeypress(&this->player);
 }
@@ -145,6 +149,7 @@ void localmap_onkeyup(local_map_t* this) {
   player_onkeyup(&this->player);
 }
 void localmap_destroy(local_map_t* this) {
+  emitter_off(&this->onupdate);
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeypress);
   emitter_off(&this->onkeydown);
@@ -161,6 +166,11 @@ void scene_localmap_load(game_t* game) {
   localmap_onresize(this);
   tilemap_introduction_load(this);
   // register
+  this->onupdate = (event_listener_t) {
+    .callback = (listener_t)localmap_onupdate,
+    .context = this
+  };
+  emitter_on(&window->onupdate, &this->onupdate);
   this->ondraw = (event_listener_t) {
     .callback = (listener_t)localmap_draw,
     .context = this

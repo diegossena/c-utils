@@ -35,7 +35,8 @@ void routine_moveto_destroy(moveto_t* this) {
   memory_free(this);
 }
 void routine_moveto_update(moveto_t* this) {
-  this->timer += this->game->elapsed_time;
+  window_t* window = this->game->window;
+  this->timer += window->elapsed_time;
   f32 progress = this->timer / this->duration;
   if (progress > 1.f) {
     progress = 1.f;

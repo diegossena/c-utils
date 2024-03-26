@@ -6,13 +6,36 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
-void player_update(player_t* this) {}
+void player_onupdate(player_t* this) {
+  if (this->walking_timer <= 0)
+    return;
+  static const f32 duration = .25f;
+  local_map_t* map = this->map;
+  game_t* game = map->game;
+  window_t* window = game->window;
+  this->walking_timer += window->elapsed_time;
+  f32 progress = this->walking_timer / duration;
+  if (progress > 1.f) {
+    progress = 1.f;
+  } else if (this->state == this->start_state && this->walking_timer >= .075f) {
+    this->state = (++this->state) % PLAYER_STATE_MAX;
+  }
+  this->x = this->start_x + progress * this->distance_x;
+  this->y = this->start_y + progress * this->distance_y;
+  window_render_request(window);
+  if (progress >= 1.f) {
+    this->distance_x = 0;
+    this->distance_y = 0;
+    this->walking_timer = 0;
+    this->state = (++this->state) % PLAYER_STATE_MAX;
+  }
+}
 void player_draw(player_t* this) {
   static const f32 sprite_width = 15.f;
   static const f32 sprite_height = 31.f;
   static const f32 scale = 4.f;
-  local_map_t* map = this->map;
-  game_t* game = map->game;
+  local_map_t* local_map = this->map;
+  game_t* game = local_map->game;
   gfx_image_t player = {
     .window = game->window,
     .src = &game->character_png,
@@ -20,10 +43,12 @@ void player_draw(player_t* this) {
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
-      (this->x - map->offset.x) * TILE_SIZE,
-      (this->y - map->offset.y) * TILE_SIZE,
+      (this->x - local_map->offset.x) * TILE_SIZE,
+      (this->y - local_map->offset.y) * TILE_SIZE,
     },
   };
+  local_map->camera.x = this->x + .5f;
+  local_map->camera.y = this->y + 1.f;
   switch (this->direction) {
     case PLAYER_UP:
       player.src_position.y = 75;
@@ -55,58 +80,48 @@ void player_draw(player_t* this) {
   gfx_image_draw(&player);
 }
 void player_onkeypress(player_t* this) {
+  if (this->walking_timer > 0)
+    return;
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  static const f32 velocity = 5.f;
-  bool update = false;
+  this->walking_timer += window->elapsed_time;
+  this->start_x = this->x;
+  this->start_y = this->y;
+  this->start_state = this->state;
   if (keyboard_pressed(KEY_UP)) {
+    this->distance_y -= 1.f;
     this->direction = PLAYER_UP;
-    this->y -= velocity * window->elapsed_time;
-    update = true;
   } else if (keyboard_pressed(KEY_DOWN)) {
+    this->distance_y += 1.f;
     this->direction = PLAYER_DOWN;
-    this->y += velocity * window->elapsed_time;
-    update = true;
   }
   if (keyboard_pressed(KEY_RIGHT)) {
+    this->distance_x += 1.f;
     this->direction = PLAYER_RIGHT;
-    this->x += velocity * window->elapsed_time;
-    update = true;
   } else if (keyboard_pressed(KEY_LEFT)) {
+    this->distance_x -= 1.f;
     this->direction = PLAYER_LEFT;
-    this->x -= velocity * window->elapsed_time;
-    update = true;
-  }
-  if (update) {
-    this->x = math_clamp(this->x, 0.f, TILEMAP_WIDTH - 1);
-    this->y = math_clamp(this->y, 0.f, TILEMAP_WIDTH - 1);
-    local_map->camera.x = this->x + .5f;
-    local_map->camera.y = this->y + 1.f;
-    this->walking_animation += window->elapsed_time;
-    if (this->walking_animation >= .15f) {
-      this->state = (++this->state) % PLAYER_STATE_MAX;
-      this->walking_animation = 0;
-    }
-    window_render_request(window);
   }
 }
-void player_onkeydown(player_t* this) {}
+void player_onkeydown(player_t* this) {
+
+}
 void player_onkeyup(player_t* this) {
-  local_map_t* local_map = this->map;
-  game_t* game = local_map->game;
-  window_t* window = game->window;
-  if (this->state != PLAYER_STATE_STANDING_1) {
-    this->state = PLAYER_STATE_STANDING_1;
-    this->walking_animation = 0;
-    window_render_request(window);
-  }
+  // local_map_t* local_map = this->map;
+  // game_t* game = local_map->game;
+  // window_t* window = game->window;
+  // if (this->state % 2) {
+  //   this->state = (++this->state) % PLAYER_STATE_MAX;
+  //   this->walking_animation = 0;
+  //   window_render_request(window);
+  // }
 }
 void player_new(player_t* this) {
   assert(this->map);
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
-  this->walking_animation = 0;
+  this->walking_timer = 0;
 }
 void player_free(player_t* this) {
 
