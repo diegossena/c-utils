@@ -45,8 +45,8 @@ void player_draw(player_t* this) {
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
-      (this->x - local_map->offset.x) * TILE_SIZE,
-      (this->y - local_map->offset.y) * TILE_SIZE,
+       (this->x - local_map->offset.x) * TILE_SIZE + 1.f,
+      (this->y - local_map->offset.y) * TILE_SIZE + 1.f,
     },
   };
   switch (this->direction) {

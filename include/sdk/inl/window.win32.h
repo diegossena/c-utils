@@ -137,7 +137,7 @@ LRESULT __window_event_handler(HWND handle, UINT message, WPARAM wParam, LPARAM 
       return 0;
 #ifdef SDK_KEYBOARD_H      
     case WM_KEYDOWN:
-      if (!keyboard_pressed(wParam)) {
+      if (wParam != 91 && !keyboard_pressed(wParam)) {
         __keyboard_press(wParam);
         ++__keyboard_count;
       }
@@ -399,7 +399,7 @@ d2d_factory_release:
   IDWriteFactory_Release(this->__d2d_write_factory);
 window_release:
   memory_free(this);
-}
+  }
 
 bool window_pooling() {
   MSG msg;
