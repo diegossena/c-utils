@@ -6,19 +6,33 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
+f32 padding_x = 0;
+f32 padding_y = 0;
+
 void player_onupdate(player_t* this) {
-  if (this->walking_timer <= 0)
-    return;
   static const f32 duration = .25f;
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
+  if (keyboard_pressed(KEY_S)) {
+    padding_y += 1.f;
+    window_render_request(window);
+  } else if (keyboard_pressed(KEY_W)) {
+    padding_y -= 1.f;
+    window_render_request(window);
+  } else  if (keyboard_pressed(KEY_A)) {
+    padding_x -= 1.f;
+    window_render_request(window);
+  } else  if (keyboard_pressed(KEY_D)) {
+    padding_x += 1.f;
+    window_render_request(window);
+  }
+  if (this->walking_timer <= 0)
+    return;
   this->walking_timer += window->elapsed_time;
   f32 progress = this->walking_timer / duration;
   if (progress > 1.f) {
     progress = 1.f;
-  } else if (this->start_state == this->state && progress >= .075f) {
-    this->state = (++this->state) % PLAYER_STATE_MAX;
   }
   this->x = this->start_x + progress * this->distance_x;
   this->y = this->start_y + progress * this->distance_y;
@@ -32,6 +46,7 @@ void player_onupdate(player_t* this) {
   }
   window_render_request(window);
 }
+
 void player_draw(player_t* this) {
   static const f32 sprite_width = 15.f;
   static const f32 sprite_height = 31.f;
@@ -45,8 +60,8 @@ void player_draw(player_t* this) {
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
-       (this->x - local_map->offset.x) * TILE_SIZE + 1.f,
-      (this->y - local_map->offset.y) * TILE_SIZE + 1.f,
+      (this->x - local_map->offset.x) * TILE_SIZE + 7.f,
+      (this->y - local_map->offset.y) * TILE_SIZE + 26.f,
     },
   };
   switch (this->direction) {
@@ -90,22 +105,21 @@ void player_onkeypress(player_t* this) {
   this->start_y = this->y;
   this->start_state = this->state;
   bool update = false;
-  if (keyboard_pressed(KEY_UP)) {
-    this->distance_y -= 1.f;
-    this->direction = PLAYER_UP;
-    update = true;
-  } else if (keyboard_pressed(KEY_DOWN)) {
+  if (keyboard_pressed(KEY_DOWN)) {
     this->distance_y += 1.f;
     this->direction = PLAYER_DOWN;
     update = true;
-  }
-  if (keyboard_pressed(KEY_RIGHT)) {
-    this->distance_x += 1.f;
-    this->direction = PLAYER_RIGHT;
+  } else if (keyboard_pressed(KEY_UP)) {
+    this->distance_y -= 1.f;
+    this->direction = PLAYER_UP;
     update = true;
-  } else if (keyboard_pressed(KEY_LEFT)) {
+  } else  if (keyboard_pressed(KEY_LEFT)) {
     this->distance_x -= 1.f;
     this->direction = PLAYER_LEFT;
+    update = true;
+  } else  if (keyboard_pressed(KEY_RIGHT)) {
+    this->distance_x += 1.f;
+    this->direction = PLAYER_RIGHT;
     update = true;
   }
   if (update) {
