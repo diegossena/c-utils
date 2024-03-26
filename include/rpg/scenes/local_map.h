@@ -30,8 +30,6 @@ typedef struct local_map_t {
   u8 tile_offset_x, tile_offset_y;
   vector2d_t offset_limit;
   vector2d_t camera;
-  // data
-  u8 health;
   // components
   player_t player;
 } local_map_t;
@@ -160,7 +158,6 @@ void scene_localmap_load(game_t* game) {
   local_map_t* this = memory_alloc0(sizeof(local_map_t));
   window_t* window = game->window;
   this->game = game;
-  this->health = 10;
   localmap_onresize(this);
   tilemap_introduction_load(this);
   // register
