@@ -6,27 +6,12 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
-f32 padding_x = 0;
-f32 padding_y = 0;
 
 void player_onupdate(player_t* this) {
   static const f32 duration = .25f;
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  if (keyboard_pressed(KEY_S)) {
-    padding_y += 1.f;
-    window_render_request(window);
-  } else if (keyboard_pressed(KEY_W)) {
-    padding_y -= 1.f;
-    window_render_request(window);
-  } else  if (keyboard_pressed(KEY_A)) {
-    padding_x -= 1.f;
-    window_render_request(window);
-  } else  if (keyboard_pressed(KEY_D)) {
-    padding_x += 1.f;
-    window_render_request(window);
-  }
   if (this->walking_timer <= 0)
     return;
   this->walking_timer += window->elapsed_time;
@@ -106,20 +91,32 @@ void player_onkeypress(player_t* this) {
   this->start_state = this->state;
   bool update = false;
   if (keyboard_pressed(KEY_DOWN)) {
-    this->distance_y += 1.f;
-    this->direction = PLAYER_DOWN;
+    if (this->direction == PLAYER_DOWN) {
+      this->distance_y += 1.f;
+    } else {
+      this->direction = PLAYER_DOWN;
+    }
     update = true;
   } else if (keyboard_pressed(KEY_UP)) {
-    this->distance_y -= 1.f;
-    this->direction = PLAYER_UP;
+    if (this->direction == PLAYER_UP) {
+      this->distance_y -= 1.f;
+    } else {
+      this->direction = PLAYER_UP;
+    }
     update = true;
   } else  if (keyboard_pressed(KEY_LEFT)) {
-    this->distance_x -= 1.f;
-    this->direction = PLAYER_LEFT;
+    if (this->direction == PLAYER_LEFT) {
+      this->distance_x -= 1.f;
+    } else {
+      this->direction = PLAYER_LEFT;
+    }
     update = true;
   } else  if (keyboard_pressed(KEY_RIGHT)) {
-    this->distance_x += 1.f;
-    this->direction = PLAYER_RIGHT;
+    if (this->direction == PLAYER_RIGHT) {
+      this->distance_x += 1.f;
+    } else {
+      this->direction = PLAYER_RIGHT;
+    }
     update = true;
   }
   if (update) {
