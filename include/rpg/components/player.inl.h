@@ -16,8 +16,8 @@ void __player_onupdate(player_t* this) {
   }
   this->x = this->start_x + progress * this->distance_x;
   this->y = this->start_y + progress * this->distance_y;
-  local_map->camera.x = this->x + .5f;
-  local_map->camera.y = this->y + 1.f;
+  local_map->camera.x = this->x;
+  local_map->camera.y = this->y;
   if (progress >= 1.f) {
     this->state = (++this->state) % PLAYER_STATE_MAX;
     emitter_off(&this->onupdate);
@@ -79,7 +79,7 @@ void __player_onkeypress(player_t* this) {
     char tile_id = tilemap_tiles_get(
       this->map->bg1, this->x + this->distance_x, this->y + this->distance_y
     );
-    if (tile_id) {
+    if (!tile_id) {
       emitter_off(&this->onkeypress);
       emitter_on(&window->onupdate, &this->onupdate);
       window_render_request(window);
@@ -99,10 +99,12 @@ void player_draw(player_t* this) {
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
-      (this->x - local_map->offset.x) * TILE_SIZE + 7.f,
-      (this->y - local_map->offset.y) * TILE_SIZE + 26.f,
+      (this->x - local_map->offset.x) * TILE_SIZE + 6.f,
+      (this->y - local_map->offset.y) * TILE_SIZE + -48.f,
     },
   };
+  // padding_x
+  // padding_y
   switch (this->direction) {
     case PLAYER_UP:
       player.src_position.y = 75;

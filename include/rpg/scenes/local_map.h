@@ -33,15 +33,15 @@ typedef struct local_map_t {
   player_t player;
 } local_map_t;
 
-#include <rpg/components/player.inl.h>
-#include <rpg/maps/introduction.h>
-
 char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
   if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
     return tiles[y * TILEMAP_WIDTH + x];
   }
-  return '\0';
+  return '.';
 }
+
+#include <rpg/components/player.inl.h>
+#include <rpg/maps/introduction.h>
 
 void localmap_onresize(local_map_t* this) {
   window_t* window = this->game->window;
