@@ -135,6 +135,7 @@ void localmap_draw(local_map_t* this) {
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->ondraw);
   emitter_off(&this->destroy);
+  player_free(&this->player);
   memory_free(this);
 }
 void scene_localmap_load(game_t* game) {
