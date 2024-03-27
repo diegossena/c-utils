@@ -148,7 +148,6 @@ void scene_localmap_load(game_t* game) {
   window_t* window = game->window;
   this->game = game;
   localmap_onresize(this);
-  tilemap_introduction_load(this);
   // register
   this->onresize = (event_listener_t) {
     .callback = (listener_t)localmap_onresize,
@@ -168,4 +167,6 @@ void scene_localmap_load(game_t* game) {
   // player
   this->player.map = this;
   player_new(&this->player);
+  // tilemap
+  tilemap_introduction_load(this);
 }

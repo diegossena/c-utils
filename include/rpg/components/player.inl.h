@@ -3,6 +3,11 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
+void player_focus(player_t* this) {
+  vector2d_t* camera = &this->map->camera;
+  camera->x = this->x + .75f;
+  camera->y = this->y + .5f;
+}
 void __player_onupdate(player_t* this) {
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
@@ -16,8 +21,7 @@ void __player_onupdate(player_t* this) {
   }
   this->x = this->start_x + progress * this->distance_x;
   this->y = this->start_y + progress * this->distance_y;
-  local_map->camera.x = this->x;
-  local_map->camera.y = this->y;
+  player_focus(this);
   if (progress >= 1.f) {
     this->state = (++this->state) % PLAYER_STATE_MAX;
     emitter_off(&this->onupdate);

@@ -75,6 +75,5 @@ void tilemap_introduction_load(local_map_t* this) {
   this->bg2[6 * TILEMAP_WIDTH + 1] = 's';
   this->player.x = 0;
   this->player.y = 5;
-  this->camera.x = this->player.x;
-  this->camera.y = this->player.y;
+  player_focus(&this->player);
 }
