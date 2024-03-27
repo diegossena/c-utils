@@ -142,7 +142,7 @@ void player_draw(player_t* this) {
 void player_free(player_t* this) {
   emitter_off(&this->onupdate);
   emitter_off(&this->onkeypress);
-  emitter_off(&this->onupdate);
+  emitter_off(&this->ondestroy);
 }
 void player_new(player_t* this) {
   assert(this->map);

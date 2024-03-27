@@ -3,7 +3,7 @@
 #include <rpg/scenes/local_map.h>
 
 void tilemap_introduction_load(local_map_t* this) {
-  memory_fill(this->bg0, '.', TILEMAP_SIZE);
+  memory_fill(this->bg0, ' ', TILEMAP_SIZE);
   memory_copy(
     this->bg1,
     "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
