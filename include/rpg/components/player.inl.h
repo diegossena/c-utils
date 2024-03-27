@@ -128,6 +128,11 @@ void __player_onkeypress(player_t* this) {
     window_render_request(window);
   }
 }
+void __player_free(player_t* this) {
+  emitter_off(&this->onupdate);
+  emitter_off(&this->onkeypress);
+  emitter_off(&this->onupdate);
+}
 void player_new(player_t* this) {
   assert(this->map);
   window_t* window = this->map->game->window;
@@ -137,6 +142,11 @@ void player_new(player_t* this) {
     .callback = (listener_t)__player_onupdate,
     .context = this
   };
+  this->ondestroy = (event_listener_t) {
+    .callback = (listener_t)__player_free,
+    .context = this
+  };
+  emitter_on(&window->onclose, &this->ondestroy);
   this->onkeypress = (event_listener_t) {
     .callback = (listener_t)__player_onkeypress,
     .context = this
