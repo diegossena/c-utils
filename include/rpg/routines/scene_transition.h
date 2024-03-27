@@ -59,7 +59,7 @@ void scene_transition_update(scene_transition_t* this) {
 void scene_transition_draw(scene_transition_t* this) {
   window_t* window = this->game->window;
   gfx_color_t gfx_color;
-  gfx_color_new(&gfx_color, window, (color_t) { 1.f, 1.f, 1.f, this->opacity });
+  gfx_color_new(&gfx_color, window, (color_t) { 0, 0, 0, this->opacity });
   this->background.color = &gfx_color;
   gfx_rect_draw(&this->background);
   gfx_color_free(&gfx_color);
