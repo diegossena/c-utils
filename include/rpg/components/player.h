@@ -30,5 +30,4 @@ typedef struct player_t {
   player_state_t start_state;
   f32 walking_timer;
   f32 duration;
-  // components
 } player_t;
