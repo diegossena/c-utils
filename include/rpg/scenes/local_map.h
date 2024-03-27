@@ -36,7 +36,7 @@ char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
   if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
     return tiles[y * TILEMAP_WIDTH + x];
   }
-  return '.';
+  return 0;
 }
 
 #include <rpg/components/player.inl.h>
