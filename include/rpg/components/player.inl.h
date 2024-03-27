@@ -107,8 +107,6 @@ void player_draw(player_t* this) {
       (this->y - local_map->offset.y) * TILE_SIZE + -48.f,
     },
   };
-  // padding_x
-  // padding_y
   switch (this->direction) {
     case PLAYER_UP:
       player.src_position.y = 75;
@@ -153,6 +151,7 @@ void player_new(player_t* this) {
     .callback = (listener_t)__player_onupdate,
     .context = this
   };
+  queue_head(&this->onupdate.queue);
   this->ondestroy = (event_listener_t) {
     .callback = (listener_t)player_free,
     .context = this

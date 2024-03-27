@@ -1,6 +1,7 @@
 #ifdef SDK_QUEUE_H
 
 #include <sdk/leaks.h>
+#include <sdk/assert.h>
 
 void queue_head(queue_t* this) {
   this->next = this;
@@ -28,6 +29,8 @@ void queue_push(queue_t* head, queue_t* this) {
   __leaks_memory_increment();
 }
 void queue_remove(queue_t* this) {
+  assert(this->prev);
+  assert(this->next);
   this->prev->next = this->next;
   this->next->prev = this->prev;
   __leaks_memory_decrement();

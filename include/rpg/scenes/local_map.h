@@ -108,8 +108,6 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.src_height = 31;
           break;
         default:
-          tile.src_width = 0;
-          tile.src_height = 31;
           continue;
       }
       tile.rect.left_top.x = x * TILE_SIZE - this->tile_offset_x;
