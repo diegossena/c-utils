@@ -11,6 +11,8 @@ void __player_onupdate(player_t* this) {
   f32 progress = this->timer / this->duration;
   if (progress > 1.f) {
     progress = 1.f;
+  } else if (this->start_state == this->state && progress >= .5f) {
+    this->state = (++this->state) % PLAYER_STATE_MAX;
   }
   this->x = this->start_x + progress * this->distance_x;
   this->y = this->start_y + progress * this->distance_y;
@@ -34,7 +36,7 @@ void __player_onkeypress(player_t* this) {
   this->distance_y = 0;
   this->timer = 0;
   bool update = false;
-  static const f32 walk_duration = .225f;
+  static const f32 walk_duration = .3f;
   static const f32 flip_duration = .1f;
   if (keyboard_pressed(KEY_DOWN)) {
     if (this->direction == PLAYER_DOWN) {
@@ -74,7 +76,6 @@ void __player_onkeypress(player_t* this) {
     update = true;
   }
   if (update) {
-    this->state = (++this->state) % PLAYER_STATE_MAX;
     emitter_off(&this->onkeypress);
     emitter_on(&window->onupdate, &this->onupdate);
     window_render_request(window);

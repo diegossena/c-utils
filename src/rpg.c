@@ -15,10 +15,8 @@ i32 main() {
   app_new(&app);
   window_props_t options = {
     .name = "RPG",
-    .width = 800,
-    .height = 600,
-    .x = 0,
-    .y = 0,
+    .width = 800, .height = 600,
+    .x = 0, .y = 0,
     .flags = WINDOW_FLAG_NO_MAXIMIZE,
     .onpreload = game_onpreload,
     .onload = game_onload

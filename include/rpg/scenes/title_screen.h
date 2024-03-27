@@ -72,7 +72,6 @@ void scene_titlescreen_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
-
   // assets
   gfx_text_style_new(&this->title_style, (text_style_props_t) {
     .window = window,
