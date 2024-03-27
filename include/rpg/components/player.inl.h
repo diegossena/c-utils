@@ -102,7 +102,7 @@ void player_draw(player_t* this) {
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
       (this->x - tilemap->offset.x) * TILE_SIZE + 6.f,
-      (this->y - tilemap->offset.y) * TILE_SIZE + -44.f,
+      (this->y - tilemap->offset.y) * TILE_SIZE + -58.f,
     },
   };
   switch (this->direction) {
