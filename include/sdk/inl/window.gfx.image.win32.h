@@ -2,8 +2,6 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/window/win32.h>
-
 typedef struct gfx_image_src_t {
   ID2D1Bitmap* __bitmap;
   const u16 width, height;

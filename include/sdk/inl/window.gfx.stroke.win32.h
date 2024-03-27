@@ -2,7 +2,6 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/window/win32.h>
 #include <sdk/assert.h>
 
 typedef struct gfx_stroke_t {

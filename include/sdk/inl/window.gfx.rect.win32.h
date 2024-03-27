@@ -2,8 +2,6 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/window/win32.h>
-
 void gfx_rect_draw(const gfx_rect_t* this) {
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
   ID2D1Brush* brush = (ID2D1Brush*)this->color->__brush;

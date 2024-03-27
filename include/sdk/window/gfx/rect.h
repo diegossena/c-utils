@@ -16,8 +16,4 @@ typedef struct gfx_rect_t {
   f32 border_radius;
 } gfx_rect_t;
 
-void gfx_rect_new(gfx_rect_t*);
-void gfx_rect_free(gfx_rect_t*);
-void gfx_rect_draw(const gfx_rect_t*);
-
 #endif

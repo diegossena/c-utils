@@ -2,8 +2,6 @@
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/window/win32.h>
-
 #define wpath_dirname(this, length) { \
   wchar_t* __ptr = this + length - 1; \
   while (--length && *__ptr != L'\\' && *__ptr != L'/') { \
@@ -399,7 +397,7 @@ d2d_factory_release:
   IDWriteFactory_Release(this->__d2d_write_factory);
 window_release:
   memory_free(this);
-  }
+}
 
 bool window_pooling() {
   MSG msg;

@@ -1,7 +1,6 @@
 #ifndef SDK_WINDOW_GFX_TEXT_H
 #define SDK_WINDOW_GFX_TEXT_H
 
-#include <sdk/window.h>
 #include <sdk/window/gfx/color.h>
 #include <sdk/string/wide.h>
 

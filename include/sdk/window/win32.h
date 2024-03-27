@@ -1,6 +1,7 @@
 #pragma once
-#include <sdk/window.h>
+
 #include <sdk/platform.h>
+#ifdef PLATFORM_WINDOWS
 
 typedef struct window_t {
   void* context;
@@ -46,3 +47,5 @@ typedef struct window_t {
   ID2D1RenderTarget* __d2d_render_target;
   IDWriteFactory* __d2d_write_factory;
 } window_t;
+
+#endif

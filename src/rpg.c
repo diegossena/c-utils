@@ -1,10 +1,10 @@
-#include <sdk/window.h>
 #include <sdk/window/gfx/rect.h>
 #include <sdk/window/gfx/text.h>
 #include <sdk/window/gfx/color.h>
 #include <sdk/window/gfx/stroke.h>
 #include <sdk/window/gfx/image.h>
 #include <sdk/keyboard.h>
+#include <sdk/window.h>
 #include <sdk/sdk.h>
 
 #include <rpg/game.h>
