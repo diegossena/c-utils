@@ -76,9 +76,14 @@ void __player_onkeypress(player_t* this) {
     update = true;
   }
   if (update) {
-    emitter_off(&this->onkeypress);
-    emitter_on(&window->onupdate, &this->onupdate);
-    window_render_request(window);
+    char tile_id = tilemap_tiles_get(
+      this->map->bg1, this->x + this->distance_x, this->y + this->distance_y
+    );
+    if (tile_id) {
+      emitter_off(&this->onkeypress);
+      emitter_on(&window->onupdate, &this->onupdate);
+      window_render_request(window);
+    }
   }
 }
 void player_draw(player_t* this) {

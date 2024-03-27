@@ -12,6 +12,7 @@
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
 #define TILE_SIZE 76
 
+
 typedef struct local_map_t {
   game_t* game;
   // event_listener_t
@@ -35,6 +36,13 @@ typedef struct local_map_t {
 #include <rpg/components/player.inl.h>
 #include <rpg/maps/introduction.h>
 
+char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
+  if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
+    return tiles[y * TILEMAP_WIDTH + x];
+  }
+  return '\0';
+}
+
 void localmap_onresize(local_map_t* this) {
   window_t* window = this->game->window;
   f32 visible_tiles_x = (f32)window->width / TILE_SIZE;
@@ -43,12 +51,6 @@ void localmap_onresize(local_map_t* this) {
   this->visible_tiles_y = math_ceil(visible_tiles_y);
   this->offset_limit.x = (f32)TILEMAP_WIDTH - visible_tiles_x;
   this->offset_limit.y = (f32)TILEMAP_WIDTH - visible_tiles_y;
-}
-char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
-  if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
-    return tiles[y * TILEMAP_WIDTH + x];
-  }
-  return '\0';
 }
 void tilemap_draw(local_map_t* this, const byte* layer) {
   game_t* game = this->game;

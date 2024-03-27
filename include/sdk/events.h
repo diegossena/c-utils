@@ -12,8 +12,8 @@ typedef struct callback_t {
 
 typedef struct event_listener_t {
   queue_t queue;
-  void* context;
   listener_t callback;
+  void* context;
 } event_listener_t;
 
 void emitter_on(queue_t*, event_listener_t*);
