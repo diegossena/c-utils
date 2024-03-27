@@ -67,52 +67,91 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
   };
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
-      char tile_id = tilemap_tiles_get(layer, x + this->offset.x, y + this->offset.y);
-      switch (tile_id) {
-        case 'T': // Tree
-          tile.src_position.x = 417;
-          tile.src_position.y = 989;
-          tile.src_width = 30;
-          tile.src_height = 32;
-          break;
-        case 'B': // Bush
-          tile.src_position.x = 202;
-          tile.src_position.y = 840;
-          tile.src_width = 77;
-          tile.src_height = 77;
-          break;
-        case ' ': // Grass
-          tile.src_position.x = 0;
-          tile.src_position.y = 800;
-          tile.src_width = 32;
-          tile.src_height = 32;
-          break;
-        case 'q': // grass-roof (0, 0)
-          tile.src_position.x = 224;
-          tile.src_position.y = 768;
-          tile.src_width = 31;
-          tile.src_height = 31;
-          break;
-        case 'w': // grass-roof (1, 0)
-          tile.src_position.x = 256;
-          tile.src_position.y = 768;
-          tile.src_width = 31;
-          tile.src_height = 31;
-          break;
-        case 'a': // grass-roof (1, 0)
-          tile.src_position.x = 224;
-          tile.src_position.y = 800;
-          tile.src_width = 31;
-          tile.src_height = 31;
-          break;
-        case 's': // grass-roof (1, 1)
-          tile.src_position.x = 256;
-          tile.src_position.y = 800;
-          tile.src_width = 31;
-          tile.src_height = 31;
-          break;
-        default:
-          continue;
+      u8 tile_id = tilemap_tiles_get(layer, x + this->offset.x, y + this->offset.y);
+      if (!tile_id)
+        continue;
+      if (tile_id <= 50) {
+        tile.src = &game->pallet_town_interiors;
+        tile.src_width = 16;
+        tile.src_height = 16;
+        switch (tile_id) {
+          case 1:
+          case 6:
+          case 14:
+          case 28:
+          case 36:
+            tile.src_position.x = 5;
+            break;
+          case 2:
+          case 7:
+          case 15:
+          case 23:
+          case 29:
+          case 37:
+            tile.src_position.x = 21;
+            break;
+          case 8:
+          case 16:
+          case 30:
+          case 38:
+            tile.src_position.x = 37;
+            break;
+          case 3:
+          case 9:
+          case 17:
+          case 31:
+          case 39:
+            tile.src_position.x = 53;
+            break;
+          case 4:
+          case 10:
+          case 18:
+          case 32:
+          case 40:
+            tile.src_position.x = 69;
+            break;
+          case 11:
+          case 19:
+          case 24:
+          case 33:
+          case 41:
+            tile.src_position.x = 85;
+            break;
+          case 34:
+            tile.src_position.x = 101;
+            break;
+          case 12:
+          case 20:
+          case 25:
+          case 35:
+            tile.src_position.x = 117;
+            break;
+          case 21:
+          case 26:
+            tile.src_position.x = 133;
+            break;
+          case 22:
+          case 27:
+            tile.src_position.x = 149;
+            break;
+          case 5:
+          case 13:
+            tile.src_position.x = 165;
+            break;
+        }
+        if (tile_id <= 5) {
+          tile.src_position.y = 5;
+        } else if (tile_id <= 13) {
+          tile.src_position.y = 21;
+        } else if (tile_id <= 22) {
+          tile.src_position.y = 37;
+        } else if (tile_id <= 27) {
+          tile.src_position.y = 53;
+        } else if (tile_id <= 35) {
+          tile.src_position.y = 69;
+        } else {
+          tile.src_position.y = 85;
+        }
       }
       tile.rect.left_top.x = x * TILE_SIZE - this->tile_offset_x;
       tile.rect.left_top.y = y * TILE_SIZE - this->tile_offset_y;
