@@ -83,14 +83,14 @@ void __player_onkeypress(player_t* this) {
   this->timer = 0;
   bool update = false;
   static const f32 walk_duration = .225f;
-  static const f32 flit_duration = .1f;
+  static const f32 flip_duration = .1f;
   if (keyboard_pressed(KEY_DOWN)) {
     if (this->direction == PLAYER_DOWN) {
       this->distance_y += 1.f;
       this->duration = walk_duration;
     } else {
       this->direction = PLAYER_DOWN;
-      this->duration = flit_duration;
+      this->duration = flip_duration;
     }
     update = true;
   } else if (keyboard_pressed(KEY_UP)) {
@@ -99,7 +99,7 @@ void __player_onkeypress(player_t* this) {
       this->duration = walk_duration;
     } else {
       this->direction = PLAYER_UP;
-      this->duration = flit_duration;
+      this->duration = flip_duration;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_LEFT)) {
@@ -108,7 +108,7 @@ void __player_onkeypress(player_t* this) {
       this->duration = walk_duration;
     } else {
       this->direction = PLAYER_LEFT;
-      this->duration = flit_duration;
+      this->duration = flip_duration;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_RIGHT)) {
@@ -117,7 +117,7 @@ void __player_onkeypress(player_t* this) {
       this->duration = walk_duration;
     } else {
       this->direction = PLAYER_RIGHT;
-      this->duration = flit_duration;
+      this->duration = flip_duration;
     }
     update = true;
   }
