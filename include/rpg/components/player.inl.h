@@ -130,7 +130,6 @@ void player_onkeypress(player_t* this) {
     window_render_request(window);
   }
 }
-void player_onkeyup(player_t* this) {}
 void player_new(player_t* this) {
   assert(this->map);
   this->direction = PLAYER_DOWN;
@@ -138,8 +137,8 @@ void player_new(player_t* this) {
   this->timer = 0;
   this->duration = 0;
   this->onupdate = (event_listener_t) {
-      .callback = (listener_t)__player_onupdate,
-      .context = this
+    .callback = (listener_t)__player_onupdate,
+    .context = this
   };
 }
 void player_free(player_t* this) {}

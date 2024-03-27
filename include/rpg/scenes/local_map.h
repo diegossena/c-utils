@@ -17,7 +17,6 @@ typedef struct local_map_t {
   // event_listener_t
   event_listener_t ondraw;
   event_listener_t onkeypress;
-  event_listener_t onkeyup;
   event_listener_t destroy;
   // layers
   byte bg0[TILEMAP_SIZE];
@@ -137,13 +136,9 @@ void localmap_draw(local_map_t* this) {
 void localmap_onkeypress(local_map_t* this) {
   player_onkeypress(&this->player);
 }
-void localmap_onkeyup(local_map_t* this) {
-  player_onkeyup(&this->player);
-}
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeypress);
-  emitter_off(&this->onkeyup);
   emitter_off(&this->destroy);
   memory_free(this);
 }
@@ -171,11 +166,6 @@ void scene_localmap_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onkeypress, &this->onkeypress);
-  this->onkeyup = (event_listener_t) {
-    .callback = (listener_t)localmap_onkeyup,
-    .context = this
-  };
-  emitter_on(&window->onkeyup, &this->onkeyup);
   // player
   this->player.map = this;
   player_new(&this->player);
