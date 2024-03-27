@@ -136,9 +136,9 @@ void localmap_draw(local_map_t* this) {
   tilemap_draw(this, this->bg2);
 }
 void localmap_destroy(local_map_t* this) {
+  player_free(&this->player);
   emitter_off(&this->ondraw);
   emitter_off(&this->ondestroy);
-  player_free(&this->player);
   memory_free(this);
 }
 void scene_localmap_load(game_t* game) {
