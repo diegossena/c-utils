@@ -108,6 +108,8 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.src_height = 31;
           break;
         default:
+          tile.src_width = 0;
+          tile.src_height = 0;
           continue;
       }
       tile.rect.left_top.x = x * TILE_SIZE - this->tile_offset_x;
@@ -124,8 +126,8 @@ void localmap_draw(local_map_t* this) {
   this->offset.x = this->camera.x - (f32)this->visible_tiles_x / 2.f;
   this->offset.y = this->camera.y - (f32)this->visible_tiles_y / 2.f;
   // clamp camera to game boudaries
-  this->offset.x = math_clamp(this->offset.x, 0.f, this->offset_limit.x);
-  this->offset.y = math_clamp(this->offset.y, 0.f, this->offset_limit.y);
+  // this->offset.x = math_clamp(this->offset.x, 0.f, this->offset_limit.x);
+  // this->offset.y = math_clamp(this->offset.y, 0.f, this->offset_limit.y);
   // Get offsets for smooth movement
   this->tile_offset_x = (this->offset.x - (i32)this->offset.x) * TILE_SIZE;
   this->tile_offset_y = (this->offset.y - (i32)this->offset.y) * TILE_SIZE;
