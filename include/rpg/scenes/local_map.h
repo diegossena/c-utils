@@ -26,7 +26,7 @@ typedef struct local_map_t {
   // tilemap
   u8 visible_tiles_x, visible_tiles_y;
   vector2d_t offset;
-  i8 tile_offset_x, tile_offset_y;
+  u8 tile_offset_x, tile_offset_y;
   vector2d_t offset_limit;
   vector2d_t camera;
   // components
@@ -63,15 +63,7 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
   };
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
     for (i32 y = -1; y < this->visible_tiles_y + 1; y++) {
-      f32 tile_x = x + this->offset.x;
-      f32 tile_y = y + this->offset.y;
-      if (tile_x <= -1 || tile_y <= -1)
-        continue;
-      if (this->offset.x < 0)
-        tile_x = math_ceil(tile_x);
-      if (this->offset.y < 0)
-        tile_y = math_ceil(tile_y);
-      char tile_id = tilemap_tiles_get(layer, tile_x, tile_y);
+      char tile_id = tilemap_tiles_get(layer, x + this->offset.x, y + this->offset.y);
       switch (tile_id) {
         case 'T': // Tree
           tile.src_position.x = 417;
@@ -116,6 +108,8 @@ void tilemap_draw(local_map_t* this, const byte* layer) {
           tile.src_height = 31;
           break;
         default:
+          tile.src_width = 0;
+          tile.src_height = 31;
           continue;
       }
       tile.rect.left_top.x = x * TILE_SIZE - this->tile_offset_x;
@@ -131,6 +125,9 @@ void localmap_draw(local_map_t* this) {
   // calculate top-leftmost visible tile
   this->offset.x = this->camera.x - (f32)this->visible_tiles_x / 2.f;
   this->offset.y = this->camera.y - (f32)this->visible_tiles_y / 2.f;
+  // clamp camera to game boudaries
+  this->offset.x = math_clamp(this->offset.x, 0.f, this->offset_limit.x);
+  this->offset.y = math_clamp(this->offset.y, 0.f, this->offset_limit.y);
   // Get offsets for smooth movement
   this->tile_offset_x = (this->offset.x - (i32)this->offset.x) * TILE_SIZE;
   this->tile_offset_y = (this->offset.y - (i32)this->offset.y) * TILE_SIZE;
