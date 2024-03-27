@@ -17,11 +17,9 @@ void __player_onupdate(player_t* this) {
   local_map->camera.x = this->x + .5f;
   local_map->camera.y = this->y + 1.f;
   if (progress >= 1.f) {
-    this->distance_x = 0;
-    this->distance_y = 0;
-    this->timer = 0;
     this->state = (++this->state) % PLAYER_STATE_MAX;
     emitter_off(&this->onupdate);
+    emitter_on(&window->onkeypress, &this->onkeypress);
   }
   window_render_request(window);
 }
@@ -73,16 +71,17 @@ void player_draw(player_t* this) {
   rect_set_height(&player.rect, sprite_height * scale);
   gfx_image_draw(&player);
 }
-void player_onkeypress(player_t* this) {
-  if (this->timer > 0)
-    return;
+void __player_onkeypress(player_t* this) {
+  console_log("__player_onkeypress");
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  this->timer += window->elapsed_time;
   this->start_x = this->x;
   this->start_y = this->y;
   this->start_state = this->state;
+  this->distance_x = 0;
+  this->distance_y = 0;
+  this->timer = 0;
   bool update = false;
   static const f32 walk_duration = .225f;
   static const f32 flit_duration = .1f;
@@ -125,19 +124,24 @@ void player_onkeypress(player_t* this) {
   }
   if (update) {
     this->state = (++this->state) % PLAYER_STATE_MAX;
+    emitter_off(&this->onkeypress);
     emitter_on(&window->onupdate, &this->onupdate);
     window_render_request(window);
   }
 }
 void player_new(player_t* this) {
   assert(this->map);
+  window_t* window = this->map->game->window;
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
-  this->timer = 0;
-  this->duration = 0;
   this->onupdate = (event_listener_t) {
     .callback = (listener_t)__player_onupdate,
     .context = this
   };
+  this->onkeypress = (event_listener_t) {
+    .callback = (listener_t)__player_onkeypress,
+    .context = this
+  };
+  emitter_on(&window->onkeypress, &this->onkeypress);
 }
 void player_free(player_t* this) {}
