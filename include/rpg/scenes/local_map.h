@@ -19,9 +19,9 @@ typedef struct local_map_t {
   event_listener_t onresize;
   event_listener_t ondestroy;
   // layers
-  byte bg0[TILEMAP_SIZE];
-  byte bg1[TILEMAP_SIZE];
-  byte bg2[TILEMAP_SIZE];
+  u8 bg0[TILEMAP_SIZE];
+  u8 bg1[TILEMAP_SIZE];
+  u8 bg2[TILEMAP_SIZE];
   // tilemap
   u8 visible_tiles_x, visible_tiles_y;
   vector2d_t offset;
@@ -32,7 +32,7 @@ typedef struct local_map_t {
   player_t player;
 } local_map_t;
 
-char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
+char tilemap_tiles_get(const u8* tiles, i32 x, i32 y) {
   if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
     return tiles[y * TILEMAP_WIDTH + x];
   }
@@ -40,7 +40,7 @@ char tilemap_tiles_get(const byte* tiles, i32 x, i32 y) {
 }
 
 #include <rpg/components/player.inl.h>
-#include <rpg/maps/introduction.h>
+#include <rpg/maps/hero_home_2f.h>
 
 void localmap_onresize(local_map_t* this) {
   window_t* window = this->game->window;
