@@ -143,4 +143,3 @@ void player_new(player_t* this) {
   };
   emitter_on(&window->onkeypress, &this->onkeypress);
 }
-void player_free(player_t* this) {}
