@@ -25,9 +25,10 @@ typedef struct local_map_t {
 
 void localmap_draw(local_map_t* this) {
   tilemap_t* tilemap = &this->tilemap;
+  player_t* player = &this->player;
   tilemap_draw(tilemap, tilemap->bg0);
   tilemap_draw(tilemap, tilemap->bg1);
-  player_draw(&this->player);
+  player_draw(player);
   tilemap_draw(tilemap, tilemap->bg2);
 }
 void localmap_destroy(local_map_t* this) {
