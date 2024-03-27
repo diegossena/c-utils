@@ -1,7 +1,8 @@
-#pragma once
+#ifndef SDK_SNOWFLAKE_H
+#define SDK_SNOWFLAKE_H
 
 #include <sdk/types.h>
 
-u64 snowflake_uid();
+// u64 snowflake_uid();
 
-#include <sdk/inl.h>
+#endif

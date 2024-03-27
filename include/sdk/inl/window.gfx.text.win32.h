@@ -1,5 +1,3 @@
-#pragma once
-
 #ifdef SDK_WINDOW_GFX_TEXT_H
 #include <sdk/platform.h>
 #ifdef PLATFORM_WINDOWS

@@ -1,11 +1,6 @@
-#pragma once
-
+#ifdef SDK_NET_H
 #include <sdk/platform.h>
-
 #ifdef PLATFORM_WINDOWS
-
-#include <sdk/net.h>
-#include <sdk/error.h>
 
 static bool __net_inicialized = false;
 
@@ -40,4 +35,5 @@ u32 net_host_resolve(const char* host) {
   return 0;
 }
 
+#endif
 #endif

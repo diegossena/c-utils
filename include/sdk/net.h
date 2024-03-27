@@ -3,6 +3,8 @@
 
 #include <sdk/types.h>
 
+#include <sdk/error.h>
+
 #define DEFAULT_TIMEOUT 10000LLU // 10s
 
 typedef union net_in_addr_t {

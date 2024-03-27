@@ -1,7 +1,5 @@
 #ifdef SDK_MATH_GEOMETRY_2D_H
 
-#include <sdk/math.h>
-
 vector2d_t vector2d_sum(const vector2d_t this, const const vector2d_t right) {
   return (vector2d_t) { this.x + right.x, this.y + right.y };
 }

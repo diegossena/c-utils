@@ -1,3 +1,5 @@
+#ifdef SDK_QUEUE_H
+
 #include <sdk/leaks.h>
 
 void queue_head(queue_t* this) {
@@ -40,3 +42,5 @@ void queue_unshift(queue_t* head, queue_t* q) {
 bool queue_empty(queue_t* head) {
   return head == head->next;
 }
+
+#endif

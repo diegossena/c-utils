@@ -3,6 +3,8 @@
 
 #include <sdk/types.h>
 
+#include <sdk/math.h>
+
 typedef struct vector2d_t {
   f32 x, y;
 } vector2d_t;

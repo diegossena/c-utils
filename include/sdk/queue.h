@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDK_QUEUE_H
+#define SDK_QUEUE_H
 
 #include <sdk/types.h>
 
@@ -14,3 +15,5 @@ typedef struct queue_t {
   queue_t* next;
   queue_t* prev;
 } queue_t;
+
+#endif

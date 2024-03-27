@@ -1,8 +1,8 @@
+#ifdef SDK_PROCESS_H
 #include <sdk/platform.h>
-
 #ifdef PLATFORM_WINDOWS
 
-#include <sdk/process.h>
+#include <windows.h>
 
 void process_execpath(string_t* this) {
   __string_mutate(this, MAX_PATH);
@@ -15,4 +15,5 @@ void process_execpath(string_t* this) {
   }
 }
 
+#endif
 #endif

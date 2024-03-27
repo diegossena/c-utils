@@ -6,16 +6,17 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
+#define PLAYER_FLIP_DURATION .1f
+#define PLAYER_WALK_DURATION .225f
 
 void player_onupdate(player_t* this) {
-  static const f32 duration = .25f;
+  if (!this->duration)
+    return;
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  if (this->walking_timer <= 0)
-    return;
   this->walking_timer += window->elapsed_time;
-  f32 progress = this->walking_timer / duration;
+  f32 progress = this->walking_timer / this->duration;
   if (progress > 1.f) {
     progress = 1.f;
   }
@@ -28,6 +29,7 @@ void player_onupdate(player_t* this) {
     this->distance_y = 0;
     this->walking_timer = 0;
     this->state = (++this->state) % PLAYER_STATE_MAX;
+    this->duration = 0;
   }
   window_render_request(window);
 }
@@ -93,29 +95,41 @@ void player_onkeypress(player_t* this) {
   if (keyboard_pressed(KEY_DOWN)) {
     if (this->direction == PLAYER_DOWN) {
       this->distance_y += 1.f;
+      this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_DOWN;
+      this->duration = PLAYER_FLIP_DURATION
+        ;
     }
     update = true;
   } else if (keyboard_pressed(KEY_UP)) {
     if (this->direction == PLAYER_UP) {
       this->distance_y -= 1.f;
+      this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_UP;
+      this->duration = PLAYER_FLIP_DURATION
+        ;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_LEFT)) {
     if (this->direction == PLAYER_LEFT) {
       this->distance_x -= 1.f;
+      this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_LEFT;
+      this->duration = PLAYER_FLIP_DURATION
+        ;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_RIGHT)) {
     if (this->direction == PLAYER_RIGHT) {
       this->distance_x += 1.f;
+      this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_RIGHT;
+      this->duration = PLAYER_FLIP_DURATION
+        ;
     }
     update = true;
   }
@@ -124,24 +138,18 @@ void player_onkeypress(player_t* this) {
     window_render_request(window);
   }
 }
-void player_onkeydown(player_t* this) {
-}
-void player_onkeyup(player_t* this) {
-  // local_map_t* local_map = this->map;
-  // game_t* game = local_map->game;
-  // window_t* window = game->window;
-  // if (this->state % 2) {
-  //   this->state = (++this->state) % PLAYER_STATE_MAX;
-  //   this->walking_animation = 0;
-  //   window_render_request(window);
-  // }
-}
+void player_onkeydown(player_t* this) {}
+void player_onkeyup(player_t* this) {}
 void player_new(player_t* this) {
   assert(this->map);
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
   this->walking_timer = 0;
+  this->duration = 0;
 }
 void player_free(player_t* this) {
 
 }
+
+#undef PLAYER_FLIP_DURATION
+#undef PLAYER_WALK_DURATION

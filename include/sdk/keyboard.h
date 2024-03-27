@@ -281,7 +281,4 @@ typedef enum key_code_t {
   KEYS_MAX_KEYS = 255
 } key_code_t;
 
-
-bool keyboard_pressed(key_code_t key);
-
 #endif

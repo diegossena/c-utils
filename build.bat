@@ -19,6 +19,7 @@ gcc %compiler_flags% ./src/%package_name%.c -o ./bin/%package_name% %defines% %i
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
    set /A "end=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
 )
+SET /A elapsed=end-start
 ECHO %package_name% compiled in %elapsed%ms
 IF %ERRORLEVEL% NEQ 0 (
   GOTO :EOF

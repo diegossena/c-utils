@@ -1,4 +1,5 @@
-#include <sdk/snowflake.h>
+#ifdef SDK_SNOWFLAKE_H
+
 #include <sdk/date.h>
 
 #define SNOWFLAKE_MAX_SEQUENCE 1023ULL
@@ -21,3 +22,7 @@ u64 snowflake_uid() {
 
   return uid_time << 22 | __snowflake_node << 10 | sequence;
 }
+
+#undef SNOWFLAKE_MAX_SEQUENCE
+
+#endif
