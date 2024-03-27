@@ -72,7 +72,6 @@ void player_draw(player_t* this) {
   gfx_image_draw(&player);
 }
 void __player_onkeypress(player_t* this) {
-  console_log("__player_onkeypress");
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
