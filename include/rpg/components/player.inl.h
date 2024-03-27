@@ -98,8 +98,7 @@ void player_onkeypress(player_t* this) {
       this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_DOWN;
-      this->duration = PLAYER_FLIP_DURATION
-        ;
+      this->duration = PLAYER_FLIP_DURATION;
     }
     update = true;
   } else if (keyboard_pressed(KEY_UP)) {
@@ -108,8 +107,7 @@ void player_onkeypress(player_t* this) {
       this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_UP;
-      this->duration = PLAYER_FLIP_DURATION
-        ;
+      this->duration = PLAYER_FLIP_DURATION;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_LEFT)) {
@@ -118,8 +116,7 @@ void player_onkeypress(player_t* this) {
       this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_LEFT;
-      this->duration = PLAYER_FLIP_DURATION
-        ;
+      this->duration = PLAYER_FLIP_DURATION;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_RIGHT)) {
@@ -128,8 +125,7 @@ void player_onkeypress(player_t* this) {
       this->duration = PLAYER_WALK_DURATION;
     } else {
       this->direction = PLAYER_RIGHT;
-      this->duration = PLAYER_FLIP_DURATION
-        ;
+      this->duration = PLAYER_FLIP_DURATION;
     }
     update = true;
   }
