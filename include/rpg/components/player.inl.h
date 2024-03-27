@@ -3,13 +3,9 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
-void player_focus(player_t* this) {
-  vector2d_t* camera = &this->map->camera;
-  camera->x = this->x + .75f;
-  camera->y = this->y + .5f;
-}
 void __player_onupdate(player_t* this) {
   local_map_t* local_map = this->map;
+  tilemap_t* tilemap = &local_map->tilemap;
   game_t* game = local_map->game;
   window_t* window = game->window;
   this->timer += window->elapsed_time;
@@ -21,7 +17,7 @@ void __player_onupdate(player_t* this) {
   }
   this->x = this->start_x + progress * this->distance_x;
   this->y = this->start_y + progress * this->distance_y;
-  player_focus(this);
+  tilemap_camera_update(tilemap, this->x, this->y);
   if (progress >= 1.f) {
     this->state = (++this->state) % PLAYER_STATE_MAX;
     emitter_off(&this->onupdate);
@@ -80,10 +76,11 @@ void __player_onkeypress(player_t* this) {
     update = true;
   }
   if (update) {
+    tilemap_t* tilemap = &local_map->tilemap;
     char tile_id = tilemap_tiles_get(
-      this->map->bg1, this->x + this->distance_x, this->y + this->distance_y
+      tilemap->bg1, this->x + this->distance_x, this->y + this->distance_y
     );
-    if (tile_id == ' ') {
+    if (tile_id == 0) {
       emitter_off(&this->onkeypress);
       emitter_on(&window->onupdate, &this->onupdate);
       window_render_request(window);
@@ -95,6 +92,7 @@ void player_draw(player_t* this) {
   static const f32 sprite_height = 31.f;
   static const f32 scale = 4.f;
   local_map_t* local_map = this->map;
+  tilemap_t* tilemap = &local_map->tilemap;
   game_t* game = local_map->game;
   gfx_image_t player = {
     .window = game->window,
@@ -103,8 +101,8 @@ void player_draw(player_t* this) {
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
-      (this->x - local_map->offset.x) * TILE_SIZE + 6.f,
-      (this->y - local_map->offset.y) * TILE_SIZE + -48.f,
+      (this->x - tilemap->offset.x) * TILE_SIZE + 6.f,
+      (this->y - tilemap->offset.y) * TILE_SIZE + -48.f,
     },
   };
   switch (this->direction) {

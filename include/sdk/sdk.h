@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sdk/inl/console.win32.h>
 #include <sdk/inl/console.h>
 #include <sdk/inl/queue.h>
