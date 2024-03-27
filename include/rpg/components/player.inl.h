@@ -23,54 +23,6 @@ void __player_onupdate(player_t* this) {
   }
   window_render_request(window);
 }
-
-void player_draw(player_t* this) {
-  static const f32 sprite_width = 15.f;
-  static const f32 sprite_height = 31.f;
-  static const f32 scale = 4.f;
-  local_map_t* local_map = this->map;
-  game_t* game = local_map->game;
-  gfx_image_t player = {
-    .window = game->window,
-    .src = &game->character_png,
-    .src_width = sprite_width,
-    .src_height = sprite_height,
-    .extend_mode = BITMAP_EXTEND_COVER,
-    .rect = {
-      (this->x - local_map->offset.x) * TILE_SIZE + 7.f,
-      (this->y - local_map->offset.y) * TILE_SIZE + 26.f,
-    },
-  };
-  switch (this->direction) {
-    case PLAYER_UP:
-      player.src_position.y = 75;
-      break;
-    case PLAYER_DOWN:
-      player.src_position.y = 42;
-      break;
-    case PLAYER_RIGHT:
-      player.src_position.y = 141;
-      break;
-    case PLAYER_LEFT:
-      player.src_position.y = 108;
-      break;
-  }
-  switch (this->state) {
-    case PLAYER_STATE_STANDING_1:
-    case PLAYER_STATE_STANDING_2:
-      player.src_position.x = 25;
-      break;
-    case PLAYER_STATE_WALKING_1:
-      player.src_position.x = 8;
-      break;
-    case PLAYER_STATE_WALKING_2:
-      player.src_position.x = 42;
-      break;
-  }
-  rect_set_width(&player.rect, sprite_width * scale);
-  rect_set_height(&player.rect, sprite_height * scale);
-  gfx_image_draw(&player);
-}
 void __player_onkeypress(player_t* this) {
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
@@ -127,6 +79,53 @@ void __player_onkeypress(player_t* this) {
     emitter_on(&window->onupdate, &this->onupdate);
     window_render_request(window);
   }
+}
+void player_draw(player_t* this) {
+  static const f32 sprite_width = 15.f;
+  static const f32 sprite_height = 31.f;
+  static const f32 scale = 4.f;
+  local_map_t* local_map = this->map;
+  game_t* game = local_map->game;
+  gfx_image_t player = {
+    .window = game->window,
+    .src = &game->character_png,
+    .src_width = sprite_width,
+    .src_height = sprite_height,
+    .extend_mode = BITMAP_EXTEND_COVER,
+    .rect = {
+      (this->x - local_map->offset.x) * TILE_SIZE + 7.f,
+      (this->y - local_map->offset.y) * TILE_SIZE + 26.f,
+    },
+  };
+  switch (this->direction) {
+    case PLAYER_UP:
+      player.src_position.y = 75;
+      break;
+    case PLAYER_DOWN:
+      player.src_position.y = 42;
+      break;
+    case PLAYER_RIGHT:
+      player.src_position.y = 141;
+      break;
+    case PLAYER_LEFT:
+      player.src_position.y = 108;
+      break;
+  }
+  switch (this->state) {
+    case PLAYER_STATE_STANDING_1:
+    case PLAYER_STATE_STANDING_2:
+      player.src_position.x = 25;
+      break;
+    case PLAYER_STATE_WALKING_1:
+      player.src_position.x = 8;
+      break;
+    case PLAYER_STATE_WALKING_2:
+      player.src_position.x = 42;
+      break;
+  }
+  rect_set_width(&player.rect, sprite_width * scale);
+  rect_set_height(&player.rect, sprite_height * scale);
+  gfx_image_draw(&player);
 }
 void player_free(player_t* this) {
   emitter_off(&this->onupdate);
