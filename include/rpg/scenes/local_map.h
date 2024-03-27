@@ -14,9 +14,8 @@ typedef struct local_map_t {
   // event_listener_t
   event_listener_t ondraw;
   event_listener_t ondestroy;
-  // tilemap
-  tilemap_t tilemap;
   // components
+  tilemap_t tilemap;
   player_t player;
 } local_map_t;
 
