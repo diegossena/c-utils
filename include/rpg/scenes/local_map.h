@@ -16,7 +16,8 @@ typedef struct local_map_t {
   game_t* game;
   // event_listener_t
   event_listener_t ondraw;
-  event_listener_t destroy;
+  event_listener_t onresize;
+  event_listener_t ondestroy;
   // layers
   byte bg0[TILEMAP_SIZE];
   byte bg1[TILEMAP_SIZE];
@@ -134,7 +135,7 @@ void localmap_draw(local_map_t* this) {
 }
 void localmap_destroy(local_map_t* this) {
   emitter_off(&this->ondraw);
-  emitter_off(&this->destroy);
+  emitter_off(&this->ondestroy);
   player_free(&this->player);
   memory_free(this);
 }
@@ -147,16 +148,21 @@ void scene_localmap_load(game_t* game) {
   localmap_onresize(this);
   tilemap_introduction_load(this);
   // register
+  this->onresize = (event_listener_t) {
+    .callback = (listener_t)localmap_onresize,
+    .context = this
+  };
+  emitter_on(&window->onresize, &this->onresize);
   this->ondraw = (event_listener_t) {
     .callback = (listener_t)localmap_draw,
     .context = this
   };
   emitter_on(&window->ondraw, &this->ondraw);
-  this->destroy = (event_listener_t) {
+  this->ondestroy = (event_listener_t) {
     .callback = (listener_t)localmap_destroy,
     .context = this
   };
-  emitter_on(&window->onclose, &this->destroy);
+  emitter_on(&window->onclose, &this->ondestroy);
   // player
   this->player.map = this;
   player_new(&this->player);

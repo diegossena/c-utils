@@ -19,7 +19,7 @@ i32 main() {
     .height = 600,
     .x = 0,
     .y = 0,
-    .flags = WINDOW_FLAG_NO_RESIZABLE | WINDOW_FLAG_NO_MAXIMIZE,
+    .flags = WINDOW_FLAG_NO_MAXIMIZE,
     .onpreload = game_onpreload,
     .onload = game_onload
   };
