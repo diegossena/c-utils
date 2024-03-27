@@ -12,7 +12,6 @@
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
 #define TILE_SIZE 76
 
-
 typedef struct local_map_t {
   game_t* game;
   // event_listener_t
