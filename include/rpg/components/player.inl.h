@@ -5,6 +5,7 @@
 
 #define PLAYER_FLIP_DURATION .1f
 #define PLAYER_WALK_DURATION .225f
+#define PLAYER_SPRITE_WIDTH 15.f
 
 void player_onupdate(player_t* this) {
   if (!this->duration)
@@ -32,7 +33,6 @@ void player_onupdate(player_t* this) {
 }
 
 void player_draw(player_t* this) {
-  static const f32 sprite_width = 15.f;
   static const f32 sprite_height = 31.f;
   static const f32 scale = 4.f;
   local_map_t* local_map = this->map;
@@ -40,7 +40,7 @@ void player_draw(player_t* this) {
   gfx_image_t player = {
     .window = game->window,
     .src = &game->character_png,
-    .src_width = sprite_width,
+    .src_width = PLAYER_WALK_DURATION,
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
@@ -146,3 +146,4 @@ void player_free(player_t* this) {
 
 #undef PLAYER_FLIP_DURATION
 #undef PLAYER_WALK_DURATION
+#undef PLAYER_SPRITE_WIDTH
