@@ -3,10 +3,6 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
-#define PLAYER_FLIP_DURATION .1f
-#define PLAYER_WALK_DURATION .225f
-#define PLAYER_SPRITE_WIDTH 15.f
-
 void player_onupdate(player_t* this) {
   if (!this->duration)
     return;
@@ -33,6 +29,7 @@ void player_onupdate(player_t* this) {
 }
 
 void player_draw(player_t* this) {
+  static const f32 sprite_width = 15.f;
   static const f32 sprite_height = 31.f;
   static const f32 scale = 4.f;
   local_map_t* local_map = this->map;
@@ -40,7 +37,7 @@ void player_draw(player_t* this) {
   gfx_image_t player = {
     .window = game->window,
     .src = &game->character_png,
-    .src_width = PLAYER_WALK_DURATION,
+    .src_width = sprite_width,
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
     .rect = {
@@ -89,40 +86,42 @@ void player_onkeypress(player_t* this) {
   this->start_y = this->y;
   this->start_state = this->state;
   bool update = false;
+  static const f32 walk_duration = .225f;
+  static const f32 flit_duration = .1f;
   if (keyboard_pressed(KEY_DOWN)) {
     if (this->direction == PLAYER_DOWN) {
       this->distance_y += 1.f;
-      this->duration = PLAYER_WALK_DURATION;
+      this->duration = walk_duration;
     } else {
       this->direction = PLAYER_DOWN;
-      this->duration = PLAYER_FLIP_DURATION;
+      this->duration = flit_duration;
     }
     update = true;
   } else if (keyboard_pressed(KEY_UP)) {
     if (this->direction == PLAYER_UP) {
       this->distance_y -= 1.f;
-      this->duration = PLAYER_WALK_DURATION;
+      this->duration = walk_duration;
     } else {
       this->direction = PLAYER_UP;
-      this->duration = PLAYER_FLIP_DURATION;
+      this->duration = flit_duration;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_LEFT)) {
     if (this->direction == PLAYER_LEFT) {
       this->distance_x -= 1.f;
-      this->duration = PLAYER_WALK_DURATION;
+      this->duration = walk_duration;
     } else {
       this->direction = PLAYER_LEFT;
-      this->duration = PLAYER_FLIP_DURATION;
+      this->duration = flit_duration;
     }
     update = true;
   } else  if (keyboard_pressed(KEY_RIGHT)) {
     if (this->direction == PLAYER_RIGHT) {
       this->distance_x += 1.f;
-      this->duration = PLAYER_WALK_DURATION;
+      this->duration = walk_duration;
     } else {
       this->direction = PLAYER_RIGHT;
-      this->duration = PLAYER_FLIP_DURATION;
+      this->duration = flit_duration;
     }
     update = true;
   }
@@ -140,10 +139,4 @@ void player_new(player_t* this) {
   this->walking_timer = 0;
   this->duration = 0;
 }
-void player_free(player_t* this) {
-
-}
-
-#undef PLAYER_FLIP_DURATION
-#undef PLAYER_WALK_DURATION
-#undef PLAYER_SPRITE_WIDTH
+void player_free(player_t* this) {}
