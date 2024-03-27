@@ -13,6 +13,7 @@ typedef enum player_state_t {
 } player_state_t;
 
 typedef struct player_t {
+  event_listener_t onupdate;
   // props
   local_map_t* map;
   // internal::props

@@ -68,6 +68,7 @@
     "cinttypes": "c",
     "typeinfo": "c",
     "win32.inl": "c",
-    "*.rh": "c"
+    "*.rh": "c",
+    "moveto": "c"
   }
 }

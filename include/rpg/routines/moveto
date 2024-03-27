@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../game.h"
-#include "../entities/entity.h"
-#include <sdk/window.h>
+#include <rpg/game.h>
 
 typedef struct moveto_t {
   event_listener_t onupdate;

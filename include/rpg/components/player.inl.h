@@ -3,9 +3,7 @@
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 
-void player_onupdate(player_t* this) {
-  if (!this->duration)
-    return;
+void __player_onupdate(player_t* this) {
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
@@ -24,6 +22,7 @@ void player_onupdate(player_t* this) {
     this->walking_timer = 0;
     this->state = (++this->state) % PLAYER_STATE_MAX;
     this->duration = 0;
+    emitter_off(&this->onupdate);
   }
   window_render_request(window);
 }
@@ -127,10 +126,10 @@ void player_onkeypress(player_t* this) {
   }
   if (update) {
     this->state = (++this->state) % PLAYER_STATE_MAX;
+    emitter_on(&window->onupdate, &this->onupdate);
     window_render_request(window);
   }
 }
-void player_onkeydown(player_t* this) {}
 void player_onkeyup(player_t* this) {}
 void player_new(player_t* this) {
   assert(this->map);
@@ -138,5 +137,9 @@ void player_new(player_t* this) {
   this->state = PLAYER_STATE_STANDING_1;
   this->walking_timer = 0;
   this->duration = 0;
+  this->onupdate = (event_listener_t) {
+      .callback = (listener_t)__player_onupdate,
+      .context = this
+  };
 }
 void player_free(player_t* this) {}
