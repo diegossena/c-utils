@@ -7,8 +7,8 @@ void __player_onupdate(player_t* this) {
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  this->walking_timer += window->elapsed_time;
-  f32 progress = this->walking_timer / this->duration;
+  this->timer += window->elapsed_time;
+  f32 progress = this->timer / this->duration;
   if (progress > 1.f) {
     progress = 1.f;
   }
@@ -19,7 +19,7 @@ void __player_onupdate(player_t* this) {
   if (progress >= 1.f) {
     this->distance_x = 0;
     this->distance_y = 0;
-    this->walking_timer = 0;
+    this->timer = 0;
     this->state = (++this->state) % PLAYER_STATE_MAX;
     this->duration = 0;
     emitter_off(&this->onupdate);
@@ -75,12 +75,12 @@ void player_draw(player_t* this) {
   gfx_image_draw(&player);
 }
 void player_onkeypress(player_t* this) {
-  if (this->walking_timer > 0)
+  if (this->timer > 0)
     return;
   local_map_t* local_map = this->map;
   game_t* game = local_map->game;
   window_t* window = game->window;
-  this->walking_timer += window->elapsed_time;
+  this->timer += window->elapsed_time;
   this->start_x = this->x;
   this->start_y = this->y;
   this->start_state = this->state;
@@ -135,7 +135,7 @@ void player_new(player_t* this) {
   assert(this->map);
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
-  this->walking_timer = 0;
+  this->timer = 0;
   this->duration = 0;
   this->onupdate = (event_listener_t) {
       .callback = (listener_t)__player_onupdate,
