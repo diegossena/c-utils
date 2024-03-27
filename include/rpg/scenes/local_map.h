@@ -20,7 +20,6 @@ typedef struct local_map_t {
   player_t player;
 } local_map_t;
 
-#include <rpg/components/player.inl.h>
 #include <rpg/maps/hero_home_2f.h>
 
 void localmap_draw(local_map_t* this) {
@@ -58,8 +57,7 @@ void scene_localmap_load(game_t* game) {
   // tilemap
   tilemap_new(&this->tilemap, this->game);
   // player
-  this->player.map = this;
-  player_new(&this->player);
+  player_new(&this->player, &this->tilemap);
   // tilemap
   hero_home_2f_load(this);
 }
