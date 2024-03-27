@@ -1,8 +1,5 @@
 #pragma once
 
-#include <sdk/window/gfx/rect.h>
-#include <sdk/keyboard.h>
-
 #include <rpg/components/player.h>
 #include <rpg/scenes/local_map.h>
 

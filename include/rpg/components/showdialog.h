@@ -2,9 +2,6 @@
 
 #include "../entities/entity.h"
 #include "../game.h"
-#include <sdk/string/wide.h>
-#include <sdk/window/gfx/text.h>
-#include <sdk/window/gfx/rect.h>
 
 typedef struct showdialog_t {
   // init

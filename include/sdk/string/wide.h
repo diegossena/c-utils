@@ -29,25 +29,4 @@ typedef struct wstring_t {
   };
 } wstring_t;
 
-// void wstring_new(wstring_t*);
-// void wstring_free(wstring_t*);
-
-// const wchar_t* wstring_cwstr(const wstring_t*);
-// u64 wstring_length(const wstring_t*);
-
-// void wstring_append_wstring(wstring_t*, wstring_t*);
-// void wstring_append_wstr(wstring_t* this, const wchar_t* cstr, u64 length);
-// void wstring_append_wchar(wstring_t* this, const wchar_t);
-// void wstring_clear(wstring_t* this);
-
-// bool wstring_equal_cwstr(const wstring_t*, const wchar_t*);
-// bool wstring_equal_wstring(const wstring_t*, const wstring_t*);
-// i16 wstring_compare(const wstring_t*, const wstring_t*);
-// void wstring_format(wstring_t*, const wchar_t* format, ...);
-
-// i16 cwstr_compare(const wchar_t*, const wchar_t*);
-// bool cwstr_equal(const wchar_t*, const wchar_t*);
-// i32 cwstr_format(wchar_t*, const wchar_t* format, ...);
-// u64 cwstr_length(const wchar_t*);
-
 #endif
