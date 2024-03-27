@@ -21,7 +21,6 @@ void __player_onupdate(player_t* this) {
     this->distance_y = 0;
     this->timer = 0;
     this->state = (++this->state) % PLAYER_STATE_MAX;
-    this->duration = 0;
     emitter_off(&this->onupdate);
   }
   window_render_request(window);
