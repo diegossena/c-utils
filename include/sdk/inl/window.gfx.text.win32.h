@@ -37,6 +37,8 @@ void gfx_font_load(window_t* this, const wchar_t* path) {
 }
 
 void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t props) {
+  if (this->__format)
+    return;
   assert(props.window);
   assert(props.size > 0);
   assert(props.family);

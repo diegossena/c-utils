@@ -25,8 +25,12 @@ void game_destroy(game_t* this) {
   gfx_color_free((gfx_color_t*)&this->white);
   gfx_color_free((gfx_color_t*)&this->green);
   gfx_color_free((gfx_color_t*)&this->darkblue);
-  gfx_image_src_free(&this->pallet_town_interiors);
-  gfx_image_src_free(&this->character_png);
+  if (this->pallet_town_interiors.bitmap) {
+    gfx_image_src_free(&this->pallet_town_interiors);
+  }
+  if (this->character_png.bitmap) {
+    gfx_image_src_free(&this->character_png);
+  }
   memory_free(this);
 }
 void game_onpreload(window_t* window) {

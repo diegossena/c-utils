@@ -73,9 +73,8 @@ wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
 }
 void gfx_image_src_free(gfx_image_src_t* this) {
-  if (this->bitmap) {
-    ID2D1Bitmap_Release(this->bitmap);
-  }
+  assert(this->bitmap);
+  ID2D1Bitmap_Release(this->bitmap);
   __leaks_memory_decrement();
 }
 void gfx_image_draw(const gfx_image_t* this) {
