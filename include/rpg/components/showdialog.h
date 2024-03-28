@@ -15,7 +15,7 @@ typedef struct showdialog_t {
 } showdialog_t;
 void showdialog_update(showdialog_t* this) {
   // text
-  gfx_text_update(&this->display);
+  gfx_text_adjust(&this->display);
   // background
   this->__background.rect.left_top.x = this->display.rect.left_top.x - 1;
   this->__background.rect.left_top.y = this->display.rect.left_top.y - 1;

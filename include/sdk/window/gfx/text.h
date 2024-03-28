@@ -24,7 +24,7 @@ typedef enum font_style_t {
 
 typedef struct text_style_props_t {
   // required
-  const window_t* window;
+  window_t* window;
   const wchar_t* family;
   f32 size;
   font_weight_t weight;
@@ -39,6 +39,8 @@ typedef struct gfx_text_t {
   rect_t rect;
   const gfx_text_style_t* style;
   const gfx_color_t* color;
+  // listeners
+  event_listener_t __ondestroy;
 } gfx_text_t;
 
 /**
@@ -51,7 +53,7 @@ void gfx_text_style_free(gfx_text_style_t*);
 
 void gfx_text_new(gfx_text_t*);
 void gfx_text_free(gfx_text_t*);
-void gfx_text_update(gfx_text_t*);
+void gfx_text_adjust(gfx_text_t*);
 void gfx_text_draw(const gfx_text_t*);
 
 #endif

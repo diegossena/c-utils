@@ -2,13 +2,13 @@
 
 #include <sdk/events.h>
 
-static bool __scene_in_transition = false;
+static bool scene_in_transition = false;
 
 typedef struct scene_transition_t {
   window_t* window;
   // callbacks
-  callback_t scene_destroy;
-  callback_t scene_load;
+  callback_t ondestroy;
+  callback_t onload;
   // private
   f32 timer, opacity;
   bool loading;
@@ -29,7 +29,7 @@ void __scene_transition_destroy(scene_transition_t* this) {
   emitter_off(&this->__onupdate);
   emitter_off(&this->__ondraw);
   emitter_off(&this->__ondestroy);
-  __scene_in_transition = false;
+  scene_in_transition = false;
   memory_free(this);
 }
 void __scene_transition_update(scene_transition_t* this) {
@@ -43,8 +43,8 @@ void __scene_transition_update(scene_transition_t* this) {
   if (this->loading) {
     this->opacity = progress;
     if (this->timer >= duration) {
-      callback_emit(&this->scene_destroy);
-      callback_emit(&this->scene_load);
+      callback_emit(&this->ondestroy);
+      callback_emit(&this->onload);
       emitter_forward(&this->__ondraw);
       this->timer = 0.f;
       this->loading = false;
@@ -68,15 +68,15 @@ void __scene_transition_draw(scene_transition_t* this) {
 
 void scene_transition(scene_transition_props_t props) {
   window_t* window = props.window;
-  if (__scene_in_transition)
+  if (scene_in_transition)
     return;
-  __scene_in_transition = true;
+  scene_in_transition = true;
   scene_transition_t* this = memory_alloc(sizeof(scene_transition_t));
   // copy
   this->window = window;
   this->timer = 0.f;
-  this->scene_destroy = props.scene_destroy;
-  this->scene_load = props.scene_load;
+  this->ondestroy = props.scene_destroy;
+  this->onload = props.scene_load;
   // init
   this->loading = true;
   this->background = (gfx_rect_t) {

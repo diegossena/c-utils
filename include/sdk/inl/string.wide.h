@@ -52,6 +52,7 @@ void wstring_new(wstring_t* this) {
 }
 void wstring_free(wstring_t* this) {
   if (this->__data != this->__small_string) {
+    assert(this->__data);
     memory_free(this->__data);
   }
 }

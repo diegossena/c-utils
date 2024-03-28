@@ -4,8 +4,9 @@
 #include <sdk/window/gfx/text.h>
 
 #include <rpg/game.h>
-#include <rpg/routines/scene_transition.h>
 #include <rpg/components/showdialog.h>
+#include <rpg/components/assets.h>
+#include <rpg/routines/scene_transition.h>
 #include <rpg/scenes/local_map.h>
 
 typedef struct title_screen_t {
@@ -17,35 +18,36 @@ typedef struct title_screen_t {
   // assets
   gfx_text_style_t title_style, play_style;
   // elements
-  gfx_image_t background;
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
-void titlescreen_destroy(title_screen_t* this) {
-  emitter_off(&this->ondraw);
-  emitter_off(&this->onkeydown);
-  emitter_off(&this->destroy);
+void titlescreen_free(title_screen_t* this) {
+  game_t* game = this->game;
+  console_log("titlescreen_free");
+  gfx_color_free(&game->white);
   gfx_text_free(&this->title);
   gfx_text_free(&this->press_space);
   gfx_text_free(&this->to_play);
   gfx_text_style_free(&this->title_style);
   gfx_text_style_free(&this->play_style);
+  emitter_off(&this->ondraw);
+  emitter_off(&this->onkeydown);
+  emitter_off(&this->destroy);
   memory_free(this);
 }
-
 void titlescreen_ondraw(title_screen_t* this) {
-  // gfx_image_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
 }
 void titlescreen_onkeydown(title_screen_t* this) {
-  window_t* window = this->game->window;
+  game_t* game = this->game;
+  window_t* window = game->window;
   if (window->has_focus) {
-    if (keyboard_pressed(KEY_SPACE)) {
+    if (!scene_in_transition && keyboard_pressed(KEY_SPACE)) {
       scene_transition((scene_transition_props_t) {
         .window = window,
-          .scene_destroy = { (listener_t)titlescreen_destroy, this },
+          .scene_destroy = { (listener_t)titlescreen_free, this },
           .scene_load = { (listener_t)scene_localmap_load, this->game },
       });
     }
@@ -54,8 +56,8 @@ void titlescreen_onkeydown(title_screen_t* this) {
 void scene_titlescreen_load(game_t* game) {
   // init
   title_screen_t* this = memory_alloc(sizeof(title_screen_t));
-  window_t* window = game->window;
   this->game = game;
+  window_t* window = game->window;
   // register
   this->ondraw = (event_listener_t) {
     .callback = (listener_t)titlescreen_ondraw,
@@ -63,7 +65,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   emitter_on(&window->ondraw, &this->ondraw);
   this->destroy = (event_listener_t) {
-    .callback = (listener_t)titlescreen_destroy,
+    .callback = (listener_t)titlescreen_free,
     .context = this
   };
   emitter_on(&window->onclose, &this->destroy);
@@ -73,6 +75,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
   // assets
+  white_load(game);
   gfx_text_style_new(&this->title_style, (text_style_props_t) {
     .window = window,
       .family = game->font_zelda_family,
@@ -87,16 +90,6 @@ void scene_titlescreen_load(game_t* game) {
       .style = FONT_STYLE_NORMAL,
       .weight = FONT_WEIGHT_BOLD
   });
-  // background
-  // this->background = (gfx_image_t) {
-  //   .window = window,
-  //   .src_position = { 609, 929 },
-  //   .src_width = 61,
-  //   .src_height = 57,
-  //   .src = &game->pallet_town_interiors
-  // };
-  // rect_set_width(&this->background.rect, window->width);
-  // rect_set_height(&this->background.rect, window->height);
   // title
   this->title = (gfx_text_t) {
     .window = window,
@@ -106,7 +99,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   gfx_text_new(&this->title);
   wstring_append_cwstr(&this->title.text, L"DreamShifters");
-  gfx_text_update(&this->title);
+  gfx_text_adjust(&this->title);
   // press_space
   this->press_space = (gfx_text_t) {
     .window = window,
@@ -116,7 +109,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   gfx_text_new(&this->press_space);
   wstring_append_cwstr(&this->press_space.text, L"Press Space");
-  gfx_text_update(&this->press_space);
+  gfx_text_adjust(&this->press_space);
   // to_play
   this->to_play = (gfx_text_t) {
     .window = window,
@@ -126,5 +119,5 @@ void scene_titlescreen_load(game_t* game) {
   };
   gfx_text_new(&this->to_play);
   wstring_append_cwstr(&this->to_play.text, L"to start");
-  gfx_text_update(&this->to_play);
+  gfx_text_adjust(&this->to_play);
 }

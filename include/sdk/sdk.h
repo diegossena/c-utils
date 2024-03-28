@@ -18,7 +18,6 @@
 #include <sdk/inl/path.h>
 #include <sdk/inl/string.h>
 #include <sdk/inl/string.wide.h>
-#include <sdk/inl/window.gfx.text.h>
 #include <sdk/inl/time.win32.h>
 #include <sdk/inl/keyboard.win32.h>
 #include <sdk/inl/net.win32.h>
@@ -31,4 +30,5 @@
 #include <sdk/inl/window.gfx.rect.win32.h>
 #include <sdk/inl/window.gfx.image.win32.h>
 #include <sdk/inl/window.win32.h>
+#include <sdk/inl/window.gfx.text.h>
 #include <sdk/inl/application.h>

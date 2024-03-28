@@ -16,7 +16,7 @@ void gfx_rect_draw(const gfx_rect_t* this) {
     if (this->border_width >= 0) {
       ID2D1RenderTarget_DrawRoundedRectangle(
         render_target, (D2D1_ROUNDED_RECT*)&rect, brush, this->border_width,
-        this->stroke->__stroke
+        this->stroke->stroke
       );
     } else {
       ID2D1RenderTarget_FillRoundedRectangle(
@@ -26,7 +26,7 @@ void gfx_rect_draw(const gfx_rect_t* this) {
   } else if (this->border_width > 0) {
     ID2D1RenderTarget_DrawRectangle(
       render_target, (D2D1_RECT_F*)&this->rect, brush, this->border_width,
-      this->stroke->__stroke
+      this->stroke->stroke
     );
   } else {
     ID2D1RenderTarget_FillRectangle(

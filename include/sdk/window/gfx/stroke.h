@@ -8,7 +8,7 @@ typedef enum stroke_style_t {
 } stroke_style_t;
 
 typedef struct gfx_stroke_props_t {
-  const window_t* window;
+  window_t* window;
   stroke_style_t style;
 } gfx_stroke_props_t;
 

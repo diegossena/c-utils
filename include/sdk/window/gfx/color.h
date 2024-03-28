@@ -15,7 +15,4 @@ typedef struct gfx_color_t gfx_color_t;
 
 typedef struct color_t { f32 r, g, b, a; } color_t;
 
-// void gfx_color_new(gfx_color_t*, window_t*, color_t);
-// void gfx_color_free(gfx_color_t*);
-
 #endif

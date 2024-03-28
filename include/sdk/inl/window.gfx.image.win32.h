@@ -4,10 +4,18 @@
 
 typedef struct gfx_image_src_t {
   const u16 width, height;
-  ID2D1Bitmap* bitmap;
+  ID2D1Bitmap* __bitmap;
+  // listeners
+  event_listener_t ondestroy;
 } gfx_image_src_t;
-
-void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_t* window) {
+void gfx_image_src_free(gfx_image_src_t* this) {
+  assert(this->__bitmap);
+  ID2D1Bitmap_Release(this->__bitmap);
+  emitter_off(&this->ondestroy);
+  __leaks_memory_decrement();
+}
+void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, window_t* window) {
+  assert(this->__bitmap);
   assert(path);
   assert(window);
   HRESULT result;
@@ -59,12 +67,18 @@ void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_
   }
   result = window->__d2d_render_target->lpVtbl->CreateBitmapFromWicBitmap(
     window->__d2d_render_target, (IWICBitmapSource*)converter, null,
-    &this->bitmap
+    &this->__bitmap
   );
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
   __leaks_memory_increment();
+  // register
+  this->ondestroy = (event_listener_t) {
+    .callback = (listener_t)gfx_image_src_free,
+    .context = this
+  };
+  emitter_on(&window->onclose, &this->ondestroy);
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:
@@ -72,15 +86,10 @@ decoder_free:
 wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
 }
-void gfx_image_src_free(gfx_image_src_t* this) {
-  assert(this->bitmap);
-  ID2D1Bitmap_Release(this->bitmap);
-  __leaks_memory_decrement();
-}
 void gfx_image_draw(const gfx_image_t* this) {
   const window_t* window = this->window;
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
-  ID2D1Bitmap* bitmap = this->src->bitmap;
+  ID2D1Bitmap* bitmap = this->src->__bitmap;
   D2D1_RECT_F position = {
     this->src_position.x, this->src_position.y,
     this->src_position.x + this->src_width, this->src_position.y + this->src_height,

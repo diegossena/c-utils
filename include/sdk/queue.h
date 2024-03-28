@@ -10,6 +10,13 @@
     it = it_next, it_next = (type*)it->queue.next \
   )
 
+// #define queue_foreach(type, head) \
+//   for ( \
+//     type* it = (type*)head.next; \
+//     it != (type*)&head; \
+//     it = (type*)it->queue.next \
+//   )
+
 typedef struct queue_t queue_t;
 typedef struct queue_t {
   queue_t* next;

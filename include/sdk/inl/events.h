@@ -15,9 +15,9 @@ void emitter_off(event_listener_t* listener) {
 void emitter_emit(queue_t* emitter) {
   event_listener_t* it = (event_listener_t*)emitter->next;
   while (it != (event_listener_t*)emitter) {
-    event_listener_t* next = (event_listener_t*)it->queue.next;
+    // event_listener_t* next = (event_listener_t*)it->queue.next;
     it->callback(it->context);
-    it = next;
+    it = (event_listener_t*)it->queue.next;
   }
 }
 void callback_emit(callback_t* this) {

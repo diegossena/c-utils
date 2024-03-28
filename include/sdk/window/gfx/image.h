@@ -23,7 +23,4 @@ typedef struct gfx_image_t {
   u16 src_width, src_height;
 } gfx_image_t;
 
-void gfx_image_src_new(gfx_image_src_t*, const wchar_t* path, const window_t*);
-void gfx_image_src_free(gfx_image_src_t*);
-
 #endif
