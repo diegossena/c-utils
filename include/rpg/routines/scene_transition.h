@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../game.h"
-#include "../entities/entity.h"
 #include <sdk/events.h>
 
 static bool __scene_in_transition = false;
