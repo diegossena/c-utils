@@ -35,7 +35,6 @@ void localmap_destroy(local_map_t* this) {
   memory_free(this);
 }
 void scene_localmap_load(game_t* game) {
-  assert(game);
   // init
   local_map_t* this = memory_alloc0(sizeof(local_map_t));
   window_t* window = game->window;
@@ -54,5 +53,6 @@ void scene_localmap_load(game_t* game) {
   // components
   tilemap_new(&this->tilemap, this->game);
   player_new(&this->player, &this->tilemap);
+  // load
   hero_home_2f_load(this);
 }
