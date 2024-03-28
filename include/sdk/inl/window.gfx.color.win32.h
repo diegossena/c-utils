@@ -11,12 +11,10 @@ typedef struct gfx_color_t {
 } gfx_color_t;
 
 void gfx_color_free(gfx_color_t* this) {
-  console_log("gfx_color_free=%d", this->__brush);
   assert(this->__brush);
   ID2D1SolidColorBrush_Release(this->__brush);
   __leaks_memory_decrement();
   emitter_off(&this->ondestroy);
-  console_log("!gfx_color_free");
 }
 void gfx_color_new(gfx_color_t* this, window_t* window, color_t color) {
   assert(window);
