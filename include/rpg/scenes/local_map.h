@@ -30,8 +30,6 @@ void localmap_draw(local_map_t* this) {
   tilemap_draw(tilemap, tilemap->bg2);
 }
 void localmap_destroy(local_map_t* this) {
-  player_free(&this->player);
-  tilemap_free(&this->tilemap);
   emitter_off(&this->ondraw);
   emitter_off(&this->ondestroy);
   memory_free(this);

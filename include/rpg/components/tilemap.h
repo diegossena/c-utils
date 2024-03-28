@@ -160,7 +160,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
     }
   }
 }
-void tilemap_free(tilemap_t* this) {
+void __tilemap_free(tilemap_t* this) {
   emitter_off(&this->ondestroy);
   emitter_off(&this->onresize);
 }
@@ -175,7 +175,7 @@ void tilemap_new(tilemap_t* this, game_t* game) {
   };
   emitter_on(&window->onresize, &this->onresize);
   this->ondestroy = (event_listener_t) {
-    .callback = (listener_t)tilemap_free,
+    .callback = (listener_t)__tilemap_free,
     .context = this
   };
   emitter_on(&window->onclose, &this->ondestroy);

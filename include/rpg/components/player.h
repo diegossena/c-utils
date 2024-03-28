@@ -164,7 +164,7 @@ void player_draw(player_t* this) {
   rect_set_height(&player.rect, sprite_height * scale);
   gfx_image_draw(&player);
 }
-void player_free(player_t* this) {
+void __player_free(player_t* this) {
   emitter_off(&this->onupdate);
   emitter_off(&this->onkeypress);
   emitter_off(&this->ondestroy);
@@ -180,7 +180,7 @@ void player_new(player_t* this, tilemap_t* tilemap) {
   };
   queue_head(&this->onupdate.queue);
   this->ondestroy = (event_listener_t) {
-    .callback = (listener_t)player_free,
+    .callback = (listener_t)__player_free,
     .context = this
   };
   emitter_on(&window->onclose, &this->ondestroy);
