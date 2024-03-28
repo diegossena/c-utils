@@ -16,6 +16,8 @@ typedef struct tilemap_t {
   // listeners
   event_listener_t onresize;
   event_listener_t ondestroy;
+  // assets
+  gfx_image_src_t pallet_town_interiors;
   // layers
   u8 bg0[TILEMAP_SIZE];
   u8 bg1[TILEMAP_SIZE];
@@ -62,7 +64,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
   // draw
   gfx_image_t tile = {
     .window = window,
-    .src = &game->pallet_town_interiors,
+    .src = &this->pallet_town_interiors,
     .extend_mode = BITMAP_EXTEND_COVER
   };
   for (i32 x = -1; x < this->visible_tiles_x + 1; x++) {
@@ -71,7 +73,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
       if (!tile_id)
         continue;
       if (tile_id <= 50) {
-        tile.src = &game->pallet_town_interiors;
+        tile.src = &this->pallet_town_interiors;
         tile.src_width = 16;
         tile.src_height = 16;
         switch (tile_id) {

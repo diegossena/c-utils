@@ -2,6 +2,15 @@
 
 #include "../entities/entity.h"
 #include "../game.h"
+// gfx_text_style_t dialog_style;
+// void dialog_style_load(game_t* this) {
+//   gfx_text_style_new((gfx_text_style_t*)&this->dialog_style, (text_style_props_t) {
+//     .window = this->window,
+//       .size = 28.f,
+//       .family = this->font_megaman_family,
+//       .weight = FONT_WEIGHT_NORMAL
+//   });
+// }
 
 typedef struct showdialog_t {
   // init

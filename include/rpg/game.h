@@ -6,13 +6,6 @@ typedef struct game_t {
   // assets
   const wchar_t* font_zelda_family;
   const wchar_t* font_megaman_family;
-  gfx_image_src_t pallet_town_interiors;
-  gfx_image_src_t character_png;
-  gfx_text_style_t dialog_style;
-  gfx_stroke_t stroke_solid;
-  gfx_color_t white;
-  gfx_color_t green;
-  gfx_color_t darkblue;
 } game_t;
 
 #include <rpg/entities/entity.h>

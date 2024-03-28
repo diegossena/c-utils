@@ -3,13 +3,13 @@
 #include <rpg/scenes/local_map.h>
 
 void hero_home_2f_unload(local_map_t* this) {
-  game_t* game = this->game;
-  gfx_image_src_free(&game->pallet_town_interiors);
+  tilemap_t* tilemap = &this->tilemap;
+  gfx_image_src_free(&tilemap->pallet_town_interiors);
 }
 void hero_home_2f_load(local_map_t* this) {
   tilemap_t* tilemap = &this->tilemap;
   game_t* game = tilemap->game;
-  gfx_image_src_new(&game->pallet_town_interiors, L"./assets/sprites/pallet_town_interiors.png", game->window);
+  gfx_image_src_new(&tilemap->pallet_town_interiors, L"./assets/sprites/pallet_town_interiors.png", game->window);
   const u8 bg0[TILEMAP_SIZE] = {
     000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,
     000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,

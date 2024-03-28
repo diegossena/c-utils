@@ -16,6 +16,8 @@ typedef struct player_t {
   event_listener_t onupdate;
   event_listener_t onkeypress;
   event_listener_t ondestroy;
+  // assets
+  gfx_image_src_t character_png;
   // props
   tilemap_t* tilemap;
   // internal::props
@@ -125,7 +127,7 @@ void player_draw(player_t* this) {
   game_t* game = tilemap->game;
   gfx_image_t player = {
     .window = game->window,
-    .src = &game->character_png,
+    .src = &this->character_png,
     .src_width = sprite_width,
     .src_height = sprite_height,
     .extend_mode = BITMAP_EXTEND_COVER,
@@ -165,6 +167,7 @@ void player_draw(player_t* this) {
   gfx_image_draw(&player);
 }
 void __player_free(player_t* this) {
+  gfx_image_src_free(&this->character_png);
   emitter_off(&this->onupdate);
   emitter_off(&this->onkeypress);
   emitter_off(&this->ondestroy);
@@ -173,7 +176,7 @@ void player_new(player_t* this, tilemap_t* tilemap) {
   this->tilemap = tilemap;
   game_t* game = tilemap->game;
   window_t* window = game->window;
-  gfx_image_src_new(&game->character_png, L"./assets/sprites/character.png", window);
+  gfx_image_src_new(&this->character_png, L"./assets/sprites/character.png", window);
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
   this->onupdate = (event_listener_t) {

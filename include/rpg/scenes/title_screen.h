@@ -4,8 +4,6 @@
 #include <sdk/window/gfx/text.h>
 
 #include <rpg/game.h>
-#include <rpg/components/showdialog.h>
-#include <rpg/components/assets.h>
 #include <rpg/routines/scene_transition.h>
 #include <rpg/scenes/local_map.h>
 
@@ -17,13 +15,14 @@ typedef struct title_screen_t {
   event_listener_t destroy;
   // assets
   gfx_text_style_t title_style, play_style;
+  gfx_color_t white;
   // components
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
 void titlescreen_free(title_screen_t* this) {
   game_t* game = this->game;
-  gfx_color_free(&game->white);
+  gfx_color_free(&this->white);
   gfx_text_style_free(&this->title_style);
   gfx_text_style_free(&this->play_style);
   gfx_text_free(&this->title);
@@ -74,7 +73,7 @@ void scene_titlescreen_load(game_t* game) {
   };
   emitter_on(&window->onkeydown, &this->onkeydown);
   // assets
-  white_load(game);
+  gfx_color_new(&this->white, window, COLOR_WHITE);
   gfx_text_style_new(&this->title_style, (text_style_props_t) {
     .window = window,
       .family = game->font_zelda_family,
@@ -93,7 +92,7 @@ void scene_titlescreen_load(game_t* game) {
   this->title = (gfx_text_t) {
     .window = window,
     .rect = { 250.f, 10.f },
-    .color = &this->game->white,
+    .color = &this->white,
     .style = &this->title_style
   };
   gfx_text_new(&this->title);
@@ -104,7 +103,7 @@ void scene_titlescreen_load(game_t* game) {
     .window = window,
     .rect = { 500.f, 500.f },
     .style = &this->play_style,
-    .color = &this->game->white,
+    .color = &this->white,
   };
   gfx_text_new(&this->press_space);
   wstring_append_cwstr(&this->press_space.text, L"Press Space");
@@ -114,7 +113,7 @@ void scene_titlescreen_load(game_t* game) {
     .window = window,
     .rect = { 545.f, 530.f },
     .style = &this->play_style,
-    .color = &this->game->white,
+    .color = &this->white,
   };
   gfx_text_new(&this->to_play);
   wstring_append_cwstr(&this->to_play.text, L"to start");
