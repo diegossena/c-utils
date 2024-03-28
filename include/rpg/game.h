@@ -23,7 +23,7 @@ void game_destroy(game_t* this) {
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
-  game_t* this = memory_alloc0(sizeof(game_t));
+  game_t* this = memory_alloc(sizeof(game_t));
   // props
   this->window = window;
   window->context = this;
