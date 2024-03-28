@@ -2,7 +2,6 @@
 
 typedef struct game_t {
   window_t* window;
-  bool __in_transition;
   event_listener_t ondestroy;
   // assets
   gfx_image_src_t pallet_town_interiors;
@@ -35,7 +34,6 @@ void game_onpreload(window_t* window) {
   // props
   this->window = window;
   window->context = this;
-  this->__in_transition = false;
   // fonts
   gfx_font_load(
     window, L".\\assets\\fonts\\zelda-font.ttf"

@@ -44,7 +44,7 @@ void titlescreen_onkeydown(title_screen_t* this) {
   if (window->has_focus) {
     if (keyboard_pressed(KEY_SPACE)) {
       scene_transition((scene_transition_props_t) {
-        .game = this->game,
+        .window = window,
           .scene_destroy = { (listener_t)titlescreen_destroy, this },
           .scene_load = { (listener_t)scene_localmap_load, this->game },
       });

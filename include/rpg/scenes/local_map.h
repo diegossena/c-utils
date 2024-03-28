@@ -53,10 +53,8 @@ void scene_localmap_load(game_t* game) {
     .context = this
   };
   emitter_on(&window->onclose, &this->ondestroy);
-  // tilemap
+  // components
   tilemap_new(&this->tilemap, this->game);
-  // player
   player_new(&this->player, &this->tilemap);
-  // tilemap
   hero_home_2f_load(this);
 }
