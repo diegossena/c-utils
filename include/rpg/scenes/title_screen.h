@@ -17,18 +17,18 @@ typedef struct title_screen_t {
   event_listener_t destroy;
   // assets
   gfx_text_style_t title_style, play_style;
-  // elements
+  // components
   gfx_text_t title, press_space, to_play;
 } title_screen_t;
 
 void titlescreen_free(title_screen_t* this) {
   game_t* game = this->game;
   gfx_color_free(&game->white);
+  gfx_text_style_free(&this->title_style);
+  gfx_text_style_free(&this->play_style);
   gfx_text_free(&this->title);
   gfx_text_free(&this->press_space);
   gfx_text_free(&this->to_play);
-  gfx_text_style_free(&this->title_style);
-  gfx_text_style_free(&this->play_style);
   emitter_off(&this->ondraw);
   emitter_off(&this->onkeydown);
   emitter_off(&this->destroy);
@@ -46,8 +46,8 @@ void titlescreen_onkeydown(title_screen_t* this) {
     if (!scene_in_transition && keyboard_pressed(KEY_SPACE)) {
       scene_transition((scene_transition_props_t) {
         .window = window,
-          .scene_destroy = { (listener_t)titlescreen_free, this },
-          .scene_load = { (listener_t)scene_localmap_load, this->game },
+          .unload = { (listener_t)titlescreen_free, this },
+          .load = { (listener_t)scene_localmap_load, this->game },
       });
     }
   }

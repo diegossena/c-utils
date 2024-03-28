@@ -21,8 +21,8 @@ typedef struct scene_transition_t {
 
 typedef struct scene_transition_props_t {
   window_t* window;
-  callback_t scene_destroy;
-  callback_t scene_load;
+  callback_t unload;
+  callback_t load;
 } scene_transition_props_t;
 
 void __scene_transition_destroy(scene_transition_t* this) {
@@ -75,8 +75,8 @@ void scene_transition(scene_transition_props_t props) {
   // copy
   this->window = window;
   this->timer = 0.f;
-  this->ondestroy = props.scene_destroy;
-  this->onload = props.scene_load;
+  this->ondestroy = props.unload;
+  this->onload = props.load;
   // init
   this->loading = true;
   this->background = (gfx_rect_t) {
