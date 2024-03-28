@@ -104,6 +104,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
           case 17:
           case 31:
           case 39:
+          case 47:
             tile.src_position.x = 53;
             break;
           case 4:
@@ -111,6 +112,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
           case 18:
           case 32:
           case 40:
+          case 48:
             tile.src_position.x = 69;
             break;
           case 11:
@@ -129,6 +131,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
           case 25:
           case 35:
           case 42:
+          case 49:
             tile.src_position.x = 117;
             break;
           case 21:
@@ -158,6 +161,8 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
           tile.src_position.y = 85;
         } else if (tile_id <= 46) {
           tile.src_position.y = 101;
+        } else if (tile_id <= 49) {
+          tile.src_position.y = 117;
         }
       }
       tile.rect.left_top.x = x * TILE_SIZE - this->tile_offset_x;

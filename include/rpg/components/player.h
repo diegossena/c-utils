@@ -108,9 +108,9 @@ void __player_onkeypress(player_t* this) {
   }
   if (update) {
     char tile_id = tilemap_tiles_get(
-      tilemap->bg1, this->x + this->distance_x, this->y + this->distance_y
+      tilemap->bg0, this->x + this->distance_x, this->y + this->distance_y
     );
-    if (tile_id == 0) {
+    if (tile_id) {
       emitter_off(&this->onkeypress);
       emitter_on(&window->onupdate, &this->onupdate);
       window_render_request(window);
