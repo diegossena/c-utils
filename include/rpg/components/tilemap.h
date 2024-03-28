@@ -124,6 +124,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
           case 20:
           case 25:
           case 35:
+          case 42:
             tile.src_position.x = 117;
             break;
           case 21:
@@ -149,7 +150,7 @@ void tilemap_draw(tilemap_t* this, const u8* layer) {
           tile.src_position.y = 53;
         } else if (tile_id <= 35) {
           tile.src_position.y = 69;
-        } else {
+        } else if (tile_id <= 42) {
           tile.src_position.y = 85;
         }
       }
