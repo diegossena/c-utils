@@ -138,5 +138,4 @@ void hero_home_2f_load(local_map_t* this) {
   player->y = 31;
   this->player.direction = PLAYER_UP;
   tilemap_camera_update(tilemap, player->x, player->y);
-
 }

@@ -18,7 +18,6 @@ void gfx_color_free(gfx_color_t* this) {
 }
 void gfx_color_new(gfx_color_t* this, window_t* window, color_t color) {
   assert(window);
-  assert(!this->__brush);
   D2D1_BRUSH_PROPERTIES brush_properties;
   ID2D1RenderTarget_CreateSolidColorBrush(
     window->__d2d_render_target, (D2D1_COLOR_F*)&color, null, &this->__brush

@@ -15,7 +15,7 @@ void gfx_image_src_free(gfx_image_src_t* this) {
   __leaks_memory_decrement();
 }
 void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, window_t* window) {
-  assert(this->__bitmap);
+  assert(!this->__bitmap);
   assert(path);
   assert(window);
   HRESULT result;

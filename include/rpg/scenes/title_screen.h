@@ -23,7 +23,7 @@ typedef struct title_screen_t {
 
 void titlescreen_free(title_screen_t* this) {
   game_t* game = this->game;
-  // gfx_color_free(&game->white);
+  gfx_color_free(&game->white);
   gfx_text_free(&this->title);
   gfx_text_free(&this->press_space);
   gfx_text_free(&this->to_play);
