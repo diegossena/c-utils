@@ -34,7 +34,7 @@ void titlescreen_destroy(title_screen_t* this) {
 }
 
 void titlescreen_ondraw(title_screen_t* this) {
-  gfx_image_draw(&this->background);
+  // gfx_image_draw(&this->background);
   gfx_text_draw(&this->title);
   gfx_text_draw(&this->press_space);
   gfx_text_draw(&this->to_play);
@@ -88,15 +88,15 @@ void scene_titlescreen_load(game_t* game) {
       .weight = FONT_WEIGHT_BOLD
   });
   // background
-  this->background = (gfx_image_t) {
-    .window = window,
-    .src_position = { 609, 929 },
-    .src_width = 61,
-    .src_height = 57,
-    .src = &game->pallet_town_interiors
-  };
-  rect_set_width(&this->background.rect, window->width);
-  rect_set_height(&this->background.rect, window->height);
+  // this->background = (gfx_image_t) {
+  //   .window = window,
+  //   .src_position = { 609, 929 },
+  //   .src_width = 61,
+  //   .src_height = 57,
+  //   .src = &game->pallet_town_interiors
+  // };
+  // rect_set_width(&this->background.rect, window->width);
+  // rect_set_height(&this->background.rect, window->height);
   // title
   this->title = (gfx_text_t) {
     .window = window,

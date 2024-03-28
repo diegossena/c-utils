@@ -3,8 +3,8 @@
 #ifdef PLATFORM_WINDOWS
 
 typedef struct gfx_image_src_t {
-  ID2D1Bitmap* __bitmap;
   const u16 width, height;
+  ID2D1Bitmap* bitmap;
 } gfx_image_src_t;
 
 void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_t* window) {
@@ -59,7 +59,7 @@ void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, const window_
   }
   result = window->__d2d_render_target->lpVtbl->CreateBitmapFromWicBitmap(
     window->__d2d_render_target, (IWICBitmapSource*)converter, null,
-    &this->__bitmap
+    &this->bitmap
   );
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
@@ -73,13 +73,13 @@ wic_factory_free:
   wic_factory->lpVtbl->Release(wic_factory);
 }
 void gfx_image_src_free(gfx_image_src_t* this) {
-  ID2D1Bitmap_Release(this->__bitmap);
+  ID2D1Bitmap_Release(this->bitmap);
   __leaks_memory_decrement();
 }
 void gfx_image_draw(const gfx_image_t* this) {
   const window_t* window = this->window;
   ID2D1RenderTarget* render_target = this->window->__d2d_render_target;
-  ID2D1Bitmap* bitmap = this->src->__bitmap;
+  ID2D1Bitmap* bitmap = this->src->bitmap;
   D2D1_RECT_F position = {
     this->src_position.x, this->src_position.y,
     this->src_position.x + this->src_width, this->src_position.y + this->src_height,

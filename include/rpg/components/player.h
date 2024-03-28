@@ -171,7 +171,9 @@ void __player_free(player_t* this) {
 }
 void player_new(player_t* this, tilemap_t* tilemap) {
   this->tilemap = tilemap;
-  window_t* window = this->tilemap->game->window;
+  game_t* game = tilemap->game;
+  window_t* window = game->window;
+  gfx_image_src_new(&game->character_png, L"./assets/sprites/character.png", window);
   this->direction = PLAYER_DOWN;
   this->state = PLAYER_STATE_STANDING_1;
   this->onupdate = (event_listener_t) {

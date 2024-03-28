@@ -30,7 +30,7 @@ void game_destroy(game_t* this) {
   memory_free(this);
 }
 void game_onpreload(window_t* window) {
-  game_t* this = memory_alloc(sizeof(game_t));
+  game_t* this = memory_alloc0(sizeof(game_t));
   // props
   this->window = window;
   window->context = this;
@@ -59,8 +59,6 @@ void game_onload(window_t* window) {
       .family = this->font_megaman_family,
       .weight = FONT_WEIGHT_NORMAL
   });
-  gfx_image_src_new(&this->pallet_town_interiors, L"./assets/sprites/pallet_town_interiors.png", window);
-  gfx_image_src_new(&this->character_png, L"./assets/sprites/character.png", window);
   gfx_stroke_new(&this->stroke_solid, (gfx_stroke_props_t) {
     window, STROKE_STYLE_SOLID
   });

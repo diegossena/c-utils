@@ -4,6 +4,8 @@
 
 void hero_home_2f_load(local_map_t* this) {
   tilemap_t* tilemap = &this->tilemap;
+  game_t* game = tilemap->game;
+  gfx_image_src_new(&game->pallet_town_interiors, L"./assets/sprites/pallet_town_interiors.png", game->window);
   const u8 bg0[TILEMAP_SIZE] = {
     000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,
     000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,
@@ -136,4 +138,5 @@ void hero_home_2f_load(local_map_t* this) {
   player->y = 31;
   this->player.direction = PLAYER_UP;
   tilemap_camera_update(tilemap, player->x, player->y);
+
 }
