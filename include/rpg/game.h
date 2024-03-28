@@ -20,11 +20,11 @@ typedef struct game_t {
 
 void game_destroy(game_t* this) {
   emitter_off(&this->ondestroy);
-  gfx_text_style_free((gfx_text_style_t*)&this->dialog_style);
-  gfx_stroke_free((gfx_stroke_t*)&this->stroke_solid);
-  gfx_color_free((gfx_color_t*)&this->white);
-  gfx_color_free((gfx_color_t*)&this->green);
-  gfx_color_free((gfx_color_t*)&this->darkblue);
+  gfx_text_style_free(&this->dialog_style);
+  gfx_stroke_free(&this->stroke_solid);
+  gfx_color_free(&this->white);
+  gfx_color_free(&this->green);
+  gfx_color_free(&this->darkblue);
   if (this->pallet_town_interiors.bitmap) {
     gfx_image_src_free(&this->pallet_town_interiors);
   }
