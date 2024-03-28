@@ -14,6 +14,7 @@ typedef struct local_map_t {
   // event_listener_t
   event_listener_t ondraw;
   event_listener_t ondestroy;
+  listener_t unload;
   // components
   tilemap_t tilemap;
   player_t player;
@@ -30,6 +31,7 @@ void localmap_draw(local_map_t* this) {
   tilemap_draw(tilemap, tilemap->bg2);
 }
 void localmap_destroy(local_map_t* this) {
+  this->unload(this);
   emitter_off(&this->ondraw);
   emitter_off(&this->ondestroy);
   memory_free(this);

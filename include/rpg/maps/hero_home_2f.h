@@ -2,6 +2,10 @@
 
 #include <rpg/scenes/local_map.h>
 
+void hero_home_2f_unload(local_map_t* this) {
+  game_t* game = this->game;
+  gfx_image_src_free(&game->pallet_town_interiors);
+}
 void hero_home_2f_load(local_map_t* this) {
   tilemap_t* tilemap = &this->tilemap;
   game_t* game = tilemap->game;
@@ -138,4 +142,5 @@ void hero_home_2f_load(local_map_t* this) {
   player->y = 31;
   this->player.direction = PLAYER_UP;
   tilemap_camera_update(tilemap, player->x, player->y);
+  this->unload = (listener_t)hero_home_2f_unload;
 }

@@ -39,21 +39,19 @@ typedef struct gfx_text_t {
   rect_t rect;
   const gfx_text_style_t* style;
   const gfx_color_t* color;
-  // listeners
-  event_listener_t __ondestroy;
 } gfx_text_t;
 
 /**
  * @brief This function should only be used in the onload event of the window_t object.
  */
-void gfx_font_load(window_t*, const wchar_t* path);
+// void gfx_font_load(window_t*, const wchar_t* path);
 
-void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t);
-void gfx_text_style_free(gfx_text_style_t*);
+// void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t);
+// void gfx_text_style_free(gfx_text_style_t*);
 
-void gfx_text_new(gfx_text_t*);
-void gfx_text_free(gfx_text_t*);
-void gfx_text_adjust(gfx_text_t*);
-void gfx_text_draw(const gfx_text_t*);
+// void gfx_text_new(gfx_text_t*);
+// void gfx_text_free(gfx_text_t*);
+// void gfx_text_adjust(gfx_text_t*);
+// void gfx_text_draw(const gfx_text_t*);
 
 #endif

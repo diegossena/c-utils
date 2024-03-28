@@ -5,13 +5,10 @@
 typedef struct gfx_image_src_t {
   const u16 width, height;
   ID2D1Bitmap* __bitmap;
-  // listeners
-  event_listener_t ondestroy;
 } gfx_image_src_t;
 void gfx_image_src_free(gfx_image_src_t* this) {
   assert(this->__bitmap);
   ID2D1Bitmap_Release(this->__bitmap);
-  emitter_off(&this->ondestroy);
   __leaks_memory_decrement();
 }
 void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, window_t* window) {
@@ -73,12 +70,6 @@ void gfx_image_src_new(gfx_image_src_t* this, const wchar_t* path, window_t* win
     error("CreateBitmapFromWicBitmap", result);
   }
   __leaks_memory_increment();
-  // register
-  this->ondestroy = (event_listener_t) {
-    .callback = (listener_t)gfx_image_src_free,
-    .context = this
-  };
-  emitter_on(&window->onclose, &this->ondestroy);
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:

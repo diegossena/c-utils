@@ -26,7 +26,6 @@ typedef struct __font_queue_t {
 
 typedef struct gfx_text_style_t {
   IDWriteTextFormat* __format;
-  event_listener_t ondestroy;
 } gfx_text_style_t;
 
 void gfx_font_load(window_t* this, const wchar_t* path) {
@@ -40,11 +39,9 @@ void gfx_font_load(window_t* this, const wchar_t* path) {
 void gfx_text_style_free(gfx_text_style_t* this) {
   assert(this->__format);
   IDWriteTextFormat_Release(this->__format);
-  emitter_off(&this->ondestroy);
   __leaks_memory_decrement();
 }
 void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t props) {
-  assert(!this->__format);
   assert(props.window);
   assert(props.size > 0);
   assert(props.family);
@@ -58,12 +55,6 @@ void gfx_text_style_new(gfx_text_style_t* this, text_style_props_t props) {
     &this->__format
   );
   __leaks_memory_increment();
-  // register
-  this->ondestroy = (event_listener_t) {
-    .callback = (listener_t)gfx_text_style_free,
-    .context = this
-  };
-  emitter_on(&window->onclose, &this->ondestroy);
 }
 void gfx_text_adjust(gfx_text_t* this) {
   IDWriteTextFormat* text_format = this->style->__format;

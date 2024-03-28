@@ -6,14 +6,12 @@
 
 typedef struct gfx_stroke_t {
   ID2D1StrokeStyle* stroke;
-  event_listener_t __ondestroy;
 } gfx_stroke_t;
 
 void gfx_stroke_free(gfx_stroke_t* this) {
   assert(this->stroke);
   ID2D1StrokeStyle_Release(this->stroke);
   __leaks_memory_decrement();
-  emitter_off(&this->__ondestroy);
 }
 void gfx_stroke_new(gfx_stroke_t* this, gfx_stroke_props_t props) {
   assert(props.window);
@@ -40,12 +38,6 @@ void gfx_stroke_new(gfx_stroke_t* this, gfx_stroke_props_t props) {
     (ID2D1StrokeStyle**)&this->stroke
   );
   __leaks_memory_increment();
-  // register
-  this->__ondestroy = (event_listener_t) {
-    .callback = (listener_t)gfx_stroke_free,
-    .context = this
-  };
-  emitter_on(&window->onclose, &this->__ondestroy);
 }
 
 #endif
