@@ -2,6 +2,9 @@
 
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
   queue_constructor(&this->tasks);
+#ifdef SDK_NET_H
+  __net_startup();
+#endif
 }
 SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
   u64 i;
@@ -20,4 +23,7 @@ SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
       ++i;
     }
   }
+#ifdef SDK_NET_H
+  __net_shutdown();
+#endif
 }

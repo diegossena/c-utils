@@ -1,3 +1,10 @@
+#ifndef SDK_ERROR_H
+#define SDK_ERROR_H
+
+#include <sdk/types.h>
+
+#include <sdk/console.h>
+
 typedef enum error_code_t {
   ERR_MIN = MIN_I16,
   ERR_INVALID_URL,
@@ -50,4 +57,7 @@ typedef enum error_code_t {
   ERR_CO_E_NOTINITIALIZED = 0x800401f0
 } error_code_t;
 
+SDK_EXPORT const char* error_cstr(i32 code);
 SDK_EXPORT void error(const char* message, error_code_t code);
+
+#endif
