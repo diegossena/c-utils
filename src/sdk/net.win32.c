@@ -14,8 +14,8 @@ SDK_EXPORT void __net_startup() {
     __net_shutdown();
   }
 }
-SDK_EXPORT u64 __socket_new(i32 family, i32 type, i32 protocol) {
-  u64 this = socket(family, type, protocol);
+SDK_EXPORT u64 __socket_new(socket_type_t type) {
+  u64 this = socket(AF_INET, type, 0);
   if (this == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
     return this;

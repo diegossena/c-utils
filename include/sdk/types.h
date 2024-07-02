@@ -43,7 +43,13 @@ typedef unsigned long long u64; // 0 ~ 18446744073709551615
 typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
+typedef u8 byte_t;
+
 typedef void (*callback_t)(void* context);
+typedef struct listener_t {
+  void* context;
+  callback_t callback;
+} listener_t;
 
 // inlining
 
