@@ -1,5 +1,6 @@
 #include <sdk/taskmanager.h>
 #include <sdk/net.h>
+#include <sdk/tcp.h>
 #include <sdk/snmp.h>
 #include <sdk/unity.h>
 
