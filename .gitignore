@@ -1,4 +1,4 @@
 *.dll
 *.exe
 *.cso
-/build.bat
+# /build.bat

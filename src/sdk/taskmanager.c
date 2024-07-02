@@ -13,7 +13,7 @@ SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
      * Process immediate callbacks a small fixed number of times
      * to avoid loop starvation.
      */
-    while ((queue_t*)it != this && i < 8) {
+    while ((queue_t*)it != &this->tasks && i < 8) {
       next = (task_t*)it->queue.next;
       it->handle(it->context);
       it = next;

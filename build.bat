@@ -1,4 +1,5 @@
 @ECHO OFF
+CLS
 SET package_name=%1
 SET defines=-DSDK_DEVELOPMENT -DSDK_UNITY
 SET compiler_flags=-O3
@@ -13,21 +14,22 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
   SET /A "start=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
 )
 :: compile
-gcc %compiler_flags% ./src/%package_name%.c -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
+SET cFilenames=
+FOR /R ./src/%package_name% %%f IN (*.c) DO CALL SET cFilenames=%%cFilenames%% "%%f"
+gcc %compiler_flags%%cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
 :: get end time
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
   set /A "end=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
 )
 SET /A elapsed=end-start
-ECHO %package_name% compiled in %elapsed%ms
-IF %ERRORLEVEL% NEQ 0 (
-  GOTO :EOF
-) 
 :: bin size
 for %%A in ("bin\%package_name%.exe") do (
   SET "tamanho=%%~zA"
 )
-ECHO file.size=%tamanho%
+ECHO %package_name% { time: %elapsed%ms, size: %tamanho% bytes }
+IF %ERRORLEVEL% NEQ 0 (
+  GOTO :EOF
+) 
 :: get start time
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
   SET /A "start=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
@@ -39,4 +41,4 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
   set /A "end=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
 )
 SET /A elapsed=end-start
-ECHO %package_name% executed in %elapsed%ms
+ECHO %package_name% { execution: %elapsed%ms }
