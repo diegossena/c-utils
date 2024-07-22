@@ -14,6 +14,7 @@ typedef struct task_t {
 } task_t;
 
 typedef struct taskmanager_t {
+  queue_t services; // task_t
   queue_t tasks; // task_t
 } taskmanager_t;
 

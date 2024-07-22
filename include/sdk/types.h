@@ -8,6 +8,8 @@
 
 #if _WIN64 || __x86_64__
 #define PLATFORM_X64 1
+#else
+#define PLATFORM_X32 1
 #endif
 
 #define STRINGIZE_KEY(x) #x
