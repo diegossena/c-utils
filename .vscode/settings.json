@@ -1,5 +1,10 @@
 {
   "files.associations": {
-    "*.h": "c"
+    ".htaccess": "ruby",
+    "*.h": "c",
+    "compare": "c",
+    "type_traits": "c",
+    "limits": "c",
+    "new": "c"
   }
 }

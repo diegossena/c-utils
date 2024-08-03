@@ -1,5 +1,7 @@
 #include <sdk/taskmanager.h>
 
+#define TASKS_LOOP_MAX 7
+
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
   queue_constructor(&this->services);
   queue_constructor(&this->tasks);
@@ -7,14 +9,17 @@ SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
   __net_startup();
 #endif
 }
-SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
+SDK_EXPORT void taskmanager_run(const taskmanager_t* this) {
   u64 i;
   task_t
-    * service, * service_next,
-    * task, * task_next;
+    * service = (task_t*)&this->services, * service_next,
+    * task = (task_t*)&this->tasks, * task_next;
+  bool running = false;
   while (!queue_is_empty(&this->services) || !queue_is_empty(&this->tasks)) {
     service_next = (task_t*)service->queue.next;
-    service->handle(service->context);
+    if ((queue_t*)service != &this->services) {
+      service->handle(service->context);
+    }
     service = service_next;
     /**
      * Process immediate callbacks a small fixed number of times
@@ -22,7 +27,7 @@ SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
      */
     i = 0;
     task = (task_t*)this->tasks.next;
-    while ((queue_t*)task != &this->tasks && i < 7) {
+    while ((queue_t*)task != &this->tasks && i < TASKS_LOOP_MAX) {
       task_next = (task_t*)task->queue.next;
       task->handle(task->context);
       task = task_next;

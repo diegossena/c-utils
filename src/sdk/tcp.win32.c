@@ -4,14 +4,14 @@
 #include <winsock2.h>
 #include <windows.h>
 
-SDK_EXPORT void tcp_ip4_connect(tcp_t* this, u32 ip4, u16 port) {
+SDK_EXPORT void tcp_ip4_connect(tcp_t* this, u32 ip4, u16 net_port) {
   this->__socket = __socket_new(NET_FAMILY_IPV4, SOCKET_TYPE_STREAM);
   if (this->__socket < 0) {
     closesocket(this->__socket);
   }
   this->address.family = NET_FAMILY_IPV4;
   this->address.ip4 = ip4;
-  this->address.net_port = net_port_from_short(port);
+  this->address.net_port = net_port;
   this->__task.handle = (callback_t)__tcp_connect_handle;
 }
 SDK_EXPORT void tcp_connect(tcp_t* this, net_address_t* address) {
@@ -70,7 +70,7 @@ SDK_EXPORT void __tcp_connecting_handle(tcp_t* this) {
 }
 SDK_EXPORT void tcp_free(tcp_t* this) {
   closesocket((SOCKET)this->__socket);
-  queue_remove(&this->__task.queue);
+  queue_remove((queue_t*)&this->__task);
   memory_free(this);
 }
 

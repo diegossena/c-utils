@@ -15,7 +15,6 @@ typedef void (*tcp_onerror_t)(tcp_t*, error_code_t error_code);
 /** @brief Represents a TCP socket.
  */
 typedef struct tcp_t {
-  // extends
   task_t __task;
   // public
   void* context;

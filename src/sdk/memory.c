@@ -1,6 +1,6 @@
 #include <sdk/memory.h>
 
-i32 __leaks_memory = 0;
+i64 __leaks_count = 0;
 
 SDK_EXPORT void* memory_fill(void* block, u8 value, u64 size) {
   u8* c = (u8*)block;

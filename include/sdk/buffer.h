@@ -3,7 +3,7 @@
 
 #include <sdk/types.h>
 
-#define BUFFER_SIZE 65535
+#define BUFFER_SIZE 65536
 
 typedef struct buffer_t {
   const u8* data;
