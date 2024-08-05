@@ -9,6 +9,7 @@
 typedef struct printers_query_t printers_query_t;
 typedef struct printers_query_t {
   task_t task;
+  udp_t udp;
   u32 ip4;
   u32 ip4_end;
   u64 tasks_count;
@@ -37,12 +38,13 @@ void printers_query_service(printers_query_t* this) {
 void printers_query_start(taskmanager_t* taskmanager, u32 ip4_start, u32 ip4_end) {
   if (!ip4_lessequal(ip4_start, ip4_end))
     return;
-  printers_query_t* this = memory_alloc0(sizeof(printers_query_t));
+  printers_query_t* this = memory_alloc(sizeof(printers_query_t));
   this->task.context = this;
   this->task.handle = (callback_t)printers_query_service;
   this->task.destroy = (callback_t)printers_query_destroy;
   this->ip4 = ip4_start;
   this->ip4_end = ip4_end;
+  this->tasks_count = 0;
   queue_push(&taskmanager->services, &this->task.queue);
 }
 
