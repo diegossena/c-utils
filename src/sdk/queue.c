@@ -10,6 +10,19 @@ SDK_EXPORT void queue_push(queue_t* this, queue_t* queue) {
   queue->prev->next = queue;
   this->prev = queue;
 }
+SDK_EXPORT void queue_unshift(queue_t* head, queue_t* q) {
+  q->next = head->next;
+  q->prev = head;
+  q->next->prev = q;
+  head->next = q;
+}
+SDK_EXPORT void queue_forward(queue_t* this) {
+  this->prev->next = this->next;
+  this->next = this->next->next;
+  this->prev->next->next = this;
+  this->prev->next->prev = this->prev;
+  this->prev = this->prev->next;
+}
 SDK_EXPORT void queue_remove(queue_t* this) {
   this->prev->next = this->next;
   this->next->prev = this->prev;

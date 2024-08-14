@@ -30,6 +30,8 @@
 #define MAX_F32 3.40282e+38F
 #define MIN_F32 -MAX_F32
 
+// types
+
 typedef _Bool bool;
 
 typedef signed char i8; // -128 ~ 127
@@ -47,11 +49,7 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef u8 byte_t;
 
-typedef void (*callback_t)(void* context);
-typedef struct listener_t {
-  void* context;
-  callback_t callback;
-} listener_t;
+typedef void (*function_t)(void* this);
 
 // inlining
 
@@ -70,8 +68,10 @@ typedef struct listener_t {
 /** @brief Inline qualifier */
 #define SDK_INLINE static inline
 /** @brief No-inline qualifier */
-#define sdk_noinline
+#define SDK_NOINLINE
 #endif
+
+// building
 
 #ifdef SDK_UNITY
 #define SDK_EXPORT SDK_INLINE

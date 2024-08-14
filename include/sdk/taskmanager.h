@@ -4,12 +4,11 @@
 #include <sdk/types.h>
 #include <sdk/queue.h>
 
-typedef struct task_t task_t;
 typedef struct task_t {
   queue_t queue;
   void* context;
-  callback_t handle;
-  callback_t destroy;
+  function_t handle;
+  function_t destroy;
 } task_t;
 
 typedef struct taskmanager_t {

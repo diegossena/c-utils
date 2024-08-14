@@ -26,7 +26,16 @@
 #ifdef SDK_TASKMANAGER_H
 #include <src/sdk/taskmanager.c>
 #endif
-#ifdef SDK_NET_UDP_H
-// #include <src/sdk/udp.c>
+#ifdef SDK_UDP_H
+#include <src/sdk/udp.c>
 #include <src/sdk/udp.win32.c>
+#endif
+#ifdef SDK_EVENTS_H
+#include <src/sdk/events.c>
+#endif
+#ifdef SDK_DATE_H
+#include <src/sdk/date.c>
+#endif
+#ifdef SDK_SNMP_H
+#include <src/sdk/snmp.c>
 #endif

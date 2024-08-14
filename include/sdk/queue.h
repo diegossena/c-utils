@@ -22,7 +22,9 @@ typedef struct queue_t {
 
 SDK_EXPORT void queue_constructor(queue_t* this);
 SDK_EXPORT void queue_push(queue_t* this, queue_t* queue);
+SDK_EXPORT void queue_unshift(queue_t* head, queue_t* q);
 SDK_EXPORT void queue_remove(queue_t* this);
+SDK_EXPORT void queue_forward(queue_t* this);
 SDK_EXPORT bool queue_is_empty(const queue_t* this);
 
 #endif

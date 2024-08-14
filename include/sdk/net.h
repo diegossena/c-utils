@@ -35,10 +35,11 @@ SDK_EXPORT u32 ip4_from_cstr(const char* ip4_cstr);
 SDK_EXPORT const char* ip4_to_cstr(u32 ip4);
 SDK_EXPORT u32 ip4_increment(u32 ip4);
 SDK_EXPORT bool ip4_lessequal(u32 oip4, u32 fip4);
+SDK_EXPORT u16 net_port_from_short(u16 port);
 SDK_EXPORT u16 net_port_to_short(u16 port);
 SDK_EXPORT void __net_startup();
 SDK_EXPORT void __net_shutdown();
-SDK_EXPORT u64 __socket_new(net_family_t family, socket_type_t type);
+SDK_EXPORT u64 socket_new(net_family_t family, socket_type_t type);
 SDK_EXPORT void __socket_free(u64 fd);
 
 #endif

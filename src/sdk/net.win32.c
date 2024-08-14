@@ -3,7 +3,8 @@
 
 #include <winsock2.h>
 
-SDK_EXPORT u16 net_port_to_short(u16 port) { return htons(port); }
+SDK_EXPORT u16 net_port_from_short(u16 port) { return htons(port); }
+SDK_EXPORT u16 net_port_to_short(u16 port) { return ntohs(port); }
 SDK_EXPORT void __net_shutdown() { WSACleanup(); }
 SDK_EXPORT void __net_startup() {
   WSADATA wsaData;
@@ -13,7 +14,7 @@ SDK_EXPORT void __net_startup() {
     __net_shutdown();
   }
 }
-SDK_EXPORT u64 __socket_new(net_family_t family, socket_type_t type) {
+SDK_EXPORT u64 socket_new(net_family_t family, socket_type_t type) {
   u64 this = socket(family, type, 0);
   if (this == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
