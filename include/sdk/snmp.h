@@ -48,7 +48,8 @@ typedef struct snmp_message_t {
 } snmp_message_t;
 typedef struct snmp_send_t {
   snmp_t* snmp;
-  net_address_t address;
+  u32 ip4;
+  u16 net_port;
   buffer_t* pdu;
 } snmp_send_t;
 typedef enum snmp_error_t {

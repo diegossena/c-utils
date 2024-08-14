@@ -25,8 +25,8 @@ SDK_EXPORT void udp_service(udp_t* this) {
 }
 SDK_EXPORT void udp_writer_task(udp_writer_t* this) {
   i32 sent = sendto(
-    this->__udp->socket, this->ptr, this->remaining, 0,
-    (struct sockaddr*)&this->address, sizeof(struct sockaddr)
+    this->udp->socket, this->ptr, this->remaining, 0,
+    (struct sockaddr*)&this->address, sizeof(net_address_t)
   );
   if (sent > 0) {
     // console_log("%x udp_write_handle %d", this, sent);

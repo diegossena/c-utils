@@ -111,7 +111,6 @@ SDK_EXPORT ber_field_t ber_read_var(byte_t** stream) {
 SDK_EXPORT varbind_t ber_read_oid(byte_t** stream) {
   ber_field_t varbind_sequence = ber_read_var(stream);
   byte_t* varbind_sequence_end = (byte_t*)varbind_sequence.cstr + varbind_sequence.size;
-  assert(*(*stream) == ASN1_TYPE_OID);
   ++(*stream);
   varbind_t varbind = { .oid = {.length = *(*stream)++, .data = (*stream) }, };
   (*stream) += varbind.oid.length;

@@ -39,3 +39,9 @@
 #ifdef SDK_SNMP_H
 #include <src/sdk/snmp.c>
 #endif
+#ifdef SDK_ASN1_H
+#include <src/sdk/asn1.c>
+#endif
+#ifdef SDK_HASHSET_H
+#include <src/sdk/hashset.c>
+#endif

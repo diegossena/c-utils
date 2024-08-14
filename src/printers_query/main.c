@@ -46,10 +46,7 @@ void printers_query_service(printers_query_t* this) {
   if (this->tasks_count < TASKS_LOOP_MAX) {
     snmp_send_t send = {
       .snmp = &this->snmp,
-      .address = {
-        .family = NET_FAMILY_IPV4,
-        .net_port = net_port_from_short(161)
-      }
+      .net_port = net_port_from_short(161)
     };
     do {
       console_log(
@@ -59,7 +56,7 @@ void printers_query_service(printers_query_t* this) {
         *((u8*)&this->ip4 + 2),
         *((u8*)&this->ip4 + 3)
       );
-      send.address.ip4 = this->ip4;
+      send.ip4 = this->ip4;
       snmp_send(&send);
       if (this->ip4 == this->ip4_end) {
         return printers_query_deconstructor(this);

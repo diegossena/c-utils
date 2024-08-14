@@ -20,6 +20,7 @@ typedef struct udp_t {
   void* context;
   u64 socket;
   task_t service;
+  queue_t* tasks;
   queue_t tasks_destroy; // queue_t<listener_t>
 } udp_t;
 typedef struct udp_message_t {
@@ -33,18 +34,19 @@ typedef struct udp_writer_t {
   net_address_t address;
   udp_onwriter_t callback;
   // private
-  udp_t* __udp;
-  task_t __task;
+  udp_t* udp;
+  task_t task;
   u64 updated_at;
   // stream
-  byte_t* __buffer;
+  byte_t* buffer;
   byte_t* ptr;
   u64 __length;
   u64 remaining;
 } udp_writer_t;
 typedef struct udp_send_t {
   udp_t* udp;
-  net_address_t address;
+  u32 ip4;
+  u16 net_port;
   buffer_t* data;
   udp_onwriter_t callback;
   void* context;

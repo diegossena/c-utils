@@ -15,7 +15,7 @@ SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
 }
 SDK_EXPORT void snmp_deconstructor(snmp_t* this) {
   udp_deconstructor(&this->udp);
-  hashset_free(&this->requests);
+  hashset_deconstructor(&this->requests);
 }
 SDK_EXPORT snmp_t* snmp_new(taskmanager_t* taskmanager) {
   snmp_t* this = memory_alloc0(sizeof(snmp_t));
@@ -30,12 +30,13 @@ SDK_EXPORT void snmp_free(snmp_t* this) {
 SDK_EXPORT void snmp_send(snmp_send_t* props) {
   udp_send_t send_props = {
     .udp = &props->snmp->udp,
-    .address = props->address,
+    .ip4 = props->ip4,
+    .net_port = props->net_port,
     .data = props->pdu,
     .callback = __snmp_onwrite,
     .context = props->snmp
   };
-  hashset_add(&props->snmp->requests, props->address.ip4);
+  hashset_add(&props->snmp->requests, props->ip4);
   props->snmp->updated_at = date_now();
   udp_send(&send_props);
 }

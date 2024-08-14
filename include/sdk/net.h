@@ -13,19 +13,16 @@ typedef enum net_family_t {
   NET_FAMILY_IPV4 = 2,
   NET_FAMILY_IPV6 = 23
 } net_family_t;
+
 typedef enum socket_type_t {
   SOCKET_TYPE_STREAM = 1,
   SOCKET_TYPE_DGRAM = 2
 } socket_type_t;
 
-
 typedef struct net_address_t {
   u8 family; // net_family_t
   u16	net_port;
-  union {
-    u32 ip4;
-    u8 ip6[16];
-  };
+  u32 ip4;
 } net_address_t;
 
 extern u64 __net_max_fd;
@@ -39,7 +36,7 @@ SDK_EXPORT u16 net_port_from_short(u16 port);
 SDK_EXPORT u16 net_port_to_short(u16 port);
 SDK_EXPORT void __net_startup();
 SDK_EXPORT void __net_shutdown();
-SDK_EXPORT u64 socket_new(net_family_t family, socket_type_t type);
+SDK_EXPORT u64 socket_new(socket_type_t type);
 SDK_EXPORT void __socket_free(u64 fd);
 
 #endif

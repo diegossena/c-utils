@@ -1,4 +1,4 @@
-#include <sdk/types.h>
+#include <sdk/math.h>
 
 f64 math_log10(f64 x) {
   static const f64
