@@ -6,7 +6,7 @@ SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
   this->updated_at = date_now();
   // udp
   udp_constructor(&this->udp, taskmanager);
-  this->udp.onmessage = __snmp_onmessage;
+  this->udp.onmessage = snmp_onmessage;
   this->udp.context = this;
   // service
   this->udp.service.handle = (function_t)snmp_service;
@@ -28,13 +28,18 @@ SDK_EXPORT void snmp_free(snmp_t* this) {
   memory_free(this);
 }
 SDK_EXPORT void snmp_send(snmp_send_t* props) {
+  snmp_writer_t* writer = memory_alloc(sizeof(snmp_writer_t));
+  writer->snmp = props->snmp;
+  writer->callback = props->callback;
+  writer->context = props->context;
+  console_log("snmp_send=%x", writer->callback);
   udp_send_t send_props = {
     .udp = &props->snmp->udp,
     .ip4 = props->ip4,
     .net_port = props->net_port,
     .data = props->pdu,
-    .callback = __snmp_onwrite,
-    .context = props->snmp
+    .callback = snmp_onwrite,
+    .context = writer
   };
   hashset_add(&props->snmp->requests, props->ip4);
   props->snmp->updated_at = date_now();
@@ -43,25 +48,25 @@ SDK_EXPORT void snmp_send(snmp_send_t* props) {
 SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this) {
   queue_constructor(&this->varbinds);
 }
-SDK_EXPORT buffer_t snmp_pdu_to_buffer(snmp_pdu_t* this) {
-  byte_t* buffer_end = buffer_shared;
-  u8* sequence = ber_sequence_start(&buffer_end, ASN1_TYPE_SEQUENCE);
-  ber_write_var_integer(&buffer_end, this->version);
-  ber_write_str(&buffer_end, this->community.data, this->community.length);
-  u8* pdu_sequence = ber_sequence_start(&buffer_end, this->type);
-  ber_write_var_integer(&buffer_end, this->request_id);
-  ber_write_var_integer(&buffer_end, this->error);
-  ber_write_var_integer(&buffer_end, this->error_index);
-  u8* varbind_list = ber_sequence_start(&buffer_end, ASN1_TYPE_SEQUENCE);
+SDK_EXPORT u64 snmp_pdu_to_buffer(snmp_pdu_t* this, byte_t* stream) {
+  byte_t* ptr = stream;
+  u8* sequence = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
+  ber_write_var_integer(&ptr, this->version);
+  ber_write_str(&ptr, this->community.data, this->community.length);
+  u8* pdu_sequence = ber_sequence_start(&ptr, this->type);
+  ber_write_var_integer(&ptr, this->request_id);
+  ber_write_var_integer(&ptr, this->error);
+  ber_write_var_integer(&ptr, this->error_index);
+  u8* varbind_list = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
   queue_foreach(varbind_t, &this->varbinds, it) {
-    u8* varbind = ber_sequence_start(&buffer_end, ASN1_TYPE_SEQUENCE);
-    ber_write_oid_null(&buffer_end, &it->oid);
-    ber_sequence_end(&buffer_end, varbind);
+    u8* varbind = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
+    ber_write_oid_null(&ptr, &it->oid);
+    ber_sequence_end(&ptr, varbind);
   }
-  ber_sequence_end(&buffer_end, varbind_list);
-  ber_sequence_end(&buffer_end, pdu_sequence);
-  ber_sequence_end(&buffer_end, sequence);
-  return (buffer_t) { buffer_shared, buffer_end - buffer_shared };
+  ber_sequence_end(&ptr, varbind_list);
+  ber_sequence_end(&ptr, pdu_sequence);
+  ber_sequence_end(&ptr, sequence);
+  return ptr - stream;
 }
 SDK_EXPORT void snmp_service(snmp_t* this) {
   udp_service(&this->udp);
@@ -70,7 +75,7 @@ SDK_EXPORT void snmp_service(snmp_t* this) {
     this->udp.service.destroy(this);
   }
 }
-SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
+SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message) {
   snmp_t* this = (snmp_t*)udp_message->udp->context;
   if (hashset_contains(&this->requests, udp_message->address.ip4)) {
     if (this->onmessage) {
@@ -123,7 +128,12 @@ SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
     }
   }
 }
-SDK_EXPORT void __snmp_onwrite(udp_writer_t* this) {
-  snmp_t* snmp = (snmp_t*)this->context;
-  snmp->updated_at = date_now();
+SDK_EXPORT void snmp_onwrite(udp_writer_t* this) {
+  snmp_writer_t* writer = (snmp_writer_t*)this->context;
+  writer->snmp->updated_at = date_now();
+  console_log("snmp_onwrite %x", this->callback);
+  if (this->callback) {
+    this->callback(this->context);
+  }
+  memory_free(writer);
 }

@@ -1,6 +1,8 @@
 #include <sdk/math.h>
 
-f64 math_log10(f64 x) {
+#include <math.h>
+
+SDK_EXPORT f64 math_log10(f64 x) {
   static const f64
     ivln10hi = 4.34294481878168880939e-01, /* 0x3fdbcb7b, 0x15200000 */
     ivln10lo = 2.50829467116452752298e-11, /* 0x3dbb9438, 0xca9aadd5 */
@@ -68,4 +70,80 @@ f64 math_log10(f64 x) {
   val_lo += (y - w) + val_hi;
   val_hi = w;
   return val_lo + val_hi;
+}
+
+SDK_EXPORT u64 math_next2pow(u64 number) {
+  if (!number)
+    return 1;
+  --number;
+  static const u8 u64_bits_length = sizeof(u64) * 8; // 64
+  for (u64 i = 1; i < u64_bits_length; i *= 2)
+    number |= number >> i;
+  return ++number;
+}
+
+SDK_EXPORT u64 math_hash_jenkins(const byte_t* data, u64 size) {
+  u64 hash = 0;
+  const byte_t* end = data + size;
+  while (data != end) {
+    hash += *data;
+    hash += hash << 10;
+    hash ^= hash >> 6;
+    ++data;
+  }
+  hash += hash << 3;
+  hash ^= hash >> 11;
+  hash += hash << 15;
+  return hash;
+}
+SDK_EXPORT i64 math_ceil(f64 number) {
+  i64 integer = (i64)number;
+  if (number > 0 && number != integer) {
+    ++integer;
+  }
+  return integer;
+}
+SDK_EXPORT f64 math_pow(f64 base, f64 exponent) {
+  return pow(base, exponent);
+}
+SDK_EXPORT f64 math_floor(f64 number) {
+  return floor(number);
+}
+SDK_EXPORT f64 math_floor_f64(f64 number, u8 places) {
+  if (places > 0) {
+    number *= math_pow(10, places);
+  }
+  number = math_floor(number);
+  if (places > 0) {
+    number *= math_pow(10, -places);
+  }
+  return number;
+}
+SDK_EXPORT i64 math_round(f64 number) {
+  i64 integer = number;
+  f64 decimals = number - integer;
+  if (decimals < .5) {
+    return integer;
+  }
+  return integer + 1;
+}
+SDK_EXPORT f64 math_round_f64(f64 number, u8 places) {
+  if (places > 0) {
+    number *= math_pow(10, places);
+  }
+  number = math_round(number);
+  if (places > 0) {
+    number *= math_pow(10, -places);
+  }
+  return number;
+}
+SDK_EXPORT f64 math_ceil_f64(f64 number, u8 places) {
+  if (places > 0) {
+    number *= math_pow(10, places);
+  }
+  number = math_ceil(number);
+  if (places > 0) {
+    number *= math_pow(10, -places);
+  }
+  return number;
 }

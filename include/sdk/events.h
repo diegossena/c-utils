@@ -15,6 +15,7 @@ typedef struct listener_t {
 } listener_t;
 
 SDK_EXPORT void callback_emit(queue_t* this);
+SDK_EXPORT void callback_on(queue_t* this, callback_t* callback);
 
 SDK_EXPORT void listener_on(queue_t* this, listener_t* listener);
 SDK_EXPORT void listener_prepend(queue_t* this, listener_t* listener);

@@ -8,6 +8,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #define DEFAULT_TIMEOUT 3000LLU
+#define IP4_STRING_LENGTH 16
 
 typedef enum net_family_t {
   NET_FAMILY_IPV4 = 2,
@@ -25,11 +26,13 @@ typedef struct net_address_t {
   u32 ip4;
 } net_address_t;
 
+typedef char ip4_string_t[IP4_STRING_LENGTH];
+
 extern u64 __net_max_fd;
 
 SDK_EXPORT u32 ip4_from_bytes(byte_t, byte_t, byte_t, byte_t);
 SDK_EXPORT u32 ip4_from_cstr(const char* ip4_cstr);
-SDK_EXPORT const char* ip4_to_cstr(u32 ip4);
+SDK_EXPORT void ip4_to_cstr(u32 ip4, ip4_string_t cstr);
 SDK_EXPORT u32 ip4_increment(u32 ip4);
 SDK_EXPORT bool ip4_lessequal(u32 oip4, u32 fip4);
 SDK_EXPORT u16 net_port_from_short(u16 port);

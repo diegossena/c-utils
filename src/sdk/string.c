@@ -3,6 +3,11 @@
 /* vsnprintf */
 #include <stdio.h>
 
+SDK_EXPORT u64 string_length(const char* str) {
+  const char* ptr = str;
+  while (*ptr != '\0') ++ptr;
+  return ptr - str;
+}
 SDK_EXPORT i32 cstr_format_va(char* stream, u64 size, const char* format, void* args) {
   i32 length = vsnprintf(stream, size, format, args);
   if (length < 0) {

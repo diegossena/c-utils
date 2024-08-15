@@ -7,6 +7,9 @@ SDK_EXPORT void callback_emit(queue_t* this) {
     it = (callback_t*)it->queue.next;
   }
 }
+SDK_EXPORT void callback_on(queue_t* this, callback_t* callback) {
+  queue_push(this, &callback->queue);
+}
 
 SDK_EXPORT void listener_on(queue_t* this, listener_t* listener) {
   queue_push(this, &listener->queue);

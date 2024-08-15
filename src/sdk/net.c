@@ -22,8 +22,8 @@ SDK_EXPORT u32 ip4_from_cstr(const char* ip4_str) {
   }
   return ip4;
 }
-SDK_EXPORT const char* ip4_to_cstr(u32 ip4) {
-  char* str_ptr = buffer_shared;
+SDK_EXPORT void ip4_to_cstr(u32 ip4, ip4_string_t cstr) {
+  char* ptr = cstr;
   char int_str[3], * int_str_ptr;
   u8 place = 0, number;
   while (true) {
@@ -36,16 +36,15 @@ SDK_EXPORT const char* ip4_to_cstr(u32 ip4) {
     } while (number != 0);
     // copy number
     do {
-      *str_ptr++ = *--int_str_ptr;
+      *ptr++ = *--int_str_ptr;
     } while (int_str_ptr != int_str);
     // iterate
     if (++place == 4) {
-      *str_ptr = '\0';
+      *ptr = '\0';
       break;
     }
-    *str_ptr++ = '.';
+    *ptr++ = '.';
   }
-  return buffer_shared;
 }
 /**
  * `ip4++`

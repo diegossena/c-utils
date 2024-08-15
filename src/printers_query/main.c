@@ -15,7 +15,10 @@ typedef struct printers_query_t {
 } printers_query_t;
 
 void printers_query_onmessage(snmp_message_t* this) {
-  console_write("%s", ip4_to_cstr(this->udp_message->address.ip4));
+  console_log("printers_query_onmessage");
+  ip4_string_t ip4_cstr;
+  ip4_to_cstr(this->udp_message->address.ip4, ip4_cstr);
+  console_write("%s", ip4_cstr);
   queue_foreach(varbind_t, &this->pdu.varbinds, it) {
     console_write_cstr(" - ");
     switch (it->value.type) {
@@ -42,11 +45,40 @@ void printers_query_deconstructor(printers_query_t* this) {
   snmp_deconstructor(&this->snmp);
   memory_free(this);
 }
+void printers_query_onsend(printers_query_t* this) {
+  console_log("printers_query_onsend");
+  --this->tasks_count;
+}
 void printers_query_service(printers_query_t* this) {
   if (this->tasks_count < TASKS_LOOP_MAX) {
+    const byte_t community [] = "public";
+    snmp_pdu_t message = {
+      .version = SNMP_VERSION_1,
+      .community = { community, sizeof(community) - 1 },
+      .type = PDU_TYPE_GET_REQUEST,
+    };
+    snmp_pdu_constructor(&message);
+    const u8 serial_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 5, 1, 1, 17, 1 };
+    varbind_t serial_varbind = { .oid = { serial_oid, sizeof(serial_oid) } };
+    queue_push(&message.varbinds, &serial_varbind.queue);
+    const u8 brand_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 8, 2, 1, 14, 1, 1 };
+    varbind_t brand_varbind = { .oid = { brand_oid, sizeof(brand_oid) } };
+    queue_push(&message.varbinds, &brand_varbind.queue);
+    const u8 model_oid [] = { OID_PREFIX, 6, 1, 2, 1, 25, 3, 2, 1, 3, 1 };
+    varbind_t model_varbind = { .oid = { model_oid, sizeof(model_oid) } };
+    queue_push(&message.varbinds, &model_varbind.queue);
+    byte_t pdu_buffer[BUFFER_SIZE];
+    u64 pdu_size = snmp_pdu_to_buffer(&message, pdu_buffer);
+    console_write("pdu_buffer=");
+    console_write_buffer(pdu_buffer, pdu_size);
+    console_newline();
+    console_log("pdu_size='%llu'", pdu_size);
     snmp_send_t send = {
       .snmp = &this->snmp,
-      .net_port = net_port_from_short(161)
+      .net_port = net_port_from_short(161),
+      .pdu = { pdu_buffer, pdu_size },
+      .callback = (function_t)printers_query_onsend,
+      .context = this
     };
     do {
       console_log(
@@ -77,6 +109,7 @@ void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 i
   this->tasks_count = 0;
   // snmp
   snmp_constructor(&this->snmp, taskmanager);
+  this->snmp.onmessage = printers_query_onmessage;
   this->snmp.udp.service.context = this;
   this->snmp.udp.service.handle = (function_t)printers_query_service;
   this->snmp.udp.service.destroy = (function_t)printers_query_deconstructor;

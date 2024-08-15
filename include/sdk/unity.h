@@ -45,3 +45,6 @@
 #ifdef SDK_HASHSET_H
 #include <src/sdk/hashset.c>
 #endif
+#ifdef SDK_MATH_H
+#include <src/sdk/math.c>
+#endif

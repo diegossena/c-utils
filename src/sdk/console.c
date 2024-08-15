@@ -6,11 +6,12 @@
 SDK_EXPORT void console_write(const char* message, ...) {
   __builtin_va_list args;
   va_start(args, message);
-  i32 length = cstr_format_va(buffer_shared, BUFFER_SIZE, message, args);
+  buffer_default_t buffer;
+  i32 length = cstr_format_va(buffer, BUFFER_SIZE, message, args);
   va_end(args);
   if (length < 0)
     return;
-  console_write_str(buffer_shared, length);
+  console_write_str(buffer, length);
 }
 SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size) {
   bool first = true;
