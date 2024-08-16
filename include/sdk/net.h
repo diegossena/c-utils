@@ -30,6 +30,7 @@ typedef char ip4_string_t[IP4_STRING_LENGTH];
 
 extern u64 __net_max_fd;
 
+SDK_EXPORT net_address_t ip4_address(u32 ip4, u16 net_port);
 SDK_EXPORT u32 ip4_from_bytes(byte_t, byte_t, byte_t, byte_t);
 SDK_EXPORT u32 ip4_from_cstr(const char* ip4_cstr);
 SDK_EXPORT void ip4_to_cstr(u32 ip4, ip4_string_t cstr);

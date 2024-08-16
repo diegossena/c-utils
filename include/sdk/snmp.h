@@ -90,6 +90,6 @@ SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this);
 SDK_EXPORT u64 snmp_pdu_to_buffer(snmp_pdu_t* this, byte_t* buffer);
 SDK_EXPORT void snmp_service(snmp_t* this);
 SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message);
-SDK_EXPORT void snmp_onwrite(udp_writer_t* this);
+SDK_EXPORT void snmp_onwrite(udp_send_t* this);
 
 #endif

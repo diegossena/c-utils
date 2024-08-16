@@ -25,18 +25,17 @@ SDK_EXPORT void udp_service(udp_t* this) {
     this->onmessage(&message);
   }
 }
-SDK_EXPORT void udp_writer_task(udp_writer_t* this) {
+SDK_EXPORT void udp_writer_task(udp_send_t* this) {
   i32 sent = sendto(
-    this->udp->socket, this->ptr, this->remaining, 0,
+    this->_udp->socket, this->__ptr, this->__remaining, 0,
     (struct sockaddr*)&this->address, sizeof(net_address_t)
   );
   console_log("udp_writer_task %d", sent);
   if (sent > 0) {
-    // console_log("%x udp_write_handle %d", this, sent);
     this->updated_at = date_now();
-    this->ptr += sent;
-    this->remaining -= sent;
-    if (!this->remaining) {
+    this->__ptr += sent;
+    this->__remaining -= sent;
+    if (!this->__remaining) {
       udp_writer_shutdown(this);
     }
   } else {

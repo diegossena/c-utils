@@ -128,7 +128,7 @@ SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message) {
     }
   }
 }
-SDK_EXPORT void snmp_onwrite(udp_writer_t* this) {
+SDK_EXPORT void snmp_onwrite(udp_send_t* this) {
   snmp_writer_t* writer = (snmp_writer_t*)this->context;
   writer->snmp->updated_at = date_now();
   console_log("snmp_onwrite %x", this->callback);

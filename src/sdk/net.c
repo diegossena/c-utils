@@ -2,6 +2,9 @@
 
 u64 __net_max_fd = 0;
 
+SDK_EXPORT net_address_t ip4_address(u32 ip4, u16 net_port) {
+  return (net_address_t) { NET_FAMILY_IPV4, net_port, ip4 };
+}
 SDK_EXPORT u32 ip4_from_bytes(byte_t f1, byte_t f2, byte_t f3, byte_t f4) {
   return f1 | f2 << 8 | f3 << 16 | f4 << 24;
 }

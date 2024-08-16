@@ -25,35 +25,36 @@ SDK_EXPORT void udp_free(udp_t* this) {
   udp_deconstructor(this);
   free(this);
 }
-SDK_EXPORT void udp_send(udp_send_t* props) {
-  assert(props->data.data);
-  udp_writer_t* this = memory_alloc0(sizeof(udp_writer_t));
-  this->callback = props->callback;
-  this->context = props->context;
-  this->udp = props->udp;
-  this->buffer = memory_alloc(props->data.length);
-  this->ptr = this->buffer;
-  this->remaining = props->data.length;
-  memory_copy(this->buffer, props->data.data, props->data.length);
+
+SDK_EXPORT udp_send_t* udp_send_new(udp_t* udp) {
+  udp_send_t* this = memory_alloc0(sizeof(udp_send_t));
+  this->_udp = udp;
+  this->data = memory_alloc(length);
+  this->__ptr = this->data;
+  this->__remaining = length;
+  memory_copy(this->data, data, length);
   // address
   this->address.family = NET_FAMILY_IPV4;
-  this->address.ip4 = props->ip4;
-  this->address.net_port = props->net_port;
+  this->address.ip4 = this->ip4;
+  this->address.net_port = this->net_port;
   // task
-  this->task.context = this;
-  this->task.handle = (function_t)udp_writer_startup;
-  this->task.destroy = (function_t)udp_writer_shutdown;
-  queue_push(props->udp->tasks, &this->task.queue);
+  this->_task.context = this;
+  this->_task.handle = (function_t)udp_writer_shutdown;
+  this->_task.destroy = (function_t)udp_writer_shutdown;
+  queue_push(udp->tasks, &this->_task.queue);
 }
-SDK_EXPORT void udp_writer_startup(udp_writer_t* this) {
+SDK_EXPORT void udp_send(udp_send_t* this) {
+  udp->_task.handle = (function_t)udp_writer_startup;
+}
+SDK_EXPORT void udp_writer_startup(udp_send_t* this) {
   this->updated_at = date_now();
-  this->task.handle = (function_t)udp_writer_task;
+  this->_task.handle = (function_t)udp_writer_task;
 }
-SDK_EXPORT void udp_writer_shutdown(udp_writer_t* this) {
+SDK_EXPORT void udp_writer_shutdown(udp_send_t* this) {
   if (this->callback) {
     this->callback(this);
   }
-  queue_remove(&this->task.queue);
-  memory_free(this->buffer);
+  queue_remove(&this->_task.queue);
+  memory_free(this->data);
   memory_free(this);
 }
