@@ -73,13 +73,14 @@ void printers_query_service(printers_query_t* this) {
     console_write_buffer(pdu_buffer, pdu_size);
     console_newline();
     console_log("pdu_size='%llu'", pdu_size);
-    snmp_send_t send = {
-      .snmp = &this->snmp,
-      .net_port = net_port_from_short(161),
-      .pdu = { pdu_buffer, pdu_size },
-      .callback = (function_t)printers_query_onsend,
-      .context = this
-    };
+    // snmp_send_t* send = 
+    // {
+    //   .snmp = &this->snmp,
+    //   .net_port = net_port_from_short(161),
+    //   .pdu = { pdu_buffer, pdu_size },
+    //   .callback = (function_t)printers_query_onsend,
+    //   .context = this
+    // };
     do {
       console_log(
         "%d.%d.%d.%d",
@@ -110,9 +111,9 @@ void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 i
   // snmp
   snmp_constructor(&this->snmp, taskmanager);
   this->snmp.onmessage = printers_query_onmessage;
-  this->snmp.udp.service.context = this;
-  this->snmp.udp.service.handle = (function_t)printers_query_service;
-  this->snmp.udp.service.destroy = (function_t)printers_query_deconstructor;
+  this->snmp.udp._service.context = this;
+  this->snmp.udp._service.handle = (function_t)printers_query_service;
+  this->snmp.udp._service.destroy = (function_t)printers_query_deconstructor;
 }
 
 i32 main(i32 argc, char** argv) {
