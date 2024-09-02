@@ -35,11 +35,11 @@ SDK_EXPORT void ber_write_str(byte_t** stream, const char* string, u8 length) {
   (*stream) += length;
 }
 
-SDK_EXPORT void ber_write_oid_null(byte_t** stream, buffer_t* oid) {
+SDK_EXPORT void ber_write_oid_null(byte_t** stream, byte_t* oid, u64 size) {
   *(*stream)++ = ASN1_TYPE_OID;
-  *(*stream)++ = oid->length;
-  memory_copy((*stream), oid->data, oid->length);
-  (*stream) += oid->length;
+  *(*stream)++ = size;
+  memory_copy((*stream), oid, size);
+  (*stream) += size;
   // value null
   *(*stream)++ = ASN1_TYPE_NULL;
   *(*stream)++ = 0x0;
@@ -112,8 +112,8 @@ SDK_EXPORT varbind_t ber_read_oid(byte_t** stream) {
   ber_field_t varbind_sequence = ber_read_var(stream);
   byte_t* varbind_sequence_end = (byte_t*)varbind_sequence.cstr + varbind_sequence.size;
   ++(*stream);
-  varbind_t varbind = { .oid = {.length = *(*stream)++, .data = (*stream) }, };
-  (*stream) += varbind.oid.length;
+  varbind_t varbind = { .oid_length = *(*stream)++, .oid = (*stream) };
+  (*stream) += varbind.oid_length;
   if ((*stream) < varbind_sequence_end) {
     varbind.value = ber_read_var(stream);
   }

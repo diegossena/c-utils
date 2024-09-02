@@ -51,6 +51,8 @@ typedef u8 byte_t;
 
 typedef void (*function_t)(void* this);
 
+void noop() {}
+
 // inlining
 
 #if defined(__clang__) || defined(__gcc__)

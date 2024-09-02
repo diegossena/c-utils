@@ -25,6 +25,7 @@ SDK_EXPORT udp_send_t* udp_send_new(udp_t* udp) {
   udp_send_t* this = memory_alloc0(sizeof(udp_send_t));
   _udp_send_constructor(this, udp);
   this->_task.destroy = (function_t)udp_send_free;
+  return this;
 }
 SDK_EXPORT void udp_send_free(udp_send_t* this) {
   _udp_send_deconstructor(this);
@@ -32,6 +33,7 @@ SDK_EXPORT void udp_send_free(udp_send_t* this) {
 }
 SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
   this->udp = udp;
+  this->address.family = NET_FAMILY_IPV4;
   this->_task.context = this;
   this->_task.handle = (function_t)udp_send_startup;
   this->_task.destroy = (function_t)_udp_send_deconstructor;
@@ -42,7 +44,6 @@ SDK_EXPORT void _udp_send_deconstructor(udp_send_t* this) {
     this->callback(this);
   }
   queue_remove(&this->_task.queue);
-  memory_free(this->data);
 }
 SDK_EXPORT void udp_send_startup(udp_send_t* this) {
   this->__data_ptr = this->data;

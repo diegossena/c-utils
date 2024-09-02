@@ -4,6 +4,7 @@
 #include <sdk/snmp.h>
 #include <sdk/memory.h>
 #include <sdk/snmp.h>
+#include <sdk/snowflake.h>
 #include <sdk/unity.h>
 
 typedef struct printers_query_t printers_query_t;
@@ -11,7 +12,6 @@ typedef struct printers_query_t {
   snmp_t snmp;
   u32 ip4;
   u32 ip4_end;
-  u64 tasks_count;
 } printers_query_t;
 
 void printers_query_onmessage(snmp_message_t* this) {
@@ -45,42 +45,25 @@ void printers_query_deconstructor(printers_query_t* this) {
   snmp_deconstructor(&this->snmp);
   memory_free(this);
 }
-void printers_query_onsend(printers_query_t* this) {
-  console_log("printers_query_onsend");
-  --this->tasks_count;
-}
 void printers_query_service(printers_query_t* this) {
-  if (this->tasks_count < TASKS_LOOP_MAX) {
-    const byte_t community [] = "public";
-    snmp_pdu_t message = {
+  if (this->snmp.pending_count < TASKS_LOOP_MAX) {
+    byte_t community [] = "public";
+    snmp_pdu_t pdu = {
       .version = SNMP_VERSION_1,
-      .community = { community, sizeof(community) - 1 },
+      .community = community,
+      .community_length = sizeof(community) - 1,
       .type = PDU_TYPE_GET_REQUEST,
     };
-    snmp_pdu_constructor(&message);
+    snmp_pdu_constructor(&pdu);
     const u8 serial_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 5, 1, 1, 17, 1 };
-    varbind_t serial_varbind = { .oid = { serial_oid, sizeof(serial_oid) } };
-    queue_push(&message.varbinds, &serial_varbind.queue);
+    varbind_t serial_varbind = varbind_from_const_u8(serial_oid);
+    queue_push(&pdu.varbinds, &serial_varbind.queue);
     const u8 brand_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 8, 2, 1, 14, 1, 1 };
-    varbind_t brand_varbind = { .oid = { brand_oid, sizeof(brand_oid) } };
-    queue_push(&message.varbinds, &brand_varbind.queue);
+    varbind_t brand_varbind = varbind_from_const_u8(brand_oid);
+    queue_push(&pdu.varbinds, &brand_varbind.queue);
     const u8 model_oid [] = { OID_PREFIX, 6, 1, 2, 1, 25, 3, 2, 1, 3, 1 };
-    varbind_t model_varbind = { .oid = { model_oid, sizeof(model_oid) } };
-    queue_push(&message.varbinds, &model_varbind.queue);
-    byte_t pdu_buffer[BUFFER_SIZE];
-    u64 pdu_size = snmp_pdu_to_buffer(&message, pdu_buffer);
-    console_write("pdu_buffer=");
-    console_write_buffer(pdu_buffer, pdu_size);
-    console_newline();
-    console_log("pdu_size='%llu'", pdu_size);
-    // snmp_send_t* send = 
-    // {
-    //   .snmp = &this->snmp,
-    //   .net_port = net_port_from_short(161),
-    //   .pdu = { pdu_buffer, pdu_size },
-    //   .callback = (function_t)printers_query_onsend,
-    //   .context = this
-    // };
+    varbind_t model_varbind = varbind_from_const_u8(model_oid);
+    queue_push(&pdu.varbinds, &model_varbind.queue);
     do {
       console_log(
         "%d.%d.%d.%d",
@@ -89,14 +72,18 @@ void printers_query_service(printers_query_t* this) {
         *((u8*)&this->ip4 + 2),
         *((u8*)&this->ip4 + 3)
       );
-      send.ip4 = this->ip4;
-      snmp_send(&send);
+      pdu.request_id = snowflake_uid();
+      udp_send_t* udp_send = udp_send_new(&this->snmp.udp);
+      udp_send->address.ip4 = this->ip4;
+      udp_send->address.net_port = SNMP_DEFAULT_PORT;
+      udp_send->data = snmp_pdu_to_buffer(&pdu);
+      udp_send->length = buffer_length(udp_send->data);
+      snmp_request_await(&this->snmp, pdu.request_id);
       if (this->ip4 == this->ip4_end) {
         return printers_query_deconstructor(this);
       }
       this->ip4 = ip4_increment(this->ip4);
-      ++this->tasks_count;
-    } while (this->tasks_count < TASKS_LOOP_MAX);
+    } while (this->snmp.pending_count < TASKS_LOOP_MAX);
   }
   snmp_service(&this->snmp);
 }
@@ -104,12 +91,11 @@ void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 i
   if (!ip4_lessequal(ip4_start, ip4_end))
     return;
   printers_query_t* this = memory_alloc(sizeof(printers_query_t));
-  // props
   this->ip4 = ip4_start;
   this->ip4_end = ip4_end;
-  this->tasks_count = 0;
   // snmp
   snmp_constructor(&this->snmp, taskmanager);
+  this->snmp.timeout = 1000;
   this->snmp.onmessage = printers_query_onmessage;
   this->snmp.udp._service.context = this;
   this->snmp.udp._service.handle = (function_t)printers_query_service;

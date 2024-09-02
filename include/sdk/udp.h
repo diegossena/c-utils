@@ -10,6 +10,13 @@
 #include <sdk/queue.h>
 #include <sdk/assert.h>
 
+/**
+ * address.ip4: u64
+ * data: byte_t*
+ * length: u64
+ * context?: any
+ * callback?: udp_onsend_t
+ */
 typedef struct udp_send_t udp_send_t;
 typedef struct udp_message_t udp_message_t;
 
@@ -30,14 +37,6 @@ typedef struct udp_message_t {
   i32 length;
   net_address_t address;
 } udp_message_t;
-/**
- * udp: udp_t*
- * address: net_address_t
- * data: byte_t*
- * length: u64
- * context?: any
- * callback?: udp_onsend_t
- */
 typedef struct udp_send_t {
   udp_t* udp;
   net_address_t address;

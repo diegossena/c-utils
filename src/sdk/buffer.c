@@ -1,13 +1,32 @@
 #include <sdk/buffer.h>
 
-buffer_t buffer_new(u64 size) {
-  buffer_t buffer;
-  buffer.data = memory_alloc0(size);
-  assert(buffer.data);
-  buffer.length = size;
-  return buffer;
+void* buffer_new(u64 size) {
+  buffer_t* this = memory_alloc0(sizeof(buffer_t) + size);
+  assert(this);
+  this->length = size;
+  return (void*)this + sizeof(buffer_t);
 }
-void buffer_free(buffer_t* this) {
-  assert(this->data);
-  memory_free((u8*)this->data);
+void* buffer_resize(void* this, u64 length) {
+  buffer_t* header = this - sizeof(buffer_t);
+  header = memory_realloc(header, sizeof(buffer_t) + length);
+  if (header) {
+    header->length = length;
+  }
+  return (void*)header + sizeof(buffer_t);
+}
+void* buffer_resize0(void* this, u64 length) {
+  buffer_t* header = this - sizeof(buffer_t);
+  header = memory_realloc0(header, sizeof(buffer_t) + length);
+  if (header) {
+    header->length = length;
+  }
+  return (void*)header + sizeof(buffer_t);
+}
+u64 buffer_length(void* this) {
+  buffer_t* header = this - sizeof(buffer_t);
+  return header->length;
+}
+void buffer_free(void* this) {
+  buffer_t* header = this - sizeof(buffer_t);
+  memory_free(header);
 }

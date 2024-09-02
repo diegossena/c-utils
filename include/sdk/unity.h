@@ -48,3 +48,6 @@
 #ifdef SDK_MATH_H
 #include <src/sdk/math.c>
 #endif
+#ifdef SDK_SNOWFLAKE_H
+#include <src/sdk/snowflake.c>
+#endif

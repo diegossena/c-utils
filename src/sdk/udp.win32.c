@@ -23,7 +23,7 @@ SDK_EXPORT void udp_service(udp_t* this) {
   message.udp = this;
   message.data = buffer;
   message.length = recvfrom(
-    this->__socket, buffer, BUFFER_SIZE, 0,
+    this->__socket, buffer, BUFFER_DEFAULT_SIZE, 0,
     (struct sockaddr*)&message.address, 0
   );
   if (message.length > 0) {
@@ -35,16 +35,15 @@ SDK_EXPORT void udp_send_task(udp_send_t* this) {
     this->udp->__socket, this->__data_ptr, this->length, 0,
     (struct sockaddr*)&this->address, sizeof(net_address_t)
   );
-  console_log("udp_writer_task %d", sent);
   if (sent > 0) {
     this->__updated_at = date_now();
     this->__data_ptr += sent;
     this->length -= sent;
     if (!this->length) {
-      _udp_send_deconstructor(this);
+      this->_task.destroy(this);
     }
   } else {
-    _udp_send_deconstructor(this);
+    this->_task.destroy(this);
   }
 }
 

@@ -5,6 +5,7 @@
 #include <sdk/hashset.h>
 #include <sdk/udp.h>
 
+#define SNMP_DEFAULT_PORT 161
 #define OID_MAX_SIZE 128
 #define OID_PREFIX 0x2b // 1.3
 #define SYSDESCR_OID { OID_PREFIX, 6, 1, 2, 1, 1, 2, 0 }
@@ -25,11 +26,13 @@ typedef enum pdu_type_t {
 } pdu_type_t;
 typedef struct snmp_request_t {
   queue_t queue;
+  u64 id;
   u64 updatedAt;
 } snmp_request_t;
 typedef struct snmp_pdu_t {
   snmp_version_t version;
-  buffer_t community;
+  byte_t* community;
+  u64 community_length;
   // pdu
   pdu_type_t type;
   u32 request_id;
@@ -39,24 +42,26 @@ typedef struct snmp_pdu_t {
 } snmp_pdu_t;
 typedef struct snmp_t {
   snmp_onmessage_t onmessage;
-  queue_t pending_requests; // queue_t<snmp_request_t>
+  queue_t pending; // queue_t<snmp_request_t>
+  u64 pending_count;
   udp_t udp;
+  u64 timeout;
 } snmp_t;
+/**
+ * snmp: snmp_t*
+ * pdu: snmp_pdu_t*
+ * address: net_address_t
+ */
+typedef struct snmp_send_t {
+  snmp_t* snmp;
+  snmp_pdu_t* pdu;
+  net_address_t address;
+} snmp_send_t;
 typedef struct snmp_message_t {
   snmp_t* snmp;
   snmp_pdu_t pdu;
   udp_message_t* udp_message;
 } snmp_message_t;
-/**
- * snmp: snmp_t
- * callback?: function_t
- * context?: any
- */
-typedef struct snmp_send_t {
-  snmp_t* snmp;
-  udp_send_t udp_send;
-  void* context;
-} snmp_send_t;
 typedef enum snmp_error_t {
   SNMP_ERR_NOERROR,
   SNMP_ERR_TOOBIG,
@@ -86,15 +91,10 @@ SDK_EXPORT void snmp_free(snmp_t* this);
 SDK_EXPORT void snmp_service(snmp_t* this);
 SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message);
 SDK_EXPORT void snmp_onwrite(udp_send_t* this);
-
-SDK_EXPORT snmp_send_t* snmp_send_new(snmp_t* udp);
-SDK_EXPORT void snmp_send_free(snmp_send_t* this);
-SDK_EXPORT void snmp_send_constructor(snmp_send_t* this, snmp_t* udp);
-SDK_EXPORT void snmp_send_deconstructor(snmp_send_t* this);
-SDK_EXPORT void snmp_send_startup(snmp_send_t* this);
-SDK_EXPORT void snmp_send_task(snmp_send_t* this);
+SDK_EXPORT void snmp_request_await(snmp_t* this, u64 request_id);
+SDK_EXPORT bool snmp_request_resolve(snmp_t* this, u64 request_id);
 
 SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this);
-SDK_EXPORT u64 snmp_pdu_to_buffer(snmp_pdu_t* this, byte_t* buffer);
+SDK_EXPORT byte_t* snmp_pdu_to_buffer(snmp_pdu_t* this);
 
 #endif
