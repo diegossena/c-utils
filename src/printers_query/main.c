@@ -46,44 +46,50 @@ void printers_query_deconstructor(printers_query_t* this) {
   memory_free(this);
 }
 void printers_query_service(printers_query_t* this) {
-  if (this->snmp.pending_count < TASKS_LOOP_MAX) {
-    byte_t community [] = "public";
-    snmp_pdu_t pdu = {
-      .version = SNMP_VERSION_1,
-      .community = community,
-      .community_length = sizeof(community) - 1,
-      .type = PDU_TYPE_GET_REQUEST,
-    };
-    snmp_pdu_constructor(&pdu);
-    const u8 serial_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 5, 1, 1, 17, 1 };
-    varbind_t serial_varbind = varbind_from_const_u8(serial_oid);
-    queue_push(&pdu.varbinds, &serial_varbind.queue);
-    const u8 brand_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 8, 2, 1, 14, 1, 1 };
-    varbind_t brand_varbind = varbind_from_const_u8(brand_oid);
-    queue_push(&pdu.varbinds, &brand_varbind.queue);
-    const u8 model_oid [] = { OID_PREFIX, 6, 1, 2, 1, 25, 3, 2, 1, 3, 1 };
-    varbind_t model_varbind = varbind_from_const_u8(model_oid);
-    queue_push(&pdu.varbinds, &model_varbind.queue);
-    do {
-      console_log(
-        "%d.%d.%d.%d",
-        (u8)this->ip4,
-        *((u8*)&this->ip4 + 1),
-        *((u8*)&this->ip4 + 2),
-        *((u8*)&this->ip4 + 3)
-      );
-      pdu.request_id = snowflake_uid();
-      udp_send_t* udp_send = udp_send_new(&this->snmp.udp);
-      udp_send->address.ip4 = this->ip4;
-      udp_send->address.net_port = SNMP_PORT;
-      udp_send->data = snmp_pdu_to_buffer(&pdu);
-      udp_send->length = buffer_length(udp_send->data);
-      snmp_request_await(&this->snmp, pdu.request_id);
-      if (this->ip4 == this->ip4_end) {
-        return printers_query_deconstructor(this);
-      }
-      this->ip4 = ip4_increment(this->ip4);
-    } while (this->snmp.pending_count < TASKS_LOOP_MAX);
+  if (this->ip4 == this->ip4_end) {
+    if (queue_is_empty(&this->snmp.pending)) {
+      return printers_query_deconstructor(this);
+    }
+  } else {
+    taskmanager_t* taskmanager = this->snmp.udp._service.taskmanager;
+    if (taskmanager->tasks_count < TASKS_LOOP_MAX) {
+      byte_t community [] = "public";
+      snmp_pdu_t pdu = {
+        .version = SNMP_VERSION_1,
+        .community = community,
+        .community_length = sizeof(community) - 1,
+        .type = PDU_TYPE_GET_REQUEST,
+      };
+      snmp_pdu_constructor(&pdu);
+      const u8 serial_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 5, 1, 1, 17, 1 };
+      varbind_t serial_varbind = varbind_from_const_u8(serial_oid);
+      queue_push(&pdu.varbinds, &serial_varbind.queue);
+      const u8 brand_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 8, 2, 1, 14, 1, 1 };
+      varbind_t brand_varbind = varbind_from_const_u8(brand_oid);
+      queue_push(&pdu.varbinds, &brand_varbind.queue);
+      const u8 model_oid [] = { OID_PREFIX, 6, 1, 2, 1, 25, 3, 2, 1, 3, 1 };
+      varbind_t model_varbind = varbind_from_const_u8(model_oid);
+      queue_push(&pdu.varbinds, &model_varbind.queue);
+      do {
+        console_log(
+          "%d.%d.%d.%d",
+          (u8)this->ip4,
+          *((u8*)&this->ip4 + 1),
+          *((u8*)&this->ip4 + 2),
+          *((u8*)&this->ip4 + 3)
+        );
+        pdu.request_id = snowflake_uid();
+        udp_send_t* udp_send = udp_send_new(&this->snmp.udp);
+        udp_send->address.ip4 = this->ip4;
+        udp_send->address.net_port = SNMP_PORT;
+        udp_send->data = snmp_pdu_to_buffer(&pdu);
+        udp_send->length = buffer_length(udp_send->data);
+        snmp_request_await(&this->snmp, pdu.request_id);
+        if (this->ip4 == this->ip4_end)
+          break;
+        this->ip4 = ip4_increment(this->ip4);
+      } while (taskmanager->tasks_count < TASKS_LOOP_MAX);
+    }
   }
   snmp_service(&this->snmp);
 }
@@ -115,6 +121,8 @@ i32 main(i32 argc, char** argv) {
     &taskmanager, ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
   );
   taskmanager_run(&taskmanager);
+  console_color(ANSI_FORE_LIGHTGREEN);
+  console_write_cstr("SUCCESS\n");
   console_color(ANSI_RESET);
   return 0;
 }

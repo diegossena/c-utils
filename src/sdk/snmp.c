@@ -4,7 +4,6 @@ SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
   this->timeout = NET_DEFAULT_TIMEOUT;
   // pending
   queue_constructor(&this->pending);
-  this->pending_count = 0;
   // udp
   udp_constructor(&this->udp, taskmanager);
   this->udp.onmessage = snmp_onmessage;
@@ -37,7 +36,6 @@ SDK_EXPORT void snmp_service(snmp_t* this) {
     if (delta > this->timeout) {
       queue_remove(&it->queue);
       memory_free(it);
-      --this->pending_count;
     }
   }
 }
@@ -95,14 +93,12 @@ SDK_EXPORT void snmp_request_await(snmp_t* this, u64 request_id) {
   request->id = request_id;
   request->updatedAt = date_now();
   queue_push(&this->pending, &request->queue);
-  ++this->pending_count;
 }
 SDK_EXPORT bool snmp_request_resolve(snmp_t* this, u64 request_id) {
   queue_foreach(snmp_request_t, &this->pending, it) {
     if (it->id == request_id) {
       queue_remove(&it->queue);
       memory_free(it);
-      --this->pending_count;
       return true;
     }
     return false;

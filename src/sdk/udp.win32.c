@@ -4,7 +4,7 @@
 
 SDK_EXPORT void udp_deconstructor(udp_t* this) {
   closesocket((SOCKET)this->__socket);
-  callback_emit(&this->__tasks_destroy);
+  callback_emit(&this->_tasks_destroy);
   queue_remove(&this->_service.queue);
 }
 SDK_EXPORT void udp_bind(udp_t* this, u16 port) {
@@ -30,21 +30,25 @@ SDK_EXPORT void udp_service(udp_t* this) {
     this->onmessage(&message);
   }
 }
-SDK_EXPORT void udp_send_task(udp_send_t* this) {
+SDK_EXPORT void _udp_send_task(udp_send_t* this) {
   i32 sent = sendto(
-    this->udp->__socket, this->__data_ptr, this->length, 0,
+    this->udp->__socket, this->data, this->length, 0,
     (struct sockaddr*)&this->address, sizeof(net_address_t)
   );
   if (sent > 0) {
     this->__updated_at = date_now();
-    this->__data_ptr += sent;
+    this->data += sent;
     this->length -= sent;
-    if (!this->length) {
-      this->_task.destroy(this);
-    }
+    if (this->length)
+      return;
   } else {
-    this->_task.destroy(this);
+    this->error_code = WSAGetLastError();
   }
+onend:
+  if (this->callback) {
+    this->callback(this);
+  }
+  this->_task.destroy(this->_task.context);
 }
 
 #endif

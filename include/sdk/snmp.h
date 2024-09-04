@@ -43,7 +43,6 @@ typedef struct snmp_pdu_t {
 typedef struct snmp_t {
   snmp_onmessage_t onmessage;
   queue_t pending; // queue_t<snmp_request_t>
-  u64 pending_count;
   udp_t udp;
   u64 timeout;
 } snmp_t;

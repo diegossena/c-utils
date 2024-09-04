@@ -4,7 +4,6 @@
 #include <sdk/types.h>
 #include <sdk/queue.h>
 
-
 typedef struct taskmanager_t {
   queue_t services; // queue_t<task_t>
   queue_t tasks; // queue_t<task_t>
