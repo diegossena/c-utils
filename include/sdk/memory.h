@@ -3,6 +3,7 @@
 
 #include <sdk/types.h>
 #include <sdk/error.h>
+#include <sdk/assert.h>
 
 #ifdef SDK_DEVELOPMENT
 

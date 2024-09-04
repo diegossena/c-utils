@@ -4,74 +4,134 @@
 #include <winsock2.h>
 #include <windows.h>
 
-SDK_EXPORT void tcp_ip4_connect(tcp_t* this, u32 ip4, u16 net_port) {
-  this->__socket = socket_new(NET_FAMILY_IPV4, SOCKET_TYPE_STREAM);
-  if (this->__socket < 0) {
-    closesocket(this->__socket);
-  }
-  this->address.family = NET_FAMILY_IPV4;
-  this->address.ip4 = ip4;
-  this->address.net_port = net_port;
-  this->__task.handle = (function_t)__tcp_connect_handle;
+SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
+  closesocket((SOCKET)this->__socket);
+  task_deconstructor(&this->_task);
 }
-SDK_EXPORT void tcp_connect(tcp_t* this, net_address_t* address) {
-  this->__socket = socket_new(address->family, SOCKET_TYPE_STREAM);
-  if (this->__socket < 0) {
-    closesocket(this->__socket);
-  }
-  this->address = *address;
-  this->__task.handle = (function_t)__tcp_connect_handle;
+SDK_EXPORT void tcp_free(tcp_t* this) {
+  _tcp_deconstructor(this);
+  memory_free(this);
 }
-SDK_EXPORT void __tcp_connect_handle(tcp_t* this) {
-  int error_code = connect(this->__socket, (SOCKADDR*)&this->address, sizeof(this->address));
+SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
+  this->__socket = socket_new(SOCKET_TYPE_STREAM);
+  if (this->__socket < 0) {
+    this->error_code = this->__socket;
+    this->onend(this->_task.context);
+    goto onerror;
+  }
+  i32 error_code = connect(this->__socket, (SOCKADDR*)&this->address, sizeof(this->address));
   if (error_code == SOCKET_ERROR) {
     error_code = WSAGetLastError();
     if (error_code != WSAEWOULDBLOCK) {
-      error("connect", error_code);
-      tcp_free(this);
-      return;
+      this->error_code = error_code;
+      goto onerror;
     }
   }
-  this->__task.handle = (function_t)__tcp_connecting_handle;
+  this->_task.handle = (function_t)__tcp_connect_task;
   this->__updated_at = date_now();
+  return;
+onerror:
+  this->onend(this->_task.context);
+  this->_task.destroy(this->_task.context);
 }
-SDK_EXPORT void __tcp_connecting_handle(tcp_t* this) {
-  static struct timeval timeout = { 0, 0 };
+SDK_EXPORT void __tcp_connect_task(tcp_t* this) {
+  struct timeval timeout = { 0, 0 };
   fd_set writable = {};
   FD_SET(this->__socket, &writable);
   i32 error_code = select(__net_max_fd, 0, &writable, 0, &timeout);
-  if (error_code > 0) {
-    // connected
-    this->__task.handle = (function_t)tcp_free;
-    this->onconnect(this);
-    if (this->__task.handle == (function_t)tcp_free) {
-      tcp_free(this);
-    } else {
-      this->__updated_at = date_now();
-    }
-    return;
-  } else if (error_code == 0) {
+  // onfail
+  if (error_code == 0) {
     u64 deltaTime = date_now() - this->__updated_at;
     if (deltaTime > this->timeout) {
-      error_code = ERR_ETIMEDOUT;
-    } else {
-      return;
+      this->error_code = ERR_ETIMEDOUT;
+      goto onend;
     }
-  } else {
-    error_code = WSAGetLastError();
+    goto awaiting;
+  }
+  // onsuccess
+  if (error_code > 0) {
+    goto onend;
   }
   // onerror
-  if (this->onerror) {
-    this->onerror(this, error_code);
-  } else {
-    error("select", error_code);
+  this->error_code = WSAGetLastError();
+onend:
+  this->_task.handle = this->_task.destroy;
+  this->onend(this->_task.context);
+  if (this->_task.handle == this->_task.destroy) {
+    this->_task.destroy(this->_task.context);
   }
-  tcp_free(this);
+awaiting:
+  return;
 }
-SDK_EXPORT void tcp_free(tcp_t* this) {
-  closesocket((SOCKET)this->__socket);
-  queue_remove((queue_t*)&this->__task);
-  memory_free(this);
+
+SDK_EXPORT void __tcp_write_task(tcp_t* this) {
+  i32 sent = send(this->__socket, this->__buffer, this->__remaining, 0);
+  if (sent > 0) {
+    console_log("__tcp_write_task %d", sent);
+    this->__updated_at = date_now();
+    this->__buffer += sent;
+    this->__remaining -= sent;
+    if (this->__remaining) {
+      goto awaiting;
+    }
+  } else if (sent < 0) {
+    sent = WSAGetLastError();
+    if (sent == WSAEWOULDBLOCK)
+      goto awaiting;
+    this->error_code = sent;
+  } else {
+    u64 elapsed = date_now() - this->__updated_at;
+    if (elapsed > this->timeout) {
+      this->error_code = ERR_ETIMEDOUT;
+    } else {
+      goto awaiting;
+    }
+  }
+onend:
+  this->_task.handle = this->_task.destroy;
+  this->onend(this->_task.context);
+  if (this->_task.handle == this->_task.destroy) {
+    this->_task.destroy(this->_task.context);
+  }
+awaiting:
+  return;
+}
+SDK_EXPORT void __tcp_read_task(tcp_t* this) {
+  buffer_default_t buffer;
+  u64 buffer_size = this->__remaining ? this->__remaining : BUFFER_DEFAULT_SIZE;
+  i32 length = recv(this->__socket, buffer, buffer_size, 0);
+  if (length > 0) {
+    this->ondata(this, buffer, length);
+    if (this->__remaining) {
+      this->__remaining -= length;
+      if (!this->__remaining) {
+        goto onend;
+      }
+    }
+    this->__updated_at = date_now();
+    goto awaiting;
+  }
+  if (length == 0) {
+    goto onend;
+  }
+  u64 elapsed = date_now() - this->__updated_at;
+  if (elapsed > this->timeout) {
+    this->error_code = ERR_ETIMEDOUT;
+    goto onend;
+  }
+  length = WSAGetLastError();
+  if (length == WSAEWOULDBLOCK) {
+    goto awaiting;
+  }
+  this->error_code = length;
+onend:
+  this->_task.handle = this->_task.destroy;
+  this->onend(this->_task.context);
+  if (this->_task.handle == this->_task.destroy) {
+    this->_task.destroy(this->_task.context);
+  }
+awaiting:
+  return;
 }
 
 #endif

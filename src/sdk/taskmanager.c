@@ -2,9 +2,20 @@
 
 #define TASKS_LOOP_MAX 7
 
+SDK_EXPORT void task_constructor(task_t* this, taskmanager_t* taskmanager) {
+  this->taskmanager = taskmanager;
+  queue_push(&taskmanager->tasks, &this->queue);
+  ++taskmanager->tasks_count;
+}
+SDK_EXPORT void task_deconstructor(task_t* this) {
+  queue_remove(&this->queue);
+  --this->taskmanager->tasks_count;
+}
+
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
   queue_constructor(&this->services);
   queue_constructor(&this->tasks);
+  this->tasks_count = 0;
 #ifdef SDK_NET_H
   __net_startup();
 #endif

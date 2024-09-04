@@ -75,7 +75,7 @@ void printers_query_service(printers_query_t* this) {
       pdu.request_id = snowflake_uid();
       udp_send_t* udp_send = udp_send_new(&this->snmp.udp);
       udp_send->address.ip4 = this->ip4;
-      udp_send->address.net_port = SNMP_DEFAULT_PORT;
+      udp_send->address.net_port = SNMP_PORT;
       udp_send->data = snmp_pdu_to_buffer(&pdu);
       udp_send->length = buffer_length(udp_send->data);
       snmp_request_await(&this->snmp, pdu.request_id);
@@ -111,11 +111,9 @@ i32 main(i32 argc, char** argv) {
   }
   taskmanager_t taskmanager;
   taskmanager_constructor(&taskmanager);
-
   printers_query_constructor(
     &taskmanager, ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
   );
-
   taskmanager_run(&taskmanager);
   console_color(ANSI_RESET);
   return 0;

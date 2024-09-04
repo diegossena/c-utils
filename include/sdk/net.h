@@ -23,7 +23,10 @@ typedef enum socket_type_t {
 typedef struct net_address_t {
   u8 family; // net_family_t
   u16	net_port;
-  u32 ip4;
+  union {
+    u32 ip4;
+    char ip6[16];
+  };
 } net_address_t;
 
 typedef char ip4_string_t[IP4_STRING_LENGTH];

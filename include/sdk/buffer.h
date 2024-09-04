@@ -2,6 +2,7 @@
 #define SDK_BUFFER_H
 
 #include <sdk/types.h>
+#include <sdk/memory.h>
 
 #define BUFFER_DEFAULT_SIZE 65535
 

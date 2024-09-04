@@ -5,7 +5,7 @@
 #include <sdk/hashset.h>
 #include <sdk/udp.h>
 
-#define SNMP_DEFAULT_PORT 161
+#define SNMP_PORT 161
 #define OID_MAX_SIZE 128
 #define OID_PREFIX 0x2b // 1.3
 #define SYSDESCR_OID { OID_PREFIX, 6, 1, 2, 1, 1, 2, 0 }

@@ -4,44 +4,53 @@
 #include <sdk/types.h>
 #include <sdk/taskmanager.h>
 #include <sdk/net.h>
+#include <sdk/date.h>
 
+/**
+ * @brief Represents a TCP socket.
+ *
+ * - net_address_t address
+ *
+ * - ? context
+ *
+ * - tcp_ondata_t? ondata
+ *
+ * - tcp_onend_t? onend
+ *
+ * - u64? timeout
+ */
 typedef struct tcp_t tcp_t;
 
-typedef void (*tcp_onconnect_t)(tcp_t*);
-typedef void (*tcp_onwrite_t)(tcp_t*);
-typedef void (*tcp_onread_t)(tcp_t*, const byte_t* data, u64 length);
-typedef void (*tcp_onerror_t)(tcp_t*, error_code_t error_code);
+typedef void (*tcp_ondata_t)(tcp_t* this, byte_t* chunk, u32 length);
+typedef void (*tcp_onend_t)(tcp_t*);
 
-/** @brief Represents a TCP socket.
- */
 typedef struct tcp_t {
-  task_t __task;
   // public
   void* context;
-  tcp_onconnect_t onconnect;
-  tcp_onwrite_t onwrite;
-  tcp_onread_t onread;
-  tcp_onerror_t onerror;
+  tcp_ondata_t ondata;
+  tcp_onend_t onend;
+  error_code_t error_code;
   u64 timeout;
   net_address_t address;
+  // protected
+  task_t _task;
   // private
   u64 __socket;
   u64 __updated_at;
-  // stream
-  byte_t* __buffer;
-  byte_t* __ptr;
-  u64 __length;
+  // send
+  const byte_t* __buffer;
   u64 __remaining;
 } tcp_t;
 
 SDK_EXPORT tcp_t* tcp_new(taskmanager_t*);
-SDK_EXPORT void tcp_connect(tcp_t* this, net_address_t* address);
-SDK_EXPORT void tcp_ip4_connect(tcp_t* this, u32 ip4, u16 port);
-SDK_EXPORT void tcp_write(tcp_t*, const byte_t*, u64 length);
-SDK_EXPORT void tcp_read(tcp_t*, u64 length);
-SDK_EXPORT void tcp_free(tcp_t*);
-SDK_EXPORT void __tcp_connect_handle(tcp_t* this);
-SDK_EXPORT void __tcp_write_handle(tcp_t* this);
-SDK_EXPORT void __tcp_read_handle(tcp_t* this);
+SDK_EXPORT void tcp_free(tcp_t* this);
+SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length);
+SDK_EXPORT void tcp_read(tcp_t* this, u64 length);
+SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t*);
+SDK_EXPORT void _tcp_deconstructor(tcp_t* this);
+SDK_EXPORT void __tcp_startup_task(tcp_t* this);
+SDK_EXPORT void __tcp_connect_task(tcp_t* this);
+SDK_EXPORT void __tcp_write_task(tcp_t* this);
+SDK_EXPORT void __tcp_read_task(tcp_t* this);
 
 #endif

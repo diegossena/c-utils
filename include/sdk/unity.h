@@ -26,6 +26,10 @@
 #ifdef SDK_TASKMANAGER_H
 #include <src/sdk/taskmanager.c>
 #endif
+#ifdef SDK_NET_TCP_H
+#include <src/sdk/tcp.c>
+#include <src/sdk/tcp.win32.c>
+#endif
 #ifdef SDK_UDP_H
 #include <src/sdk/udp.c>
 #include <src/sdk/udp.win32.c>
