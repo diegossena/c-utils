@@ -30,7 +30,6 @@ SDK_EXPORT void snmp_free(snmp_t* this) {
   memory_free(this);
 }
 SDK_EXPORT void snmp_service(snmp_t* this) {
-  udp_service(&this->udp);
   queue_foreach(snmp_request_t, &this->pending, it) {
     u64 delta = date_now() - it->updatedAt;
     if (delta > this->timeout) {
@@ -38,6 +37,7 @@ SDK_EXPORT void snmp_service(snmp_t* this) {
       memory_free(it);
     }
   }
+  _udp_service(&this->udp);
 }
 SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message) {
   snmp_t* this = (snmp_t*)udp_message->udp->context;
