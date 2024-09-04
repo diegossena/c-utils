@@ -67,7 +67,6 @@ awaiting:
 SDK_EXPORT void __tcp_write_task(tcp_t* this) {
   i32 sent = send(this->__socket, this->__buffer, this->__remaining, 0);
   if (sent > 0) {
-    console_log("__tcp_write_task %d", sent);
     this->__updated_at = date_now();
     this->__buffer += sent;
     this->__remaining -= sent;
