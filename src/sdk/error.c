@@ -49,19 +49,21 @@ SDK_EXPORT const char* error_cstr(i32 code) {
     case ERR_INSUFFICIENT_BUFFER:
       return "ERR_INSUFFICIENT_BUFFER";
     // winsock2
-    case ERR_WSAEFAULT:
+    case ERR_EFAULT:
       return "ERR_EFAULT";
-    case ERR_WSAEINVAL:
+    case ERR_EINVAL:
       return "ERR_EINVAL";
     case ERR_EWOULDBLOCK:
       return "ERR_EWOULDBLOCK";
-    case ERR_WSAENOTSOCK:
+    case ERR_EALREADY:
+      return "ERR_EALREADY";
+    case ERR_ENOTSOCK:
       return "ERR_ENOTSOCK";
-    case ERR_WSAEMSGSIZE:
+    case ERR_EMSGSIZE:
       return "ERR_EMSGSIZE";
-    case ERR_WSAEOPNOTSUPP:
+    case ERR_EOPNOTSUPP:
       return "ERR_EOPNOTSUPP";
-    case ERR_WSAEAFNOSUPPORT:
+    case ERR_EAFNOSUPPORT:
       return "ERR_EAFNOSUPPORT";
     case ERR_EADDRNOTAVAIL:
       return "ERR_EADDRNOTAVAIL";
@@ -71,9 +73,9 @@ SDK_EXPORT const char* error_cstr(i32 code) {
       return "ERR_ENOBUFS";
     case ERR_ETIMEDOUT:
       return "ERR_ETIMEDOUT";
-    case ERR_WSAECONNREFUSED:
+    case ERR_ECONNREFUSED:
       return "ERR_ECONNREFUSED";
-    case ERR_WSANOTINITIALISED:
+    case ERR_NOTINITIALISED:
       return "ERR_NOTINITIALISED";
     case ERR_CO_E_NOTINITIALIZED:
       return "ERR_CO_E_NOTINITIALIZED";

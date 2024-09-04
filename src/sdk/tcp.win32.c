@@ -22,7 +22,7 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
   i32 error_code = connect(this->__socket, (SOCKADDR*)&this->address, sizeof(this->address));
   if (error_code == SOCKET_ERROR) {
     error_code = WSAGetLastError();
-    if (error_code != WSAEWOULDBLOCK) {
+    if (error_code != ERR_EWOULDBLOCK) {
       this->error_code = error_code;
       goto onerror;
     }
