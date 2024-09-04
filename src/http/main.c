@@ -10,7 +10,7 @@ void http_ondata(tcp_t* this, byte_t* chunk, u32 length) {
 }
 void http_onresponse(tcp_t* tcp) {
   if (tcp->error_code) {
-    // return error("http_onresponse", tcp->error_code);
+    return error("http_onresponse", tcp->error_code);
   }
 }
 void http_onrequest(tcp_t* tcp) {

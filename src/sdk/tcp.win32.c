@@ -41,8 +41,8 @@ SDK_EXPORT void __tcp_connect_task(tcp_t* this) {
   i32 error_code = select(__net_max_fd, 0, &writable, 0, &timeout);
   // onfail
   if (error_code == 0) {
-    u64 deltaTime = date_now() - this->__updated_at;
-    if (deltaTime > this->timeout) {
+    u64 elapsed = date_now() - this->__updated_at;
+    if (elapsed > this->timeout) {
       this->error_code = ERR_ETIMEDOUT;
       goto onend;
     }
