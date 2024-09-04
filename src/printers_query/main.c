@@ -15,7 +15,6 @@ typedef struct printers_query_t {
 } printers_query_t;
 
 void printers_query_onmessage(snmp_message_t* this) {
-  console_log("printers_query_onmessage");
   ip4_string_t ip4_cstr;
   ip4_to_cstr(this->udp_message->address.ip4, ip4_cstr);
   console_write("%s", ip4_cstr);

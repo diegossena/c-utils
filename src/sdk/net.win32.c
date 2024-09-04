@@ -34,6 +34,6 @@ SDK_EXPORT u64 socket_new(socket_type_t type) {
   }
   return this;
 }
-SDK_EXPORT void __socket_free(u64 fd) { closesocket((SOCKET)fd); }
+SDK_EXPORT void _socket_free(u64 fd) { closesocket((SOCKET)fd); }
 
 #endif

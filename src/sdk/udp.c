@@ -31,6 +31,11 @@ SDK_EXPORT void udp_send_free(udp_send_t* this) {
   _udp_send_deconstructor(this);
   memory_free(this);
 }
+SDK_EXPORT void udp_deconstructor(udp_t* this) {
+  _socket_free(this->__socket);
+  callback_emit(&this->_tasks);
+  queue_remove(&this->_service.queue);
+}
 SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
   taskmanager_t* taskmanager = udp->_service.taskmanager;
   this->udp = udp;
@@ -46,9 +51,6 @@ SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
   this->_task.context = this;
 }
 SDK_EXPORT void _udp_send_deconstructor(udp_send_t* this) {
-  if (this->callback) {
-    this->callback(this);
-  }
   task_deconstructor(&this->_task);
   queue_remove(&this->__udp_tasks.queue);
 }

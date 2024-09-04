@@ -11,7 +11,7 @@ SDK_EXPORT void task_deconstructor(task_t* this) {
   queue_remove(&this->queue);
   --this->taskmanager->tasks_count;
 }
-SDK_EXPORT void task_call_destroy(task_t* this) {
+SDK_EXPORT void _task_call_destroy(task_t* this) {
   this->destroy(this->context);
 }
 

@@ -8,6 +8,7 @@ SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
   udp_constructor(&this->udp, taskmanager);
   this->udp.onmessage = snmp_onmessage;
   this->udp.context = this;
+  udp_bind(&this->udp, 0);
   // service
   this->udp._service.handle = (function_t)snmp_service;
   this->udp._service.destroy = (function_t)snmp_deconstructor;

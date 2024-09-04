@@ -28,6 +28,6 @@ SDK_EXPORT void taskmanager_run(const taskmanager_t* this);
 
 SDK_EXPORT void task_constructor(task_t* this, taskmanager_t*);
 SDK_EXPORT void task_deconstructor(task_t* this);
-SDK_EXPORT void task_call_destroy(task_t* this);
+SDK_EXPORT void _task_call_destroy(task_t* this);
 
 #endif
