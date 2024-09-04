@@ -11,11 +11,11 @@
  *
  * - net_address_t address
  *
+ * - tcp_onend_t onend
+ *
  * - ? context
  *
  * - tcp_ondata_t? ondata
- *
- * - tcp_onend_t? onend
  *
  * - u64? timeout
  */
