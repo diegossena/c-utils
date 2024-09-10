@@ -3,11 +3,15 @@
 
 #include <sdk/types.h>
 #include <sdk/queue.h>
+#include <sdk/error.h>
 
 typedef struct taskmanager_t {
-  queue_t services; // queue_t<task_t>
   queue_t tasks; // queue_t<task_t>
+  queue_t tasks_pending; // queue_t<task_t>
   u64 tasks_count;
+#ifdef PLATFORM_WINDOWS
+  void* iocp;
+#endif
 } taskmanager_t;
 
 /**
@@ -24,10 +28,15 @@ typedef struct task_t {
 } task_t;
 
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this);
-SDK_EXPORT void taskmanager_run(const taskmanager_t* this);
+SDK_EXPORT void taskmanager_run(taskmanager_t* this);
 
-SDK_EXPORT void task_constructor(task_t* this, taskmanager_t*);
-SDK_EXPORT void task_deconstructor(task_t* this);
+SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t*);
+SDK_EXPORT void _task_deconstructor(task_t* this);
+SDK_EXPORT void _task_pending(task_t* this);
+SDK_EXPORT void _task_handle(task_t* this);
 SDK_EXPORT void _task_call_destroy(task_t* this);
+
+SDK_EXPORT void __taskmanager_constructor_platform(taskmanager_t* this);
+SDK_EXPORT void __taskmanager_deconstructor_platform(taskmanager_t* this);
 
 #endif

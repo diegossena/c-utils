@@ -4,6 +4,7 @@
 #include <sdk/types.h>
 #include <sdk/error.h>
 #include <sdk/buffer.h>
+#include <sdk/taskmanager.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -43,7 +44,7 @@ SDK_EXPORT u16 net_port_from_short(u16 port);
 SDK_EXPORT u16 net_port_to_short(u16 port);
 SDK_EXPORT void __net_startup();
 SDK_EXPORT void __net_shutdown();
-SDK_EXPORT u64 socket_new(socket_type_t type);
+SDK_EXPORT u64 socket_new(task_t*, socket_type_t);
 SDK_EXPORT void _socket_free(u64 fd);
 
 #endif

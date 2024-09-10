@@ -25,6 +25,7 @@
 #endif
 #ifdef SDK_TASKMANAGER_H
 #include <src/sdk/taskmanager.c>
+#include <src/sdk/taskmanager.win32.c>
 #endif
 #ifdef SDK_NET_TCP_H
 #include <src/sdk/tcp.c>

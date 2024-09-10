@@ -40,6 +40,7 @@ typedef enum error_code_t {
   ERR_BAD_FORMAT = 11,
   ERR_INSUFFICIENT_BUFFER = 122,
   // https://learn.microsoft.com/pt-br/windows/win32/winsock/windows-sockets-error-codes-2
+  ERR_IO_PENDING = 997,
   ERR_EFAULT = 10014,
   ERR_EINVAL = 10022,
   ERR_EWOULDBLOCK = 10035,
@@ -51,6 +52,7 @@ typedef enum error_code_t {
   ERR_EADDRNOTAVAIL = 10049,
   ERR_ECONNRESET = 10054,
   ERR_ENOBUFS = 10055,
+  ERR_ENOTCONN = 10057,
   ERR_ETIMEDOUT = 10060,
   ERR_ECONNREFUSED = 10061,
   ERR_NOTINITIALISED = 10093,

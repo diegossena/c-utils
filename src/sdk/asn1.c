@@ -2,11 +2,11 @@
 
 SDK_EXPORT u8* ber_sequence_start(byte_t** stream, u8 type) {
   *(*stream)++ = type;
-  u8* length_ptr = (*stream)++;
-  return length_ptr;
+  return (*stream)++;
 }
 SDK_EXPORT void ber_sequence_end(byte_t** stream, u8* sequence) {
   *sequence = (*stream) - sequence - sizeof(u8);
+  console_log("ber_sequence_end %d", *sequence);
 }
 SDK_EXPORT void ber_write_i64(byte_t** stream, i64 value) {
   if (value <= 0xFF) {

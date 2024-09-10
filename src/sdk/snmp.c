@@ -110,7 +110,7 @@ SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this) {
   queue_constructor(&this->varbinds);
 }
 SDK_EXPORT byte_t* snmp_pdu_to_buffer(snmp_pdu_t* this) {
-  byte_t* buffer = buffer_new(BUFFER_DEFAULT_SIZE);
+  buffer_default_t buffer;
   byte_t* ptr = buffer;
   u8* sequence = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
   ber_write_var_integer(&ptr, this->version);
@@ -128,7 +128,8 @@ SDK_EXPORT byte_t* snmp_pdu_to_buffer(snmp_pdu_t* this) {
   ber_sequence_end(&ptr, varbind_list);
   ber_sequence_end(&ptr, pdu_sequence);
   ber_sequence_end(&ptr, sequence);
-  u64 size = ptr - buffer;
-  buffer = buffer_resize(buffer, size);
-  return buffer;
+  u16 size = ptr - buffer;
+  ptr = buffer_new(size);
+  memory_copy(ptr, buffer, size);
+  return ptr;
 }

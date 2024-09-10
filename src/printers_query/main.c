@@ -12,6 +12,7 @@ typedef struct printers_query_t {
   snmp_t snmp;
   u32 ip4;
   u32 ip4_end;
+  bool finished;
 } printers_query_t;
 
 void printers_query_onmessage(snmp_message_t* this) {
@@ -45,7 +46,7 @@ void printers_query_deconstructor(printers_query_t* this) {
   memory_free(this);
 }
 void printers_query_service(printers_query_t* this) {
-  if (this->ip4 == this->ip4_end) {
+  if (this->finished) {
     if (queue_is_empty(&this->snmp.pending)) {
       return printers_query_deconstructor(this);
     }
@@ -83,9 +84,16 @@ void printers_query_service(printers_query_t* this) {
         udp_send->address.net_port = SNMP_PORT;
         udp_send->data = snmp_pdu_to_buffer(&pdu);
         udp_send->length = buffer_length(udp_send->data);
+        udp_send->callback = (function_t)buffer_free;
+        udp_send->context = udp_send->data;
+        console_log("pdu[%d]", udp_send->length);
+        console_write_buffer(udp_send->data, udp_send->length);
+        console_newline();
         snmp_request_await(&this->snmp, pdu.request_id);
-        if (this->ip4 == this->ip4_end)
+        if (this->ip4 == this->ip4_end) {
+          this->finished = true;
           break;
+        }
         this->ip4 = ip4_increment(this->ip4);
       } while (taskmanager->tasks_count < TASKS_LOOP_MAX);
     }
@@ -98,6 +106,7 @@ void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 i
   printers_query_t* this = memory_alloc(sizeof(printers_query_t));
   this->ip4 = ip4_start;
   this->ip4_end = ip4_end;
+  this->finished = false;
   // snmp
   snmp_constructor(&this->snmp, taskmanager);
   this->snmp.timeout = 1000;

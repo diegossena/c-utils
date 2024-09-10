@@ -5,7 +5,7 @@ SET defines=-DSDK_DEVELOPMENT -DSDK_UNITY
 SET compiler_flags=-O2
 SET include_flags=-Iinclude -I.
 SET linker_flags=-lws2_32 -ld3d11 -ld2d1 -lDwrite -ld3dcompiler -lole32 -ldxguid -lgdi32
-SET params=192.168.0.0 192.168.0.255
+SET params=192.168.0.18 192.168.0.18
 :: clear exe
 if EXIST .\bin\%package_name%.exe DEL .\bin\%package_name%.exe
 ECHO %package_name% compiling...

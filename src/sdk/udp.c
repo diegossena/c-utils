@@ -45,13 +45,16 @@ SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
   this->__udp_tasks.this = this;
   queue_push(&udp->_tasks, &this->__udp_tasks.queue);
   // task
-  task_constructor(&this->_task, taskmanager);
+  _task_constructor(&this->_task, taskmanager);
   this->_task.handle = (function_t)_udp_send_startup;
   this->_task.destroy = (function_t)_udp_send_deconstructor;
   this->_task.context = this;
 }
 SDK_EXPORT void _udp_send_deconstructor(udp_send_t* this) {
-  task_deconstructor(&this->_task);
+  if (this->callback) {
+    this->callback(this->context);
+  }
+  _task_deconstructor(&this->_task);
   queue_remove(&this->__udp_tasks.queue);
 }
 SDK_EXPORT void _udp_send_startup(udp_send_t* this) {

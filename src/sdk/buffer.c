@@ -6,19 +6,19 @@ void* buffer_new(u64 size) {
   this->length = size;
   return (void*)this + sizeof(buffer_t);
 }
-void* buffer_resize(void* this, u64 length) {
+void* buffer_resize(void* this, u64 size) {
   buffer_t* header = this - sizeof(buffer_t);
-  header = memory_realloc(header, sizeof(buffer_t) + length);
+  header = memory_realloc(header, sizeof(buffer_t) + size);
   if (header) {
-    header->length = length;
+    header->length = size;
   }
   return (void*)header + sizeof(buffer_t);
 }
-void* buffer_resize0(void* this, u64 length) {
+void* buffer_resize0(void* this, u64 size) {
   buffer_t* header = this - sizeof(buffer_t);
-  header = memory_realloc0(header, sizeof(buffer_t) + length);
+  header = memory_realloc0(header, sizeof(buffer_t) + size);
   if (header) {
-    header->length = length;
+    header->length = size;
   }
   return (void*)header + sizeof(buffer_t);
 }

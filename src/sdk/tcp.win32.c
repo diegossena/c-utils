@@ -3,134 +3,89 @@
 
 #include <winsock2.h>
 #include <windows.h>
+#include <mswsock.h>
 
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
   closesocket((SOCKET)this->__socket);
-  task_deconstructor(&this->_task);
+  _task_deconstructor(&this->_task);
 }
 SDK_EXPORT void tcp_free(tcp_t* this) {
   _tcp_deconstructor(this);
   memory_free(this);
 }
-SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
-  this->__socket = socket_new(SOCKET_TYPE_STREAM);
-  if (this->__socket < 0) {
-    this->error_code = this->__socket;
-    this->onend(this->_task.context);
-    goto onerror;
+SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length) {
+  this->_task.handle = (function_t)this->onend;
+  this->__remaining = length;
+  WSABUF data_buffer = { .buf = (void*)chunk, .len = length };
+  OVERLAPPED overlapped = { 0 };
+  DWORD bytesSent;
+  i32 result = WSASend(this->__socket, &data_buffer, 1, &bytesSent, 0, &overlapped, 0);
+  if (result == SOCKET_ERROR) {
+    result = WSAGetLastError();
+    if (result != WSAEWOULDBLOCK) {
+      error("WSASend", result);
+    }
   }
-  i32 error_code = connect(this->__socket, (SOCKADDR*)&this->address, sizeof(this->address));
-  if (error_code == SOCKET_ERROR) {
-    error_code = WSAGetLastError();
-    if (error_code != ERR_EWOULDBLOCK) {
-      this->error_code = error_code;
+}
+static char data[512] = "";
+OVERLAPPED overlapped = { 0 };
+SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
+  this->_task.handle = (function_t)this->onend;
+  this->__remaining = length;
+  DWORD bytes;
+  WSABUF data_buffer = { .len = 512, .buf = (char*)&data[0] };
+  data_buffer.buf = data;
+  data_buffer.len = sizeof(data);
+  i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, 0, &overlapped, 0);
+  if (result == SOCKET_ERROR) {
+    if (result != WSAEWOULDBLOCK) {
+      error("WSARecv", WSAGetLastError());
+    }
+  }
+}
+SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
+  i32 result;
+  // bind
+  struct sockaddr_in local_Address;
+  local_Address.sin_family = AF_INET;
+  local_Address.sin_port = htons(0);
+  local_Address.sin_addr.s_addr = INADDR_ANY;
+  result = bind(this->__socket, (SOCKADDR*)&local_Address, sizeof(local_Address));
+  // ConnectionEx
+  LPFN_CONNECTEX ConnectEx = 0;
+  GUID guid = WSAID_CONNECTEX;
+  DWORD bytes;
+  result = WSAIoctl(this->__socket,
+    SIO_GET_EXTENSION_FUNCTION_POINTER,
+    &guid,
+    sizeof(guid),
+    &ConnectEx,
+    sizeof(ConnectEx),
+    &bytes,
+    NULL,
+    NULL
+  );
+  if (result == SOCKET_ERROR) {
+    error("WSAIoctl", GetLastError());
+  }
+  OVERLAPPED overlapped = { 0 };
+  result = ConnectEx(
+    this->__socket, (SOCKADDR*)&this->address, sizeof(this->address), 0, 0,
+    0, &overlapped
+  );
+  if (!result) {
+    result = WSAGetLastError();
+    if (result != ERR_IO_PENDING) {
+      this->error_code = result;
       goto onerror;
     }
   }
-  this->_task.handle = (function_t)__tcp_connect_task;
+  this->_task.handle = (function_t)this->onend;
   this->__updated_at = date_now();
-  return;
+  return _task_pending(&this->_task);
 onerror:
   this->onend(this->_task.context);
   this->_task.destroy(this->_task.context);
-}
-SDK_EXPORT void __tcp_connect_task(tcp_t* this) {
-  struct timeval timeout = { 0, 0 };
-  fd_set writable = {};
-  FD_SET(this->__socket, &writable);
-  i32 error_code = select(__net_max_fd, 0, &writable, 0, &timeout);
-  // onfail
-  if (error_code == 0) {
-    u64 elapsed = date_now() - this->__updated_at;
-    if (elapsed > this->timeout) {
-      this->error_code = ERR_ETIMEDOUT;
-      goto onend;
-    }
-    goto awaiting;
-  }
-  // onsuccess
-  if (error_code > 0) {
-    goto onend;
-  }
-  // onerror
-  this->error_code = WSAGetLastError();
-onend:
-  this->_task.handle = this->_task.destroy;
-  this->onend(this->_task.context);
-  if (this->_task.handle == this->_task.destroy) {
-    this->_task.destroy(this->_task.context);
-  }
-awaiting:
-  return;
-}
-
-SDK_EXPORT void __tcp_write_task(tcp_t* this) {
-  i32 sent = send(this->__socket, this->__buffer, this->__remaining, 0);
-  if (sent > 0) {
-    this->__updated_at = date_now();
-    this->__buffer += sent;
-    this->__remaining -= sent;
-    if (this->__remaining) {
-      goto awaiting;
-    }
-  } else if (sent < 0) {
-    sent = WSAGetLastError();
-    if (sent == WSAEWOULDBLOCK)
-      goto awaiting;
-    this->error_code = sent;
-  } else {
-    u64 elapsed = date_now() - this->__updated_at;
-    if (elapsed > this->timeout) {
-      this->error_code = ERR_ETIMEDOUT;
-    } else {
-      goto awaiting;
-    }
-  }
-onend:
-  this->_task.handle = this->_task.destroy;
-  this->onend(this->_task.context);
-  if (this->_task.handle == this->_task.destroy) {
-    this->_task.destroy(this->_task.context);
-  }
-awaiting:
-  return;
-}
-SDK_EXPORT void __tcp_read_task(tcp_t* this) {
-  buffer_default_t buffer;
-  u64 buffer_size = this->__remaining ? this->__remaining : BUFFER_DEFAULT_SIZE;
-  i32 length = recv(this->__socket, buffer, buffer_size, 0);
-  if (length > 0) {
-    this->ondata(this, buffer, length);
-    if (this->__remaining) {
-      this->__remaining -= length;
-      if (!this->__remaining) {
-        goto onend;
-      }
-    }
-    this->__updated_at = date_now();
-    goto awaiting;
-  }
-  if (length == 0) {
-    goto onend;
-  }
-  u64 elapsed = date_now() - this->__updated_at;
-  if (elapsed > this->timeout) {
-    this->error_code = ERR_ETIMEDOUT;
-    goto onend;
-  }
-  length = WSAGetLastError();
-  if (length == WSAEWOULDBLOCK) {
-    goto awaiting;
-  }
-  this->error_code = length;
-onend:
-  this->_task.handle = this->_task.destroy;
-  this->onend(this->_task.context);
-  if (this->_task.handle == this->_task.destroy) {
-    this->_task.destroy(this->_task.context);
-  }
-awaiting:
-  return;
 }
 
 #endif

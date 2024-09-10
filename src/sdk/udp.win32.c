@@ -23,6 +23,7 @@ SDK_EXPORT void _udp_service(udp_t* this) {
     (struct sockaddr*)&message.address, &address_size
   );
   if (error_code > 0) {
+    console_log("_udp_service %d", error_code);
     message.length = error_code;
     this->onmessage(&message);
   } else if (error_code < 0) {
@@ -39,20 +40,18 @@ SDK_EXPORT void _udp_send_task(udp_send_t* this) {
     (struct sockaddr*)&this->address, sizeof(net_address_t)
   );
   if (sent > 0) {
-    this->__updated_at = date_now();
-    this->data += sent;
     this->length -= sent;
-    if (this->length)
+    if (this->length) {
+      this->data += sent;
+      this->__updated_at = date_now();
       return;
+    }
   } else {
     this->error_code = WSAGetLastError();
     error("_udp_send_task", this->error_code);
-    return _task_call_destroy(&this->udp->_service);
+    _task_call_destroy(&this->udp->_service);
   }
 onend:
-  if (this->callback) {
-    this->callback(this);
-  }
   _task_call_destroy(&this->_task);
 }
 

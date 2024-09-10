@@ -14,24 +14,30 @@ SDK_EXPORT void __net_startup() {
     __net_shutdown();
   }
 }
-SDK_EXPORT u64 socket_new(socket_type_t type) {
-  u64 this = socket(AF_INET, type, 0);
+
+SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
+  u64 this = WSASocketW(AF_INET, type, 0, 0, 0, WSA_FLAG_OVERLAPPED);
   if (this == INVALID_SOCKET) {
     error("socket", WSAGetLastError());
-    return this;
-  }
-  /**
-   * If iMode = 0, blocking is enabled;
-   * If iMode != 0, non-blocking mode is enabled.
-   */
-  u_long mode = 1;
-  if (ioctlsocket(this, FIONBIO, &mode) == SOCKET_ERROR) {
-    error("ioctlsocket", WSAGetLastError());
     return this;
   }
   if (this > __net_max_fd) {
     __net_max_fd = this + 1;
   }
+  /**
+   * If non_blocking = 0, blocking is enabled;
+   * If non_blocking != 0, non-blocking mode is enabled.
+   */
+  u_long non_blocking = 1;
+  if (ioctlsocket(this, FIONBIO, &non_blocking) == SOCKET_ERROR) {
+    error("ioctlsocket", WSAGetLastError());
+    return this;
+  }
+  // Associate it with the I/O completion port
+  if (CreateIoCompletionPort((HANDLE)this, task->taskmanager->iocp, (ULONG_PTR)task, 0) == NULL) {
+    error("CreateIoCompletionPort", GetLastError());
+  }
+  console_log("socket_new { task: %d }", task);
   return this;
 }
 SDK_EXPORT void _socket_free(u64 fd) { closesocket((SOCKET)fd); }

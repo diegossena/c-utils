@@ -1,13 +1,19 @@
 #include <sdk/taskmanager.h>
 
-#define TASKS_LOOP_MAX 7
-
-SDK_EXPORT void task_constructor(task_t* this, taskmanager_t* taskmanager) {
+SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t* taskmanager) {
   this->taskmanager = taskmanager;
   queue_push(&taskmanager->tasks, &this->queue);
   ++taskmanager->tasks_count;
 }
-SDK_EXPORT void task_deconstructor(task_t* this) {
+SDK_EXPORT void _task_pending(task_t* this) {
+  queue_remove(&this->queue);
+  queue_push(&this->taskmanager->tasks_pending, &this->queue);
+}
+SDK_EXPORT void _task_handle(task_t* this) {
+  queue_remove(&this->queue);
+  queue_push(&this->taskmanager->tasks, &this->queue);
+}
+SDK_EXPORT void _task_deconstructor(task_t* this) {
   queue_remove(&this->queue);
   --this->taskmanager->tasks_count;
 }
@@ -16,39 +22,47 @@ SDK_EXPORT void _task_call_destroy(task_t* this) {
 }
 
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
-  queue_constructor(&this->services);
   queue_constructor(&this->tasks);
+  queue_constructor(&this->tasks_pending);
   this->tasks_count = 0;
 #ifdef SDK_NET_H
   __net_startup();
 #endif
+  __taskmanager_constructor_platform(this);
 }
-SDK_EXPORT void taskmanager_run(const taskmanager_t* this) {
+SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
   u64 i;
-  task_t
-    * service = (task_t*)&this->services, * service_next,
-    * task = (task_t*)&this->tasks, * task_next;
-  bool running = false;
-  while (!queue_is_empty(&this->services) || !queue_is_empty(&this->tasks)) {
-    service_next = (task_t*)service->queue.next;
-    if ((queue_t*)service != &this->services) {
-      service->handle(service->context);
+  task_t* task, * task_next = (task_t*)this->tasks.next;
+  DWORD bytes;
+  ULONG_PTR key;
+  WINBOOL result;
+  OVERLAPPED* overlapped;
+  while (this->tasks_count) {
+    // pool
+    result = GetQueuedCompletionStatus(this->iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
+    if (result) {
+      // console_log("bytes %d", bytes);
+      function_t handle = task->handle;
+      task->handle = task->destroy;
+      handle(task->context);
     }
-    service = service_next;
-    /**
-     * Process immediate callbacks a small fixed number of times
-     * to avoid loop starvation.
-     */
-    i = 0;
-    task = (task_t*)this->tasks.next;
-    while ((queue_t*)task != &this->tasks && i < TASKS_LOOP_MAX) {
-      task_next = (task_t*)task->queue.next;
+    // tasks
+    task = task_next;
+    task_next = (task_t*)task->queue.next;
+    if ((queue_t*)task != &this->tasks) {
+      console_log("task");
       task->handle(task->context);
-      task = task_next;
-      ++i;
     }
   }
 #ifdef SDK_NET_H
   __net_shutdown();
 #endif
+#ifdef SDK_DEVELOPMENT
+  if (__leaks_count) {
+    console_color(ANSI_FORE_RED);
+    console_log("leak %d", __leaks_count);
+    console_color(ANSI_RESET);
+  }
+#endif
+  __taskmanager_deconstructor_platform(this);
 }

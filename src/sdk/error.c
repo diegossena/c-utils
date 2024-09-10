@@ -49,6 +49,8 @@ SDK_EXPORT const char* error_cstr(i32 code) {
     case ERR_INSUFFICIENT_BUFFER:
       return "ERR_INSUFFICIENT_BUFFER";
     // winsock2
+    case ERR_IO_PENDING:
+      return "ERR_IO_PENDING";
     case ERR_EFAULT:
       return "ERR_EFAULT";
     case ERR_EINVAL:
@@ -71,6 +73,8 @@ SDK_EXPORT const char* error_cstr(i32 code) {
       return "ERR_ECONNRESET";
     case ERR_ENOBUFS:
       return "ERR_ENOBUFS";
+    case ERR_ENOTCONN:
+      return "ERR_ENOTCONN";
     case ERR_ETIMEDOUT:
       return "ERR_ETIMEDOUT";
     case ERR_ECONNREFUSED:

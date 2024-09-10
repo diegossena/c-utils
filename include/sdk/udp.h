@@ -42,7 +42,7 @@ typedef struct udp_send_t {
   byte_t* data;
   u64 length;
   void* context;
-  udp_onsend_t callback;
+  function_t callback;
   i32 error_code;
   task_t _task;
   callback_t __udp_tasks;

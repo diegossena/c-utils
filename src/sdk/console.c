@@ -15,9 +15,9 @@ SDK_EXPORT void console_write(const char* message, ...) {
 }
 SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size) {
   bool first = true;
-  console_write_cstr("<Buffer ");
   if (size) {
     console_write("%02x", *buffer);
+    ++buffer;
     if (--size) {
       while (true) {
         console_write(" %02x", *buffer);
@@ -27,5 +27,4 @@ SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size) {
       }
     }
   }
-  console_write_cstr(">");
 }
