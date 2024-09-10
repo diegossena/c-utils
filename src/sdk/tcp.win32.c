@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <mswsock.h>
 
+LPFN_CONNECTEX ConnectEx = 0;
+
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
   closesocket((SOCKET)this->__socket);
   _task_deconstructor(&this->_task);
@@ -18,8 +20,7 @@ SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length) {
   this->__remaining = length;
   WSABUF data_buffer = { .buf = (void*)chunk, .len = length };
   OVERLAPPED overlapped = { 0 };
-  DWORD bytesSent;
-  i32 result = WSASend(this->__socket, &data_buffer, 1, &bytesSent, 0, &overlapped, 0);
+  i32 result = WSASend(this->__socket, &data_buffer, 1, 0, 0, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {
@@ -27,21 +28,55 @@ SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length) {
     }
   }
 }
-static char data[512] = "";
-OVERLAPPED overlapped = { 0 };
 SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
-  this->_task.handle = (function_t)this->onend;
+  this->_task.handle = (function_t)__tcp_onread;
   this->__remaining = length;
-  DWORD bytes;
-  WSABUF data_buffer = { .len = 512, .buf = (char*)&data[0] };
-  data_buffer.buf = data;
-  data_buffer.len = sizeof(data);
-  i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, 0, &overlapped, 0);
+  DWORD flags;
+  WSABUF data_buffer = { 0 };
+  OVERLAPPED overlapped = { 0 };
+  i32 result = WSARecv(this->__socket, &data_buffer, 1, 0, &flags, &overlapped, 0);
   if (result == SOCKET_ERROR) {
-    if (result != WSAEWOULDBLOCK) {
+    result = WSAGetLastError();
+    if (result != ERR_IO_PENDING) {
+      console_log("!%x tcp_read %d", this->__socket, result);
       error("WSARecv", WSAGetLastError());
+      this->_task.destroy(this->_task.context);
     }
   }
+}
+SDK_EXPORT void __tcp_onread(tcp_t* this) {
+  // Do nonblocking reads until the buffer is empty
+  u8 count = 32;
+  char buffer[BUFFER_DEFAULT_SIZE];
+  WSABUF data_buffer = {
+    this->__remaining ? this->__remaining : BUFFER_DEFAULT_SIZE,
+    buffer
+  };
+  DWORD bytes, flags;
+  do {
+    i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, 0, 0);
+    if (result == SOCKET_ERROR) {
+      result = WSAGetLastError();
+      if (result == WSAEWOULDBLOCK) {
+        return tcp_read(this, this->__remaining);
+      } else {
+        this->error_code = result;
+        this->onend(this);
+        return _task_call_destroy(&this->_task);
+      }
+    } else {
+      if (bytes > 0) {
+        this->ondata(this, buffer, bytes);
+        if (this->__remaining) {
+          this->__remaining -= bytes;
+        }
+      } else {
+        this->_task.handle = this->_task.destroy;
+        this->onend(this);
+        return _task_handle(&this->_task);
+      }
+    }
+  } while (--count);
 }
 SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
   i32 result;
@@ -51,22 +86,23 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
   local_Address.sin_port = htons(0);
   local_Address.sin_addr.s_addr = INADDR_ANY;
   result = bind(this->__socket, (SOCKADDR*)&local_Address, sizeof(local_Address));
-  // ConnectionEx
-  LPFN_CONNECTEX ConnectEx = 0;
-  GUID guid = WSAID_CONNECTEX;
-  DWORD bytes;
-  result = WSAIoctl(this->__socket,
-    SIO_GET_EXTENSION_FUNCTION_POINTER,
-    &guid,
-    sizeof(guid),
-    &ConnectEx,
-    sizeof(ConnectEx),
-    &bytes,
-    NULL,
-    NULL
-  );
-  if (result == SOCKET_ERROR) {
-    error("WSAIoctl", GetLastError());
+  if (!ConnectEx) {
+    GUID guid = WSAID_CONNECTEX;
+    DWORD bytes;
+    result = WSAIoctl(this->__socket,
+      SIO_GET_EXTENSION_FUNCTION_POINTER,
+      &guid,
+      sizeof(guid),
+      &ConnectEx,
+      sizeof(ConnectEx),
+      &bytes,
+      NULL,
+      NULL
+    );
+    if (result == SOCKET_ERROR) {
+      error("WSAIoctl", GetLastError());
+      return this->_task.destroy(this->_task.context);
+    }
   }
   OVERLAPPED overlapped = { 0 };
   result = ConnectEx(

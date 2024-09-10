@@ -38,5 +38,6 @@ SDK_EXPORT void _task_call_destroy(task_t* this);
 
 SDK_EXPORT void __taskmanager_constructor_platform(taskmanager_t* this);
 SDK_EXPORT void __taskmanager_deconstructor_platform(taskmanager_t* this);
+SDK_EXPORT void __taskmanager_pool(taskmanager_t* this);
 
 #endif

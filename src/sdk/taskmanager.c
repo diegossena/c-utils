@@ -33,26 +33,14 @@ SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
 SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
   u64 i;
   task_t* task, * task_next = (task_t*)this->tasks.next;
-  DWORD bytes;
-  ULONG_PTR key;
-  WINBOOL result;
-  OVERLAPPED* overlapped;
+
   while (this->tasks_count) {
-    // pool
-    result = GetQueuedCompletionStatus(this->iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
-    if (result) {
-      // console_log("bytes %d", bytes);
-      function_t handle = task->handle;
-      task->handle = task->destroy;
-      handle(task->context);
-    }
-    // tasks
     task = task_next;
     task_next = (task_t*)task->queue.next;
     if ((queue_t*)task != &this->tasks) {
-      console_log("task");
       task->handle(task->context);
     }
+    __taskmanager_pool(this);
   }
 #ifdef SDK_NET_H
   __net_shutdown();

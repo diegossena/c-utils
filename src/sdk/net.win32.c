@@ -37,7 +37,6 @@ SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
   if (CreateIoCompletionPort((HANDLE)this, task->taskmanager->iocp, (ULONG_PTR)task, 0) == NULL) {
     error("CreateIoCompletionPort", GetLastError());
   }
-  console_log("socket_new { task: %d }", task);
   return this;
 }
 SDK_EXPORT void _socket_free(u64 fd) { closesocket((SOCKET)fd); }

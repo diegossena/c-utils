@@ -3,7 +3,7 @@
 #include <sdk/unity.h>
 
 void http_ondata(tcp_t* this, byte_t* chunk, u32 length) {
-  console_log("ondata.chunk[%d]", length);
+  // console_log("ondata.chunk[%d]", length);
   // console_write_cstr("`");
   // console_write_str(chunk, length);
   // console_write_cstr("`\n");
@@ -12,9 +12,10 @@ void http_onresponse(tcp_t* tcp) {
   if (tcp->error_code) {
     return error("http_onresponse", tcp->error_code);
   }
+  console_log("http_onresponse");
 }
 void http_onrequest(tcp_t* tcp) {
-  console_log("http_onrequest");
+  // console_log("http_onrequest");
   if (tcp->error_code) {
     return error("http_onrequest", tcp->error_code);
   }
@@ -23,7 +24,7 @@ void http_onrequest(tcp_t* tcp) {
   tcp_read(tcp, 0);
 }
 void http_onconnect(tcp_t* tcp) {
-  console_log("http_onconnect");
+  // console_log("http_onconnect");
   if (tcp->error_code) {
     return error("http_onconnect", tcp->error_code);
   }
@@ -40,13 +41,12 @@ i32 main(i32 argc, char** argv) {
   taskmanager_t taskmanager;
   taskmanager_constructor(&taskmanager);
 
-  for (i32 i = 0; i < 1; i++) {
+  for (i32 i = 0; i < 1000; i++) {
     tcp_t* tcp = tcp_new(&taskmanager);
     tcp->address.ip4 = ip4_from_bytes(142, 251, 135, 35);
     tcp->address.net_port = net_port_from_short(80);
     tcp->onend = http_onconnect;
   }
-
   taskmanager_run(&taskmanager);
   console_color(ANSI_FORE_LIGHTGREEN);
   console_log("SUCCESS");
