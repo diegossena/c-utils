@@ -10,11 +10,11 @@ void http_ondata(tcp_t* this, byte_t* chunk, u32 length) {
 }
 u64 response_count = 0;
 void http_onresponse(tcp_t* tcp) {
-  if (tcp->error_code) {
-    error("http_onresponse", tcp->error_code);
-  } else {
-    console_log("http_onresponse %d", ++response_count);
-  }
+  console_log("%llu %d http_onresponse %s", date_now(), tcp->__socket, error_cstr(tcp->error_code));
+  // if (tcp->error_code) {
+  //   error("http_onresponse", tcp->error_code);
+  // } else {
+  // }
 }
 void http_onrequest(tcp_t* tcp) {
   if (tcp->error_code) {
@@ -26,8 +26,9 @@ void http_onrequest(tcp_t* tcp) {
   }
 }
 void http_onconnect(tcp_t* tcp) {
+  console_log("%llu %d http_onresponse %s", date_now(), tcp->__socket, error_cstr(tcp->error_code));
   if (tcp->error_code) {
-    error("http_onconnect", tcp->error_code);
+    // error("http_onconnect", tcp->error_code);
   } else {
     const char http_request [] =
       "GET / HTTP/1.1\r\n"

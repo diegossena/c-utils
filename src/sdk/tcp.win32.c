@@ -65,12 +65,13 @@ onerror:
   this->_task.destroy(this->_task.context);
 }
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
-  closesocket((SOCKET)this->__socket);
-  _task_deconstructor(&this->_task);
+  console_log("%llu %d _tcp_deconstructor", date_now(), this->__socket);
   WINBOOL result = DeleteTimerQueueTimer(0, this->__timer, 0);
   if (result == 0) {
     error("DeleteTimerQueueTimer", GetLastError());
   }
+  closesocket((SOCKET)this->__socket);
+  _task_deconstructor(&this->_task);
 }
 SDK_EXPORT void __tcp_onwrite(tcp_t* this, u32 bytes) {
   this->__remaining -= bytes;
@@ -115,6 +116,7 @@ SDK_EXPORT void __tcp_onread(tcp_t* this) {
         goto onend;
     }
   } while (--count);
+  console_log("%llu %d ChangeTimerQueueTimer", date_now(), this->__socket);
   ChangeTimerQueueTimer(0, this->__timer, this->timeout, 0);
   return tcp_read(this, this->__remaining);
 onend:
