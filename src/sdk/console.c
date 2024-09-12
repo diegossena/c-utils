@@ -6,7 +6,7 @@
 SDK_EXPORT void console_write(const char* message, ...) {
   __builtin_va_list args;
   va_start(args, message);
-  buffer_default_t buffer;
+  char buffer[BUFFER_DEFAULT_SIZE];
   i32 length = cstr_format_va(buffer, BUFFER_DEFAULT_SIZE, message, args);
   va_end(args);
   if (length < 0)

@@ -13,7 +13,7 @@ SDK_EXPORT void udp_bind(udp_t* this, u16 net_port) {
   }
 }
 SDK_EXPORT void _udp_service(udp_t* this) {
-  buffer_default_t buffer;
+  char buffer[BUFFER_DEFAULT_SIZE];
   udp_message_t message;
   message.udp = this;
   message.data = buffer;

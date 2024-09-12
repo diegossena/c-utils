@@ -7,41 +7,78 @@
 
 LPFN_CONNECTEX ConnectEx = 0;
 
-SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
-  closesocket((SOCKET)this->__socket);
-  _task_deconstructor(&this->_task);
-}
 SDK_EXPORT void tcp_free(tcp_t* this) {
   _tcp_deconstructor(this);
   memory_free(this);
 }
 SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length) {
-  this->_task.handle = (function_t)this->onend;
   this->__remaining = length;
-  WSABUF data_buffer = { .buf = (void*)chunk, .len = length };
+  WSABUF data_buffer = { length, (char*)chunk };
   OVERLAPPED overlapped = { 0 };
   i32 result = WSASend(this->__socket, &data_buffer, 1, 0, 0, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {
-      error("WSASend", result);
+      this->error_code = result;
+      this->onend(this);
+      return _task_call_destroy(&this->_task);
     }
   }
+  this->_task.handle = (task_handle_t)__tcp_onwrite;
 }
 SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
-  this->_task.handle = (function_t)__tcp_onread;
   this->__remaining = length;
-  DWORD flags;
+  DWORD bytes, flags = 0;
   WSABUF data_buffer = { 0 };
   OVERLAPPED overlapped = { 0 };
-  i32 result = WSARecv(this->__socket, &data_buffer, 1, 0, &flags, &overlapped, 0);
+  i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
-      console_log("!%x tcp_read %d", this->__socket, result);
-      error("WSARecv", WSAGetLastError());
-      this->_task.destroy(this->_task.context);
+      this->error_code = result;
+      this->onend(this);
+      return _task_call_destroy(&this->_task);
     }
+  }
+  this->_task.handle = (task_handle_t)__tcp_onread;
+}
+SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t* taskmanager) {
+  this->timeout = NET_DEFAULT_TIMEOUT;
+  this->error_code = 0;
+  // address
+  this->address.family = NET_FAMILY_IPV4;
+  // task
+  _task_constructor(&this->_task, taskmanager);
+  this->_task.handle = (task_handle_t)__tcp_startup_task;
+  this->_task.destroy = (function_t)_tcp_deconstructor;
+  this->_task.context = this;
+  // startup
+  this->__socket = socket_new(&this->_task, SOCKET_TYPE_STREAM);
+  if (this->__socket < 0) {
+    this->error_code = this->__socket;
+    this->onend(this->_task.context);
+    goto onerror;
+  }
+  return;
+onerror:
+  this->onend(this->_task.context);
+  this->_task.destroy(this->_task.context);
+}
+SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
+  closesocket((SOCKET)this->__socket);
+  _task_deconstructor(&this->_task);
+  WINBOOL result = DeleteTimerQueueTimer(0, this->__timer, 0);
+  if (result == 0) {
+    error("DeleteTimerQueueTimer", GetLastError());
+  }
+}
+SDK_EXPORT void __tcp_onwrite(tcp_t* this, u32 bytes) {
+  this->__remaining -= bytes;
+  if (this->__remaining == 0) {
+    this->_task.handle = (task_handle_t)this->_task.destroy;
+    this->onend(this);
+  } else {
+    ChangeTimerQueueTimer(0, this->__timer, this->timeout, 0);
   }
 }
 SDK_EXPORT void __tcp_onread(tcp_t* this) {
@@ -52,31 +89,34 @@ SDK_EXPORT void __tcp_onread(tcp_t* this) {
     this->__remaining ? this->__remaining : BUFFER_DEFAULT_SIZE,
     buffer
   };
+  OVERLAPPED overlapped = { 0 };
   DWORD bytes, flags;
   do {
     i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, 0, 0);
     if (result == SOCKET_ERROR) {
       result = WSAGetLastError();
-      if (result == WSAEWOULDBLOCK) {
-        return tcp_read(this, this->__remaining);
-      } else {
-        this->error_code = result;
-        this->onend(this);
-        return _task_call_destroy(&this->_task);
-      }
-    } else {
-      if (bytes > 0) {
-        this->ondata(this, buffer, bytes);
-        if (this->__remaining) {
-          this->__remaining -= bytes;
-        }
-      } else {
-        this->_task.handle = this->_task.destroy;
-        this->onend(this);
-        return _task_handle(&this->_task);
-      }
+      if (result == WSAEWOULDBLOCK)
+        break;
+      // onerror
+      this->error_code = result;
+      this->onend(this);
+      return _task_call_destroy(&this->_task);
+    }
+    if (!bytes)
+      goto onend;
+    this->ondata(this, buffer, bytes);
+    if (this->__remaining) {
+      this->__remaining -= bytes;
+      if (!this->__remaining)
+        goto onend;
     }
   } while (--count);
+  ChangeTimerQueueTimer(0, this->__timer, this->timeout, 0);
+  return tcp_read(this, this->__remaining);
+onend:
+  this->_task.handle = (task_handle_t)this->_task.destroy;
+  _task_handle(&this->_task);
+  this->onend(this);
 }
 SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
   i32 result;
@@ -101,7 +141,7 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
     );
     if (result == SOCKET_ERROR) {
       error("WSAIoctl", GetLastError());
-      return this->_task.destroy(this->_task.context);
+      return _task_call_destroy(&this->_task);
     }
   }
   OVERLAPPED overlapped = { 0 };
@@ -116,9 +156,13 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
       goto onerror;
     }
   }
-  this->_task.handle = (function_t)this->onend;
-  this->__updated_at = date_now();
-  return _task_pending(&this->_task);
+  this->_task.handle = (task_handle_t)__tcp_onconnect;
+  u64 start = date_now();
+  result = CreateTimerQueueTimer(&this->__timer, 0, (WAITORTIMERCALLBACK)__tcp_ontimeout, this, this->timeout, 0, 0);
+  if (result == 0) {
+    error("CreateTimerQueueTimer", GetLastError());
+  }
+  return _task_promise(&this->_task);
 onerror:
   this->onend(this->_task.context);
   this->_task.destroy(this->_task.context);

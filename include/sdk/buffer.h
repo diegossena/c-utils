@@ -6,8 +6,6 @@
 
 #define BUFFER_DEFAULT_SIZE 65535
 
-typedef u8 buffer_default_t[BUFFER_DEFAULT_SIZE];
-
 typedef struct buffer_t {
   u64 length;
   // ...data

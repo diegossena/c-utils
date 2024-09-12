@@ -1,7 +1,5 @@
 #include <sdk/net.h>
 
-u64 __net_max_fd = 0;
-
 SDK_EXPORT net_address_t ip4_address(u32 ip4, u16 net_port) {
   return (net_address_t) { NET_FAMILY_IPV4, net_port, ip4 };
 }
