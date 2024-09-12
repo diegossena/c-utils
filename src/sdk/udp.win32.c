@@ -12,27 +12,22 @@ SDK_EXPORT void udp_bind(udp_t* this, u16 net_port) {
     error("bind", ERR_UNKNOWN);
   }
 }
-SDK_EXPORT void _udp_service(udp_t* this) {
-  char buffer[BUFFER_DEFAULT_SIZE];
-  udp_message_t message;
-  message.udp = this;
-  message.data = buffer;
-  i32 address_size = sizeof(struct sockaddr);
-  i32 error_code = recvfrom(
-    this->__socket, buffer, BUFFER_DEFAULT_SIZE, 0,
-    (struct sockaddr*)&message.address, &address_size
+SDK_EXPORT void __udp_read(udp_t* this) {
+  DWORD bytes, flags = 0;
+  WSABUF buffer = { 0 };
+  OVERLAPPED overlapped = { 0 };
+  i32 result = WSARecvFrom(
+    this->__socket, &buffer, 1, &bytes,
+    &flags, 0, 0, &overlapped, 0
   );
-  if (error_code > 0) {
-    console_log("_udp_service %d", error_code);
-    message.length = error_code;
-    this->onmessage(&message);
-  } else if (error_code < 0) {
-    error_code = WSAGetLastError();
-    if (error_code != ERR_EWOULDBLOCK && error_code != ERR_ECONNRESET) {
-      error("_udp_service", error_code);
-      _task_call_destroy(&this->_service);
+  if (result == SOCKET_ERROR) {
+    result = WSAGetLastError();
+    if (result != ERR_IO_PENDING) {
+      error("WSARecvFrom", result);
+      return _task_call_destroy(&this->_task);
     }
   }
+  this->_task.handle = (task_handle_t)__udp_onread;
 }
 SDK_EXPORT void _udp_send_task(udp_send_t* this) {
   i32 sent = sendto(
@@ -49,10 +44,29 @@ SDK_EXPORT void _udp_send_task(udp_send_t* this) {
   } else {
     this->error_code = WSAGetLastError();
     error("_udp_send_task", this->error_code);
-    _task_call_destroy(&this->udp->_service);
+    _task_call_destroy(&this->udp->_task);
   }
 onend:
   _task_call_destroy(&this->_task);
+}
+
+SDK_EXPORT void __udp_onread(udp_t* this) {
+  udp_message_t message;
+  WSABUF buffer = { BUFFER_DEFAULT_SIZE, message.data };
+  DWORD bytes, flags;
+  i32 address_size = sizeof(struct sockaddr);
+  i32 result = WSARecvFrom(this->__socket, &buffer, 1, &bytes, &flags, (struct sockaddr*)&message.address, &address_size, 0, 0);
+  if (result == SOCKET_ERROR) {
+    result = WSAGetLastError();
+    if (result != WSAEWOULDBLOCK) {
+      error("WSARecvFrom", result);
+      goto exit;
+    }
+  }
+  message.length = bytes;
+  this->onmessage(&message);
+exit:
+  __udp_read(this);
 }
 
 #endif

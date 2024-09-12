@@ -2,6 +2,9 @@
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 
+SDK_EXPORT void _task_resolve(task_t* this, u32 value) {
+  PostQueuedCompletionStatus(this->taskmanager->__iocp, value, (ULONG_PTR)this, 0);
+}
 SDK_EXPORT void __taskmanager_constructor(taskmanager_t* this) {
   this->__iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
   if (this->__iocp == NULL) {

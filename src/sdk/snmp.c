@@ -10,11 +10,11 @@ SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
   this->udp.context = this;
   udp_bind(&this->udp, 0);
   // service
-  this->udp._service.handle = (function_t)snmp_service;
-  this->udp._service.destroy = (function_t)snmp_deconstructor;
-  this->udp._service.context = this;
+  this->udp._task.handle = (function_t)_snmp_service;
+  this->udp._task.destroy = (function_t)_snmp_deconstructor;
+  this->udp._task.context = this;
 }
-SDK_EXPORT void snmp_deconstructor(snmp_t* this) {
+SDK_EXPORT void _snmp_deconstructor(snmp_t* this) {
   udp_deconstructor(&this->udp);
   queue_foreach(snmp_request_t, &this->pending, it) {
     memory_free(it);
@@ -23,14 +23,14 @@ SDK_EXPORT void snmp_deconstructor(snmp_t* this) {
 SDK_EXPORT snmp_t* snmp_new(taskmanager_t* taskmanager) {
   snmp_t* this = memory_alloc0(sizeof(snmp_t));
   snmp_constructor(this, taskmanager);
-  this->udp._service.destroy = (function_t)snmp_free;
+  this->udp._task.destroy = (function_t)snmp_free;
   return this;
 }
 SDK_EXPORT void snmp_free(snmp_t* this) {
-  snmp_deconstructor(this);
+  _snmp_deconstructor(this);
   memory_free(this);
 }
-SDK_EXPORT void snmp_service(snmp_t* this) {
+SDK_EXPORT void _snmp_service(snmp_t* this) {
   queue_foreach(snmp_request_t, &this->pending, it) {
     u64 delta = date_now() - it->updatedAt;
     if (delta > this->timeout) {
@@ -38,7 +38,7 @@ SDK_EXPORT void snmp_service(snmp_t* this) {
       memory_free(it);
     }
   }
-  _udp_service(&this->udp);
+  __udp_read(&this->udp);
 }
 SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message) {
   snmp_t* this = (snmp_t*)udp_message->udp->context;

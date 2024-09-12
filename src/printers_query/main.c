@@ -7,6 +7,8 @@
 #include <sdk/snowflake.h>
 #include <sdk/unity.h>
 
+#define PRINTERS_TASK_COUNT 255
+
 typedef struct printers_query_t printers_query_t;
 typedef struct printers_query_t {
   snmp_t snmp;
@@ -42,7 +44,7 @@ void printers_query_onmessage(snmp_message_t* this) {
   console_newline();
 }
 void printers_query_deconstructor(printers_query_t* this) {
-  snmp_deconstructor(&this->snmp);
+  _snmp_deconstructor(&this->snmp);
   memory_free(this);
 }
 void printers_query_service(printers_query_t* this) {
@@ -51,8 +53,8 @@ void printers_query_service(printers_query_t* this) {
       return printers_query_deconstructor(this);
     }
   } else {
-    taskmanager_t* taskmanager = this->snmp.udp._service.taskmanager;
-    if (taskmanager->tasks_count < TASKS_LOOP_MAX) {
+    taskmanager_t* taskmanager = this->snmp.udp._task.taskmanager;
+    if (taskmanager->tasks_count < PRINTERS_TASK_COUNT) {
       byte_t community [] = "public";
       snmp_pdu_t pdu = {
         .version = SNMP_VERSION_1,
@@ -95,10 +97,10 @@ void printers_query_service(printers_query_t* this) {
           break;
         }
         this->ip4 = ip4_increment(this->ip4);
-      } while (taskmanager->tasks_count < TASKS_LOOP_MAX);
+      } while (taskmanager->tasks_count < PRINTERS_TASK_COUNT);
     }
   }
-  snmp_service(&this->snmp);
+  _snmp_service(&this->snmp);
 }
 void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 ip4_end) {
   if (!ip4_lessequal(ip4_start, ip4_end))
@@ -111,9 +113,9 @@ void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 i
   snmp_constructor(&this->snmp, taskmanager);
   this->snmp.timeout = 1000;
   this->snmp.onmessage = printers_query_onmessage;
-  this->snmp.udp._service.context = this;
-  this->snmp.udp._service.handle = (function_t)printers_query_service;
-  this->snmp.udp._service.destroy = (function_t)printers_query_deconstructor;
+  this->snmp.udp._task.context = this;
+  this->snmp.udp._task.handle = (function_t)printers_query_service;
+  this->snmp.udp._task.destroy = (function_t)printers_query_deconstructor;
 }
 
 i32 main(i32 argc, char** argv) {

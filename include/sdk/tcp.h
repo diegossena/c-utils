@@ -5,6 +5,7 @@
 #include <sdk/taskmanager.h>
 #include <sdk/net.h>
 #include <sdk/date.h>
+#include <sdk/timer.h>
 
 /**
  * @brief Represents a TCP socket.
@@ -35,7 +36,7 @@ typedef struct tcp_t {
   task_t _task;
   tcp_onend_t __callback;
   u64 __socket;
-  void* __timer;
+  timer_t __timer;
   // stream
   u64 __remaining;
 } tcp_t;

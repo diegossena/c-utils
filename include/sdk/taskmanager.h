@@ -36,6 +36,7 @@ SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t*);
 SDK_EXPORT void _task_deconstructor(task_t* this);
 SDK_EXPORT void _task_handle(task_t* this);
 SDK_EXPORT void _task_promise(task_t* this);
+SDK_EXPORT void _task_resolve(task_t* this, u32 value);
 SDK_EXPORT void _task_call_destroy(task_t* this);
 
 SDK_EXPORT void __taskmanager_constructor(taskmanager_t* this);

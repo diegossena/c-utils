@@ -56,3 +56,6 @@
 #ifdef SDK_SNOWFLAKE_H
 #include <src/sdk/snowflake.c>
 #endif
+#ifdef SDK_TIMER_H
+#include <src/sdk/timer.win32.h>
+#endif

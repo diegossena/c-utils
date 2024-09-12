@@ -26,14 +26,14 @@ typedef void (*udp_onsend_t)(udp_send_t*);
 typedef struct udp_t {
   udp_onmessage_t onmessage;
   void* context;
-  task_t _service;
+  task_t _task;
   queue_t _tasks; // queue_t<callback_t>
   u64 __socket;
 } udp_t;
 typedef struct udp_message_t {
   udp_t* udp;
-  byte_t* data;
-  i32 length;
+  byte_t data[BUFFER_DEFAULT_SIZE];
+  u32 length;
   net_address_t address;
 } udp_message_t;
 typedef struct udp_send_t {
@@ -56,13 +56,16 @@ SDK_EXPORT void udp_free(udp_t* this);
 
 SDK_EXPORT void udp_bind(udp_t* this, u16 port);
 
-SDK_EXPORT void _udp_service(udp_t* this);
-
 SDK_EXPORT udp_send_t* udp_send_new(udp_t* udp);
 SDK_EXPORT void udp_send_free(udp_send_t* this);
+
+SDK_EXPORT void __udp_read(udp_t* this);
+
 SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp);
 SDK_EXPORT void _udp_send_deconstructor(udp_send_t* this);
 SDK_EXPORT void _udp_send_startup(udp_send_t* this);
 SDK_EXPORT void _udp_send_task(udp_send_t* this);
+
+SDK_EXPORT void __udp_onread(udp_t* this);
 
 #endif

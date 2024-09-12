@@ -84,10 +84,10 @@ typedef enum snmp_error_t {
 } snmp_error_t;
 
 SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager);
-SDK_EXPORT void snmp_deconstructor(snmp_t* this);
+SDK_EXPORT void _snmp_deconstructor(snmp_t* this);
 SDK_EXPORT snmp_t* snmp_new(taskmanager_t* taskmanager);
 SDK_EXPORT void snmp_free(snmp_t* this);
-SDK_EXPORT void snmp_service(snmp_t* this);
+SDK_EXPORT void _snmp_service(snmp_t* this);
 SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message);
 SDK_EXPORT void snmp_onwrite(udp_send_t* this);
 SDK_EXPORT void snmp_request_await(snmp_t* this, u64 request_id);
