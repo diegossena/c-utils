@@ -6,9 +6,9 @@ SDK_EXPORT tcp_t* tcp_new(taskmanager_t* taskmanager) {
   this->_task.destroy = (function_t)tcp_free;
   return this;
 }
-SDK_EXPORT void __tcp_onconnect(tcp_t* this, i8 result) {
+SDK_EXPORT void __tcp_onconnect(tcp_t* this) {
   this->onend(this);
-  if (result < 0) {
+  if (this->error_code) {
     _task_call_destroy(&this->_task);
   }
 }

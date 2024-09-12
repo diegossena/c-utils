@@ -82,6 +82,10 @@ SDK_EXPORT void __tcp_onwrite(tcp_t* this, u32 bytes) {
   }
 }
 SDK_EXPORT void __tcp_onread(tcp_t* this) {
+  if (this->error_code) {
+    this->onend(this);
+    return _task_call_destroy(&this->_task);
+  }
   // Do nonblocking reads until the buffer is empty
   u8 count = 32;
   char buffer[BUFFER_DEFAULT_SIZE];
