@@ -24,10 +24,10 @@ SDK_EXPORT void __udp_read(udp_t* this) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
       error("WSARecvFrom", result);
-      return _task_call_destroy(&this->_task);
+      return _task_call_destroy(&this->_promise);
     }
   }
-  this->_task.handle = (task_handle_t)__udp_onread;
+  this->_promise.handle = (task_handle_t)__udp_onread;
 }
 SDK_EXPORT void _udp_send_task(udp_send_t* this) {
   i32 sent = sendto(
@@ -44,7 +44,7 @@ SDK_EXPORT void _udp_send_task(udp_send_t* this) {
   } else {
     this->error_code = WSAGetLastError();
     error("_udp_send_task", this->error_code);
-    _task_call_destroy(&this->udp->_task);
+    _task_call_destroy(&this->udp->_promise);
   }
 onend:
   _task_call_destroy(&this->_task);

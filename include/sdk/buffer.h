@@ -15,6 +15,7 @@ void* buffer_new(u64 size);
 void buffer_free(void* this);
 void* buffer_resize(void* this, u64 size);
 void* buffer_resize0(void* this, u64 size);
+buffer_t* buffer_header(void* this);
 u64 buffer_length(void* this);
 
 #endif

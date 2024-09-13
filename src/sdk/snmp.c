@@ -1,46 +1,83 @@
 #include <sdk/snmp.h>
 
-SDK_EXPORT void snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
-  this->timeout = NET_DEFAULT_TIMEOUT;
-  // pending
-  queue_constructor(&this->pending);
-  // udp
-  udp_constructor(&this->udp, taskmanager);
-  this->udp.onmessage = snmp_onmessage;
-  this->udp.context = this;
-  udp_bind(&this->udp, 0);
-  // service
-  this->udp._task.handle = (function_t)_snmp_service;
-  this->udp._task.destroy = (function_t)_snmp_deconstructor;
-  this->udp._task.context = this;
-}
-SDK_EXPORT void _snmp_deconstructor(snmp_t* this) {
-  udp_deconstructor(&this->udp);
-  queue_foreach(snmp_request_t, &this->pending, it) {
-    memory_free(it);
-  }
-}
 SDK_EXPORT snmp_t* snmp_new(taskmanager_t* taskmanager) {
   snmp_t* this = memory_alloc0(sizeof(snmp_t));
-  snmp_constructor(this, taskmanager);
-  this->udp._task.destroy = (function_t)snmp_free;
+  _snmp_constructor(this, taskmanager);
+  this->__udp._promise.destroy = (function_t)snmp_free;
   return this;
 }
 SDK_EXPORT void snmp_free(snmp_t* this) {
   _snmp_deconstructor(this);
   memory_free(this);
 }
-SDK_EXPORT void _snmp_service(snmp_t* this) {
-  queue_foreach(snmp_request_t, &this->pending, it) {
-    u64 delta = date_now() - it->updatedAt;
-    if (delta > this->timeout) {
-      queue_remove(&it->queue);
-      memory_free(it);
-    }
-  }
-  __udp_read(&this->udp);
+SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this) {
+  queue_constructor(&this->varbinds);
 }
-SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message) {
+SDK_EXPORT snmp_request_t* snmp_send(snmp_t* snmp, snmp_pdu_t* pdu) {
+  snmp_request_t* this = memory_alloc0(sizeof(snmp_request_t));
+  // pdu->bytes
+  char bytes[BUFFER_DEFAULT_SIZE];
+  byte_t* buffer = bytes;
+  u8* sequence = ber_sequence_start(&buffer, ASN1_TYPE_SEQUENCE);
+  ber_write_var_integer(&buffer, pdu->version);
+  ber_write_str(&buffer, pdu->community, pdu->community_length);
+  u8* pdu_sequence = ber_sequence_start(&buffer, pdu->type);
+  ber_write_var_integer(&buffer, pdu->request_id);
+  ber_write_var_integer(&buffer, pdu->error);
+  ber_write_var_integer(&buffer, pdu->error_index);
+  u8* varbind_list = ber_sequence_start(&buffer, ASN1_TYPE_SEQUENCE);
+  queue_foreach(varbind_t, &pdu->varbinds, it) {
+    u8* varbind = ber_sequence_start(&buffer, ASN1_TYPE_SEQUENCE);
+    ber_write_oid_null(&buffer, it->oid, it->oid_length);
+    ber_sequence_end(&buffer, varbind);
+  }
+  ber_sequence_end(&buffer, varbind_list);
+  ber_sequence_end(&buffer, pdu_sequence);
+  ber_sequence_end(&buffer, sequence);
+  // buffer
+  u16 size = buffer - bytes;
+  buffer = buffer_new(size);
+  memory_copy(buffer, bytes, size);
+  // udp_send
+  _udp_send_constructor(&this->send, &snmp->__udp);
+  this->send.address.net_port = SNMP_PORT;
+  this->send.data = buffer;
+  this->send.length = size;
+  this->send.callback = (function_t)buffer_free;
+  this->send.context = this->send.data;
+  // promise
+  this->__timer = timer_new((function_t)__snmp_onrequest, this, snmp->timeout, 0);
+  return this;
+}
+SDK_EXPORT void _snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
+  this->timeout = NET_DEFAULT_TIMEOUT;
+  // pending
+  queue_constructor(&this->__pending);
+  // udp
+  udp_constructor(&this->__udp, taskmanager);
+  this->__udp.onmessage = __snmp_onmessage;
+  this->__udp.context = this;
+  udp_bind(&this->__udp, 0);
+  // udp._task
+  this->__udp._promise.destroy = (function_t)_snmp_deconstructor;
+  this->__udp._promise.context = this;
+}
+SDK_EXPORT void _snmp_deconstructor(snmp_t* this) {
+  udp_deconstructor(&this->__udp);
+  queue_foreach(snmp_request_t, &this->__pending, it) {
+    memory_free(it);
+  }
+}
+SDK_EXPORT void __snmp_onrequest(snmp_request_t* this) {
+  timer_clear(this->__timer);
+  _udp_send_deconstructor(&this->send);
+  queue_remove(&this->queue);
+  if (this->onend) {
+    this->onend(this->context);
+  }
+  memory_free(this);
+}
+SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
   snmp_t* this = (snmp_t*)udp_message->udp->context;
   snmp_message_t snmp_message;
   snmp_pdu_constructor(&snmp_message.pdu);
@@ -87,49 +124,4 @@ SDK_EXPORT void snmp_onmessage(udp_message_t* udp_message) {
   queue_foreach(varbind_t, &snmp_message.pdu.varbinds, it) {
     memory_free(it);
   }
-}
-
-SDK_EXPORT void snmp_request_await(snmp_t* this, u64 request_id) {
-  snmp_request_t* request = memory_alloc(sizeof(snmp_request_t));
-  request->id = request_id;
-  request->updatedAt = date_now();
-  queue_push(&this->pending, &request->queue);
-}
-SDK_EXPORT bool snmp_request_resolve(snmp_t* this, u64 request_id) {
-  queue_foreach(snmp_request_t, &this->pending, it) {
-    if (it->id == request_id) {
-      queue_remove(&it->queue);
-      memory_free(it);
-      return true;
-    }
-    return false;
-  }
-}
-
-SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this) {
-  queue_constructor(&this->varbinds);
-}
-SDK_EXPORT byte_t* snmp_pdu_to_buffer(snmp_pdu_t* this) {
-  char buffer[BUFFER_DEFAULT_SIZE];
-  byte_t* ptr = buffer;
-  u8* sequence = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
-  ber_write_var_integer(&ptr, this->version);
-  ber_write_str(&ptr, this->community, this->community_length);
-  u8* pdu_sequence = ber_sequence_start(&ptr, this->type);
-  ber_write_var_integer(&ptr, this->request_id);
-  ber_write_var_integer(&ptr, this->error);
-  ber_write_var_integer(&ptr, this->error_index);
-  u8* varbind_list = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
-  queue_foreach(varbind_t, &this->varbinds, it) {
-    u8* varbind = ber_sequence_start(&ptr, ASN1_TYPE_SEQUENCE);
-    ber_write_oid_null(&ptr, it->oid, it->oid_length);
-    ber_sequence_end(&ptr, varbind);
-  }
-  ber_sequence_end(&ptr, varbind_list);
-  ber_sequence_end(&ptr, pdu_sequence);
-  ber_sequence_end(&ptr, sequence);
-  u16 size = ptr - buffer;
-  ptr = buffer_new(size);
-  memory_copy(ptr, buffer, size);
-  return ptr;
 }

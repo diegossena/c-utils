@@ -22,6 +22,9 @@ void* buffer_resize0(void* this, u64 size) {
   }
   return (void*)header + sizeof(buffer_t);
 }
+buffer_t* buffer_header(void* this) {
+  return this - sizeof(buffer_t);
+}
 u64 buffer_length(void* this) {
   buffer_t* header = this - sizeof(buffer_t);
   return header->length;

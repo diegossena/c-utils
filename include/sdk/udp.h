@@ -26,7 +26,7 @@ typedef void (*udp_onsend_t)(udp_send_t*);
 typedef struct udp_t {
   udp_onmessage_t onmessage;
   void* context;
-  task_t _task;
+  task_t _promise;
   queue_t _tasks; // queue_t<callback_t>
   u64 __socket;
 } udp_t;

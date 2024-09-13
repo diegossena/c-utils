@@ -9,7 +9,6 @@
 
 #define PRINTERS_TASK_COUNT 255
 
-typedef struct printers_query_t printers_query_t;
 typedef struct printers_query_t {
   snmp_t snmp;
   u32 ip4;
@@ -47,13 +46,13 @@ void printers_query_deconstructor(printers_query_t* this) {
   _snmp_deconstructor(&this->snmp);
   memory_free(this);
 }
-void printers_query_service(printers_query_t* this) {
+void printers_query_task(printers_query_t* this) {
   if (this->finished) {
-    if (queue_is_empty(&this->snmp.pending)) {
+    if (queue_is_empty(&this->snmp.__pending)) {
       return printers_query_deconstructor(this);
     }
   } else {
-    taskmanager_t* taskmanager = this->snmp.udp._task.taskmanager;
+    taskmanager_t* taskmanager = this->snmp.__udp._promise.taskmanager;
     if (taskmanager->tasks_count < PRINTERS_TASK_COUNT) {
       byte_t community [] = "public";
       snmp_pdu_t pdu = {
@@ -81,7 +80,7 @@ void printers_query_service(printers_query_t* this) {
           *((u8*)&this->ip4 + 3)
         );
         pdu.request_id = snowflake_uid();
-        udp_send_t* udp_send = udp_send_new(&this->snmp.udp);
+        udp_send_t* udp_send = udp_send_new(&this->snmp.__udp);
         udp_send->address.ip4 = this->ip4;
         udp_send->address.net_port = SNMP_PORT;
         udp_send->data = snmp_pdu_to_buffer(&pdu);
@@ -110,12 +109,10 @@ void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 i
   this->ip4_end = ip4_end;
   this->finished = false;
   // snmp
-  snmp_constructor(&this->snmp, taskmanager);
+  _snmp_constructor(&this->snmp, taskmanager);
   this->snmp.timeout = 1000;
   this->snmp.onmessage = printers_query_onmessage;
-  this->snmp.udp._task.context = this;
-  this->snmp.udp._task.handle = (function_t)printers_query_service;
-  this->snmp.udp._task.destroy = (function_t)printers_query_deconstructor;
+  printers_query_task(this);
 }
 
 i32 main(i32 argc, char** argv) {
