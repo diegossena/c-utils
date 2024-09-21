@@ -15,6 +15,10 @@
 #ifdef SDK_QUEUE_H
 #include <src/sdk/queue.c>
 #endif
+#ifdef SDK_TASKMANAGER_H
+#include <src/sdk/taskmanager.c>
+#include <src/sdk/taskmanager.win32.c>
+#endif
 #ifdef SDK_NET_H
 #include <src/sdk/net.c>
 #include <src/sdk/net.win32.c>
@@ -22,10 +26,6 @@
 #ifdef SDK_CONSOLE_H
 #include <src/sdk/console.c>
 #include <src/sdk/console.win32.c>
-#endif
-#ifdef SDK_TASKMANAGER_H
-#include <src/sdk/taskmanager.c>
-#include <src/sdk/taskmanager.win32.c>
 #endif
 #ifdef SDK_NET_TCP_H
 #include <src/sdk/tcp.c>

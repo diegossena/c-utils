@@ -38,9 +38,14 @@ typedef enum error_code_t {
   ERR_INVALID_BLOCK = 9,
   ERR_BAD_ENVIRONMENT = 10,
   ERR_BAD_FORMAT = 11,
+  ERR_NETNAME_DELETED = 64,
   ERR_INSUFFICIENT_BUFFER = 122,
-  // https://learn.microsoft.com/pt-br/windows/win32/winsock/windows-sockets-error-codes-2
+  ERR_WAIT_TIMEOUT = 258,
+  // https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--500-999-
   ERR_IO_PENDING = 997,
+  // https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--1000-1299-
+  ERR_NOT_FOUND = 1168,
+  // https://learn.microsoft.com/pt-br/windows/win32/winsock/windows-sockets-error-codes-2
   ERR_EFAULT = 10014,
   ERR_EINVAL = 10022,
   ERR_EWOULDBLOCK = 10035,

@@ -4,24 +4,20 @@ SDK_EXPORT const char* error_cstr(i32 code) {
   switch (code) {
     case ERR_OUT_OF_RANGE:
       return "ERR_OUT_OF_RANGE";
-    // Stream
     case ERR_STREAM_READ_AFTER_END:
       return "ERR_STREAM_READ_AFTER_END";
     case ERR_STREAM_WRITE_AFTER_END:
       return "ERR_STREAM_WRITE_AFTER_END";
     case ERR_READ_NO_RESPONSE:
       return "ERR_READ_NO_RESPONSE";
-    // SNMP
     case ERR_SNMP_STAT:
       return "ERR_SNMP_STAT";
     case ERR_SNMP_STAT_ERROR:
       return "ERR_SNMP_STAT_ERROR";
     case ERR_SNMP_STAT_TIMEOUT:
       return "ERR_SNMP_STAT_TIMEOUT";
-    // URL
     case ERR_INVALID_URL:
       return "ERR_INVALID_URL";
-    // system
     case ERR_SUCCESS:
       return "ERR_SUCCESS";
     case ERR_INVALID_FUNCTION:
@@ -46,11 +42,16 @@ SDK_EXPORT const char* error_cstr(i32 code) {
       return "ERR_BAD_ENVIRONMENT";
     case ERR_BAD_FORMAT:
       return "ERR_BAD_FORMAT";
+    case ERR_NETNAME_DELETED:
+      return "ERR_NETNAME_DELETED";
     case ERR_INSUFFICIENT_BUFFER:
       return "ERR_INSUFFICIENT_BUFFER";
-    // winsock2
+    case ERR_WAIT_TIMEOUT:
+      return "ERR_WAIT_TIMEOUT";
     case ERR_IO_PENDING:
       return "ERR_IO_PENDING";
+    case ERR_NOT_FOUND:
+      return "ERR_NOT_FOUND";
     case ERR_EFAULT:
       return "ERR_EFAULT";
     case ERR_EINVAL:

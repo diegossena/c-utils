@@ -36,10 +36,12 @@ SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
       return _task_call_destroy(&this->_task);
     }
   }
+  // timer_set(this->__timer, this->timeout, 0);
   this->_task.handle = (task_handle_t)__tcp_onread;
 }
 SDK_EXPORT void __tcp_onread(tcp_t* this) {
   if (this->error_code) {
+    console_log("%x __tcp_onread:onerror error_code=%d", this, this->error_code);
     this->onend(this);
     return _task_call_destroy(&this->_task);
   }
@@ -74,9 +76,12 @@ SDK_EXPORT void __tcp_onread(tcp_t* this) {
   timer_set(this->__timer, this->timeout, 0);
   return tcp_read(this, this->__remaining);
 onend:
+  console_log("%x __tcp_onread:onend %d %d", this, this->error_code, this->_task.handle);
   this->_task.handle = (task_handle_t)this->_task.destroy;
-  _task_handle(&this->_task);
   this->onend(this);
+  if (this->_task.handle == (void*)this->_task.destroy) {
+    _task_call_destroy(&this->_task);
+  }
 }
 SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
   i32 result;

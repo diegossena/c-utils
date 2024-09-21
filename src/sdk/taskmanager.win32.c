@@ -1,12 +1,18 @@
 #include <sdk/taskmanager.h>
 #ifdef PLATFORM_WINDOWS
+
+#ifdef SDK_NET_H
+#include <winsock2.h>
+#endif
 #include <windows.h>
 
-SDK_EXPORT void _task_resolve(task_t* this, u32 value) {
-  PostQueuedCompletionStatus(this->taskmanager->__iocp, value, (ULONG_PTR)this, 0);
-}
+typedef BOOL(WINAPI* CancelIoEx_t)(HANDLE, LPOVERLAPPED);
+CancelIoEx_t pCancelIoEx = 0;
+
 SDK_EXPORT void __taskmanager_constructor(taskmanager_t* this) {
-  this->__iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+  HMODULE hKernel32 = GetModuleHandleA("Kernel32.dll");
+  pCancelIoEx = (CancelIoEx_t)GetProcAddress(hKernel32, "CancelIoEx");
+  this->__iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 1);
   if (this->__iocp == NULL) {
     error("CreateIoCompletionPort", GetLastError());
   }
@@ -18,10 +24,13 @@ SDK_EXPORT void __taskmanager_pool(taskmanager_t* this) {
   DWORD bytes;
   task_t* task;
   OVERLAPPED* overlapped;
-  bool result = GetQueuedCompletionStatus(this->__iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
-  if (result) {
-    task->handle(task->context, bytes);
+  i32 result = GetQueuedCompletionStatus(this->__iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
+  if (!result) {
+    result = GetLastError();
+    if (result == ERR_WAIT_TIMEOUT)
+      return;
   }
+  task->handle(task->context, bytes);
 }
 
 #endif

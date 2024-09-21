@@ -32,6 +32,18 @@ SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
   }
   return this;
 }
-SDK_EXPORT void _socket_free(u64 fd) { closesocket((SOCKET)fd); }
+SDK_EXPORT void _socket_cancel(u64 fd) {
+  i32 result = pCancelIoEx((HANDLE)fd, 0);
+  if (result == 0) {
+    result = GetLastError();
+    if (result != ERR_NOT_FOUND) {
+      error("CancelIoEx", GetLastError());
+    }
+  }
+}
+SDK_EXPORT void _socket_free(u64 fd) {
+  _socket_cancel(fd);
+  closesocket((SOCKET)fd);
+}
 
 #endif

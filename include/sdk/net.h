@@ -42,6 +42,7 @@ SDK_EXPORT u16 net_port_from_short(u16 port);
 SDK_EXPORT u16 net_port_to_short(u16 port);
 SDK_EXPORT u64 socket_new(task_t*, socket_type_t);
 
+SDK_EXPORT void _socket_cancel(u64 fd);
 SDK_EXPORT void _socket_free(u64 fd);
 
 SDK_EXPORT void __net_startup();

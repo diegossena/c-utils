@@ -33,9 +33,12 @@ onerror:
   this->_task.destroy(this->_task.context);
 }
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
+  console_log("%x _tcp_deconstructor", this);
+  this->_task.handle = 0;
   timer_clear(this->__timer);
   _socket_free(this->__socket);
   _task_deconstructor(&this->_task);
+  console_log("%x !_tcp_deconstructor", this);
 }
 SDK_EXPORT void __tcp_onwrite(tcp_t* this, u32 bytes) {
   this->__remaining -= bytes;
@@ -54,5 +57,5 @@ SDK_EXPORT void __tcp_onconnect(tcp_t* this) {
 }
 SDK_EXPORT void __tcp_ontimeout(tcp_t* this) {
   this->error_code = ERR_ETIMEDOUT;
-  _task_resolve(&this->_task, -1);
+  _socket_cancel(this->__socket);
 }
