@@ -1,9 +1,9 @@
-#ifndef SDK_NET_TCP_H
-#define SDK_NET_TCP_H
+#ifndef SDK_TCP_H
+#define SDK_TCP_H
 
 #include <sdk/types.h>
-#include <sdk/taskmanager.h>
 #include <sdk/net.h>
+#include <sdk/taskmanager.h>
 #include <sdk/date.h>
 #include <sdk/timer.h>
 

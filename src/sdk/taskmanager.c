@@ -9,12 +9,7 @@ SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
 #endif
   __taskmanager_constructor(this);
 }
-SDK_EXPORT void taskmanager_run(
-  taskmanager_t* this
-#ifdef SDK_WINDOW_H
-  , window_t* window
-#endif
-) {
+SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
   u64 i;
   task_t* task, * task_next = (task_t*)this->tasks.next;
 #ifdef SDK_WINDOW_H

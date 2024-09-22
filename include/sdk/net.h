@@ -8,8 +8,6 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-#define IP4_STRING_LENGTH 16
-
 typedef enum net_family_t {
   NET_FAMILY_IPV4 = 2,
   NET_FAMILY_IPV6 = 23
@@ -29,7 +27,7 @@ typedef struct net_address_t {
   };
 } net_address_t;
 
-typedef char ip4_string_t[IP4_STRING_LENGTH];
+typedef char ip4_string_t[16];
 
 SDK_EXPORT net_address_t ip4_address(u32 ip4, u16 net_port);
 SDK_EXPORT u32 ip4_from_bytes(byte_t, byte_t, byte_t, byte_t);

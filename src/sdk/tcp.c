@@ -60,6 +60,5 @@ SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t error_code) {
   }
 }
 SDK_EXPORT void __tcp_ontimeout(tcp_t* this) {
-  console_log("%x __tcp_ontimeout", this);
   _socket_cancel(this->__socket);
 }
