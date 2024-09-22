@@ -9,7 +9,7 @@ SDK_EXPORT void* memory_alloc(u64 size) {
   if (block) {
     __leaks_count_increment();
   } else {
-    error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
+    error_log("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
   return block;
 }
@@ -19,7 +19,7 @@ SDK_EXPORT void* memory_alloc0(u64 size) {
   if (block) {
     __leaks_count_increment();
   } else {
-    error("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
+    error_log("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
   return block;
 }
@@ -37,7 +37,7 @@ SDK_EXPORT void* memory_realloc(void* this, u64 size) {
     __leaks_count_increment();
   }
   if (!this) {
-    error("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
+    error_log("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
   return this;
 }
@@ -50,7 +50,7 @@ SDK_EXPORT void* memory_realloc0(void* this, u64 size) {
     __leaks_count_increment();
   }
   if (!this) {
-    error("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
+    error_log("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
   }
   return this;
 }

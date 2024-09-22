@@ -67,6 +67,6 @@ typedef enum error_code_t {
 } error_code_t;
 
 SDK_EXPORT const char* error_cstr(i32 code);
-SDK_EXPORT void error(const char* message, error_code_t code);
+SDK_EXPORT void error_log(const char* message, error_code_t code);
 
 #endif

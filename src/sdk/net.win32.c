@@ -10,7 +10,7 @@ SDK_EXPORT void __net_startup() {
   WSADATA wsaData;
   i32 error_code = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (error_code) {
-    error("WSAStartup", error_code);
+    error_log("WSAStartup", error_code);
     __net_shutdown();
   }
 }
@@ -18,17 +18,17 @@ SDK_EXPORT void __net_startup() {
 SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
   u64 this = socket(AF_INET, type, 0);
   if (this == INVALID_SOCKET) {
-    error("socket", WSAGetLastError());
+    error_log("socket", WSAGetLastError());
     return this;
   }
   bool non_blocking = true;
   if (ioctlsocket(this, FIONBIO, (u_long*)&non_blocking) == SOCKET_ERROR) {
-    error("ioctlsocket", WSAGetLastError());
+    error_log("ioctlsocket", WSAGetLastError());
     return this;
   }
   // Associate it with the I/O completion port
   if (CreateIoCompletionPort((HANDLE)this, task->taskmanager->__iocp, (ULONG_PTR)task, 0) == NULL) {
-    error("CreateIoCompletionPort", GetLastError());
+    error_log("CreateIoCompletionPort", GetLastError());
   }
   return this;
 }
@@ -37,7 +37,7 @@ SDK_EXPORT void _socket_cancel(u64 fd) {
   if (result == 0) {
     result = GetLastError();
     if (result != ERR_NOT_FOUND) {
-      error("CancelIoEx", GetLastError());
+      error_log("CancelIoEx", GetLastError());
     }
   }
 }

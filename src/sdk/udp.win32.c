@@ -9,7 +9,7 @@ SDK_EXPORT void udp_bind(udp_t* this, u16 net_port) {
     .sin_addr.S_un.S_addr = INADDR_ANY
   };
   if (bind(this->__socket, (struct sockaddr*)&address, sizeof(struct sockaddr)) == SOCKET_ERROR) {
-    error("bind", ERR_UNKNOWN);
+    error_log("bind", ERR_UNKNOWN);
   }
 }
 SDK_EXPORT void __udp_read(udp_t* this) {
@@ -23,7 +23,7 @@ SDK_EXPORT void __udp_read(udp_t* this) {
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
-      error("WSARecvFrom", result);
+      error_log("WSARecvFrom", result);
       return _task_call_destroy(&this->_promise);
     }
   }
@@ -43,7 +43,7 @@ SDK_EXPORT void _udp_send_task(udp_send_t* this) {
     }
   } else {
     this->error_code = WSAGetLastError();
-    error("_udp_send_task", this->error_code);
+    error_log("_udp_send_task", this->error_code);
     _task_call_destroy(&this->udp->_promise);
   }
 onend:
@@ -59,7 +59,7 @@ SDK_EXPORT void __udp_onread(udp_t* this) {
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {
-      error("WSARecvFrom", result);
+      error_log("WSARecvFrom", result);
       goto exit;
     }
   }

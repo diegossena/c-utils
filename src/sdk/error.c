@@ -93,7 +93,7 @@ SDK_EXPORT const char* error_cstr(i32 code) {
   }
 }
 
-SDK_EXPORT void error(const char* message, error_code_t code) {
+SDK_EXPORT void error_log(const char* message, error_code_t code) {
   const char* error_str = error_cstr(code);
   console_color(ANSI_FORE_RED);
   console_write_cstr("Error:");
