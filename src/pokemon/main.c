@@ -2,6 +2,7 @@
 #include <sdk/window.h>
 #include <sdk/unity.h>
 
+// 374248 bytes
 i32 main(i32 argc, char** argv) {
   taskmanager_t taskmanager;
   taskmanager_constructor(&taskmanager);

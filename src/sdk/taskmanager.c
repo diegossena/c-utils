@@ -2,19 +2,24 @@
 
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
   queue_constructor(&this->tasks);
+#ifdef SDK_TASKMANAGER_PROMISES
   queue_constructor(&this->promises);
+#endif
+#ifdef SDK_WINDOW_H
+  this->tasks_count = 1;
+#else
   this->tasks_count = 0;
+#endif
 #ifdef SDK_NET_H
   __net_startup();
 #endif
+#ifdef SDK_TASKMANAGER_PROMISES
   __taskmanager_constructor(this);
+#endif
 }
 SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
   u64 i;
   task_t* task, * task_next = (task_t*)this->tasks.next;
-#ifdef SDK_WINDOW_H
-  ++this->tasks_count;
-#endif
   while (this->tasks_count) {
     task = task_next;
     task_next = (task_t*)task->queue.next;
@@ -38,15 +43,23 @@ SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
 
 // TASK
 
-SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t* taskmanager, bool promise) {
+SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t* taskmanager
+#ifdef SDK_TASKMANAGER_PROMISES
+  , bool promise
+#endif
+) {
   this->taskmanager = taskmanager;
+#ifdef SDK_TASKMANAGER_PROMISES
   if (promise) {
     queue_push(&taskmanager->promises, &this->queue);
   } else {
     queue_push(&taskmanager->tasks, &this->queue);
   }
+#else
+  queue_push(&taskmanager->tasks, &this->queue);
+#endif
   ++taskmanager->tasks_count;
-}
+  }
 SDK_EXPORT void _task_deconstructor(task_t* this) {
   queue_remove(&this->queue);
   --this->taskmanager->tasks_count;

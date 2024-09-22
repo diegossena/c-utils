@@ -6,13 +6,12 @@
 #endif
 #include <windows.h>
 
-#ifdef SDK_IOCP
+#ifdef SDK_TASKMANAGER_PROMISES
 typedef BOOL(WINAPI* CancelIoEx_t)(HANDLE, LPOVERLAPPED);
 CancelIoEx_t pCancelIoEx = 0;
 #endif
-
 SDK_EXPORT void __taskmanager_constructor(taskmanager_t* this) {
-#ifdef SDK_IOCP
+#ifdef SDK_TASKMANAGER_PROMISES
   HMODULE hKernel32 = GetModuleHandleA("Kernel32.dll");
   pCancelIoEx = (CancelIoEx_t)GetProcAddress(hKernel32, "CancelIoEx");
   this->__iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 1);
@@ -22,7 +21,7 @@ SDK_EXPORT void __taskmanager_constructor(taskmanager_t* this) {
 #endif
 }
 SDK_EXPORT void __taskmanager_deconstructor(taskmanager_t* this) {
-#ifdef SDK_IOCP
+#ifdef SDK_TASKMANAGER_PROMISES
   CloseHandle(this->__iocp);
 #endif
 }
@@ -39,7 +38,7 @@ SDK_EXPORT void __taskmanager_pool(taskmanager_t* this) {
     }
   }
 #endif
-#ifdef SDK_IOCP
+#ifdef SDK_TASKMANAGER_PROMISES
   DWORD bytes;
   task_t* task = 0;
   OVERLAPPED* overlapped;
@@ -57,10 +56,10 @@ SDK_EXPORT void __taskmanager_pool(taskmanager_t* this) {
 #endif
 }
 
+#ifdef SDK_TASKMANAGER_PROMISES
 SDK_EXPORT void _promise_post(task_t* this, i32 value) {
-#ifdef SDK_IOCP
   PostQueuedCompletionStatus(this->taskmanager->__iocp, value, (ULONG_PTR)this, 0);
-#endif
 }
+#endif
 
 #endif
