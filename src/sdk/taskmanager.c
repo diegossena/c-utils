@@ -59,7 +59,7 @@ SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t* taskmanager
   queue_push(&taskmanager->tasks, &this->queue);
 #endif
   ++taskmanager->tasks_count;
-  }
+}
 SDK_EXPORT void _task_deconstructor(task_t* this) {
   queue_remove(&this->queue);
   --this->taskmanager->tasks_count;
