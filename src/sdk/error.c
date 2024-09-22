@@ -50,6 +50,8 @@ SDK_EXPORT const char* error_cstr(i32 code) {
       return "ERR_INSUFFICIENT_BUFFER";
     case ERR_WAIT_TIMEOUT:
       return "ERR_WAIT_TIMEOUT";
+    case ERR_OPERATION_ABORTED:
+      return "ERR_OPERATION_ABORTED";
     case ERR_IO_PENDING:
       return "ERR_IO_PENDING";
     case ERR_NOT_FOUND:

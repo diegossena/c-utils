@@ -34,7 +34,9 @@ SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
       return _task_call_destroy(&this->_task);
     }
   }
-  timer_set(this->__timer, this->timeout, 0);
+  if (this->__timer) {
+    timer_set(this->__timer, this->timeout, 0);
+  }
   this->_task.callback = (task_callback_t)__tcp_onread;
 }
 SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t error_code) {
@@ -67,7 +69,9 @@ SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t error_code) {
     }
   } while (--count);
   // continue
-  timer_set(this->__timer, this->timeout, 0);
+  if (this->__timer) {
+    timer_set(this->__timer, this->timeout, 0);
+  }
   return tcp_read(this, this->__remaining);
 onerror:
   this->onend(this, error_code);
@@ -114,7 +118,9 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
     }
   }
   this->_task.callback = (task_callback_t)__tcp_onconnect;
-  this->__timer = timer_new((function_t)__tcp_ontimeout, this, this->timeout, 0);
+  if (this->timeout) {
+    this->__timer = timer_new((function_t)__tcp_ontimeout, this, this->timeout, 0);
+  }
   return;
 onerror:
   this->onend(this->_task.context, result);

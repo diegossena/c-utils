@@ -51,6 +51,5 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this);
 SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t);
 SDK_EXPORT void __tcp_onwrite(tcp_t* this, error_code_t, u32 bytes);
 SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t);
-SDK_EXPORT void __tcp_ontimeout(tcp_t* this);
 
 #endif

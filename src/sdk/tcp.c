@@ -11,7 +11,8 @@ SDK_EXPORT void tcp_free(tcp_t* this) {
   memory_free(this);
 }
 SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t* taskmanager) {
-  this->timeout = NET_DEFAULT_TIMEOUT;
+  this->timeout = 0;
+  this->__timer = 0;
   // address
   this->address.family = NET_FAMILY_IPV4;
   // task
@@ -31,7 +32,9 @@ SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t* taskmanager) {
   _promise_post(&this->_task, 0);
 }
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this) {
-  timer_clear(this->__timer);
+  if (this->__timer) {
+    timer_clear(this->__timer);
+  }
   _socket_free(this->__socket);
   _task_deconstructor(&this->_task);
 }
@@ -45,7 +48,9 @@ SDK_EXPORT void __tcp_onwrite(tcp_t* this, error_code_t error_code, u32 bytes) {
     this->_task.callback = (task_callback_t)this->_task.destroy;
     this->onend(this, error_code);
   } else {
-    timer_set(this->__timer, this->timeout, 0);
+    if (this->__timer) {
+      timer_set(this->__timer, this->timeout, 0);
+    }
   }
 }
 SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t error_code) {
@@ -55,5 +60,6 @@ SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t error_code) {
   }
 }
 SDK_EXPORT void __tcp_ontimeout(tcp_t* this) {
+  console_log("%x __tcp_ontimeout", this);
   _socket_cancel(this->__socket);
 }
