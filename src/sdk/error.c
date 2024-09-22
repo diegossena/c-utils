@@ -44,6 +44,8 @@ SDK_EXPORT const char* error_cstr(i32 code) {
       return "ERR_BAD_FORMAT";
     case ERR_NETNAME_DELETED:
       return "ERR_NETNAME_DELETED";
+    case ERR_SEM_TIMEOUT:
+      return "ERR_SEM_TIMEOUT";
     case ERR_INSUFFICIENT_BUFFER:
       return "ERR_INSUFFICIENT_BUFFER";
     case ERR_WAIT_TIMEOUT:

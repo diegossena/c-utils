@@ -23,14 +23,13 @@
 typedef struct tcp_t tcp_t;
 
 typedef void (*tcp_ondata_t)(tcp_t* this, byte_t* chunk, u32 length);
-typedef void (*tcp_onend_t)(tcp_t*);
+typedef void (*tcp_onend_t)(tcp_t*, error_code_t);
 
 typedef struct tcp_t {
   task_t _task;
   void* context;
   tcp_ondata_t ondata;
   tcp_onend_t onend;
-  error_code_t error_code;
   u64 timeout;
   net_address_t address;
   tcp_onend_t __callback;
@@ -49,10 +48,9 @@ SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t*);
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this);
 
 SDK_EXPORT void __tcp_startup_task(tcp_t* this);
-SDK_EXPORT void __tcp_onwrite(tcp_t* this, u32 bytes);
-SDK_EXPORT void __tcp_onread(tcp_t* this);
+SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t);
+SDK_EXPORT void __tcp_onwrite(tcp_t* this, error_code_t, u32 bytes);
+SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t);
 SDK_EXPORT void __tcp_ontimeout(tcp_t* this);
-SDK_EXPORT void __tcp_onconnect(tcp_t* this);
-
 
 #endif

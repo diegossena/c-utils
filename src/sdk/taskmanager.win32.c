@@ -25,12 +25,18 @@ SDK_EXPORT void __taskmanager_pool(taskmanager_t* this) {
   task_t* task;
   OVERLAPPED* overlapped;
   i32 result = GetQueuedCompletionStatus(this->__iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
-  if (!result) {
+  if (result) {
+    result = 0;
+  } else {
     result = GetLastError();
     if (result == ERR_WAIT_TIMEOUT)
       return;
   }
-  task->handle(task->context, bytes);
+  task->callback(task->context, result, bytes);
+}
+
+SDK_EXPORT void _promise_post(task_t* this, i32 value) {
+  PostQueuedCompletionStatus(this->taskmanager->__iocp, value, (ULONG_PTR)this, 0);
 }
 
 #endif

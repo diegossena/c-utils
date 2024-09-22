@@ -8,7 +8,7 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-#define NET_DEFAULT_TIMEOUT 3000LLU
+#define NET_DEFAULT_TIMEOUT 30000LLU
 #define IP4_STRING_LENGTH 16
 
 typedef enum net_family_t {

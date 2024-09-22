@@ -1,26 +1,5 @@
 #include <sdk/taskmanager.h>
 
-SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t* taskmanager) {
-  this->taskmanager = taskmanager;
-  queue_push(&taskmanager->tasks, &this->queue);
-  ++taskmanager->tasks_count;
-}
-SDK_EXPORT void _task_deconstructor(task_t* this) {
-  queue_remove(&this->queue);
-  --this->taskmanager->tasks_count;
-}
-SDK_EXPORT void _task_handle(task_t* this) {
-  queue_remove(&this->queue);
-  queue_push(&this->taskmanager->tasks, &this->queue);
-}
-SDK_EXPORT void _task_promise(task_t* this) {
-  queue_remove(&this->queue);
-  queue_push(&this->taskmanager->promises, &this->queue);
-}
-SDK_EXPORT void _task_call_destroy(task_t* this) {
-  this->destroy(this->context);
-}
-
 SDK_EXPORT void taskmanager_constructor(taskmanager_t* this) {
   queue_constructor(&this->tasks);
   queue_constructor(&this->promises);
@@ -37,7 +16,7 @@ SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
     task = task_next;
     task_next = (task_t*)task->queue.next;
     if ((queue_t*)task != &this->tasks) {
-      task->handle(task->context, 0);
+      task->callback(task->context, 0, 0);
     }
     __taskmanager_pool(this);
   }
@@ -52,4 +31,23 @@ SDK_EXPORT void taskmanager_run(taskmanager_t* this) {
   }
 #endif
   __taskmanager_deconstructor(this);
+}
+
+// TASK
+
+SDK_EXPORT void _task_constructor(task_t* this, taskmanager_t* taskmanager, bool promise) {
+  this->taskmanager = taskmanager;
+  if (promise) {
+    queue_push(&taskmanager->promises, &this->queue);
+  } else {
+    queue_push(&taskmanager->tasks, &this->queue);
+  }
+  ++taskmanager->tasks_count;
+}
+SDK_EXPORT void _task_deconstructor(task_t* this) {
+  queue_remove(&this->queue);
+  --this->taskmanager->tasks_count;
+}
+SDK_EXPORT void _task_call_destroy(task_t* this) {
+  this->destroy(this->context);
 }

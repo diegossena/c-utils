@@ -15,12 +15,11 @@ SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length) {
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {
-      this->error_code = result;
-      this->onend(this);
+      this->onend(this, result);
       return _task_call_destroy(&this->_task);
     }
   }
-  this->_task.handle = (task_handle_t)__tcp_onwrite;
+  this->_task.callback = (task_callback_t)__tcp_onwrite;
 }
 SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
   this->__remaining = length;
@@ -31,20 +30,16 @@ SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
-      this->error_code = result;
-      this->onend(this);
+      this->onend(this, result);
       return _task_call_destroy(&this->_task);
     }
   }
-  // timer_set(this->__timer, this->timeout, 0);
-  this->_task.handle = (task_handle_t)__tcp_onread;
+  timer_set(this->__timer, this->timeout, 0);
+  this->_task.callback = (task_callback_t)__tcp_onread;
 }
-SDK_EXPORT void __tcp_onread(tcp_t* this) {
-  if (this->error_code) {
-    console_log("%x __tcp_onread:onerror error_code=%d", this, this->error_code);
-    this->onend(this);
-    return _task_call_destroy(&this->_task);
-  }
+SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t error_code) {
+  if (error_code)
+    goto onerror;
   // Do nonblocking reads until the buffer is empty
   u8 count = 32;
   char buffer[BUFFER_DEFAULT_SIZE];
@@ -54,32 +49,33 @@ SDK_EXPORT void __tcp_onread(tcp_t* this) {
   };
   DWORD bytes, flags;
   do {
-    i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, 0, 0);
-    if (result == SOCKET_ERROR) {
-      result = WSAGetLastError();
-      if (result == WSAEWOULDBLOCK)
+    error_code = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, 0, 0);
+    if (error_code == SOCKET_ERROR) {
+      error_code = WSAGetLastError();
+      if (error_code == WSAEWOULDBLOCK)
         break;
-      // onerror
-      this->error_code = result;
-      this->onend(this);
-      return _task_call_destroy(&this->_task);
+      goto onerror;
     }
     if (!bytes)
       goto onend;
     this->ondata(this, buffer, bytes);
     if (this->__remaining) {
       this->__remaining -= bytes;
-      if (!this->__remaining)
+      if (!this->__remaining) {
         goto onend;
+      }
     }
   } while (--count);
+  // continue
   timer_set(this->__timer, this->timeout, 0);
   return tcp_read(this, this->__remaining);
+onerror:
+  this->onend(this, error_code);
+  return _task_call_destroy(&this->_task);
 onend:
-  console_log("%x __tcp_onread:onend %d %d", this, this->error_code, this->_task.handle);
-  this->_task.handle = (task_handle_t)this->_task.destroy;
-  this->onend(this);
-  if (this->_task.handle == (void*)this->_task.destroy) {
+  this->_task.callback = (task_callback_t)this->_task.destroy;
+  this->onend(this, 0);
+  if (this->_task.callback == (void*)this->_task.destroy) {
     _task_call_destroy(&this->_task);
   }
 }
@@ -96,17 +92,14 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
     DWORD bytes;
     result = WSAIoctl(this->__socket,
       SIO_GET_EXTENSION_FUNCTION_POINTER,
-      &guid,
-      sizeof(guid),
-      &ConnectEx,
-      sizeof(ConnectEx),
+      &guid, sizeof(guid),
+      &ConnectEx, sizeof(ConnectEx),
       &bytes,
-      NULL,
-      NULL
+      0, 0
     );
     if (result == SOCKET_ERROR) {
-      error("WSAIoctl", GetLastError());
-      return _task_call_destroy(&this->_task);
+      result = GetLastError();
+      goto onerror;
     }
   }
   OVERLAPPED overlapped = { 0 };
@@ -117,17 +110,15 @@ SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
   if (!result) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
-      this->error_code = result;
       goto onerror;
     }
   }
-  this->_task.handle = (task_handle_t)__tcp_onconnect;
-  u64 start = date_now();
+  this->_task.callback = (task_callback_t)__tcp_onconnect;
   this->__timer = timer_new((function_t)__tcp_ontimeout, this, this->timeout, 0);
-  return _task_promise(&this->_task);
+  return;
 onerror:
-  this->onend(this->_task.context);
-  this->_task.destroy(this->_task.context);
+  this->onend(this->_task.context, result);
+  _task_call_destroy(&this->_task);
 }
 
 #endif

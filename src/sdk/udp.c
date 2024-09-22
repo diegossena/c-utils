@@ -46,7 +46,7 @@ SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
   queue_push(&udp->_tasks, &this->__udp_tasks.queue);
   // task
   _task_constructor(&this->_task, taskmanager);
-  this->_task.handle = (function_t)_udp_send_startup;
+  this->_task.callback = (function_t)_udp_send_startup;
   this->_task.destroy = (function_t)_udp_send_deconstructor;
   this->_task.context = this;
 }
@@ -59,5 +59,5 @@ SDK_EXPORT void _udp_send_deconstructor(udp_send_t* this) {
 }
 SDK_EXPORT void _udp_send_startup(udp_send_t* this) {
   this->__updated_at = date_now();
-  this->_task.handle = (function_t)_udp_send_task;
+  this->_task.callback = (function_t)_udp_send_task;
 }

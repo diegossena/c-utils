@@ -42,7 +42,6 @@ SDK_EXPORT void _socket_cancel(u64 fd) {
   }
 }
 SDK_EXPORT void _socket_free(u64 fd) {
-  _socket_cancel(fd);
   closesocket((SOCKET)fd);
 }
 

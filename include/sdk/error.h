@@ -39,6 +39,7 @@ typedef enum error_code_t {
   ERR_BAD_ENVIRONMENT = 10,
   ERR_BAD_FORMAT = 11,
   ERR_NETNAME_DELETED = 64,
+  ERR_SEM_TIMEOUT = 121,
   ERR_INSUFFICIENT_BUFFER = 122,
   ERR_WAIT_TIMEOUT = 258,
   // https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--500-999-

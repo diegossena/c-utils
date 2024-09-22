@@ -27,7 +27,7 @@ SDK_EXPORT void __udp_read(udp_t* this) {
       return _task_call_destroy(&this->_promise);
     }
   }
-  this->_promise.handle = (task_handle_t)__udp_onread;
+  this->_promise.callback = (task_callback_t)__udp_onread;
 }
 SDK_EXPORT void _udp_send_task(udp_send_t* this) {
   i32 sent = sendto(
