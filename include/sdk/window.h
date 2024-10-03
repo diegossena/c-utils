@@ -14,5 +14,13 @@ void window_redraw();
 /** @brief Externally-defined function
  */
 extern void window_onupdate(u32 time);
+/** @brief Externally-defined function
+ */
+extern void window_onrender();
+
+void window_fill_rectangle(
+  f32 left, f32 top, f32 right, f32 bottom,
+  f32 r, f32 g, f32 b, f32 a
+);
 
 #endif

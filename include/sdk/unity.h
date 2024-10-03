@@ -66,3 +66,6 @@
 #include <src/sdk/window.c>
 #include <src/sdk/window.win32.c>
 #endif
+#ifdef SDK_KEYBOARD_H
+#include <src/sdk/keyboard.win32.c>
+#endif

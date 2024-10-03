@@ -30,28 +30,18 @@ void window_run() {
 void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   window_onupdate(time);
 }
-D2D1_RECT_F rect = {
-  .top = 0.f,
-  .bottom = 10.f,
-  .left = 0.f,
-  .right = 10.f
-};
-ID2D1SolidColorBrush* brush;
-ID2D1StrokeStyle* stroke;
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_PAINT:
       ID2D1HwndRenderTarget_BeginDraw(__sdk_d2d_render_target);
       ID2D1HwndRenderTarget_Clear(__sdk_d2d_render_target, 0);
-      // ID2D1HwndRenderTarget_DrawRectangle(__d2d_render_target, &rect, (ID2D1Brush*)brush, 1.f, stroke);
+      window_onrender();
       ID2D1HwndRenderTarget_EndDraw(__sdk_d2d_render_target, 0, 0);
       break;
     case WM_CLOSE:
       KillTimer(0, 0);
       break;
     case WM_DESTROY:
-      // ID2D1StrokeStyle_Release(stroke);
-      // ID2D1SolidColorBrush_Release(brush);
       IDWriteFactory_Release(__sdk_d2d_write_factory);
       ID2D1HwndRenderTarget_Release(__sdk_d2d_render_target);
       ID2D1Factory_Release(__sdk_d2d_factory);
@@ -61,9 +51,19 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
   }
   return DefWindowProcA(handle, message, wParam, lParam);
 }
-
 void window_redraw() {
   RedrawWindow(__sdk_window_handle, 0, 0, RDW_INVALIDATE);
+}
+void window_fill_rectangle(
+  f32 left, f32 top, f32 right, f32 bottom,
+  f32 r, f32 g, f32 b, f32 a
+) {
+  D2D1_RECT_F rect = { left, top, right, bottom };
+  ID2D1SolidColorBrush* brush;
+  D2D1_COLOR_F color = { r, g, b, a };
+  ID2D1HwndRenderTarget_CreateSolidColorBrush(__sdk_d2d_render_target, &color, 0, &brush);
+  ID2D1HwndRenderTarget_FillRectangle(__sdk_d2d_render_target, &rect, (ID2D1Brush*)brush);
+  ID2D1SolidColorBrush_Release(brush);
 }
 void window_startup(
   const char* title,
@@ -102,13 +102,6 @@ void window_startup(
   if (FAILED(result)) {
     error_log("DWriteCreateFactory", result);
   }
-  // brush
-  D2D1_COLOR_F brush_color = { 1.f, 0, 0, 1.f };
-  D2D1_BRUSH_PROPERTIES brush_props = { .opacity = 1.f };
-  // ID2D1HwndRenderTarget_CreateSolidColorBrush(__d2d_render_target, &brush_color, &brush_props, &brush);
-  // stroke
-  D2D1_STROKE_STYLE_PROPERTIES stroke_props = {};
-  // ID2D1Factory_CreateStrokeStyle(__d2d_factory, &stroke_props, 0, 0, &stroke);
   // window_create
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, window_style, false);
