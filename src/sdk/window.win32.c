@@ -46,16 +46,6 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
       // ID2D1HwndRenderTarget_DrawRectangle(__d2d_render_target, &rect, (ID2D1Brush*)brush, 1.f, stroke);
       ID2D1HwndRenderTarget_EndDraw(__sdk_d2d_render_target, 0, 0);
       break;
-    case WM_CREATE: {
-      // brush
-      D2D1_COLOR_F brush_color = { 1.f, 0, 0, 1.f };
-      D2D1_BRUSH_PROPERTIES brush_props = { .opacity = 1.f };
-      // ID2D1HwndRenderTarget_CreateSolidColorBrush(__d2d_render_target, &brush_color, &brush_props, &brush);
-      // stroke
-      D2D1_STROKE_STYLE_PROPERTIES stroke_props = {};
-      // ID2D1Factory_CreateStrokeStyle(__d2d_factory, &stroke_props, 0, 0, &stroke);
-      return 0;
-    };
     case WM_CLOSE:
       KillTimer(0, 0);
       break;
@@ -79,6 +69,7 @@ void window_startup(
   const char* title,
   i32 width, i32 height
 ) {
+  assert(_sdk_window_running == false);
   _sdk_window_running = true;
   LPCSTR class_name = "SDK_WINDOW";
   // window_class_register
@@ -95,10 +86,32 @@ void window_startup(
   }
   u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
+  // d2d.factory
+  HRESULT result = D2D1CreateFactory(
+    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, 0,
+    (void**)&__sdk_d2d_factory
+  );
+  if (FAILED(result)) {
+    error_log("D2D1CreateFactory", result);
+  }
+  // d2d.write_factory
+  result = DWriteCreateFactory(
+    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
+    (IUnknown**)&__sdk_d2d_write_factory
+  );
+  if (FAILED(result)) {
+    error_log("DWriteCreateFactory", result);
+  }
+  // brush
+  D2D1_COLOR_F brush_color = { 1.f, 0, 0, 1.f };
+  D2D1_BRUSH_PROPERTIES brush_props = { .opacity = 1.f };
+  // ID2D1HwndRenderTarget_CreateSolidColorBrush(__d2d_render_target, &brush_color, &brush_props, &brush);
+  // stroke
+  D2D1_STROKE_STYLE_PROPERTIES stroke_props = {};
+  // ID2D1Factory_CreateStrokeStyle(__d2d_factory, &stroke_props, 0, 0, &stroke);
   // window_create
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, window_style, false);
-  console_log("test");
   __sdk_window_handle = CreateWindowExA(
     window_ex_style, wc.lpszClassName, title, window_style,
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
@@ -109,14 +122,6 @@ void window_startup(
   );
   if (!__sdk_window_handle) {
     return error_log("CreateWindowExA", ERR_UNKNOWN);
-  }
-  // d2d.factory
-  HRESULT result = D2D1CreateFactory(
-    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, 0,
-    (void**)&__sdk_d2d_factory
-  );
-  if (FAILED(result)) {
-    error_log("D2D1CreateFactory", result);
   }
   // d2d.render_target
   D2D1_RENDER_TARGET_PROPERTIES render_target_props = {
@@ -140,14 +145,6 @@ void window_startup(
   if (FAILED(result)) {
     error_log("CreateHwndRenderTarget", result);
     goto onerror;
-  }
-  // d2d.write_factory
-  result = DWriteCreateFactory(
-    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
-    (IUnknown**)&__sdk_d2d_write_factory
-  );
-  if (FAILED(result)) {
-    error_log("DWriteCreateFactory", result);
   }
   // onsuccess
   SetTimer(0, 0, 0, (TIMERPROC)__window_onupdate);
