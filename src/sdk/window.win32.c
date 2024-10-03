@@ -8,6 +8,7 @@
 #include <wincodec.h>
 #include <windows.h>
 
+
 HWND __sdk_window_handle;
 ID2D1Factory* __sdk_d2d_factory;
 ID2D1HwndRenderTarget* __sdk_d2d_render_target;
@@ -18,13 +19,13 @@ void window_run() {
   i32 result;
   while (_sdk_window_running) {
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
-      TranslateMessage(&msg);
+      // TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
         _sdk_window_running = false;
       }
     }
-    Sleep(USER_TIMER_MINIMUM);
+    Sleep(1);
   }
 }
 void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
@@ -140,7 +141,7 @@ void window_startup(
     goto onerror;
   }
   // onsuccess
-  SetTimer(0, 0, USER_TIMER_MINIMUM, (TIMERPROC)__window_onupdate);
+  SetTimer(0, 0, 0, (TIMERPROC)__window_onupdate);
   return;
 onerror:
   return;

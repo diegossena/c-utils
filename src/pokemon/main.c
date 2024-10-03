@@ -1,4 +1,6 @@
 
+#include <sdk/date.h>
+
 #include <sdk/window.h>
 #include <sdk/console.h>
 #include <sdk/keyboard.h>
