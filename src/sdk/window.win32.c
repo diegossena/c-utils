@@ -17,17 +17,20 @@ void window_run() {
   MSG msg;
   i32 result;
   while (_sdk_window_running) {
-    result = PeekMessageA(&msg, 0, 0, 0, PM_REMOVE);
-    if (result) {
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
         _sdk_window_running = false;
       }
     }
+    Sleep(16);
   }
 }
+u32 updated_at = 0;
 void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
+  console_log("time %llu", time - updated_at);
+  updated_at = time;
   window_onupdate(time);
 }
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -140,7 +143,7 @@ void window_startup(
     goto onerror;
   }
   // onsuccess
-  SetTimer(0, 0, 0, (TIMERPROC)__window_onupdate);
+  SetTimer(0, 0, 16, (TIMERPROC)__window_onupdate);
   return;
 onerror:
   return;
