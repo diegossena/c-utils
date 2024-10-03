@@ -25,7 +25,7 @@ void window_run() {
         _sdk_window_running = false;
       }
     }
-    Sleep(1);
+    Sleep(true);
   }
 }
 void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
