@@ -13,7 +13,7 @@ void window_onrender() {
   );
 }
 void window_onupdate(u32 time) {
-  f32 velocity = 5.f;
+  f32 velocity = 10.f;
   if (keyboard_pressed(KEY_DOWN)) {
     top += velocity;
     bottom += velocity;
