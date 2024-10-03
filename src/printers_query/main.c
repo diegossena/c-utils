@@ -122,12 +122,11 @@ i32 main(i32 argc, char** argv) {
     console_color(ANSI_RESET);
     return 0;
   }
-  taskmanager_t taskmanager;
-  taskmanager_constructor(&taskmanager);
+  taskmanager_startup();
   printers_query_constructor(
     &taskmanager, ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
   );
-  taskmanager_run(&taskmanager);
+  taskmanager_run();
   console_color(ANSI_FORE_LIGHTGREEN);
   console_write_cstr("SUCCESS\n");
   console_color(ANSI_RESET);

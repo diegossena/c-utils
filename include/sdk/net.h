@@ -1,6 +1,8 @@
 #ifndef SDK_NET_H
 #define SDK_NET_H
 
+#define SDK_PROMISES
+
 #include <sdk/types.h>
 #include <sdk/error.h>
 #include <sdk/buffer.h>

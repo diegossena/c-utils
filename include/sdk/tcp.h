@@ -3,7 +3,7 @@
 
 #include <sdk/types.h>
 #include <sdk/net.h>
-#include <sdk/taskmanager.h>
+#include <sdk/promise.h>
 #include <sdk/date.h>
 #include <sdk/timer.h>
 
@@ -39,12 +39,12 @@ typedef struct tcp_t {
   u64 __remaining;
 } tcp_t;
 
-SDK_EXPORT tcp_t* tcp_new(taskmanager_t*);
+SDK_EXPORT tcp_t* tcp_new();
 SDK_EXPORT void tcp_free(tcp_t* this);
 SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length);
 SDK_EXPORT void tcp_read(tcp_t* this, u64 length);
 
-SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t*);
+SDK_EXPORT void _tcp_constructor(tcp_t* this);
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this);
 
 SDK_EXPORT void __tcp_startup_task(tcp_t* this);

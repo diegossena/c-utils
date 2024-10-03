@@ -33,15 +33,14 @@ void http_onconnect(tcp_t* tcp, error_code_t error_code) {
 }
 
 i32 main(i32 argc, char** argv) {
-  taskmanager_t taskmanager;
-  taskmanager_constructor(&taskmanager);
+  taskmanager_startup();
   for (i32 i = 0; i < 1000; i++) {
-    tcp_t* tcp = tcp_new(&taskmanager);
+    tcp_t* tcp = tcp_new();
     tcp->address.ip4 = ip4_from_bytes(142, 250, 79, 35);
     tcp->address.net_port = net_port_from_short(80);
     tcp->onend = http_onconnect;
   }
-  taskmanager_run(&taskmanager);
+  taskmanager_run();
   console_color(ANSI_FORE_LIGHTGREEN);
   console_log("SUCCESS");
   console_color(ANSI_RESET);

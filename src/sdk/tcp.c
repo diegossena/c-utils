@@ -1,8 +1,8 @@
 #include <sdk/tcp.h>
 
-SDK_EXPORT tcp_t* tcp_new(taskmanager_t* taskmanager) {
+SDK_EXPORT tcp_t* tcp_new() {
   tcp_t* this = memory_alloc0(sizeof(tcp_t));
-  _tcp_constructor(this, taskmanager);
+  _tcp_constructor(this);
   this->_task.destroy = (function_t)tcp_free;
   return this;
 }
@@ -10,13 +10,13 @@ SDK_EXPORT void tcp_free(tcp_t* this) {
   _tcp_deconstructor(this);
   memory_free(this);
 }
-SDK_EXPORT void _tcp_constructor(tcp_t* this, taskmanager_t* taskmanager) {
+SDK_EXPORT void _tcp_constructor(tcp_t* this) {
   this->timeout = 0;
   this->__timer = 0;
   // address
   this->address.family = NET_FAMILY_IPV4;
-  // task
-  _task_constructor(&this->_task, taskmanager, true);
+  // promise
+  _promise_constructor(&this->_task);
   this->_task.callback = (task_callback_t)__tcp_startup_task;
   this->_task.destroy = (function_t)_tcp_deconstructor;
   this->_task.context = this;

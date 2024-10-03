@@ -17,7 +17,10 @@
 #endif
 #ifdef SDK_TASKMANAGER_H
 #include <src/sdk/taskmanager.c>
-#include <src/sdk/taskmanager.win32.c>
+#endif
+#ifdef SDK_PROMISE_H
+#include <src/sdk/promise.c>
+#include <src/sdk/promise.win32.c>
 #endif
 #ifdef SDK_NET_H
 #include <src/sdk/net.c>
@@ -60,5 +63,6 @@
 #include <src/sdk/timer.win32.c>
 #endif
 #ifdef SDK_WINDOW_H
+#include <src/sdk/window.c>
 #include <src/sdk/window.win32.c>
 #endif
