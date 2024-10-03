@@ -8,7 +8,7 @@
 #include <wincodec.h>
 #include <windows.h>
 
-HWND __sdk_window_handle = 0;
+HWND __sdk_window_handle;
 ID2D1Factory* __sdk_d2d_factory;
 ID2D1HwndRenderTarget* __sdk_d2d_render_target;
 IDWriteFactory* __sdk_d2d_write_factory;
@@ -24,13 +24,10 @@ void window_run() {
         _sdk_window_running = false;
       }
     }
-    Sleep(16);
+    Sleep(USER_TIMER_MINIMUM);
   }
 }
-u32 updated_at = 0;
 void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
-  console_log("time %llu", time - updated_at);
-  updated_at = time;
   window_onupdate(time);
 }
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -143,7 +140,7 @@ void window_startup(
     goto onerror;
   }
   // onsuccess
-  SetTimer(0, 0, 16, (TIMERPROC)__window_onupdate);
+  SetTimer(0, 0, USER_TIMER_MINIMUM, (TIMERPROC)__window_onupdate);
   return;
 onerror:
   return;
