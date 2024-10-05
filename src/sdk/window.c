@@ -20,3 +20,7 @@ void __window_key_release(key_code_t key) {
   u8 bit_index = key % 8;
   __global_window_keyboard_state[byte_index] &= ~(1 << bit_index);
 }
+
+SDK_EXPORT bool window_focused() {
+  return __global_window_focus;
+}

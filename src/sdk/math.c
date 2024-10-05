@@ -147,3 +147,9 @@ SDK_EXPORT f64 math_ceil_f64(f64 number, u8 places) {
   }
   return number;
 }
+SDK_EXPORT i32 math_random() {
+  return rand();
+}
+SDK_EXPORT i32 math_random_in_range(i32 min, i32 max) {
+  return (rand() % (max - min + 1)) + min;
+}

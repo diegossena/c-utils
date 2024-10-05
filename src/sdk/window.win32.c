@@ -13,7 +13,7 @@ ID2D1Factory* __global_d2d_factory;
 ID2D1HwndRenderTarget* __global_d2d_render_target;
 IDWriteFactory* __global_d2d_write_factory;
 
-void window_run() {
+SDK_EXPORT void window_run() {
   MSG msg;
   while (__global_window_running) {
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
@@ -23,10 +23,16 @@ void window_run() {
         __global_window_running = false;
       }
     }
-    Sleep(true);
+    Sleep(1);
   }
 }
-void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
+SDK_EXPORT void window_clear() {
+  ID2D1HwndRenderTarget_Clear(__global_d2d_render_target, 0);
+}
+SDK_EXPORT void window_close() {
+  DestroyWindow(__global_window_handle);
+}
+SDK_EXPORT void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (__global_window_focus && __global_window_keyboard_count) {
     window_onkeypress();
   }
@@ -36,7 +42,7 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
   switch (message) {
     case WM_PAINT:
       ID2D1HwndRenderTarget_BeginDraw(__global_d2d_render_target);
-      ID2D1HwndRenderTarget_Clear(__global_d2d_render_target, 0);
+
       window_onrender();
       ID2D1HwndRenderTarget_EndDraw(__global_d2d_render_target, 0, 0);
       break;
@@ -45,7 +51,7 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
         __window_key_press(wParam);
         ++__global_window_keyboard_count;
       }
-      window_onkeydown();
+      window_onkeydown(wParam);
       return 0;
     case WM_KEYUP:
       __window_key_release(wParam);
@@ -58,10 +64,8 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
     case WM_KILLFOCUS:
       __global_window_focus = false;
       return 0;
-    case WM_CLOSE:
-      KillTimer(0, 0);
-      break;
     case WM_DESTROY:
+      KillTimer(0, 0);
       IDWriteFactory_Release(__global_d2d_write_factory);
       ID2D1HwndRenderTarget_Release(__global_d2d_render_target);
       ID2D1Factory_Release(__global_d2d_factory);
@@ -71,10 +75,10 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
   }
   return DefWindowProcA(handle, message, wParam, lParam);
 }
-void window_redraw() {
+SDK_EXPORT void window_redraw() {
   RedrawWindow(__global_window_handle, 0, 0, RDW_INVALIDATE);
 }
-void window_fill_rectangle(
+SDK_EXPORT void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
   f32 r, f32 g, f32 b, f32 a
 ) {
@@ -85,7 +89,7 @@ void window_fill_rectangle(
   ID2D1HwndRenderTarget_FillRectangle(__global_d2d_render_target, &rect, (ID2D1Brush*)brush);
   ID2D1SolidColorBrush_Release(brush);
 }
-void window_startup(
+SDK_EXPORT void window_startup(
   const char* title,
   i32 width, i32 height
 ) {

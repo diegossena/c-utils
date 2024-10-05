@@ -2,6 +2,7 @@
   "files.associations": {
     ".htaccess": "ruby",
     "*.h": "c",
-    "cmath": "c"
+    "cmath": "c",
+    "type_traits": "c"
   }
 }
