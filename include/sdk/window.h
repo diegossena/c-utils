@@ -28,20 +28,21 @@ extern void window_onupdate(u32 time);
 /**
  * - Event Listener
  * - Externally-defined function
+ * The `onrender` event occurs when a draw is requested.
  */
 extern void window_onrender();
 /**
- * The `onkeydown` event occurs when the user presses a key on the keyboard.
- * It repeats if the key is kept pressed after a delay.
  * - Event Listener
  * - Externally-defined function
+ * The `onkeydown` event occurs when the user presses a key on the keyboard.
+ * It repeats if the key is kept pressed after a delay.
  */
 extern void window_onkeydown();
 /**
- * The `onkeypress` event occurs when the user presses a key on the keyboard.
- * It repeats while the user keeps the key depressed.
  * - Event Listener
  * - Externally-defined function
+ * The `onkeypress` event occurs when the user presses a key on the keyboard.
+ * It repeats while the user keeps the key depressed.
  */
 extern void window_onkeypress();
 /**
