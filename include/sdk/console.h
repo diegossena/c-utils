@@ -59,7 +59,7 @@ typedef enum ansi_t {
 
 SDK_EXPORT void console_color(ansi_t ansi);
 SDK_EXPORT void console_write(const char* message, ...);
-SDK_EXPORT void console_write_bin(const u64);
+SDK_EXPORT void console_write_bin(u64);
 SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size);
 SDK_EXPORT void console_write_str(const char* message, u64 length);
 

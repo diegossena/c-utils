@@ -27,7 +27,7 @@ SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
     return this;
   }
   // Associate it with the I/O completion port
-  if (CreateIoCompletionPort((HANDLE)this, __sdk_iocp, (ULONG_PTR)task, 0) == NULL) {
+  if (CreateIoCompletionPort((HANDLE)this, __global_iocp, (ULONG_PTR)task, 0) == NULL) {
     error_log("CreateIoCompletionPort", GetLastError());
   }
   return this;

@@ -13,8 +13,34 @@ SDK_EXPORT void console_write(const char* message, ...) {
     return;
   console_write_str(buffer, length);
 }
+SDK_EXPORT void console_write_bin(u64 value) {
+  char str[76] = {};
+  char* ptr = str;
+  if (value) {
+    u8 place = 63;
+    while (true) {
+      if ((1LLU << place) <= value) {
+        place += 3 - place % 4;
+        break;
+      }
+      --place;
+    }
+    while (true) {
+      *ptr++ = value & (1 << place) ? '1' : '0';
+      if (place == 0)
+        break;
+      if (place % 4 == 0) {
+        *ptr++ = ' ';
+      }
+      --place;
+    }
+  } else {
+    str[0] = str[1] = str[2] = str[3] = '0';
+    ptr += 4;
+  }
+  console_write_str(str, ptr - str);
+}
 SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size) {
-  bool first = true;
   if (size) {
     console_write("%02x", *buffer);
     ++buffer;

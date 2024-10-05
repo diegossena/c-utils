@@ -20,7 +20,7 @@ SDK_EXPORT void console_color(ansi_t ansi) {
   } else if (ansi == 4) {
     // underline
     info.wAttributes |= COMMON_LVB_UNDERSCORE;
-  } else if (ansi >= 30 && ansi <= 39 || ansi >= 90 && ansi <= 99) {
+  } else if ((ansi >= 30 && ansi <= 39) || (ansi >= 90 && ansi <= 99)) {
     // foreground
     fore = 0;
     if (ansi >= 90 && ansi <= 99) {
@@ -50,8 +50,10 @@ SDK_EXPORT void console_color(ansi_t ansi) {
       case 39: // reset
         fore |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
         break;
+      default:
+
     }
-  } else if (ansi >= 40 && ansi <= 49 || ansi >= 100 && ansi <= 109) {
+  } else if ((ansi >= 40 && ansi <= 49) || (ansi >= 100 && ansi <= 109)) {
     // background
     back = 0;
     if (ansi >= 100 && ansi <= 109) {
@@ -81,6 +83,7 @@ SDK_EXPORT void console_color(ansi_t ansi) {
       case 49: // reset
         back |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
         break;
+      default:
     }
   }
   SetConsoleTextAttribute(handle, info.wAttributes | (back << 4) | fore);

@@ -18,9 +18,9 @@ typedef struct task_t {
   function_t destroy;
 } task_t;
 
-extern queue_t _sdk_tasks; // queue_t<task_t>
-extern u64 __sdk_tasks_count;
-extern task_t* __sdk_task_it;
+extern queue_t _global_tasks; // queue_t<task_t>
+extern u64 __global_tasks_count;
+extern task_t* __global_task_it;
 
 SDK_EXPORT void taskmanager_startup();
 SDK_EXPORT void taskmanager_run();

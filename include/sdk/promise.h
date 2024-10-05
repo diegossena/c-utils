@@ -4,9 +4,9 @@
 #include <sdk/queue.h>
 #include <sdk/taskmanager.h>
 
-extern queue_t _sdk_promises; // queue_t<task_t>
+extern queue_t _global_promises; // queue_t<task_t>
 #ifdef PLATFORM_WINDOWS
-extern void* __sdk_iocp;
+extern void* __global_iocp;
 #endif
 
 SDK_EXPORT void _promise_constructor(task_t* this);

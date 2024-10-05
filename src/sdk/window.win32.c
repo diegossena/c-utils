@@ -8,52 +8,71 @@
 #include <wincodec.h>
 #include <windows.h>
 
-
-HWND __sdk_window_handle;
-ID2D1Factory* __sdk_d2d_factory;
-ID2D1HwndRenderTarget* __sdk_d2d_render_target;
-IDWriteFactory* __sdk_d2d_write_factory;
+HWND __global_window_handle;
+ID2D1Factory* __global_d2d_factory;
+ID2D1HwndRenderTarget* __global_d2d_render_target;
+IDWriteFactory* __global_d2d_write_factory;
 
 void window_run() {
   MSG msg;
-  i32 result;
-  while (_sdk_window_running) {
+  while (__global_window_running) {
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
       // TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
-        _sdk_window_running = false;
+        __global_window_running = false;
       }
     }
     Sleep(true);
   }
 }
 void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
+  if (__global_window_focus && __global_window_keyboard_count) {
+    window_onkeypress();
+  }
   window_onupdate(time);
 }
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_PAINT:
-      ID2D1HwndRenderTarget_BeginDraw(__sdk_d2d_render_target);
-      ID2D1HwndRenderTarget_Clear(__sdk_d2d_render_target, 0);
+      ID2D1HwndRenderTarget_BeginDraw(__global_d2d_render_target);
+      ID2D1HwndRenderTarget_Clear(__global_d2d_render_target, 0);
       window_onrender();
-      ID2D1HwndRenderTarget_EndDraw(__sdk_d2d_render_target, 0, 0);
+      ID2D1HwndRenderTarget_EndDraw(__global_d2d_render_target, 0, 0);
       break;
+    case WM_KEYDOWN:
+      if (wParam != 91 && !window_key_pressed(wParam)) {
+        __window_key_press(wParam);
+        ++__global_window_keyboard_count;
+      }
+      window_onkeydown();
+      return 0;
+    case WM_KEYUP:
+      __window_key_release(wParam);
+      --__global_window_keyboard_count;
+      window_onkeyup();
+      return 0;
+    case WM_SETFOCUS:
+      __global_window_focus = true;
+      return 0;
+    case WM_KILLFOCUS:
+      __global_window_focus = false;
+      return 0;
     case WM_CLOSE:
       KillTimer(0, 0);
       break;
     case WM_DESTROY:
-      IDWriteFactory_Release(__sdk_d2d_write_factory);
-      ID2D1HwndRenderTarget_Release(__sdk_d2d_render_target);
-      ID2D1Factory_Release(__sdk_d2d_factory);
+      IDWriteFactory_Release(__global_d2d_write_factory);
+      ID2D1HwndRenderTarget_Release(__global_d2d_render_target);
+      ID2D1Factory_Release(__global_d2d_factory);
       PostQuitMessage(0);
-      _sdk_window_running = false;
+      __global_window_running = false;
       return 0;
   }
   return DefWindowProcA(handle, message, wParam, lParam);
 }
 void window_redraw() {
-  RedrawWindow(__sdk_window_handle, 0, 0, RDW_INVALIDATE);
+  RedrawWindow(__global_window_handle, 0, 0, RDW_INVALIDATE);
 }
 void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
@@ -62,16 +81,16 @@ void window_fill_rectangle(
   D2D1_RECT_F rect = { left, top, right, bottom };
   ID2D1SolidColorBrush* brush;
   D2D1_COLOR_F color = { r, g, b, a };
-  ID2D1HwndRenderTarget_CreateSolidColorBrush(__sdk_d2d_render_target, &color, 0, &brush);
-  ID2D1HwndRenderTarget_FillRectangle(__sdk_d2d_render_target, &rect, (ID2D1Brush*)brush);
+  ID2D1HwndRenderTarget_CreateSolidColorBrush(__global_d2d_render_target, &color, 0, &brush);
+  ID2D1HwndRenderTarget_FillRectangle(__global_d2d_render_target, &rect, (ID2D1Brush*)brush);
   ID2D1SolidColorBrush_Release(brush);
 }
 void window_startup(
   const char* title,
   i32 width, i32 height
 ) {
-  assert(_sdk_window_running == false);
-  _sdk_window_running = true;
+  assert(__global_window_running == false);
+  __global_window_running = true;
   LPCSTR class_name = "SDK_WINDOW";
   // window_class_register
   WNDCLASSEXA wc = {
@@ -90,7 +109,7 @@ void window_startup(
   // d2d.factory
   HRESULT result = D2D1CreateFactory(
     D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, 0,
-    (void**)&__sdk_d2d_factory
+    (void**)&__global_d2d_factory
   );
   if (FAILED(result)) {
     error_log("D2D1CreateFactory", result);
@@ -98,7 +117,7 @@ void window_startup(
   // d2d.write_factory
   result = DWriteCreateFactory(
     DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
-    (IUnknown**)&__sdk_d2d_write_factory
+    (IUnknown**)&__global_d2d_write_factory
   );
   if (FAILED(result)) {
     error_log("DWriteCreateFactory", result);
@@ -106,7 +125,7 @@ void window_startup(
   // window_create
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, window_style, false);
-  __sdk_window_handle = CreateWindowExA(
+  __global_window_handle = CreateWindowExA(
     window_ex_style, wc.lpszClassName, title, window_style,
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
     0, // handle to parent or owner window
@@ -114,7 +133,7 @@ void window_startup(
     wc.hInstance,
     0 // pointer to window-creation data
   );
-  if (!__sdk_window_handle) {
+  if (!__global_window_handle) {
     return error_log("CreateWindowExA", ERR_UNKNOWN);
   }
   // d2d.render_target
@@ -126,15 +145,15 @@ void window_startup(
     }
   };
   D2D1_HWND_RENDER_TARGET_PROPERTIES window_render_target_props = {
-    .hwnd = __sdk_window_handle,
+    .hwnd = __global_window_handle,
     .pixelSize = { width, height },
     .presentOptions = D2D1_PRESENT_OPTIONS_NONE
   };
   result = ID2D1Factory_CreateHwndRenderTarget(
-    __sdk_d2d_factory,
+    __global_d2d_factory,
     &render_target_props,
     &window_render_target_props,
-    &__sdk_d2d_render_target
+    &__global_d2d_render_target
   );
   if (FAILED(result)) {
     error_log("CreateHwndRenderTarget", result);

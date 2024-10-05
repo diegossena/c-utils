@@ -281,4 +281,6 @@ typedef enum key_code_t {
   KEYS_MAX_KEYS = 0xFF
 } key_code_t;
 
+bool keyboard_pressed(key_code_t key);
+
 #endif
