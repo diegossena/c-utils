@@ -169,7 +169,7 @@ void window_onkeydown(key_code_t key) {
 }
 void window_onkeyup() {}
 void window_onkeypress() {}
-// MAIN 304316 bytes
+// MAIN 305473 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Test", SCREEN_SIZE, SCREEN_SIZE);
   game_startup();
