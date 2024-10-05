@@ -36,7 +36,7 @@ typedef enum pdu_type_t {
 } pdu_type_t;
 typedef struct snmp_pdu_t {
   snmp_version_t version;
-  byte_t* community;
+  char* community;
   u64 community_length;
   // pdu
   pdu_type_t type;

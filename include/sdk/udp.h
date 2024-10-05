@@ -32,14 +32,14 @@ typedef struct udp_t {
 } udp_t;
 typedef struct udp_message_t {
   udp_t* udp;
-  byte_t data[BUFFER_DEFAULT_SIZE];
+  char data[BUFFER_DEFAULT_SIZE];
   u32 length;
   net_address_t address;
 } udp_message_t;
 typedef struct udp_send_t {
   udp_t* udp;
   net_address_t address;
-  byte_t* data;
+  char* data;
   u64 length;
   void* context;
   function_t callback;

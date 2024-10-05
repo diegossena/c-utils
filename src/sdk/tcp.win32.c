@@ -7,7 +7,7 @@
 
 LPFN_CONNECTEX ConnectEx = 0;
 
-SDK_EXPORT void tcp_write(tcp_t* this, const byte_t* chunk, u64 length) {
+SDK_EXPORT void tcp_write(tcp_t* this, const char* chunk, u64 length) {
   this->__remaining = length;
   WSABUF data_buffer = { length, (char*)chunk };
   OVERLAPPED overlapped = { 0 };

@@ -82,9 +82,9 @@ SDK_EXPORT u64 math_next2pow(u64 number) {
   return ++number;
 }
 
-SDK_EXPORT u64 math_hash_jenkins(const byte_t* data, u64 size) {
+SDK_EXPORT u64 math_hash_jenkins(const char* data, u64 size) {
   u64 hash = 0;
-  const byte_t* end = data + size;
+  const char* end = data + size;
   while (data != end) {
     hash += *data;
     hash += hash << 10;

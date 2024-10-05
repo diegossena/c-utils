@@ -2,7 +2,7 @@
 #include <sdk/tcp.h>
 #include <sdk/unity.h>
 
-void http_ondata(tcp_t* this, byte_t* chunk, u32 length) {
+void http_ondata(tcp_t* this, char* chunk, u32 length) {
   // console_log("ondata.chunk[%d]", length);
   // console_write_cstr("`");
   // console_write_str(chunk, length);
@@ -31,10 +31,10 @@ void http_onconnect(tcp_t* tcp, error_code_t error_code) {
     tcp_write(tcp, http_request, sizeof(http_request) - 1);
   }
 }
-
+// MAIN 263586 bytes
 i32 main(i32 argc, char** argv) {
   taskmanager_startup();
-  for (i32 i = 0; i < 1000; i++) {
+  for (i32 i = 0; i < 1; i++) {
     tcp_t* tcp = tcp_new();
     tcp->address.ip4 = ip4_from_bytes(142, 250, 79, 35);
     tcp->address.net_port = net_port_from_short(80);

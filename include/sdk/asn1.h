@@ -40,19 +40,19 @@ typedef struct ber_field_t {
 
 typedef struct varbind_t {
   queue_t queue;
-  byte_t* oid;
+  char* oid;
   u64 oid_length;
   ber_field_t value;
 } varbind_t;
 
-SDK_EXPORT u8* ber_sequence_start(byte_t** stream, u8 type);
-SDK_EXPORT void ber_sequence_end(byte_t** stream, u8* sequence);
-SDK_EXPORT void ber_write_i64(byte_t** stream, i64 value);
-SDK_EXPORT void ber_write_var_integer(byte_t** stream, u32 value);
-SDK_EXPORT void ber_write_str(byte_t** stream, const char* string, u8 length);
-SDK_EXPORT void ber_write_oid_null(byte_t** stream, byte_t* oid, u64 size);
-SDK_EXPORT u64 ber_read_u64(const byte_t* stream, u8 length);
-SDK_EXPORT ber_field_t ber_read_var(byte_t** stream);
-SDK_EXPORT varbind_t ber_read_oid(byte_t** stream);
+SDK_EXPORT u8* ber_sequence_start(char** stream, u8 type);
+SDK_EXPORT void ber_sequence_end(char** stream, u8* sequence);
+SDK_EXPORT void ber_write_i64(char** stream, i64 value);
+SDK_EXPORT void ber_write_var_integer(char** stream, u32 value);
+SDK_EXPORT void ber_write_str(char** stream, const char* string, u8 length);
+SDK_EXPORT void ber_write_oid_null(char** stream, char* oid, u64 size);
+SDK_EXPORT u64 ber_read_u64(const char* stream, u8 length);
+SDK_EXPORT ber_field_t ber_read_var(char** stream);
+SDK_EXPORT varbind_t ber_read_oid(char** stream);
 
 #endif

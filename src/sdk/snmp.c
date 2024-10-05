@@ -17,7 +17,7 @@ SDK_EXPORT snmp_request_t* snmp_send(snmp_t* snmp, snmp_pdu_t* pdu) {
   snmp_request_t* this = memory_alloc0(sizeof(snmp_request_t));
   // pdu->bytes
   char bytes[BUFFER_DEFAULT_SIZE];
-  byte_t* buffer = bytes;
+  char* buffer = bytes;
   u8* sequence = ber_sequence_start(&buffer, ASN1_TYPE_SEQUENCE);
   ber_write_var_integer(&buffer, pdu->version);
   ber_write_str(&buffer, pdu->community, pdu->community_length);
@@ -82,7 +82,7 @@ SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
   snmp_message_t snmp_message;
   snmp_pdu_constructor(&snmp_message.pdu);
   snmp_message.udp_message = udp_message;
-  byte_t* ptr = udp_message->data;
+  char* ptr = udp_message->data;
   ber_field_t field;
   ber_read_var(&ptr);
   // version
@@ -91,7 +91,7 @@ SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
   ++ptr;
   // community
   field = ber_read_var(&ptr);
-  snmp_message.pdu.community = (byte_t*)field.cstr;
+  snmp_message.pdu.community = (char*)field.cstr;
   snmp_message.pdu.community_length = field.size;
   // type
   field = ber_read_var(&ptr);
@@ -112,7 +112,7 @@ SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
   ++ptr;
   // varbind_list
   ber_field_t varbind_list = ber_read_var(&ptr);
-  byte_t* varbind_list_end = (byte_t*)varbind_list.cstr + varbind_list.size;
+  char* varbind_list_end = (char*)varbind_list.cstr + varbind_list.size;
   while (ptr < varbind_list_end) {
     varbind_t* varbind = memory_alloc(sizeof(varbind_t));
     *varbind = ber_read_oid(&ptr);

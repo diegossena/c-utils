@@ -54,7 +54,7 @@ void printers_query_task(printers_query_t* this) {
   } else {
     taskmanager_t* taskmanager = this->snmp.__udp._promise.taskmanager;
     if (taskmanager->tasks_count < PRINTERS_TASK_COUNT) {
-      byte_t community [] = "public";
+      char community [] = "public";
       snmp_pdu_t pdu = {
         .version = SNMP_VERSION_1,
         .community = community,

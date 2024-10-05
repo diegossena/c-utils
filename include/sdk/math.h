@@ -32,7 +32,7 @@
 
 SDK_EXPORT f64 math_log10(f64);
 SDK_EXPORT u64 math_next2pow(u64 number);
-SDK_EXPORT u64 math_hash_jenkins(const byte_t* data, u64 size);
+SDK_EXPORT u64 math_hash_jenkins(const char* data, u64 size);
 SDK_EXPORT i64 math_ceil(f64 number);
 SDK_EXPORT f64 math_pow(f64 base, f64 exponent);
 SDK_EXPORT f64 math_floor(f64 number);
