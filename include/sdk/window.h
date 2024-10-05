@@ -61,14 +61,9 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup();
 
-// KEYBOARD
-
-SDK_EXPORT bool window_key_pressed(key_code_t);
-SDK_EXPORT void __window_key_press(key_code_t);
-SDK_EXPORT void __window_key_release(key_code_t);
-
 // GETTERS
 
 SDK_EXPORT bool window_focused();
+SDK_EXPORT bool window_key_pressed(key_code_t);
 
 #endif

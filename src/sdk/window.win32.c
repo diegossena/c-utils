@@ -48,16 +48,21 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
       break;
     case WM_KEYDOWN:
       if (wParam != 91 && !window_key_pressed(wParam)) {
-        __window_key_press(wParam);
+        u8 byte_index = wParam / 8;
+        u8 bit_index = wParam % 8;
+        __global_window_keyboard_state[byte_index] |= (1 << bit_index);
         ++__global_window_keyboard_count;
       }
       window_onkeydown(wParam);
       return 0;
-    case WM_KEYUP:
-      __window_key_release(wParam);
+    case WM_KEYUP: {
+      u8 byte_index = wParam / 8;
+      u8 bit_index = wParam % 8;
+      __global_window_keyboard_state[byte_index] &= ~(1 << bit_index);
       --__global_window_keyboard_count;
       window_onkeyup();
       return 0;
+    }
     case WM_SETFOCUS:
       __global_window_focus = true;
       return 0;
