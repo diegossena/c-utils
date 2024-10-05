@@ -2,7 +2,7 @@
 #define SDK_PROMISE_H
 
 #include <sdk/queue.h>
-#include <sdk/taskmanager.h>
+#include <sdk/task.h>
 
 extern queue_t _global_promises; // queue_t<task_t>
 #ifdef PLATFORM_WINDOWS

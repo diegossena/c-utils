@@ -22,16 +22,16 @@ extern queue_t _global_tasks; // queue_t<task_t>
 extern u64 __global_tasks_count;
 extern task_t* __global_task_it;
 
-SDK_EXPORT void taskmanager_startup();
-SDK_EXPORT void taskmanager_run();
+SDK_EXPORT void task_manager_startup();
+SDK_EXPORT void task_manager_run();
 
 SDK_EXPORT void _task_constructor(task_t* this);
 SDK_EXPORT void _task_deconstructor(task_t* this);
 SDK_EXPORT void _task_call_destroy(task_t* this);
 
 
-SDK_EXPORT void _taskmanager_deconstructor();
-SDK_EXPORT void _taskmanager_run();
+SDK_EXPORT void _task_manager_shutdown();
+SDK_EXPORT void _task_manager_run();
 
 
 #endif

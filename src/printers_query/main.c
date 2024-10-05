@@ -1,4 +1,4 @@
-#include <sdk/taskmanager.h>
+#include <sdk/task.h>
 #include <sdk/net.h>
 #include <sdk/tcp.h>
 #include <sdk/snmp.h>
@@ -126,7 +126,7 @@ i32 main(i32 argc, char** argv) {
   printers_query_constructor(
     &taskmanager, ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
   );
-  taskmanager_run();
+  task_manager_run();
   console_color(ANSI_FORE_LIGHTGREEN);
   console_write_cstr("SUCCESS\n");
   console_color(ANSI_RESET);
