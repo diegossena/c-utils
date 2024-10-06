@@ -30,7 +30,6 @@ SDK_EXPORT void _promise_run() {
   OVERLAPPED* overlapped;
   result = GetQueuedCompletionStatus(__global_iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
   if (result) {
-    console_log("GetQueuedCompletionStatus %d", result);
     result = 0;
   } else {
     result = GetLastError();
@@ -38,9 +37,6 @@ SDK_EXPORT void _promise_run() {
       return;
   }
   if (task) {
-    if (overlapped) {
-      console_log("hEvent %d", overlapped->hEvent);
-    }
     task->callback(task->context, result, bytes);
   }
 }

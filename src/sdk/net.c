@@ -3,7 +3,7 @@
 SDK_EXPORT net_address_t ip4_address(u32 ip4, u16 net_port) {
   return (net_address_t) { NET_FAMILY_IPV4, net_port, { ip4 } };
 }
-SDK_EXPORT u32 ip4_from_bytes(char f1, char f2, char f3, char f4) {
+SDK_EXPORT u32 ip4_from_bytes(u8 f1, u8 f2, u8 f3, u8 f4) {
   return f1 | f2 << 8 | f3 << 16 | f4 << 24;
 }
 SDK_EXPORT u32 ip4_from_cstr(const char* ip4_str) {
