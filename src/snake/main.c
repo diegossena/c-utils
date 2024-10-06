@@ -1,6 +1,5 @@
 
 #include <sdk/date.h>
-
 #include <sdk/window.h>
 #include <sdk/console.h>
 #include <sdk/keyboard.h>
@@ -13,16 +12,13 @@
 #define BOARD_AREA (BOARD_SIZE * BOARD_SIZE)
 
 // GAME:STATE
-
 u16 food_location;
 u16 snake[BOARD_AREA];
 u16 snake_length;
 key_code_t snake_direction[2];
 u8 direction_i = 0;
-
 u32 updated_at = 0;
 bool game_over = false;
-
 // GAME:METHODS
 u16 game_score() {
   return snake_length - 3;
@@ -51,6 +47,12 @@ void game_startup() {
   snake_direction[0] = snake_direction[1] = KEY_RIGHT;
   // FOOD:STARTUP
   food_create();
+}
+void game_over_call() {
+  char message[25565];
+  cstr_format(message, "SCORE: %lu", game_score());
+  MessageBoxA(__global_window_handle, message, "GAME OVER", MB_OK);
+  game_over = true;
 }
 void slot_draw(u16 position, f32 r, f32 g, f32 b, f32 a) {
   u8 y = position / BOARD_SIZE;
@@ -91,29 +93,25 @@ void window_onupdate(u32 time) {
       switch (snake_direction[0]) {
         case KEY_DOWN:
           if (snake[0] >= BOARD_AREA - BOARD_SIZE) {
-            game_over = true;
-            return;
+            return game_over_call();
           }
           snake[0] += BOARD_SIZE;
           break;
         case KEY_UP:
           if (snake[0] <= BOARD_SIZE) {
-            game_over = true;
-            return;
+            return game_over_call();
           }
           snake[0] -= BOARD_SIZE;
           break;
         case KEY_LEFT:
           if (snake[0] % BOARD_SIZE == 0) {
-            game_over = true;
-            return;
+            return game_over_call();
           }
           snake[0] -= 1;
           break;
         case KEY_RIGHT:
           if (snake[0] % BOARD_SIZE == BOARD_SIZE - 1) {
-            game_over = true;
-            return;
+            return game_over_call();
           }
           snake[0] += 1;
           break;
@@ -127,8 +125,7 @@ void window_onupdate(u32 time) {
       // BODY COLLISION
       for (u8 i = 1; i < snake_length; i++) {
         if (snake[0] == snake[i]) {
-          game_over = true;
-          return;
+          return game_over_call();
         }
       }
       window_redraw();
