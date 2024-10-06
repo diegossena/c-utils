@@ -22,9 +22,7 @@ SDK_EXPORT void __promise_startup() {
     error_log("CreateIoCompletionPort", GetLastError());
   }
 }
-SDK_EXPORT void _promise_shutdown() {
-  CloseHandle(__global_iocp);
-}
+SDK_EXPORT void _promise_shutdown() { CloseHandle(__global_iocp); }
 SDK_EXPORT void _promise_run() {
   i32 result;
   DWORD bytes;
@@ -32,6 +30,7 @@ SDK_EXPORT void _promise_run() {
   OVERLAPPED* overlapped;
   result = GetQueuedCompletionStatus(__global_iocp, &bytes, (PULONG_PTR)&task, &overlapped, 0);
   if (result) {
+    console_log("GetQueuedCompletionStatus %d", result);
     result = 0;
   } else {
     result = GetLastError();
@@ -39,6 +38,9 @@ SDK_EXPORT void _promise_run() {
       return;
   }
   if (task) {
+    if (overlapped) {
+      console_log("hEvent %d", overlapped->hEvent);
+    }
     task->callback(task->context, result, bytes);
   }
 }

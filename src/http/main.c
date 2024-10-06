@@ -36,7 +36,7 @@ i32 main(i32 argc, char** argv) {
   task_manager_startup();
   for (i32 i = 0; i < 1; i++) {
     tcp_t* tcp = tcp_new();
-    tcp->address.ip4 = ip4_from_bytes(142, 250, 79, 35);
+    tcp->address.ip4 = ip4_from_bytes(162, 241, 3, 30);
     tcp->address.net_port = net_port_from_short(80);
     tcp->onend = http_onconnect;
   }

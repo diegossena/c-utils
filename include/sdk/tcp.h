@@ -47,7 +47,7 @@ SDK_EXPORT void tcp_read(tcp_t* this, u64 length);
 SDK_EXPORT void _tcp_constructor(tcp_t* this);
 SDK_EXPORT void _tcp_deconstructor(tcp_t* this);
 
-SDK_EXPORT void __tcp_startup_task(tcp_t* this);
+SDK_EXPORT void __tcp_startup(tcp_t* this);
 SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t);
 SDK_EXPORT void __tcp_onwrite(tcp_t* this, error_code_t, u32 bytes);
 SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t);

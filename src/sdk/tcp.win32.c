@@ -83,12 +83,12 @@ onend:
     _task_call_destroy(&this->_task);
   }
 }
-SDK_EXPORT void __tcp_startup_task(tcp_t* this) {
+SDK_EXPORT void __tcp_startup(tcp_t* this) {
   i32 result;
   // bind
   struct sockaddr_in local_Address;
   local_Address.sin_family = AF_INET;
-  local_Address.sin_port = htons(0);
+  local_Address.sin_port = 0;
   local_Address.sin_addr.s_addr = INADDR_ANY;
   result = bind(this->__socket, (SOCKADDR*)&local_Address, sizeof(local_Address));
   if (!ConnectEx) {

@@ -17,7 +17,7 @@ SDK_EXPORT void _tcp_constructor(tcp_t* this) {
   this->address.family = NET_FAMILY_IPV4;
   // promise
   _promise_constructor(&this->_task);
-  this->_task.callback = (task_callback_t)__tcp_startup_task;
+  this->_task.callback = (task_callback_t)__tcp_startup;
   this->_task.destroy = (function_t)_tcp_deconstructor;
   this->_task.context = this;
   // startup
