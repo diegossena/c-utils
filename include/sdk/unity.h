@@ -1,3 +1,7 @@
+#ifdef SDK_NET_H
+#include <winsock2.h>
+#endif
+
 #include <sdk/types.h>
 #ifdef SDK_ERROR_H
 #include <src/sdk/error.c>

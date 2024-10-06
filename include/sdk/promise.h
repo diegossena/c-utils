@@ -5,9 +5,6 @@
 #include <sdk/task.h>
 
 extern queue_t _global_promises; // queue_t<task_t>
-#ifdef PLATFORM_WINDOWS
-extern void* __global_iocp;
-#endif
 
 SDK_EXPORT void _promise_constructor(task_t* this);
 SDK_EXPORT void _promise_deconstructor(task_t* this);
