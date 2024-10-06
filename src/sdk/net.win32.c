@@ -21,11 +21,6 @@ SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
     error_log("socket", WSAGetLastError());
     return this;
   }
-  bool non_blocking = true;
-  if (ioctlsocket(this, FIONBIO, (u_long*)&non_blocking) == SOCKET_ERROR) {
-    error_log("ioctlsocket", WSAGetLastError());
-    return this;
-  }
   // Associate it with the I/O completion port
   if (CreateIoCompletionPort((HANDLE)this, __global_iocp, (ULONG_PTR)task, 0) == NULL) {
     error_log("CreateIoCompletionPort", GetLastError());
