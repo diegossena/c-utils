@@ -1,7 +1,7 @@
 #include <sdk/task.h>
 
 queue_t _global_tasks;
-u64 __global_tasks_count = 0;
+u64 _global_tasks_count = 0;
 task_t* __global_task_it = (task_t*)&_global_tasks;
 
 SDK_EXPORT void task_manager_startup() {
@@ -14,7 +14,7 @@ SDK_EXPORT void task_manager_startup() {
 #endif
 }
 SDK_EXPORT void task_manager_run() {
-  while (__global_tasks_count)
+  while (_global_tasks_count)
     _task_manager_run();
   _task_manager_shutdown();
 }
@@ -47,11 +47,11 @@ SDK_EXPORT void _task_manager_shutdown() {
 
 SDK_EXPORT void _task_constructor(task_t* this) {
   queue_push(&_global_tasks, &this->queue);
-  ++__global_tasks_count;
+  ++_global_tasks_count;
 }
 SDK_EXPORT void _task_deconstructor(task_t* this) {
   queue_remove(&this->queue);
-  --__global_tasks_count;
+  --_global_tasks_count;
 }
 SDK_EXPORT void _task_call_destroy(task_t* this) {
   this->destroy(this->context);

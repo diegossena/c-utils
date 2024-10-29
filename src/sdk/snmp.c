@@ -1,8 +1,8 @@
 #include <sdk/snmp.h>
 
-SDK_EXPORT snmp_t* snmp_new(taskmanager_t* taskmanager) {
+SDK_EXPORT snmp_t* snmp_new() {
   snmp_t* this = memory_alloc0(sizeof(snmp_t));
-  _snmp_constructor(this, taskmanager);
+  _snmp_constructor(this);
   this->__udp._promise.destroy = (function_t)snmp_free;
   return this;
 }
@@ -49,12 +49,11 @@ SDK_EXPORT snmp_request_t* snmp_send(snmp_t* snmp, snmp_pdu_t* pdu) {
   this->__timer = timer_new((function_t)__snmp_onrequest, this, snmp->timeout, 0);
   return this;
 }
-SDK_EXPORT void _snmp_constructor(snmp_t* this, taskmanager_t* taskmanager) {
-  this->timeout = NET_DEFAULT_TIMEOUT;
+SDK_EXPORT void _snmp_constructor(snmp_t* this) {
   // pending
   queue_constructor(&this->__pending);
   // udp
-  udp_constructor(&this->__udp, taskmanager);
+  udp_constructor(&this->__udp);
   this->__udp.onmessage = __snmp_onmessage;
   this->__udp.context = this;
   udp_bind(&this->__udp, 0);

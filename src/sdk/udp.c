@@ -1,18 +1,17 @@
 #include <sdk/udp.h>
 
-SDK_EXPORT void udp_constructor(udp_t* this, taskmanager_t* taskmanager) {
+SDK_EXPORT void udp_constructor(udp_t* this) {
   queue_constructor(&this->_tasks);
   this->__socket = socket_new(&this->_promise, SOCKET_TYPE_DGRAM);
   // task
   this->_promise.context = this;
   this->_promise.destroy = (function_t)udp_deconstructor;
-  this->_promise.taskmanager = taskmanager;
-  queue_push(&taskmanager->promises, &this->_promise.queue);
+  queue_push(&_global_promises, &this->_promise.queue);
   __udp_read(this);
 }
-SDK_EXPORT udp_t* udp_new(taskmanager_t* taskmanager) {
+SDK_EXPORT udp_t* udp_new() {
   udp_t* this = memory_alloc0(sizeof(udp_t));
-  udp_constructor(this, taskmanager);
+  udp_constructor(this);
   this->_promise.destroy = (function_t)udp_free;
   return this;
 }
@@ -37,7 +36,6 @@ SDK_EXPORT void udp_deconstructor(udp_t* this) {
   queue_remove(&this->_promise.queue);
 }
 SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
-  taskmanager_t* taskmanager = udp->_promise.taskmanager;
   this->udp = udp;
   this->address.family = NET_FAMILY_IPV4;
   // __udp_tasks
@@ -45,7 +43,7 @@ SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp) {
   this->__udp_tasks.this = this;
   queue_push(&udp->_tasks, &this->__udp_tasks.queue);
   // task
-  _task_constructor(&this->_task, taskmanager);
+  _task_constructor(&this->_task);
   this->_task.callback = (function_t)_udp_send_startup;
   this->_task.destroy = (function_t)_udp_send_deconstructor;
   this->_task.context = this;

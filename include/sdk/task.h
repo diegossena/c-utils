@@ -19,7 +19,7 @@ typedef struct task_t {
 } task_t;
 
 extern queue_t _global_tasks; // queue_t<task_t>
-extern u64 __global_tasks_count;
+extern u64 _global_tasks_count;
 extern task_t* __global_task_it;
 
 SDK_EXPORT void task_manager_startup();

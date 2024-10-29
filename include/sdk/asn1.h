@@ -6,7 +6,7 @@
 #include <sdk/buffer.h>
 
 #define asn1_int2(number) number >> 7 | 0x80, number & 0x7F
-#define varbind_from_const_u8(value) { .oid = (byte_t*)serial_oid, .oid_length = sizeof(serial_oid) }
+#define varbind_from_const_u8(value) { .oid = (char*)serial_oid, .oid_length = sizeof(serial_oid) }
 
 typedef enum asn1_type_t {
   ASN1_TYPE_BOOLEAN = 0x1,

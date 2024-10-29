@@ -10,6 +10,7 @@
 #define PRINTERS_TASK_COUNT 255
 
 typedef struct printers_query_t {
+  task_t task;
   snmp_t snmp;
   u32 ip4;
   u32 ip4_end;
@@ -52,8 +53,7 @@ void printers_query_task(printers_query_t* this) {
       return printers_query_deconstructor(this);
     }
   } else {
-    taskmanager_t* taskmanager = this->snmp.__udp._promise.taskmanager;
-    if (taskmanager->tasks_count < PRINTERS_TASK_COUNT) {
+    if (_global_tasks_count < PRINTERS_TASK_COUNT) {
       char community [] = "public";
       snmp_pdu_t pdu = {
         .version = SNMP_VERSION_1,
@@ -96,23 +96,24 @@ void printers_query_task(printers_query_t* this) {
           break;
         }
         this->ip4 = ip4_increment(this->ip4);
-      } while (taskmanager->tasks_count < PRINTERS_TASK_COUNT);
+      } while (_global_tasks_count < PRINTERS_TASK_COUNT);
     }
   }
-  _snmp_service(&this->snmp);
 }
-void printers_query_constructor(taskmanager_t* taskmanager, u32 ip4_start, u32 ip4_end) {
+void printers_query_constructor(printers_query_t* this, u32 ip4_start, u32 ip4_end) {
   if (!ip4_lessequal(ip4_start, ip4_end))
     return;
-  printers_query_t* this = memory_alloc(sizeof(printers_query_t));
   this->ip4 = ip4_start;
   this->ip4_end = ip4_end;
   this->finished = false;
+  // task
+  _task_constructor(&this->task);
+  this->task.callback = printers_query_task;
+  this->task.context = &this;
   // snmp
-  _snmp_constructor(&this->snmp, taskmanager);
+  _snmp_constructor(&this->snmp);
   this->snmp.timeout = 1000;
   this->snmp.onmessage = printers_query_onmessage;
-  printers_query_task(this);
 }
 
 i32 main(i32 argc, char** argv) {
@@ -123,8 +124,9 @@ i32 main(i32 argc, char** argv) {
     return 0;
   }
   taskmanager_startup();
-  printers_query_constructor(
-    &taskmanager, ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
+  printers_query_t printers_query;
+  printers_query_constructor(&printers_query,
+    ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
   );
   task_manager_run();
   console_color(ANSI_FORE_LIGHTGREEN);
