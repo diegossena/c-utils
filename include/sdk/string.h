@@ -2,6 +2,7 @@
 #define STRING_H
 
 #include <sdk/types.h>
+#include <sdk/math.h>
 #include <sdk/stdarg.h>
 
 #define TINY_SIZE 255

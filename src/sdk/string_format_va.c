@@ -17,7 +17,7 @@ enum __string_format_flag_t {
   __STRING_FORMAT__WIDE = 128, // UTF-16 string
 };
 static i32 __string_format_va__get_flags(const char** format) {
-  int flags = 0;
+  i32 flags = 0;
   do {
     switch (**format) {
       case '-':
@@ -53,10 +53,8 @@ static i32 __string_format_va__get_int(const char** format, va_list* args) {
 }
 static u64 __string_format_va__utf16s_utf8nlen(const u16* s16, u64 maxlen) {
   u64 len, clen;
-
   for (len = 0; len < maxlen && *s16; len += clen) {
     u16 c0 = *s16++;
-
     /* First, get the length for a BMP character */
     clen = 1 + (c0 >= 0x80) + (c0 >= 0x800);
     if (len + clen > maxlen)
@@ -76,7 +74,6 @@ static u64 __string_format_va__utf16s_utf8nlen(const u16* s16, u64 maxlen) {
       }
     }
   }
-
   return len;
 }
 /*
@@ -150,10 +147,8 @@ static char* __string_format_va__number(char* end, u64 num, int base, char locas
    * locase = 0 or 0x20. ORing digits or letters with 'locase'
    * produces same digits or (maybe lowercased) letters
    */
-
   /* we are called with base 8, 10 or 16, only, thus don't need "G..."  */
   static const char digits[16] = "0123456789ABCDEF"; /* "GHIJKLMNOPQRSTUVWXYZ"; */
-
   switch (base) {
     case 10:
       if (num != 0)
@@ -170,7 +165,6 @@ static char* __string_format_va__number(char* end, u64 num, int base, char locas
     default:
       // unreachable
   }
-
   return end;
 }
 static u32 __string_format_va__utf16_to_utf32(const u16** s16) {
@@ -191,7 +185,7 @@ static u32 __string_format_va__utf16_to_utf32(const u16** s16) {
   ++(*s16);
   return (0x10000 - (0xd800 << 10) - 0xdc00) + (c0 << 10) + c1;
 }
-static char __string_format_va__get_sign(long long* num, int flags) {
+static char __string_format_va__get_sign(i64* num, int flags) {
   if (!(flags & __STRING_FORMAT__SIGN))
     return 0;
   if (*num < 0) {
@@ -204,53 +198,51 @@ static char __string_format_va__get_sign(long long* num, int flags) {
     return ' ';
   return 0;
 }
-static u64 __string_format_va__get_number(int sign, int qualifier, va_list* ap) {
+static u64 __string_format_va__get_number(int sign, int qualifier, va_list* args) {
   if (sign) {
     switch (qualifier) {
       case 'L':
-        return va_arg(*ap, long long);
+        return va_arg(*args, i64);
       case 'l':
-        return va_arg(*ap, long);
+        return va_arg(*args, i32);
       case 'h':
-        return (short)va_arg(*ap, int);
+        return (short)va_arg(*args, i32);
       case 'H':
-        return (signed char)va_arg(*ap, int);
+        return (signed char)va_arg(*args, i32);
       default:
-        return va_arg(*ap, int);
+        return va_arg(*args, i32);
     };
   } else {
     switch (qualifier) {
       case 'L':
-        return va_arg(*ap, u64);
+        return va_arg(*args, u64);
       case 'l':
-        return va_arg(*ap, unsigned long);
+        return va_arg(*args, unsigned long);
       case 'h':
-        return (unsigned short)va_arg(*ap, int);
+        return (unsigned short)va_arg(*args, i32);
       case 'H':
-        return (unsigned char)va_arg(*ap, int);
+        return (unsigned char)va_arg(*args, i32);
       default:
-        return va_arg(*ap, i32);
+        return va_arg(*args, i32);
     }
   }
 }
-export i32 string_format_va(char* target, u64 size, const char* format, va_list ap) {
+export i32 string_format_va(char* target, u64 size, const char* format, va_list args) {
   /* The maximum space required is to print a 64-bit number in octal */
   char tmp[(sizeof(u64) * 8 + 2) / 3];
   char* tmp_end = &tmp[sizeof(tmp)];
-  long long num;
-  int base;
+  i64 num;
+  i32 base;
   const char* s;
   u64 len, pos;
   char sign;
 
-  int flags;		/* flags to number() */
+  i32 flags;		/* flags to number() */
 
-  int field_width;	/* width of output field */
-  int precision;		/* min. # of digits for integers; max
+  i32 field_width;	/* width of output field */
+  i32 precision;		/* min. # of digits for integers; max
            number of chars for from string */
-  int qualifier;		/* 'h', 'hh', 'l' or 'll' for integer fields */
-
-  va_list args;
+  i32 qualifier;		/* 'h', 'hh', 'l' or 'll' for integer fields */
 
   /*
    * We want to pass our input va_list to helper functions by reference,
@@ -266,8 +258,6 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
    * variable of type va_list and then passing a pointer to that local
    * copy instead, which is what we do here.
    */
-  va_copy(args, ap);
-
   for (pos = 0; *format; ++format) {
     if (*format != '%' || *++format == '%') {
       __STRING_FORMAT__PUTC(*format);
@@ -306,9 +296,7 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
         ++format;
       }
     }
-
     sign = 0;
-
     switch (*format) {
       case 'c':
         flags &= __STRING_FORMAT__LEFT;
@@ -319,7 +307,7 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
           precision = MAX_I32;
           goto wstring;
         } else {
-          tmp[0] = (unsigned char)va_arg(args, int);
+          tmp[0] = (u8)va_arg(args, int);
           precision = len = 1;
         }
         goto output;
@@ -337,7 +325,7 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
           precision = len = __string_format_va__utf16s_utf8nlen((const u16*)s, precision);
           goto output;
         }
-        precision = len = strnlen(s, precision);
+        precision = len = string_nlength(s, precision);
         goto output;
 
         /* integer number formats - set up the flags and "break" */
@@ -413,7 +401,6 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
      */
     if ((flags & __STRING_FORMAT__ZEROPAD) && field_width > precision)
       precision = field_width;
-
   output:
       /* Calculate the padding necessary */
     field_width -= precision;
@@ -446,31 +433,29 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
           continue;
         }
 
-        /* Number of trailing octets */
+        // Number of trailing octets
         clen = 1 + (c32 >= 0x800) + (c32 >= 0x10000);
 
         len -= clen;
         s8 = (u8*)&target[pos];
-
-        /* Avoid writing partial character */
+        // Avoid writing partial character
         __STRING_FORMAT__PUTC('\0');
         pos += clen;
         if (pos >= size)
           continue;
-
-        /* Set high bits of leading octet */
+        // Set high bits of leading octet
         *s8 = (0xf00 >> 1) >> clen;
-        /* Write trailing octets in reverse order */
+        // Write trailing octets in reverse order
         for (s8 += clen; clen; --clen, c32 >>= 6)
           *s8-- = 0x80 | (c32 & 0x3f);
-        /* Set low bits of leading octet */
+        // Set low bits of leading octet
         *s8 |= c32;
       }
     } else {
       while (len-- > 0)
         __STRING_FORMAT__PUTC(*s++);
     }
-    /* Trailing padding with ' ' */
+    // Trailing padding with ' '
     while (field_width-- > 0)
       __STRING_FORMAT__PUTC(' ');
   }
@@ -478,7 +463,7 @@ fail:
   va_end(args);
 
   if (size)
-    target[min(pos, size - 1)] = '\0';
+    target[math_min(pos, size - 1)] = '\0';
 
   return pos;
 }

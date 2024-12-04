@@ -4,6 +4,8 @@
     "*.h": "c",
     "cmath": "c",
     "type_traits": "c",
-    "cstdio": "c"
+    "cstdio": "c",
+    "limits": "c",
+    "*.tcc": "c"
   }
 }
