@@ -12,18 +12,18 @@ extern u8 __global_window_keyboard_state[32];
 
 // METHODS
 
-SDK_EXPORT void window_startup(
+export void window_startup(
   const char* title,
   i32 width, i32 height
 );
-SDK_EXPORT void window_run();
-SDK_EXPORT void window_clear();
-SDK_EXPORT void window_close();
+export void window_run();
+export void window_clear();
+export void window_close();
 
 // DRAW
 
-SDK_EXPORT void window_redraw();
-SDK_EXPORT void window_fill_rectangle(
+export void window_redraw();
+export void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
   f32 r, f32 g, f32 b, f32 a
 );
@@ -63,7 +63,7 @@ extern void window_onkeyup();
 
 // GETTERS
 
-SDK_EXPORT bool window_focused();
-SDK_EXPORT bool window_key_pressed(key_code_t);
+export bool window_focused();
+export bool window_key_pressed(key_code_t);
 
 #endif

@@ -3,7 +3,7 @@
 
 #include <heapapi.h>
 
-SDK_EXPORT void* memory_alloc(u64 size) {
+export void* memory_alloc(u64 size) {
   assert(size > 0);
   void* block = HeapAlloc(GetProcessHeap(), 0, size);
   if (block) {
@@ -13,7 +13,7 @@ SDK_EXPORT void* memory_alloc(u64 size) {
   }
   return block;
 }
-SDK_EXPORT void* memory_alloc0(u64 size) {
+export void* memory_alloc0(u64 size) {
   assert(size > 0);
   void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
   if (block) {
@@ -23,12 +23,12 @@ SDK_EXPORT void* memory_alloc0(u64 size) {
   }
   return block;
 }
-SDK_EXPORT void memory_free(void* this) {
+export void memory_free(void* this) {
   assert(this);
   HeapFree(GetProcessHeap(), 0, this);
   __leaks_count_decrement();
 }
-SDK_EXPORT void* memory_realloc(void* this, u64 size) {
+export void* memory_realloc(void* this, u64 size) {
   assert(size > 0);
   if (this) {
     this = HeapReAlloc(GetProcessHeap(), 0, this, size);
@@ -41,7 +41,7 @@ SDK_EXPORT void* memory_realloc(void* this, u64 size) {
   }
   return this;
 }
-SDK_EXPORT void* memory_realloc0(void* this, u64 size) {
+export void* memory_realloc0(void* this, u64 size) {
   assert(size > 0);
   if (this) {
     this = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, this, size);

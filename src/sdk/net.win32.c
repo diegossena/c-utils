@@ -3,10 +3,10 @@
 
 #include <winsock2.h>
 
-SDK_EXPORT u16 net_port_from_short(u16 port) { return htons(port); }
-SDK_EXPORT u16 net_port_to_short(u16 port) { return ntohs(port); }
-SDK_EXPORT void __net_shutdown() { WSACleanup(); }
-SDK_EXPORT void __net_startup() {
+export u16 net_port_from_short(u16 port) { return htons(port); }
+export u16 net_port_to_short(u16 port) { return ntohs(port); }
+export void __net_shutdown() { WSACleanup(); }
+export void __net_startup() {
   WSADATA wsaData;
   i32 error_code = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (error_code) {
@@ -15,7 +15,7 @@ SDK_EXPORT void __net_startup() {
   }
 }
 
-SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
+export u64 socket_new(task_t* task, socket_type_t type) {
   u64 this = socket(AF_INET, type, 0);
   if (this == INVALID_SOCKET) {
     error_log("socket", WSAGetLastError());
@@ -27,7 +27,7 @@ SDK_EXPORT u64 socket_new(task_t* task, socket_type_t type) {
   }
   return this;
 }
-SDK_EXPORT void _socket_cancel(u64 fd) {
+export void _socket_cancel(u64 fd) {
   i32 result = CancelIoEx((HANDLE)fd, 0);
   if (result == 0) {
     result = GetLastError();
@@ -36,7 +36,7 @@ SDK_EXPORT void _socket_cancel(u64 fd) {
     }
   }
 }
-SDK_EXPORT void _socket_free(u64 fd) {
+export void _socket_free(u64 fd) {
   closesocket((SOCKET)fd);
 }
 

@@ -1,6 +1,6 @@
 #include <sdk/error.h>
 
-SDK_EXPORT const char* error_cstr(i32 code) {
+export const char* error_cstr(i32 code) {
   switch (code) {
     case ERR_OUT_OF_RANGE:
       return "ERR_OUT_OF_RANGE";
@@ -93,7 +93,7 @@ SDK_EXPORT const char* error_cstr(i32 code) {
   }
 }
 
-SDK_EXPORT void error_log(const char* message, error_code_t code) {
+export void error_log(const char* message, error_code_t code) {
   const char* error_str = error_cstr(code);
   console_color(ANSI_FORE_RED);
   console_write_cstr("Error:");

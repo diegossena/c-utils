@@ -4,6 +4,7 @@
 #include <sdk/asn1.h>
 #include <sdk/hashset.h>
 #include <sdk/udp.h>
+#include <sdk/timer.h>
 
 #define SNMP_PORT 161
 #define OID_MAX_SIZE 128
@@ -84,17 +85,17 @@ typedef enum snmp_error_t {
   SNMP_ERR_INCONSISTENTNAME,
 } snmp_error_t;
 
-SDK_EXPORT snmp_t* snmp_new(taskmanager_t* taskmanager);
-SDK_EXPORT void snmp_free(snmp_t* this);
+export snmp_t* snmp_new();
+export void snmp_free(snmp_t* this);
 
-SDK_EXPORT snmp_request_t* snmp_request(snmp_t*, snmp_pdu_t*);
+export snmp_request_t* snmp_request(snmp_t*, snmp_pdu_t*);
 
-SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this);
+export void snmp_pdu_constructor(snmp_pdu_t* this);
 
-SDK_EXPORT void _snmp_constructor(snmp_t* this, taskmanager_t* taskmanager);
-SDK_EXPORT void _snmp_deconstructor(snmp_t* this);
+export void _snmp_constructor(snmp_t* this);
+export void _snmp_deconstructor(snmp_t* this);
 
-SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message);
-SDK_EXPORT void __snmp_onrequest(snmp_request_t* this);
+export void __snmp_onmessage(udp_message_t* udp_message);
+export void __snmp_onrequest(snmp_request_t* this);
 
 #endif

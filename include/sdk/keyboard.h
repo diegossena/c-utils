@@ -1,5 +1,5 @@
-#ifndef SDK_KEYBOARD_H
-#define SDK_KEYBOARD_H
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 #include <sdk/types.h>
 

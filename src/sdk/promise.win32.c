@@ -4,17 +4,17 @@
 #include <windows.h>
 void* __global_iocp = 0;
 
-SDK_EXPORT void _promise_post(task_t* this, i32 value) {
+export void _promise_post(task_t* this, i32 value) {
   PostQueuedCompletionStatus(__global_iocp, value, (ULONG_PTR)this, 0);
 }
-SDK_EXPORT void __promise_startup() {
+export void __promise_startup() {
   __global_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 1);
   if (__global_iocp == NULL) {
     error_log("CreateIoCompletionPort", GetLastError());
   }
 }
-SDK_EXPORT void _promise_shutdown() { CloseHandle(__global_iocp); }
-SDK_EXPORT void _promise_run() {
+export void _promise_shutdown() { CloseHandle(__global_iocp); }
+export void _promise_run() {
   i32 result;
   DWORD bytes;
   task_t* task = 0;

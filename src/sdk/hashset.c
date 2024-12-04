@@ -3,7 +3,7 @@
 #define HASHSET_MIN_SIZE 512ULL // table size when first created
 #define HASHSET_OCCUPANCY_PCT 0.5 // large PCT means smaller and slower
 
-SDK_EXPORT void __hashset_rehash(hashset_t* this, u64 bucket_length) {
+export void __hashset_rehash(hashset_t* this, u64 bucket_length) {
   hashmap_entry_t** old_it = this->__buckets;
   hashmap_entry_t** new_bucket = memory_alloc0(sizeof(this->__buckets) * bucket_length);
   do {
@@ -17,12 +17,12 @@ SDK_EXPORT void __hashset_rehash(hashset_t* this, u64 bucket_length) {
   this->__buckets = new_bucket;
   this->__buckets_length = bucket_length;
 }
-SDK_EXPORT void hashset_constructor(hashset_t* this) {
+export void hashset_constructor(hashset_t* this) {
   this->__buckets = memory_alloc0(sizeof(this->__buckets) * HASHSET_MIN_SIZE);
   this->__buckets_length = HASHSET_MIN_SIZE;
   *(u64*)&this->length = 0;
 }
-SDK_EXPORT void hashset_deconstructor(hashset_t* this) {
+export void hashset_deconstructor(hashset_t* this) {
   hashmap_entry_t** it = this->__buckets;
   while (true) {
     hashmap_entry_t* node = *it;
@@ -38,7 +38,7 @@ SDK_EXPORT void hashset_deconstructor(hashset_t* this) {
   }
   memory_free(this->__buckets);
 }
-SDK_EXPORT bool hashset_contains(const hashset_t* this, const u64 hash) {
+export bool hashset_contains(const hashset_t* this, const u64 hash) {
   hashmap_entry_t* node = *(this->__buckets + hash % this->__buckets_length);
   while (node) {
     if (hash == node->__hash) {
@@ -48,7 +48,7 @@ SDK_EXPORT bool hashset_contains(const hashset_t* this, const u64 hash) {
   }
   return 0;
 }
-SDK_EXPORT void hashset_add(hashset_t* this, const u64 hash) {
+export void hashset_add(hashset_t* this, const u64 hash) {
   hashmap_entry_t** it = this->__buckets + hash % this->__buckets_length;
   while (true) {
     if (!*it) {
@@ -69,7 +69,7 @@ SDK_EXPORT void hashset_add(hashset_t* this, const u64 hash) {
     __hashset_rehash(this, new_length);
   }
 }
-SDK_EXPORT bool hashset_remove(hashset_t* this, const u64 hash) {
+export bool hashset_remove(hashset_t* this, const u64 hash) {
   if (!this->length)
     return false;
   hashmap_entry_t** it = this->__buckets;

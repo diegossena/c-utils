@@ -49,23 +49,23 @@ typedef struct udp_send_t {
   u64 __updated_at;
 } udp_send_t;
 
-SDK_EXPORT void udp_constructor(udp_t* this, taskmanager_t*);
-SDK_EXPORT void udp_deconstructor(udp_t* this);
-SDK_EXPORT udp_t* udp_new(taskmanager_t*);
-SDK_EXPORT void udp_free(udp_t* this);
+export void udp_constructor(udp_t* this);
+export void udp_deconstructor(udp_t* this);
+export udp_t* udp_new();
+export void udp_free(udp_t* this);
 
-SDK_EXPORT void udp_bind(udp_t* this, u16 port);
+export void udp_bind(udp_t* this, u16 port);
 
-SDK_EXPORT udp_send_t* udp_send_new(udp_t* udp);
-SDK_EXPORT void udp_send_free(udp_send_t* this);
+export udp_send_t* udp_send_new(udp_t* udp);
+export void udp_send_free(udp_send_t* this);
 
-SDK_EXPORT void __udp_read(udp_t* this);
+export void __udp_read(udp_t* this);
 
-SDK_EXPORT void _udp_send_constructor(udp_send_t* this, udp_t* udp);
-SDK_EXPORT void _udp_send_deconstructor(udp_send_t* this);
-SDK_EXPORT void _udp_send_startup(udp_send_t* this);
-SDK_EXPORT void _udp_send_task(udp_send_t* this);
+export void _udp_send_constructor(udp_send_t* this, udp_t* udp);
+export void _udp_send_deconstructor(udp_send_t* this);
+export void _udp_send_startup(udp_send_t* this);
+export void _udp_send_task(udp_send_t* this);
 
-SDK_EXPORT void __udp_onread(udp_t* this);
+export void __udp_onread(udp_t* this);
 
 #endif

@@ -2,7 +2,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
 
-SDK_EXPORT void udp_bind(udp_t* this, u16 net_port) {
+export void udp_bind(udp_t* this, u16 net_port) {
   struct sockaddr_in address = {
     .sin_family = AF_INET,
     .sin_port = net_port,
@@ -12,7 +12,7 @@ SDK_EXPORT void udp_bind(udp_t* this, u16 net_port) {
     error_log("bind", ERR_UNKNOWN);
   }
 }
-SDK_EXPORT void __udp_read(udp_t* this) {
+export void __udp_read(udp_t* this) {
   DWORD bytes, flags = 0;
   WSABUF buffer = { 0 };
   OVERLAPPED overlapped = { 0 };
@@ -29,7 +29,7 @@ SDK_EXPORT void __udp_read(udp_t* this) {
   }
   this->_promise.callback = (task_callback_t)__udp_onread;
 }
-SDK_EXPORT void _udp_send_task(udp_send_t* this) {
+export void _udp_send_task(udp_send_t* this) {
   i32 sent = sendto(
     this->udp->__socket, this->data, this->length, 0,
     (struct sockaddr*)&this->address, sizeof(net_address_t)
@@ -50,7 +50,7 @@ onend:
   _task_call_destroy(&this->_task);
 }
 
-SDK_EXPORT void __udp_onread(udp_t* this) {
+export void __udp_onread(udp_t* this) {
   udp_message_t message;
   WSABUF buffer = { BUFFER_DEFAULT_SIZE, message.data };
   DWORD bytes, flags;

@@ -1,5 +1,5 @@
-#ifndef SDK_TASKMANAGER_H
-#define SDK_TASKMANAGER_H
+#ifndef TASK_H
+#define TASK_H
 
 #include <sdk/types.h>
 #include <sdk/queue.h>
@@ -22,16 +22,15 @@ extern queue_t _global_tasks; // queue_t<task_t>
 extern u64 _global_tasks_count;
 extern task_t* __global_task_it;
 
-SDK_EXPORT void task_manager_startup();
-SDK_EXPORT void task_manager_run();
+export void task_manager_startup();
+export void task_manager_run();
 
-SDK_EXPORT void _task_constructor(task_t* this);
-SDK_EXPORT void _task_deconstructor(task_t* this);
-SDK_EXPORT void _task_call_destroy(task_t* this);
+export void _task_constructor(task_t* this);
+export void _task_deconstructor(task_t* this);
+export void _task_call_destroy(task_t* this);
 
-
-SDK_EXPORT void _task_manager_shutdown();
-SDK_EXPORT void _task_manager_run();
+export void _task_manager_shutdown();
+export void _task_manager_run();
 
 
 #endif

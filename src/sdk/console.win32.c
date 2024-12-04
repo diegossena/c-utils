@@ -2,7 +2,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 
-SDK_EXPORT void console_color(ansi_t ansi) {
+export void console_color(ansi_t ansi) {
   HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
   CONSOLE_SCREEN_BUFFER_INFO info;
   GetConsoleScreenBufferInfo(handle, &info);
@@ -88,7 +88,7 @@ SDK_EXPORT void console_color(ansi_t ansi) {
   }
   SetConsoleTextAttribute(handle, info.wAttributes | (back << 4) | fore);
 }
-SDK_EXPORT void console_write_str(const char* message, u64 length) {
+export void console_write_str(const char* message, u64 length) {
   HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
   WriteConsoleA(handle, message, length, 0, 0);
 }

@@ -13,7 +13,7 @@ ID2D1Factory* __global_d2d_factory;
 ID2D1HwndRenderTarget* __global_d2d_render_target;
 IDWriteFactory* __global_d2d_write_factory;
 
-SDK_EXPORT void window_run() {
+export void window_run() {
   MSG msg;
   while (__global_window_running) {
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
@@ -26,13 +26,13 @@ SDK_EXPORT void window_run() {
     Sleep(1);
   }
 }
-SDK_EXPORT void window_clear() {
+export void window_clear() {
   ID2D1HwndRenderTarget_Clear(__global_d2d_render_target, 0);
 }
-SDK_EXPORT void window_close() {
+export void window_close() {
   DestroyWindow(__global_window_handle);
 }
-SDK_EXPORT void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
+export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (__global_window_focus && __global_window_keyboard_count) {
     window_onkeypress();
   }
@@ -80,10 +80,10 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
   }
   return DefWindowProcA(handle, message, wParam, lParam);
 }
-SDK_EXPORT void window_redraw() {
+export void window_redraw() {
   RedrawWindow(__global_window_handle, 0, 0, RDW_INVALIDATE);
 }
-SDK_EXPORT void window_fill_rectangle(
+export void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
   f32 r, f32 g, f32 b, f32 a
 ) {
@@ -94,7 +94,7 @@ SDK_EXPORT void window_fill_rectangle(
   ID2D1HwndRenderTarget_FillRectangle(__global_d2d_render_target, &rect, (ID2D1Brush*)brush);
   ID2D1SolidColorBrush_Release(brush);
 }
-SDK_EXPORT void window_startup(
+export void window_startup(
   const char* title,
   i32 width, i32 height
 ) {

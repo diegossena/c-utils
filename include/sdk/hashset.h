@@ -1,5 +1,5 @@
-#ifndef SDK_HASHSET_H
-#define SDK_HASHSET_H
+#ifndef HASHSET_H
+#define HASHSET_H
 
 #include <sdk/types.h>
 #include <sdk/math.h>
@@ -28,11 +28,11 @@ typedef struct hashset_t {
   u64 __buckets_length;
 } hashset_t;
 
-SDK_EXPORT void hashset_constructor(hashset_t* this);
-SDK_EXPORT void hashset_deconstructor(hashset_t* this);
-SDK_EXPORT void __hashset_rehash(hashset_t* this, u64 bucket_length);
-SDK_EXPORT bool hashset_contains(const hashset_t* this, const u64 hash);
-SDK_EXPORT void hashset_add(hashset_t* this, const u64 hash);
-SDK_EXPORT bool hashset_remove(hashset_t* this, const u64 hash);
+export void hashset_constructor(hashset_t* this);
+export void hashset_deconstructor(hashset_t* this);
+export void __hashset_rehash(hashset_t* this, u64 bucket_length);
+export bool hashset_contains(const hashset_t* this, const u64 hash);
+export void hashset_add(hashset_t* this, const u64 hash);
+export bool hashset_remove(hashset_t* this, const u64 hash);
 
 #endif

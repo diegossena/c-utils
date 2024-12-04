@@ -1,4 +1,4 @@
-#ifdef SDK_DEVELOPMENT
+#ifdef DEVELOPMENT
 
 #include <sdk/types.h>
 #include <sdk/console.h>

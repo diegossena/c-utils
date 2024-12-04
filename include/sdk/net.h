@@ -1,12 +1,11 @@
-#ifndef SDK_NET_H
-#define SDK_NET_H
-
-#define SDK_PROMISES
+#ifndef NET_H
+#define NET_H
 
 #include <sdk/types.h>
 #include <sdk/error.h>
 #include <sdk/buffer.h>
 #include <sdk/task.h>
+#include <sdk/promise.h>
 
 typedef enum net_family_t {
   NET_FAMILY_IPV4 = 2,
@@ -29,20 +28,20 @@ typedef struct net_address_t {
 
 typedef char ip4_string_t[16];
 
-SDK_EXPORT net_address_t ip4_address(u32 ip4, u16 net_port);
-SDK_EXPORT u32 ip4_from_bytes(u8, u8, u8, u8);
-SDK_EXPORT u32 ip4_from_cstr(const char* ip4_cstr);
-SDK_EXPORT void ip4_to_cstr(u32 ip4, ip4_string_t cstr);
-SDK_EXPORT u32 ip4_increment(u32 ip4);
-SDK_EXPORT bool ip4_lessequal(u32 oip4, u32 fip4);
-SDK_EXPORT u16 net_port_from_short(u16 port);
-SDK_EXPORT u16 net_port_to_short(u16 port);
-SDK_EXPORT u64 socket_new(task_t*, socket_type_t);
+export net_address_t ip4_address(u32 ip4, u16 net_port);
+export u32 ip4_from_bytes(u8, u8, u8, u8);
+export u32 ip4_from_cstr(const char* ip4_cstr);
+export void ip4_to_cstr(u32 ip4, ip4_string_t cstr);
+export u32 ip4_increment(u32 ip4);
+export bool ip4_lessequal(u32 oip4, u32 fip4);
+export u16 net_port_from_short(u16 port);
+export u16 net_port_to_short(u16 port);
+export u64 socket_new(task_t*, socket_type_t);
 
-SDK_EXPORT void _socket_cancel(u64 fd);
-SDK_EXPORT void _socket_free(u64 fd);
+export void _socket_cancel(u64 fd);
+export void _socket_free(u64 fd);
 
-SDK_EXPORT void __net_startup();
-SDK_EXPORT void __net_shutdown();
+export void __net_startup();
+export void __net_shutdown();
 
 #endif

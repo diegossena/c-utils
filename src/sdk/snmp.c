@@ -1,19 +1,19 @@
 #include <sdk/snmp.h>
 
-SDK_EXPORT snmp_t* snmp_new() {
+export snmp_t* snmp_new() {
   snmp_t* this = memory_alloc0(sizeof(snmp_t));
   _snmp_constructor(this);
   this->__udp._promise.destroy = (function_t)snmp_free;
   return this;
 }
-SDK_EXPORT void snmp_free(snmp_t* this) {
+export void snmp_free(snmp_t* this) {
   _snmp_deconstructor(this);
   memory_free(this);
 }
-SDK_EXPORT void snmp_pdu_constructor(snmp_pdu_t* this) {
+export void snmp_pdu_constructor(snmp_pdu_t* this) {
   queue_constructor(&this->varbinds);
 }
-SDK_EXPORT snmp_request_t* snmp_send(snmp_t* snmp, snmp_pdu_t* pdu) {
+export snmp_request_t* snmp_send(snmp_t* snmp, snmp_pdu_t* pdu) {
   snmp_request_t* this = memory_alloc0(sizeof(snmp_request_t));
   // pdu->bytes
   char bytes[BUFFER_DEFAULT_SIZE];
@@ -49,7 +49,7 @@ SDK_EXPORT snmp_request_t* snmp_send(snmp_t* snmp, snmp_pdu_t* pdu) {
   this->__timer = timer_new((function_t)__snmp_onrequest, this, snmp->timeout, 0);
   return this;
 }
-SDK_EXPORT void _snmp_constructor(snmp_t* this) {
+export void _snmp_constructor(snmp_t* this) {
   // pending
   queue_constructor(&this->__pending);
   // udp
@@ -61,13 +61,13 @@ SDK_EXPORT void _snmp_constructor(snmp_t* this) {
   this->__udp._promise.destroy = (function_t)_snmp_deconstructor;
   this->__udp._promise.context = this;
 }
-SDK_EXPORT void _snmp_deconstructor(snmp_t* this) {
+export void _snmp_deconstructor(snmp_t* this) {
   udp_deconstructor(&this->__udp);
   queue_foreach(snmp_request_t, &this->__pending, it) {
     memory_free(it);
   }
 }
-SDK_EXPORT void __snmp_onrequest(snmp_request_t* this) {
+export void __snmp_onrequest(snmp_request_t* this) {
   timer_clear(this->__timer);
   _udp_send_deconstructor(&this->send);
   queue_remove(&this->queue);
@@ -76,7 +76,7 @@ SDK_EXPORT void __snmp_onrequest(snmp_request_t* this) {
   }
   memory_free(this);
 }
-SDK_EXPORT void __snmp_onmessage(udp_message_t* udp_message) {
+export void __snmp_onmessage(udp_message_t* udp_message) {
   snmp_t* this = (snmp_t*)udp_message->udp->context;
   snmp_message_t snmp_message;
   snmp_pdu_constructor(&snmp_message.pdu);

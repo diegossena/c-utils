@@ -1,5 +1,5 @@
-#ifndef SDK_MATH_H
-#define SDK_MATH_H
+#ifndef MATH_H
+#define MATH_H
 
 #include <sdk/types.h>
 /**
@@ -30,14 +30,14 @@
     : 1 \
 )
 
-SDK_EXPORT f64 math_log10(f64);
-SDK_EXPORT u64 math_next2pow(u64 number);
-SDK_EXPORT u64 math_hash_jenkins(const char* data, u64 size);
-SDK_EXPORT i64 math_ceil(f64 number);
-SDK_EXPORT f64 math_pow(f64 base, f64 exponent);
-SDK_EXPORT f64 math_floor(f64 number);
-SDK_EXPORT f64 math_floor_f64(f64 number, u8 places);
-SDK_EXPORT i32 math_random();
-SDK_EXPORT i32 math_random_in_range(i32 min, i32 max);
+export f64 math_log10(f64);
+export u64 math_next2pow(u64 number);
+export u64 math_hash_jenkins(const char* data, u64 size);
+export i64 math_ceil(f64 number);
+export f64 math_pow(f64 base, f64 exponent);
+export f64 math_floor(f64 number);
+export f64 math_floor_f64(f64 number, u8 places);
+export i32 math_random();
+export i32 math_random_in_range(i32 min, i32 max);
 
 #endif

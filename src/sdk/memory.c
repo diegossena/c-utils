@@ -2,7 +2,7 @@
 
 i64 __leaks_count = 0;
 
-SDK_EXPORT void* memory_fill(void* block, u8 value, u64 size) {
+export void* memory_fill(void* block, u8 value, u64 size) {
   u8* c = (u8*)block;
   while (size) {
     *c = value;
@@ -11,7 +11,7 @@ SDK_EXPORT void* memory_fill(void* block, u8 value, u64 size) {
   }
   return block;
 }
-SDK_EXPORT void* memory_zero(void* block, u64 size) {
+export void* memory_zero(void* block, u64 size) {
   void* start = block;
 #ifdef PLATFORM_X64
   while (size >= sizeof(u64)) {
@@ -43,7 +43,7 @@ SDK_EXPORT void* memory_zero(void* block, u64 size) {
   }
   return start;
 }
-SDK_EXPORT void* memory_copy(void* dest, const void* src, u64 size) {
+export void* memory_copy(void* dest, const void* src, u64 size) {
   void* start = dest;
 #ifdef PLATFORM_X64
   while (size >= sizeof(u64)) {

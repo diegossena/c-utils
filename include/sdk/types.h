@@ -74,7 +74,7 @@ void noop() {}
 // building
 
 #ifdef SDK_UNITY
-#define SDK_EXPORT SDK_INLINE
+#define export SDK_INLINE
 #else
-#define SDK_EXPORT
+#define export
 #endif

@@ -1,75 +1,76 @@
-#ifdef SDK_NET_H
+#ifdef NET_H
 #include <winsock2.h>
 #endif
 
 #include <sdk/types.h>
-#ifdef SDK_ERROR_H
+#ifdef ERROR_H
 #include <src/sdk/error.c>
 #endif
-#ifdef SDK_MEMORY_H
+#ifdef MEMORY_H
 #include <src/sdk/memory.c>
 #include <src/sdk/memory.win32.c>
 #endif
-#ifdef SDK_BUFFER_H
+#ifdef BUFFER_H
 #include <src/sdk/buffer.c>
 #endif
-#ifdef SDK_STRING_H
+#ifdef STRING_H
 #include <src/sdk/string.c>
+#include <src/sdk/string_format_va.c>
 #endif
-#ifdef SDK_QUEUE_H
+#ifdef QUEUE_H
 #include <src/sdk/queue.c>
 #endif
-#ifdef SDK_TASKMANAGER_H
-#include <src/sdk/taskmanager.c>
+#ifdef TASK_H
+#include <src/sdk/task.c>
 #endif
-#ifdef SDK_PROMISE_H
+#ifdef PROMISE_H
 #include <src/sdk/promise.c>
 #include <src/sdk/promise.win32.c>
 #endif
-#ifdef SDK_NET_H
+#ifdef NET_H
 #include <src/sdk/net.c>
 #include <src/sdk/net.win32.c>
 #endif
-#ifdef SDK_CONSOLE_H
+#ifdef CONSOLE_H
 #include <src/sdk/console.c>
 #include <src/sdk/console.win32.c>
 #endif
-#ifdef SDK_TCP_H
+#ifdef TCP_H
 #include <src/sdk/tcp.c>
 #include <src/sdk/tcp.win32.c>
 #endif
-#ifdef SDK_UDP_H
+#ifdef UDP_H
 #include <src/sdk/udp.c>
 #include <src/sdk/udp.win32.c>
 #endif
-#ifdef SDK_EVENTS_H
+#ifdef EVENTS_H
 #include <src/sdk/events.c>
 #endif
-#ifdef SDK_DATE_H
+#ifdef DATE_H
 #include <src/sdk/date.c>
 #endif
-#ifdef SDK_SNMP_H
+#ifdef SNMP_H
 #include <src/sdk/snmp.c>
 #endif
-#ifdef SDK_ASN1_H
+#ifdef ASN1_H
 #include <src/sdk/asn1.c>
 #endif
-#ifdef SDK_HASHSET_H
+#ifdef HASHSET_H
 #include <src/sdk/hashset.c>
 #endif
-#ifdef SDK_MATH_H
+#ifdef MATH_H
 #include <src/sdk/math.c>
 #endif
-#ifdef SDK_SNOWFLAKE_H
+#ifdef SNOWFLAKE_H
 #include <src/sdk/snowflake.c>
 #endif
-#ifdef SDK_TIMER_H
+#ifdef TIMER_H
 #include <src/sdk/timer.win32.c>
 #endif
-#ifdef SDK_WINDOW_H
+#ifdef WINDOW_H
 #include <src/sdk/window.c>
 #include <src/sdk/window.win32.c>
 #endif
-#ifdef SDK_KEYBOARD_H
+#ifdef KEYBOARD_H
 #include <src/sdk/keyboard.win32.c>
 #endif

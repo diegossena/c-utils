@@ -1,5 +1,5 @@
-#ifndef SDK_BUFFER_H
-#define SDK_BUFFER_H
+#ifndef BUFFER_H
+#define BUFFER_H
 
 #include <sdk/types.h>
 #include <sdk/memory.h>

@@ -1,5 +1,5 @@
-#ifndef SDK_TCP_H
-#define SDK_TCP_H
+#ifndef TCP_H
+#define TCP_H
 
 #include <sdk/types.h>
 #include <sdk/net.h>
@@ -39,18 +39,18 @@ typedef struct tcp_t {
   u64 __remaining;
 } tcp_t;
 
-SDK_EXPORT tcp_t* tcp_new();
-SDK_EXPORT void tcp_free(tcp_t* this);
-SDK_EXPORT void tcp_write(tcp_t* this, const char* chunk, u64 length);
-SDK_EXPORT void tcp_read(tcp_t* this, u64 length);
+export tcp_t* tcp_new();
+export void tcp_free(tcp_t* this);
+export void tcp_write(tcp_t* this, const char* chunk, u64 length);
+export void tcp_read(tcp_t* this, u64 length);
 
-SDK_EXPORT void _tcp_constructor(tcp_t* this);
-SDK_EXPORT void _tcp_deconstructor(tcp_t* this);
+export void _tcp_constructor(tcp_t* this);
+export void _tcp_deconstructor(tcp_t* this);
 
-SDK_EXPORT void __tcp_startup(tcp_t* this);
-SDK_EXPORT void __tcp_onconnect(tcp_t* this, error_code_t);
-SDK_EXPORT void __tcp_onwrite(tcp_t* this, error_code_t, u32 bytes);
-SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t);
-SDK_EXPORT void __tcp_ontimeout(tcp_t* this);
+export void __tcp_startup(tcp_t* this);
+export void __tcp_onconnect(tcp_t* this, error_code_t);
+export void __tcp_onwrite(tcp_t* this, error_code_t, u32 bytes);
+export void __tcp_onread(tcp_t* this, error_code_t);
+export void __tcp_ontimeout(tcp_t* this);
 
 #endif

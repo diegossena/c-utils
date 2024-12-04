@@ -1,5 +1,5 @@
-#ifndef SDK_CONSOLE_H
-#define SDK_CONSOLE_H
+#ifndef CONSOLE_H
+#define CONSOLE_H
 
 #include <sdk/types.h>
 #include <sdk/buffer.h>
@@ -57,10 +57,10 @@ typedef enum ansi_t {
   ANSI_BACK_LIGHTWHITE = 107,
 } ansi_t;
 
-SDK_EXPORT void console_color(ansi_t ansi);
-SDK_EXPORT void console_write(const char* message, ...);
-SDK_EXPORT void console_write_bin(u64);
-SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size);
-SDK_EXPORT void console_write_str(const char* message, u64 length);
+export void console_color(ansi_t ansi);
+export void console_write(const char* message, ...);
+export void console_write_bin(u64);
+export void console_write_buffer(const u8* buffer, u64 size);
+export void console_write_str(const char* message, u64 length);
 
 #endif

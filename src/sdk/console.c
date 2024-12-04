@@ -3,17 +3,17 @@
 // __builtin_va_list, va_start, va_end
 #include <stdarg.h>
 
-SDK_EXPORT void console_write(const char* message, ...) {
+export void console_write(const char* message, ...) {
   __builtin_va_list args;
   va_start(args, message);
   char buffer[BUFFER_DEFAULT_SIZE];
-  i32 length = cstr_format_va(buffer, BUFFER_DEFAULT_SIZE, message, args);
+  i32 length = string_format_va(buffer, BUFFER_DEFAULT_SIZE, message, args);
   va_end(args);
   if (length < 0)
     return;
   console_write_str(buffer, length);
 }
-SDK_EXPORT void console_write_bin(u64 value) {
+export void console_write_bin(u64 value) {
   char str[76] = {};
   char* ptr = str;
   if (value) {
@@ -40,7 +40,7 @@ SDK_EXPORT void console_write_bin(u64 value) {
   }
   console_write_str(str, ptr - str);
 }
-SDK_EXPORT void console_write_buffer(const u8* buffer, u64 size) {
+export void console_write_buffer(const u8* buffer, u64 size) {
   if (size) {
     console_write("%02x", *buffer);
     ++buffer;

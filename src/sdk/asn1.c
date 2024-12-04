@@ -1,14 +1,14 @@
 #include <sdk/asn1.h>
 
-SDK_EXPORT u8* ber_sequence_start(char** stream, u8 type) {
+export u8* ber_sequence_start(char** stream, u8 type) {
   *(*stream)++ = type;
   return (*stream)++;
 }
-SDK_EXPORT void ber_sequence_end(char** stream, u8* sequence) {
+export void ber_sequence_end(char** stream, u8* sequence) {
   *sequence = (*stream) - sequence - sizeof(u8);
   console_log("ber_sequence_end %d", *sequence);
 }
-SDK_EXPORT void ber_write_i64(char** stream, i64 value) {
+export void ber_write_i64(char** stream, i64 value) {
   if (value <= 0xFF) {
     *(*stream)++ = 0x1;
   } else if (value <= 0xFFFF) {
@@ -24,18 +24,18 @@ SDK_EXPORT void ber_write_i64(char** stream, i64 value) {
     value >>= 8;
   } while (value);
 }
-SDK_EXPORT void ber_write_var_integer(char** stream, u32 value) {
+export void ber_write_var_integer(char** stream, u32 value) {
   *(*stream)++ = ASN1_TYPE_INTEGER;
   ber_write_i64(stream, value);
 }
-SDK_EXPORT void ber_write_str(char** stream, const char* string, u8 length) {
+export void ber_write_str(char** stream, const char* string, u8 length) {
   *(*stream)++ = ASN1_TYPE_OCTETSTRING;
   *(*stream)++ = length;
   memory_copy((*stream), string, length);
   (*stream) += length;
 }
 
-SDK_EXPORT void ber_write_oid_null(char** stream, char* oid, u64 size) {
+export void ber_write_oid_null(char** stream, char* oid, u64 size) {
   *(*stream)++ = ASN1_TYPE_OID;
   *(*stream)++ = size;
   memory_copy((*stream), oid, size);
@@ -47,7 +47,7 @@ SDK_EXPORT void ber_write_oid_null(char** stream, char* oid, u64 size) {
 
 // ber_reader
 
-SDK_EXPORT u64 ber_read_u64(const char* stream, u8 length) {
+export u64 ber_read_u64(const char* stream, u8 length) {
   u64 number = 0;
   while (length) {
     number <<= 8;
@@ -56,7 +56,7 @@ SDK_EXPORT u64 ber_read_u64(const char* stream, u8 length) {
   }
   return number;
 }
-SDK_EXPORT u64 ber_read_size(char** this) {
+export u64 ber_read_size(char** this) {
   u64 size = *(*this)++;
   if (size > 127) {
     u8 length = size & 0x7F;
@@ -65,7 +65,7 @@ SDK_EXPORT u64 ber_read_size(char** this) {
   }
   return size;
 }
-SDK_EXPORT i64 ber_read_i64(const char* stream, u8 length) {
+export i64 ber_read_i64(const char* stream, u8 length) {
   i64 number = 0;
   while (length) {
     number <<= 8;
@@ -74,7 +74,7 @@ SDK_EXPORT i64 ber_read_i64(const char* stream, u8 length) {
   }
   return number;
 }
-SDK_EXPORT ber_field_t ber_read_var(char** stream) {
+export ber_field_t ber_read_var(char** stream) {
   ber_field_t ber_value;
   ber_value.type = *(*stream)++;
   if (ber_value.type != ASN1_TYPE_NULL) {
@@ -108,7 +108,7 @@ SDK_EXPORT ber_field_t ber_read_var(char** stream) {
   }
   return ber_value;
 }
-SDK_EXPORT varbind_t ber_read_oid(char** stream) {
+export varbind_t ber_read_oid(char** stream) {
   ber_field_t varbind_sequence = ber_read_var(stream);
   char* varbind_sequence_end = (char*)varbind_sequence.cstr + varbind_sequence.size;
   ++(*stream);

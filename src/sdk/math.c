@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-SDK_EXPORT f64 math_log10(f64 x) {
+export f64 math_log10(f64 x) {
   static const f64
     ivln10hi = 4.34294481878168880939e-01, /* 0x3fdbcb7b, 0x15200000 */
     ivln10lo = 2.50829467116452752298e-11, /* 0x3dbb9438, 0xca9aadd5 */
@@ -72,7 +72,7 @@ SDK_EXPORT f64 math_log10(f64 x) {
   return val_lo + val_hi;
 }
 
-SDK_EXPORT u64 math_next2pow(u64 number) {
+export u64 math_next2pow(u64 number) {
   if (!number)
     return 1;
   --number;
@@ -82,7 +82,7 @@ SDK_EXPORT u64 math_next2pow(u64 number) {
   return ++number;
 }
 
-SDK_EXPORT u64 math_hash_jenkins(const char* data, u64 size) {
+export u64 math_hash_jenkins(const char* data, u64 size) {
   u64 hash = 0;
   const char* end = data + size;
   while (data != end) {
@@ -96,20 +96,20 @@ SDK_EXPORT u64 math_hash_jenkins(const char* data, u64 size) {
   hash += hash << 15;
   return hash;
 }
-SDK_EXPORT i64 math_ceil(f64 number) {
+export i64 math_ceil(f64 number) {
   i64 integer = (i64)number;
   if (number > 0 && number != integer) {
     ++integer;
   }
   return integer;
 }
-SDK_EXPORT f64 math_pow(f64 base, f64 exponent) {
+export f64 math_pow(f64 base, f64 exponent) {
   return pow(base, exponent);
 }
-SDK_EXPORT f64 math_floor(f64 number) {
+export f64 math_floor(f64 number) {
   return floor(number);
 }
-SDK_EXPORT f64 math_floor_f64(f64 number, u8 places) {
+export f64 math_floor_f64(f64 number, u8 places) {
   if (places > 0) {
     number *= math_pow(10, places);
   }
@@ -119,7 +119,7 @@ SDK_EXPORT f64 math_floor_f64(f64 number, u8 places) {
   }
   return number;
 }
-SDK_EXPORT i64 math_round(f64 number) {
+export i64 math_round(f64 number) {
   i64 integer = number;
   f64 decimals = number - integer;
   if (decimals < .5) {
@@ -127,7 +127,7 @@ SDK_EXPORT i64 math_round(f64 number) {
   }
   return integer + 1;
 }
-SDK_EXPORT f64 math_round_f64(f64 number, u8 places) {
+export f64 math_round_f64(f64 number, u8 places) {
   if (places > 0) {
     number *= math_pow(10, places);
   }
@@ -137,7 +137,7 @@ SDK_EXPORT f64 math_round_f64(f64 number, u8 places) {
   }
   return number;
 }
-SDK_EXPORT f64 math_ceil_f64(f64 number, u8 places) {
+export f64 math_ceil_f64(f64 number, u8 places) {
   if (places > 0) {
     number *= math_pow(10, places);
   }
@@ -147,9 +147,9 @@ SDK_EXPORT f64 math_ceil_f64(f64 number, u8 places) {
   }
   return number;
 }
-SDK_EXPORT i32 math_random() {
+export i32 math_random() {
   return rand();
 }
-SDK_EXPORT i32 math_random_in_range(i32 min, i32 max) {
+export i32 math_random_in_range(i32 min, i32 max) {
   return (rand() % (max - min + 1)) + min;
 }

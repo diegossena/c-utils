@@ -1,5 +1,5 @@
-#ifndef SDK_EVENTS_H
-#define SDK_EVENTS_H
+#ifndef EVENTS_H
+#define EVENTS_H
 
 #include <sdk/types.h>
 #include <sdk/queue.h>
@@ -14,13 +14,13 @@ typedef struct listener_t {
   function_t callback;
 } listener_t;
 
-SDK_EXPORT void callback_emit(queue_t* this);
-SDK_EXPORT void callback_on(queue_t* this, callback_t* callback);
+export void callback_emit(queue_t* this);
+export void callback_on(queue_t* this, callback_t* callback);
 
-SDK_EXPORT void listener_on(queue_t* this, listener_t* listener);
-SDK_EXPORT void listener_prepend(queue_t* this, listener_t* listener);
-SDK_EXPORT void listener_forward(listener_t* listener);
-SDK_EXPORT void listener_off(listener_t* listener);
-SDK_EXPORT void listener_emit(queue_t* this, void* argument);
+export void listener_on(queue_t* this, listener_t* listener);
+export void listener_prepend(queue_t* this, listener_t* listener);
+export void listener_forward(listener_t* listener);
+export void listener_off(listener_t* listener);
+export void listener_emit(queue_t* this, void* argument);
 
 #endif

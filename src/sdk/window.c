@@ -11,6 +11,6 @@ bool window_key_pressed(key_code_t key) {
   return __global_window_keyboard_state[byte_index] & (1 << bit_index);
 }
 
-SDK_EXPORT bool window_focused() {
+export bool window_focused() {
   return __global_window_focus;
 }

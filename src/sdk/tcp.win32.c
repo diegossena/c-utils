@@ -7,7 +7,7 @@
 
 LPFN_CONNECTEX ConnectEx = 0;
 
-SDK_EXPORT void tcp_write(tcp_t* this, const char* chunk, u64 length) {
+export void tcp_write(tcp_t* this, const char* chunk, u64 length) {
   this->__remaining = length;
   WSABUF data_buffer = { length, (char*)chunk };
   OVERLAPPED overlapped = { 0 };
@@ -21,7 +21,7 @@ SDK_EXPORT void tcp_write(tcp_t* this, const char* chunk, u64 length) {
   }
   this->_task.callback = (task_callback_t)__tcp_onwrite;
 }
-SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
+export void tcp_read(tcp_t* this, u64 length) {
   this->__remaining = length;
   DWORD bytes, flags = 0;
   WSABUF data_buffer = { 0 };
@@ -39,7 +39,7 @@ SDK_EXPORT void tcp_read(tcp_t* this, u64 length) {
   }
   this->_task.callback = (task_callback_t)__tcp_onread;
 }
-SDK_EXPORT void __tcp_onread(tcp_t* this, error_code_t error_code) {
+export void __tcp_onread(tcp_t* this, error_code_t error_code) {
   if (error_code)
     goto onerror;
   // Do nonblocking reads until the buffer is empty
@@ -83,7 +83,7 @@ onend:
     _task_call_destroy(&this->_task);
   }
 }
-SDK_EXPORT void __tcp_startup(tcp_t* this) {
+export void __tcp_startup(tcp_t* this) {
   i32 result;
   // bind
   struct sockaddr_in local_Address;

@@ -3,6 +3,7 @@
     ".htaccess": "ruby",
     "*.h": "c",
     "cmath": "c",
-    "type_traits": "c"
+    "type_traits": "c",
+    "cstdio": "c"
   }
 }
