@@ -96,7 +96,7 @@ export void window_fill_rectangle(
 }
 export void window_startup(
   const char* title,
-  err_t width, err_t height
+  i32 width, i32 height
 ) {
   assert(__global_window_running == false);
   __global_window_running = true;

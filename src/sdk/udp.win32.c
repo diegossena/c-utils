@@ -16,7 +16,7 @@ export void __udp_read(udp_t* this) {
   DWORD bytes, flags = 0;
   WSABUF buffer = { 0 };
   OVERLAPPED overlapped = { 0 };
-  err_t result = WSARecvFrom(
+  i32 result = WSARecvFrom(
     this->__socket, &buffer, 1, &bytes,
     &flags, 0, 0, &overlapped, 0
   );
@@ -30,7 +30,7 @@ export void __udp_read(udp_t* this) {
   this->_promise.callback = (task_callback_t)__udp_onread;
 }
 export void _udp_send_task(udp_send_t* this) {
-  err_t sent = sendto(
+  i32 sent = sendto(
     this->udp->__socket, this->data, this->length, 0,
     (struct sockaddr*)&this->address, sizeof(net_address_t)
   );
@@ -54,8 +54,8 @@ export void __udp_onread(udp_t* this) {
   udp_message_t message;
   WSABUF buffer = { BUFFER_DEFAULT_SIZE, message.data };
   DWORD bytes, flags;
-  err_t address_size = sizeof(struct sockaddr);
-  err_t result = WSARecvFrom(this->__socket, &buffer, 1, &bytes, &flags, (struct sockaddr*)&message.address, &address_size, 0, 0);
+  i32 address_size = sizeof(struct sockaddr);
+  i32 result = WSARecvFrom(this->__socket, &buffer, 1, &bytes, &flags, (struct sockaddr*)&message.address, &address_size, 0, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {

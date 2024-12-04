@@ -24,7 +24,7 @@ u16 game_score() {
   return snake_length - 3;
 }
 void food_create() {
-  err_t slot = -1;
+  i32 slot = -1;
   do {
     slot = math_random_in_range(0, BOARD_AREA);
     for (u16 i = 0; i < snake_length; i++) {
@@ -167,7 +167,7 @@ void window_onkeydown(key_code_t key) {
 void window_onkeyup() {}
 void window_onkeypress() {}
 // MAIN 305473 bytes
-err_t main(err_t argc, char** argv) {
+i32 main(i32 argc, char** argv) {
   window_startup("Test", SCREEN_SIZE, SCREEN_SIZE);
   game_startup();
   window_run();

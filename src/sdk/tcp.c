@@ -21,7 +21,7 @@ export void _tcp_constructor(tcp_t* this) {
   this->_task.destroy = (function_t)_tcp_deconstructor;
   this->_task.context = this;
   // startup
-  err_t result = socket_new(&this->_task, SOCKET_TYPE_STREAM);
+  i32 result = socket_new(&this->_task, SOCKET_TYPE_STREAM);
   if (result < 0) {
     // onerror
     this->onend(this->_task.context, result);

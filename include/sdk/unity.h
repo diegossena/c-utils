@@ -15,7 +15,6 @@
 #endif
 #ifdef STRING_H
 #include <src/sdk/string.c>
-#include <src/sdk/string_format_va.c>
 #endif
 #ifdef QUEUE_H
 #include <src/sdk/queue.c>

@@ -4,7 +4,7 @@
 #include <windows.h>
 void* __global_iocp = 0;
 
-export void _promise_post(task_t* this, err_t value) {
+export void _promise_post(task_t* this, i32 value) {
   PostQueuedCompletionStatus(__global_iocp, value, (ULONG_PTR)this, 0);
 }
 export error_t __promise_startup() {
@@ -16,7 +16,7 @@ export error_t __promise_startup() {
 }
 export void _promise_shutdown() { CloseHandle(__global_iocp); }
 export void _promise_run() {
-  err_t result;
+  i32 result;
   DWORD bytes;
   task_t* task = 0;
   OVERLAPPED* overlapped;

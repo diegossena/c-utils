@@ -10,7 +10,7 @@ export void tcp_write(tcp_t* this, const char* chunk, u64 length) {
   this->__remaining = length;
   WSABUF data_buffer = { length, (char*)chunk };
   OVERLAPPED overlapped = { 0 };
-  err_t result = WSASend(this->__socket, &data_buffer, 1, 0, 0, &overlapped, 0);
+  i32 result = WSASend(this->__socket, &data_buffer, 1, 0, 0, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {
@@ -25,7 +25,7 @@ export void tcp_read(tcp_t* this, u64 length) {
   DWORD bytes, flags = 0;
   WSABUF data_buffer = { 0 };
   OVERLAPPED overlapped = { 0 };
-  err_t result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, &overlapped, 0);
+  i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
@@ -83,7 +83,7 @@ onend:
   }
 }
 export void __tcp_startup(tcp_t* this) {
-  err_t result;
+  i32 result;
   // bind
   struct sockaddr_in local_Address;
   local_Address.sin_family = AF_INET;

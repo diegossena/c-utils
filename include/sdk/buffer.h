@@ -4,8 +4,6 @@
 #include <sdk/types.h>
 #include <sdk/memory.h>
 
-#define BUFFER_DEFAULT_SIZE 65535
-
 typedef struct buffer_t {
   u64 length;
   // ...data

@@ -1,5 +1,8 @@
 #include <sdk/string.h>
 
+// vsnprintf
+#include <stdio.h>
+
 export u64 string_length(const char* this) {
   const char* ptr = this;
   while (*ptr != '\0') ++ptr;
@@ -26,10 +29,10 @@ export bool string_startswith(const char* this, const char* neddle) {
   }
   return true;
 }
-export err_t string_format(char* target, u64 size, const char* format, ...) {
+export i32 string_format(char* target, u64 size, const char* format, ...) {
   va_list argv;
   va_start(argv, format);
-  err_t length = string_format_va(target, size, format, argv);
+  i32 length = string_format_va(target, size, format, argv);
   va_end(argv);
   return length;
 }
@@ -102,4 +105,7 @@ export char* url_encode(const char* this, char* target) {
     }
   }
   return target;
+}
+export i32 string_format_va(char* this, u64 size, const char* format, va_list args) {
+  return vsnprintf(this, size, format, args);
 }

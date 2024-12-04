@@ -16,7 +16,7 @@ export u64 socket_promise_new(task_t* task, socket_type_t type) {
   return this;
 }
 export void _socket_cancel(u64 fd) {
-  err_t result = CancelIoEx((HANDLE)fd, 0);
+  i32 result = CancelIoEx((HANDLE)fd, 0);
   if (result == 0) {
     result = GetLastError();
     if (result != ERR_NOT_FOUND) {

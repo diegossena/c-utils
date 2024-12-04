@@ -6,6 +6,11 @@
     "type_traits": "c",
     "cstdio": "c",
     "limits": "c",
-    "*.tcc": "c"
+    "*.tcc": "c",
+    "array": "c",
+    "string_view": "c",
+    "format": "c",
+    "initializer_list": "c",
+    "span": "c"
   }
 }

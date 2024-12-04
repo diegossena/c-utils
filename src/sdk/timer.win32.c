@@ -20,7 +20,7 @@ export void timer_set(timer_t* this, u32 timeout, u32 delay) {
   }
 }
 export void timer_clear(timer_t* this) {
-  err_t result = DeleteTimerQueueTimer(0, this, 0);
+  i32 result = DeleteTimerQueueTimer(0, this, 0);
   if (result == 0) {
     result = GetLastError();
     if (result != ERR_IO_PENDING) {

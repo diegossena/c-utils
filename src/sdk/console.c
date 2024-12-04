@@ -1,10 +1,10 @@
 #include <sdk/console.h>
 
 export void console_write(const char* message, ...) {
-  __builtin_va_list args;
+  va_list args;
   va_start(args, message);
-  char buffer[BUFFER_DEFAULT_SIZE];
-  err_t length = string_format_va(buffer, BUFFER_DEFAULT_SIZE, message, args);
+  char buffer[TEXT_SIZE + 1];
+  i32 length = string_format_va(buffer, TEXT_SIZE, message, args);
   va_end(args);
   if (length < 0)
     return;

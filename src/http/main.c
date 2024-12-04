@@ -32,9 +32,9 @@ void http_onconnect(tcp_t* tcp, error_t error_code) {
   }
 }
 // MAIN 263586 bytes
-err_t main(err_t argc, char** argv) {
+i32 main(i32 argc, char** argv) {
   task_manager_startup();
-  for (err_t i = 0; i < 1; i++) {
+  for (i32 i = 0; i < 1; i++) {
     tcp_t* tcp = tcp_new();
     tcp->address.ip4 = ip4_from_bytes(162, 241, 3, 30);
     tcp->address.net_port = net_port_from_short(80);
