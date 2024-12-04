@@ -31,7 +31,7 @@ export void udp_send_free(udp_send_t* this) {
   memory_free(this);
 }
 export void udp_deconstructor(udp_t* this) {
-  _socket_free(this->__socket);
+  socket_free(this->__socket);
   callback_emit(&this->_tasks);
   queue_remove(&this->_promise.queue);
 }

@@ -3,9 +3,6 @@
 
 #include <sdk/types.h>
 #include <sdk/error.h>
-#include <sdk/buffer.h>
-#include <sdk/task.h>
-#include <sdk/promise.h>
 
 typedef enum net_family_t {
   NET_FAMILY_IPV4 = 2,
@@ -26,6 +23,8 @@ typedef struct net_address_t {
   };
 } net_address_t;
 
+typedef u64 socket_t;
+typedef socket_t tcp_socket_t;
 typedef u32 ip4_t;
 typedef u16 net_port_t;
 typedef char ip4_string_t[16];
@@ -38,12 +37,11 @@ export u32 ip4_increment(u32 ip4);
 export bool ip4_lessequal(u32 oip4, u32 fip4);
 export u16 net_port_from_short(u16 port);
 export u16 net_port_to_short(u16 port);
-export u64 socket_new(task_t*, socket_type_t);
 
-export void _socket_cancel(u64 fd);
-export void _socket_free(u64 fd);
+export u64 socket_new(socket_type_t);
+export void socket_free(u64 fd);
 
-export error_t _net_startup();
-export void _net_shutdown();
+export error_t net_startup();
+export void net_shutdown();
 
 #endif

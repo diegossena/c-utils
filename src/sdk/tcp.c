@@ -35,7 +35,7 @@ export void _tcp_deconstructor(tcp_t* this) {
   if (this->__timer) {
     timer_clear(this->__timer);
   }
-  _socket_free(this->__socket);
+  socket_free(this->__socket);
   _task_deconstructor(&this->_task);
 }
 export void __tcp_onwrite(tcp_t* this, error_t error_code, u32 bytes) {

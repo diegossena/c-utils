@@ -31,6 +31,9 @@
 #include <src/sdk/net.c>
 #include <src/sdk/net.win32.c>
 #endif
+#ifdef NET_PROMISE_H
+#include <src/sdk/net_promise.win32.c>
+#endif
 #ifdef CONSOLE_H
 #include <src/sdk/console.c>
 #include <src/sdk/console.win32.c>

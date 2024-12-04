@@ -1,16 +1,7 @@
 #include <sdk/tcp_sync.h>
 #ifdef PLATFORM_WINDOWS
-
 #include <winsock2.h>
 
-export tcp_socket_t tcp_sync_new() {
-  tcp_socket_t this = socket(AF_INET, SOCKET_TYPE_STREAM, 0);
-  u_long mode = 1;
-  if (ioctlsocket(this, FIONBIO, &mode) != NO_ERROR) {
-    return 0;
-  }
-  return this;
-}
 export error_t tcp_sync_connect(tcp_socket_t this, ip4_t ip4, net_port_t port, u64 timeout_ms) {
   struct sockaddr_in address = {
     .sin_family = AF_INET,
@@ -33,9 +24,6 @@ export error_t tcp_sync_connect(tcp_socket_t this, ip4_t ip4, net_port_t port, u
       return ERR_ETIMEDOUT;
   }
   return ERR_SUCCESS;
-}
-export void tcp_sync_free(tcp_socket_t this) {
-  closesocket((SOCKET)this);
 }
 
 #endif
