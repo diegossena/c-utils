@@ -10,13 +10,14 @@
 #define URL_SIZE 2048
 #define TEXT_SIZE 65535
 
-#define IS_DIGIT(x)  (((x) >= '0') && ((x) <= '9'))
-#define IS_LOWER(x)  (((x) >= 'a') && ((x) <= 'z'))
-#define IS_UPPER(x)  (((x) >= 'A') && ((x) <= 'Z'))
-#define IS_HEX_ALPHA_LOWER(x) (((x) >= 'a') && ((x) <= 'f'))
-#define IS_HEX_ALPHA_UPPER(x) (((x) >= 'A') && ((x) <= 'F'))
+#define IS_DIGIT(x)  ((x) >= '0' && (x) <= '9')
+#define IS_LOWER(x)  ((x) >= 'a' && (x) <= 'z')
+#define IS_UPPER(x)  ((x) >= 'A' && (x) <= 'Z')
+#define IS_HEX_ALPHA_LOWER(x) ((x) >= 'a' && (x) <= 'f')
+#define IS_HEX_ALPHA_UPPER(x) ((x) >= 'A' && (x) <= 'F')
+#define IS_HEX(x) (IS_HEX_ALPHA_LOWER(x) && IS_HEX_ALPHA_UPPER(x))
 
-#define IS_URL_PUNCT(x) (((x) == '-') || ((x) == '.') || ((x) == '_') || ((x) == '~'))
+#define IS_URL_PUNCT(x) ((x) == '-' || (x) == '.' || (x) == '_' || (x) == '~')
 
 #define IS_ALPHA(x)  (IS_DIGIT(x) || IS_LOWER(x) || IS_UPPER(x))
 
