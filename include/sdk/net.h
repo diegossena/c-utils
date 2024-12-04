@@ -26,6 +26,8 @@ typedef struct net_address_t {
   };
 } net_address_t;
 
+typedef u32 ip4_t;
+typedef u16 net_port_t;
 typedef char ip4_string_t[16];
 
 export net_address_t ip4_address(u32 ip4, u16 net_port);
@@ -41,7 +43,7 @@ export u64 socket_new(task_t*, socket_type_t);
 export void _socket_cancel(u64 fd);
 export void _socket_free(u64 fd);
 
-export void __net_startup();
-export void __net_shutdown();
+export error_t _net_startup();
+export void _net_shutdown();
 
 #endif

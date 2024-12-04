@@ -7,7 +7,7 @@ task_t* __global_task_it = (task_t*)&_global_tasks;
 export void task_manager_startup() {
   queue_constructor(&_global_tasks);
 #ifdef NET_H
-  __net_startup();
+  _net_startup();
 #endif
 #ifdef PROMISE_H
   _promise_startup();
@@ -35,7 +35,7 @@ export void task_manager_run() {
   _promise_run();
 #endif
 #ifdef NET_H
-  __net_shutdown();
+  _net_shutdown();
 #endif
 #ifdef DEVELOPMENT
   if (__leaks_count) {

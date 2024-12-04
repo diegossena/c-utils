@@ -116,7 +116,7 @@ void printers_query_constructor(printers_query_t* this, u32 ip4_start, u32 ip4_e
   this->snmp.onmessage = printers_query_onmessage;
 }
 
-i32 main(i32 argc, char** argv) {
+err_t main(err_t argc, char** argv) {
   console_color(ANSI_FORE_LIGHTBLUE);
   if (argc != 3) {
     console_log("exe [ip1] [ip2]");

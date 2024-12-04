@@ -4,10 +4,13 @@ SET package_name=%1
 SET defines=-DSDK_DEVELOPMENT -DSDK_UNITY
 SET compiler_flags=-O2 -Wall
 SET include_flags=-Iinclude -I.
-:: -lws2_32 -ld3d11 -lDwrite -ld2d1 -ld3dcompiler -lole32 -ldxguid -lgdi32
 SET linker_flags=
 SET params=192.168.0.18 192.168.0.18
+:: -lws2_32 -ld3d11 -lDwrite -ld2d1 -ld3dcompiler -lole32 -ldxguid -lgdi32
 :: packages
+IF "%package_name%" == "test" (
+  SET linker_flags=-lws2_32
+)
 IF "%package_name%" == "http" (
   SET linker_flags=-lws2_32
 )

@@ -10,7 +10,7 @@ export void console_color(ansi_t ansi) {
   DWORD fore = info.wAttributes & 0x0f;
   info.wAttributes = info.wAttributes & FOREGROUND_INTENSITY;
   if (ansi == 0) {
-      // reset
+    // reset
     info.wAttributes = 0;
     back = 0;
     fore = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;

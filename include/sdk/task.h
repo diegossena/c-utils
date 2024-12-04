@@ -4,8 +4,9 @@
 #include <sdk/types.h>
 #include <sdk/queue.h>
 #include <sdk/error.h>
+#include <sdk/console.h>
 
-typedef void (*task_callback_t)(void* this, error_code_t, u32 bytes);
+typedef void (*task_callback_t)(void* this, error_t, u32 bytes);
 /**
  * task_handle_t handle
  * function_t destroy

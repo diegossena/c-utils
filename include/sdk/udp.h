@@ -43,7 +43,7 @@ typedef struct udp_send_t {
   u64 length;
   void* context;
   function_t callback;
-  i32 error_code;
+  err_t error_code;
   task_t _task;
   callback_t __udp_tasks;
   u64 __updated_at;

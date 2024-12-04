@@ -4,18 +4,19 @@
 #include <windows.h>
 void* __global_iocp = 0;
 
-export void _promise_post(task_t* this, i32 value) {
+export void _promise_post(task_t* this, err_t value) {
   PostQueuedCompletionStatus(__global_iocp, value, (ULONG_PTR)this, 0);
 }
-export void __promise_startup() {
+export error_t __promise_startup() {
   __global_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 1);
   if (__global_iocp == NULL) {
-    error_log("CreateIoCompletionPort", GetLastError());
+    return GetLastError();
   }
+  return ERR_SUCCESS;
 }
 export void _promise_shutdown() { CloseHandle(__global_iocp); }
 export void _promise_run() {
-  i32 result;
+  err_t result;
   DWORD bytes;
   task_t* task = 0;
   OVERLAPPED* overlapped;

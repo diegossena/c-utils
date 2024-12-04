@@ -147,9 +147,9 @@ export f64 math_ceil_f64(f64 number, u8 places) {
   }
   return number;
 }
-export i32 math_random() {
+export err_t math_random() {
   return rand();
 }
-export i32 math_random_in_range(i32 min, i32 max) {
+export err_t math_random_in_range(err_t min, err_t max) {
   return (rand() % (max - min + 1)) + min;
 }

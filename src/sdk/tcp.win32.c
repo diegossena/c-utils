@@ -6,12 +6,11 @@
 #include <mswsock.h>
 
 LPFN_CONNECTEX ConnectEx = 0;
-
 export void tcp_write(tcp_t* this, const char* chunk, u64 length) {
   this->__remaining = length;
   WSABUF data_buffer = { length, (char*)chunk };
   OVERLAPPED overlapped = { 0 };
-  i32 result = WSASend(this->__socket, &data_buffer, 1, 0, 0, &overlapped, 0);
+  err_t result = WSASend(this->__socket, &data_buffer, 1, 0, 0, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != WSAEWOULDBLOCK) {
@@ -26,7 +25,7 @@ export void tcp_read(tcp_t* this, u64 length) {
   DWORD bytes, flags = 0;
   WSABUF data_buffer = { 0 };
   OVERLAPPED overlapped = { 0 };
-  i32 result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, &overlapped, 0);
+  err_t result = WSARecv(this->__socket, &data_buffer, 1, &bytes, &flags, &overlapped, 0);
   if (result == SOCKET_ERROR) {
     result = WSAGetLastError();
     if (result != ERR_IO_PENDING) {
@@ -39,7 +38,7 @@ export void tcp_read(tcp_t* this, u64 length) {
   }
   this->_task.callback = (task_callback_t)__tcp_onread;
 }
-export void __tcp_onread(tcp_t* this, error_code_t error_code) {
+export void __tcp_onread(tcp_t* this, error_t error_code) {
   if (error_code)
     goto onerror;
   // Do nonblocking reads until the buffer is empty
@@ -84,7 +83,7 @@ onend:
   }
 }
 export void __tcp_startup(tcp_t* this) {
-  i32 result;
+  err_t result;
   // bind
   struct sockaddr_in local_Address;
   local_Address.sin_family = AF_INET;

@@ -1,13 +1,10 @@
 #include <sdk/console.h>
 
-// __builtin_va_list, va_start, va_end
-#include <stdarg.h>
-
 export void console_write(const char* message, ...) {
   __builtin_va_list args;
   va_start(args, message);
   char buffer[BUFFER_DEFAULT_SIZE];
-  i32 length = string_format_va(buffer, BUFFER_DEFAULT_SIZE, message, args);
+  err_t length = string_format_va(buffer, BUFFER_DEFAULT_SIZE, message, args);
   va_end(args);
   if (length < 0)
     return;

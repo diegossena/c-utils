@@ -5,6 +5,7 @@
 #include <sdk/buffer.h>
 #include <sdk/string.h>
 #include <sdk/error.h>
+#include <sdk/stdarg.h>
 
 #define console_write_cstr(message) { \
   const char cstr[] = message; \

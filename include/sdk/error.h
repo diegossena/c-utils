@@ -2,9 +2,8 @@
 #define ERROR_H
 
 #include <sdk/types.h>
-#include <sdk/console.h>
 
-typedef enum error_code_t {
+typedef enum error_t {
   ERR_MIN = MIN_I16,
   ERR_INVALID_URL,
   ERR_STREAM_WRITE_AFTER_END,
@@ -63,9 +62,8 @@ typedef enum error_code_t {
   ERR_ECONNREFUSED = 10061,
   ERR_NOTINITIALISED = 10093,
   ERR_CO_E_NOTINITIALIZED = 0x800401f0
-} error_code_t;
+} error_t;
 
-export const char* error_cstr(i32 code);
-export void error_log(const char* message, error_code_t code);
+export const char* error_cstr(error_t code);
 
 #endif

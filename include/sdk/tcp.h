@@ -23,7 +23,7 @@
 typedef struct tcp_t tcp_t;
 
 typedef void (*tcp_ondata_t)(tcp_t* this, char* chunk, u32 length);
-typedef void (*tcp_onend_t)(tcp_t*, error_code_t);
+typedef void (*tcp_onend_t)(tcp_t*, error_t);
 
 typedef struct tcp_t {
   task_t _task;
@@ -48,9 +48,9 @@ export void _tcp_constructor(tcp_t* this);
 export void _tcp_deconstructor(tcp_t* this);
 
 export void __tcp_startup(tcp_t* this);
-export void __tcp_onconnect(tcp_t* this, error_code_t);
-export void __tcp_onwrite(tcp_t* this, error_code_t, u32 bytes);
-export void __tcp_onread(tcp_t* this, error_code_t);
+export void __tcp_onconnect(tcp_t* this, error_t);
+export void __tcp_onwrite(tcp_t* this, error_t, u32 bytes);
+export void __tcp_onread(tcp_t* this, error_t);
 export void __tcp_ontimeout(tcp_t* this);
 
 #endif

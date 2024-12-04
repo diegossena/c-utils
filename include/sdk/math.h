@@ -37,7 +37,7 @@ export i64 math_ceil(f64 number);
 export f64 math_pow(f64 base, f64 exponent);
 export f64 math_floor(f64 number);
 export f64 math_floor_f64(f64 number, u8 places);
-export i32 math_random();
-export i32 math_random_in_range(i32 min, i32 max);
+export err_t math_random();
+export err_t math_random_in_range(err_t min, err_t max);
 
 #endif

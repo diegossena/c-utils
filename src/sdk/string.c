@@ -26,10 +26,10 @@ export bool string_startswith(const char* this, const char* neddle) {
   }
   return true;
 }
-export i32 string_format(char* target, u64 size, const char* format, ...) {
+export err_t string_format(char* target, u64 size, const char* format, ...) {
   va_list argv;
   va_start(argv, format);
-  i32 length = string_format_va(target, size, format, argv);
+  err_t length = string_format_va(target, size, format, argv);
   va_end(argv);
   return length;
 }

@@ -35,6 +35,9 @@
 #include <src/sdk/console.c>
 #include <src/sdk/console.win32.c>
 #endif
+#ifdef TCP_SYNC_H
+#include <src/sdk/tcp_sync.win32.c>
+#endif
 #ifdef TCP_H
 #include <src/sdk/tcp.c>
 #include <src/sdk/tcp.win32.c>

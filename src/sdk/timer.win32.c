@@ -9,22 +9,22 @@ export timer_t* timer_new(function_t callback, void* context, u32 timeout, u32 d
   timer_t this;
   bool result = CreateTimerQueueTimer(&this, 0, (WAITORTIMERCALLBACK)callback, context, timeout, delay, 0);
   if (result == 0) {
-    error_log("CreateTimerQueueTimer", GetLastError());
+    console_error("CreateTimerQueueTimer", GetLastError());
   }
   return this;
 }
 export void timer_set(timer_t* this, u32 timeout, u32 delay) {
   bool result = ChangeTimerQueueTimer(0, this, timeout, delay);
   if (result == 0) {
-    error_log("ChangeTimerQueueTimer", GetLastError());
+    console_error("ChangeTimerQueueTimer", GetLastError());
   }
 }
 export void timer_clear(timer_t* this) {
-  i32 result = DeleteTimerQueueTimer(0, this, 0);
+  err_t result = DeleteTimerQueueTimer(0, this, 0);
   if (result == 0) {
     result = GetLastError();
     if (result != ERR_IO_PENDING) {
-      error_log("DeleteTimerQueueTimer", GetLastError());
+      console_error("DeleteTimerQueueTimer", GetLastError());
     }
   }
 }

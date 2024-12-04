@@ -8,10 +8,10 @@ void http_ondata(tcp_t* this, char* chunk, u32 length) {
   // console_write_str(chunk, length);
   // console_write_cstr("`\n");
 }
-void http_onresponse(tcp_t* tcp, error_code_t error_code) {
+void http_onresponse(tcp_t* tcp, error_t error_code) {
   console_log("%x http_onresponse %s", tcp, error_cstr(error_code));
 }
-void http_onrequest(tcp_t* tcp, error_code_t error_code) {
+void http_onrequest(tcp_t* tcp, error_t error_code) {
   console_log("%x http_onrequest %s", tcp, error_cstr(error_code));
   if (!error_code) {
     tcp->ondata = http_ondata;
@@ -19,7 +19,7 @@ void http_onrequest(tcp_t* tcp, error_code_t error_code) {
     tcp_read(tcp, 0);
   }
 }
-void http_onconnect(tcp_t* tcp, error_code_t error_code) {
+void http_onconnect(tcp_t* tcp, error_t error_code) {
   console_log("%x http_onconnect %s", tcp, error_cstr(error_code));
   if (!error_code) {
     const char http_request [] =
@@ -32,9 +32,9 @@ void http_onconnect(tcp_t* tcp, error_code_t error_code) {
   }
 }
 // MAIN 263586 bytes
-i32 main(i32 argc, char** argv) {
+err_t main(err_t argc, char** argv) {
   task_manager_startup();
-  for (i32 i = 0; i < 1; i++) {
+  for (err_t i = 0; i < 1; i++) {
     tcp_t* tcp = tcp_new();
     tcp->address.ip4 = ip4_from_bytes(162, 241, 3, 30);
     tcp->address.net_port = net_port_from_short(80);

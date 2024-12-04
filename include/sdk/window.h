@@ -14,7 +14,7 @@ extern u8 __global_window_keyboard_state[32];
 
 export void window_startup(
   const char* title,
-  i32 width, i32 height
+  err_t width, err_t height
 );
 export void window_run();
 export void window_clear();

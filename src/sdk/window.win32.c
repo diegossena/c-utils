@@ -96,7 +96,7 @@ export void window_fill_rectangle(
 }
 export void window_startup(
   const char* title,
-  i32 width, i32 height
+  err_t width, err_t height
 ) {
   assert(__global_window_running == false);
   __global_window_running = true;
@@ -111,7 +111,7 @@ export void window_startup(
     .lpszClassName = class_name,
   };
   if (!RegisterClassExA(&wc)) {
-    return error_log("RegisterClassExA", ERR_UNKNOWN);
+    return console_error("RegisterClassExA", ERR_UNKNOWN);
   }
   u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
@@ -121,7 +121,7 @@ export void window_startup(
     (void**)&__global_d2d_factory
   );
   if (FAILED(result)) {
-    error_log("D2D1CreateFactory", result);
+    console_error("D2D1CreateFactory", result);
   }
   // d2d.write_factory
   result = DWriteCreateFactory(
@@ -129,7 +129,7 @@ export void window_startup(
     (IUnknown**)&__global_d2d_write_factory
   );
   if (FAILED(result)) {
-    error_log("DWriteCreateFactory", result);
+    console_error("DWriteCreateFactory", result);
   }
   // window_create
   RECT rect = { 0, 0, width, height };
@@ -143,7 +143,7 @@ export void window_startup(
     0 // pointer to window-creation data
   );
   if (!__global_window_handle) {
-    return error_log("CreateWindowExA", ERR_UNKNOWN);
+    return console_error("CreateWindowExA", ERR_UNKNOWN);
   }
   // d2d.render_target
   D2D1_RENDER_TARGET_PROPERTIES render_target_props = {
@@ -165,7 +165,7 @@ export void window_startup(
     &__global_d2d_render_target
   );
   if (FAILED(result)) {
-    error_log("CreateHwndRenderTarget", result);
+    console_error("CreateHwndRenderTarget", result);
     goto onerror;
   }
   // onsuccess

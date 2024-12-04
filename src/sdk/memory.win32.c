@@ -9,7 +9,7 @@ export void* memory_alloc(u64 size) {
   if (block) {
     __leaks_count_increment();
   } else {
-    error_log("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
+    assert(this != 0);
   }
   return block;
 }
@@ -19,12 +19,12 @@ export void* memory_alloc0(u64 size) {
   if (block) {
     __leaks_count_increment();
   } else {
-    error_log("HeapAlloc", ERR_NOT_ENOUGH_MEMORY);
+    assert(this != 0);
   }
   return block;
 }
 export void memory_free(void* this) {
-  assert(this);
+  assert(this != 0);
   HeapFree(GetProcessHeap(), 0, this);
   __leaks_count_decrement();
 }
@@ -36,9 +36,7 @@ export void* memory_realloc(void* this, u64 size) {
     this = HeapAlloc(GetProcessHeap(), 0, size);
     __leaks_count_increment();
   }
-  if (!this) {
-    error_log("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
-  }
+  assert(this != 0);
   return this;
 }
 export void* memory_realloc0(void* this, u64 size) {
@@ -49,9 +47,7 @@ export void* memory_realloc0(void* this, u64 size) {
     this = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
     __leaks_count_increment();
   }
-  if (!this) {
-    error_log("HeapReAlloc", ERR_NOT_ENOUGH_MEMORY);
-  }
+  assert(this != 0);
   return this;
 }
 

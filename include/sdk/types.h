@@ -36,7 +36,7 @@ typedef _Bool bool;
 
 typedef signed char i8; // -128 ~ 127
 typedef signed short i16; // -32768 ~ 32767
-typedef signed int i32; // -2147483648 ~ 2147483647
+typedef signed int err_t; // -2147483648 ~ 2147483647
 typedef signed long long i64; // -9223372036854775808 ~ 9223372036854775807
 
 typedef unsigned char u8; // 0 ~ 255

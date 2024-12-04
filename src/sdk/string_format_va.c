@@ -16,8 +16,8 @@ enum __string_format_flag_t {
   __STRING_FORMAT__SPECIAL = 64, // 0x
   __STRING_FORMAT__WIDE = 128, // UTF-16 string
 };
-static i32 __string_format_va__get_flags(const char** format) {
-  i32 flags = 0;
+static err_t __string_format_va__get_flags(const char** format) {
+  err_t flags = 0;
   do {
     switch (**format) {
       case '-':
@@ -41,13 +41,13 @@ static i32 __string_format_va__get_flags(const char** format) {
     ++(*format);
   } while (1);
 }
-static i32 __string_format_va__get_int(const char** format, va_list* args) {
+static err_t __string_format_va__get_int(const char** format, va_list* args) {
   if (IS_DIGIT(**format))
     return string_skip_u64(format);
   if (**format == '*') {
     ++(*format);
     /* it's the next argument */
-    return va_arg(*args, i32);
+    return va_arg(*args, err_t);
   }
   return 0;
 }
@@ -81,10 +81,10 @@ static u64 __string_format_va__utf16s_utf8nlen(const u16* s16, u64 maxlen) {
  * The multiplier 0xccd is round(2^15/10), and the approximation
  * r/10 == (r * 0xccd) >> 15 is exact for all r < 16389.
  */
-static void __string_format_va__put_dec_full4(char* end, i32 r) {
+static void __string_format_va__put_dec_full4(char* end, err_t r) {
   int i;
   for (i = 0; i < 3; i++) {
-    i32 q = (r * 0xccd) >> 15;
+    err_t q = (r * 0xccd) >> 15;
     *--end = '0' + (r - q * 10);
     r = q;
   }
@@ -97,8 +97,8 @@ static void __string_format_va__put_dec_full4(char* end, i32 r) {
  * helper will ever be asked to convert is 1,125,520,955.
  * (second call in the put_dec code, assuming n is all-ones).
  */
-static i32 __string_format_va__put_dec_helper4(char* end, i32 x) {
-  i32 q = (x * 0x346DC5D7ULL) >> 43;
+static err_t __string_format_va__put_dec_helper4(char* end, err_t x) {
+  err_t q = (x * 0x346DC5D7ULL) >> 43;
   __string_format_va__put_dec_full4(end, x - q * 10000);
   return q;
 }
@@ -107,17 +107,17 @@ static i32 __string_format_va__put_dec_helper4(char* end, i32 x) {
  * Performs no 64-bit division and hence should be fast on 32-bit machines.
  */
 static char* __string_format_va__put_dec(char* end, u64 n) {
-  i32 d3, d2, d1, q, h;
+  err_t d3, d2, d1, q, h;
   char* p = end;
 
-  d1 = ((i32)n >> 16); /* implicit "& 0xffff" */
+  d1 = ((err_t)n >> 16); /* implicit "& 0xffff" */
   h = (n >> 32);
   d2 = (h) & 0xffff;
   d3 = (h >> 16); /* implicit "& 0xffff" */
 
   /* n = 2^48 d3 + 2^32 d2 + 2^16 d1 + d0
        = 281_4749_7671_0656 d3 + 42_9496_7296 d2 + 6_5536 d1 + d0 */
-  q = 656 * d3 + 7296 * d2 + 5536 * d1 + ((i32)n & 0xffff);
+  q = 656 * d3 + 7296 * d2 + 5536 * d1 + ((err_t)n & 0xffff);
   q = __string_format_va__put_dec_helper4(p, q);
   p -= 4;
 
@@ -204,13 +204,13 @@ static u64 __string_format_va__get_number(int sign, int qualifier, va_list* args
       case 'L':
         return va_arg(*args, i64);
       case 'l':
-        return va_arg(*args, i32);
+        return va_arg(*args, err_t);
       case 'h':
-        return (short)va_arg(*args, i32);
+        return (short)va_arg(*args, err_t);
       case 'H':
-        return (signed char)va_arg(*args, i32);
+        return (signed char)va_arg(*args, err_t);
       default:
-        return va_arg(*args, i32);
+        return va_arg(*args, err_t);
     };
   } else {
     switch (qualifier) {
@@ -219,31 +219,30 @@ static u64 __string_format_va__get_number(int sign, int qualifier, va_list* args
       case 'l':
         return va_arg(*args, unsigned long);
       case 'h':
-        return (unsigned short)va_arg(*args, i32);
+        return (unsigned short)va_arg(*args, err_t);
       case 'H':
-        return (unsigned char)va_arg(*args, i32);
+        return (unsigned char)va_arg(*args, err_t);
       default:
-        return va_arg(*args, i32);
+        return va_arg(*args, err_t);
     }
   }
 }
-export i32 string_format_va(char* target, u64 size, const char* format, va_list args) {
+export err_t string_format_va(char* target, u64 size, const char* format, va_list args) {
   /* The maximum space required is to print a 64-bit number in octal */
   char tmp[(sizeof(u64) * 8 + 2) / 3];
-  char* tmp_end = &tmp[sizeof(tmp)];
+  char* tmp_end = tmp + sizeof(tmp);
   i64 num;
-  i32 base;
+  err_t base;
   const char* s;
   u64 len, pos;
   char sign;
 
-  i32 flags;		/* flags to number() */
+  err_t flags;		/* flags to number() */
 
-  i32 field_width;	/* width of output field */
-  i32 precision;		/* min. # of digits for integers; max
+  err_t field_width;	/* width of output field */
+  err_t precision;		/* min. # of digits for integers; max
            number of chars for from string */
-  i32 qualifier;		/* 'h', 'hh', 'l' or 'll' for integer fields */
-
+  err_t qualifier;		/* 'h', 'hh', 'l' or 'll' for integer fields */
   /*
    * We want to pass our input va_list to helper functions by reference,
    * but there's an annoying edge case. If va_list was originally passed
@@ -277,7 +276,7 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
     if (flags & __STRING_FORMAT__LEFT)
       flags &= ~__STRING_FORMAT__ZEROPAD;
 
-    /* get the precision */
+    // get the precision
     precision = -1;
     if (*format == '.') {
       ++format;
@@ -285,8 +284,7 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
       if (precision >= 0)
         flags &= ~__STRING_FORMAT__ZEROPAD;
     }
-
-    /* get the conversion qualifier */
+    // get the conversion qualifier
     qualifier = -1;
     if (*format == 'h' || *format == 'l') {
       qualifier = *format;
@@ -302,7 +300,7 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
         flags &= __STRING_FORMAT__LEFT;
         s = tmp;
         if (qualifier == 'l') {
-          ((u16*)tmp)[0] = (u16)va_arg(args, i32);
+          ((u16*)tmp)[0] = (u16)va_arg(args, err_t);
           ((u16*)tmp)[1] = L'\0';
           precision = MAX_I32;
           goto wstring;
@@ -364,11 +362,9 @@ export i32 string_format_va(char* target, u64 size, const char* format, va_list 
     } else {
       num = __string_format_va__get_number(flags & __STRING_FORMAT__SIGN, qualifier, &args);
     }
-
     sign = __string_format_va__get_sign(&num, flags);
     if (sign)
       --field_width;
-
     s = __string_format_va__number(tmp_end, num, base, flags & __STRING_FORMAT__SMALL);
     len = tmp_end - s;
     /* default precision is 1 */
