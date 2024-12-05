@@ -1,8 +1,5 @@
-#ifdef NET_H
-#include <winsock2.h>
-#endif
-
 #include <sdk/types.h>
+
 #ifdef ERROR_H
 #include <src/sdk/error.c>
 #endif
@@ -22,23 +19,9 @@
 #ifdef TASK_H
 #include <src/sdk/task.c>
 #endif
-#ifdef PROMISE_H
-#include <src/sdk/promise.c>
-#include <src/sdk/promise.win32.c>
-#endif
 #ifdef NET_H
 #include <src/sdk/net.c>
 #include <src/sdk/net.win32.c>
-#endif
-#ifdef NET_PROMISE_H
-#include <src/sdk/net_promise.win32.c>
-#endif
-#ifdef CONSOLE_H
-#include <src/sdk/console.c>
-#include <src/sdk/console.win32.c>
-#endif
-#ifdef TCP_SYNC_H
-#include <src/sdk/tcp_sync.win32.c>
 #endif
 #ifdef TCP_H
 #include <src/sdk/tcp.c>
@@ -47,6 +30,10 @@
 #ifdef UDP_H
 #include <src/sdk/udp.c>
 #include <src/sdk/udp.win32.c>
+#endif
+#ifdef CONSOLE_H
+#include <src/sdk/console.c>
+#include <src/sdk/console.win32.c>
 #endif
 #ifdef EVENTS_H
 #include <src/sdk/events.c>

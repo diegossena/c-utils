@@ -48,10 +48,6 @@ typedef unsigned long long u64; // 0 ~ 18446744073709551615
 typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
-typedef void (*function_t)(void* this);
-
-void noop() {}
-
 // inlining
 
 #if defined(__clang__) || defined(__gcc__)

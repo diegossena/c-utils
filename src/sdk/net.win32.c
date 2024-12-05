@@ -2,8 +2,8 @@
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
 
-export u16 net_port_from_short(u16 port) { return htons(port); }
-export u16 net_port_to_short(u16 port) { return ntohs(port); }
+export net_port_t net_port_from_short(u16 port) { return htons(port); }
+export u16 net_port_to_short(net_port_t port) { return ntohs(port); }
 export void net_shutdown() { WSACleanup(); }
 export error_t net_startup() {
   WSADATA wsaData;
@@ -14,15 +14,10 @@ export error_t net_startup() {
   return error;
 }
 
-export tcp_socket_t socket_new(socket_type_t type) {
-  tcp_socket_t this = socket(AF_INET, type, 0);
-  u_long mode = 1;
-  if (ioctlsocket(this, FIONBIO, &mode) != NO_ERROR) {
-    return 0;
-  }
-  return this;
+export socket_t _socket_new(socket_type_t type) {
+  return socket(AF_INET, type, 0);
 }
-export void socket_free(u64 fd) {
+export void _socket_free(socket_t fd) {
   closesocket((SOCKET)fd);
 }
 

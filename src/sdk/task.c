@@ -53,7 +53,7 @@ export void _task_manager_run() {
     __global_task_it->callback(__global_task_it->context, 0, 0);
   }
   __global_task_it = task_next;
-#ifdef SDK_PROMISE_H
+#ifdef PROMISE_H
   _promise_run();
 #endif
 }

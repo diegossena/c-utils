@@ -9,9 +9,8 @@
 
 #define console_write_cstr(message) { \
   const char cstr[] = message; \
-  console_write_str(message, sizeof(cstr) - 1); \
+  console_write_str(cstr, sizeof(cstr) - 1); \
 }
-#define console_newline() console_write_str("\r\n", 2)
 #define console_log(message, ...) console_write(message "\n", ##__VA_ARGS__)
 
 typedef enum ansi_t {

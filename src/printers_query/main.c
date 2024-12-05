@@ -19,7 +19,7 @@ typedef struct printers_query_t {
 
 void printers_query_onmessage(snmp_message_t* this) {
   ip4_string_t ip4_cstr;
-  ip4_to_cstr(this->udp_message->address.ip4, ip4_cstr);
+  ip4_to_str(this->udp_message->address.ip4, ip4_cstr);
   console_write("%s", ip4_cstr);
   queue_foreach(varbind_t, &this->pdu.varbinds, it) {
     console_write_cstr(" - ");
@@ -126,7 +126,7 @@ i32 main(i32 argc, char** argv) {
   taskmanager_startup();
   printers_query_t printers_query;
   printers_query_constructor(&printers_query,
-    ip4_from_cstr(argv[1]), ip4_from_cstr(argv[2])
+    ip4_from_str(argv[1]), ip4_from_str(argv[2])
   );
   task_manager_run();
   console_color(ANSI_FORE_LIGHTGREEN);

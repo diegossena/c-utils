@@ -11,6 +11,14 @@
     "string_view": "c",
     "format": "c",
     "initializer_list": "c",
-    "span": "c"
+    "span": "c",
+    "system_error": "c",
+    "charconv": "c",
+    "compare": "c",
+    "complex": "c",
+    "functional": "c",
+    "tuple": "c",
+    "utility": "c",
+    "variant": "c"
   }
 }
