@@ -19,6 +19,7 @@
     "functional": "c",
     "tuple": "c",
     "utility": "c",
-    "variant": "c"
+    "variant": "c",
+    "string": "c"
   }
 }

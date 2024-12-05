@@ -13,7 +13,9 @@ export error_t net_startup() {
   }
   return error;
 }
-
+export error_t net_error() {
+  return WSAGetLastError();
+}
 export socket_t _socket_new(socket_type_t type) {
   return socket(AF_INET, type, 0);
 }
