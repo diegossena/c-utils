@@ -13,6 +13,7 @@ typedef enum net_family_t {
   NET_FAMILY_IPV4 = 2,
   NET_FAMILY_IPV6 = 23
 } net_family_t;
+
 typedef struct net_address_t {
   u8 family; // net_family_t
   u16	net_port;
@@ -36,11 +37,11 @@ export bool ip4_lessequal(ip4_t oip4, ip4_t fip4);
 export net_port_t net_port_from_short(u16 port);
 export u16 net_port_to_short(net_port_t port);
 
-export u64 _socket_new(socket_type_t);
-export void _socket_free(socket_t fd);
-
 export error_t net_startup();
 export void net_shutdown();
 export error_t net_error();
+
+export u64 _socket_new(socket_type_t);
+export void _socket_free(socket_t fd);
 
 #endif

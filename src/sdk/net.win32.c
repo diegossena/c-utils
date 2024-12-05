@@ -17,7 +17,11 @@ export error_t net_error() {
   return WSAGetLastError();
 }
 export socket_t _socket_new(socket_type_t type) {
-  return socket(AF_INET, type, 0);
+  socket_t this = socket(AF_INET, type, 0);
+  if (this == INVALID_SOCKET) {
+    return 0;
+  }
+  return this;
 }
 export void _socket_free(socket_t fd) {
   closesocket((SOCKET)fd);

@@ -32,21 +32,27 @@ i32 main() {
     error = net_startup();
     if (error) {
       console_log("net_startup %d %s", error, error_cstr(error));
-      return 1;
+      goto exit;
     }
     udp_t udp = udp_new();
-    const char* data = "test";
+    if (!udp) {
+      error = net_error();
+      console_log("udp_bind %d %s", error, error_cstr(error));
+      goto exit;
+    }
     net_address_t address = {
       .family = NET_FAMILY_IPV4,
-      .ip4 = 0,
-      .net_port = net_port_from_short(9100)
+      .net_port = net_port_from_short(9100),
+      .ip4 = ip4_from_bytes(127, 0, 0, 1)
     };
+    const char data [] = "test";
     i32 result = udp_send(udp, data, sizeof(data) - 1, &address);
     if (result < 0) {
       error = net_error();
       console_log("udp_send %d %s", error, error_cstr(error));
     }
     udp_free(udp);
+  exit:
     net_shutdown();
   }
   return 0;
