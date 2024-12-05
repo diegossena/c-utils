@@ -18,8 +18,8 @@ extern i64 __leaks_count;
 
 #endif
 
-export void memory_fill(u8* block, u8 value, u64 size);
-export void memory_copy(u8* dest, const u8* src, u64 size);
+export void memory_fill(void* block, u8 value, u64 size);
+export void memory_copy(void* dest, const void* src, u64 size);
 export void* memory_alloc(u64 size);
 export void* memory_alloc0(u64 size);
 export void* memory_realloc(void* this, u64 size);

@@ -72,6 +72,8 @@ export const char* error_cstr(error_t code) {
       return "ERR_EOPNOTSUPP";
     case ERR_EAFNOSUPPORT:
       return "ERR_EAFNOSUPPORT";
+    case ERR_EADDRINUSE:
+      return "ERR_EADDRINUSE";
     case ERR_EADDRNOTAVAIL:
       return "ERR_EADDRNOTAVAIL";
     case ERR_ECONNRESET:

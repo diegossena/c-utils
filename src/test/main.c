@@ -27,18 +27,18 @@ i32 main() {
     tcp_free(tcp);
     net_shutdown();
   }
-  if (true) {
-    // 123100 bytes
+  if (false) {
+    // 255845 bytes
     error = net_startup();
     if (error) {
       console_log("net_startup %d %s", error, error_cstr(error));
-      goto exit;
+      goto udp_client_exit;
     }
     udp_t udp = udp_new();
     if (!udp) {
       error = net_error();
-      console_log("udp_bind %d %s", error, error_cstr(error));
-      goto exit;
+      console_log("udp_new %d %s", error, error_cstr(error));
+      goto udp_client_exit;
     }
     net_address_t address = {
       .family = NET_FAMILY_IPV4,
@@ -52,7 +52,42 @@ i32 main() {
       console_log("udp_send %d %s", error, error_cstr(error));
     }
     udp_free(udp);
-  exit:
+  udp_client_exit:
+    net_shutdown();
+  }
+  if (true) {
+    // 255845 bytes
+    error = net_startup();
+    if (error) {
+      console_log("net_startup %d %s", error, error_cstr(error));
+      goto udp_server_exit;
+    }
+    udp_t udp = udp_new();
+    if (!udp) {
+      error = net_error();
+      console_log("udp_new %d %s", error, error_cstr(error));
+      goto udp_server_exit;
+    }
+    error = udp_bind(udp, net_port_from_short(9100));
+    if (error) {
+      console_log("udp_bind %d %s", error, error_cstr(error));
+      goto udp_server_exit;
+    }
+    char data[TEXT_SIZE];
+    net_address_t address;
+    i32 result = 0;
+    while (result == 0) {
+      console_log("udp_read");
+      result = udp_read(udp, data, sizeof(data) - 1, &address);
+      if (result < 0) {
+        error = net_error();
+        console_log("udp_read %d %s", error, error_cstr(error));
+        goto udp_server_exit;
+      }
+    }
+    console_log("data '%s'", data);
+    udp_free(udp);
+  udp_server_exit:
     net_shutdown();
   }
   return 0;
