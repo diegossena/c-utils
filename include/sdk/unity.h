@@ -16,9 +16,6 @@
 #ifdef QUEUE_H
 #include <src/sdk/queue.c>
 #endif
-#ifdef TASK_H
-#include <src/sdk/task.c>
-#endif
 #ifdef NET_H
 #include <src/sdk/net.c>
 #include <src/sdk/net.win32.c>
@@ -55,9 +52,6 @@
 #endif
 #ifdef SNOWFLAKE_H
 #include <src/sdk/snowflake.c>
-#endif
-#ifdef TIMER_H
-#include <src/sdk/timer.win32.c>
 #endif
 #ifdef WINDOW_H
 #include <src/sdk/window.c>
