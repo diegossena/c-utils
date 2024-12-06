@@ -38,14 +38,16 @@ export i32 tcp_read(tcp_t this, char* target, u64 size) {
   u64 length = 0;
   do {
     result = recv(this, target, size, 0);
-    if (result < 0)
-      return -1;
     if (result > 0) {
       length += result;
       target += result;
       size -= result;
+    } else if (result == 0) {
+      break;
+    } else {
+      return -1;
     }
-  } while (result > 0 && size > 0);
+  } while (size > 0);
   *target = '\0';
   return length;
 }

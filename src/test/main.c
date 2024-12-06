@@ -143,7 +143,6 @@ i32 main() {
       goto http_exit;
     }
     console_log("http_response[%d]\n%s", result, http_response);
-
   http_exit:
     tcp_free(tcp);
   }
