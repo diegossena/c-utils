@@ -45,7 +45,7 @@ export i32 tcp_read(tcp_t this, char* target, u64 size) {
       target += result;
       size -= result;
     }
-  } while (result > 0);
+  } while (result > 0 && size > 0);
   *target = '\0';
   return length;
 }
