@@ -71,14 +71,11 @@ i32 main() {
 
     char client_data[TEXT_SIZE];
     net_address_t client_address;
-    result = 0;
-    while (result == 0) {
-      result = udp_read(udp_server, client_data, sizeof(client_data) - 1, &client_address);
-      if (result < 0) {
-        error = net_error();
-        console_log("udp_read %d %s", error, error_cstr(error));
-        goto udp_client_exit;
-      }
+    result = udp_read(udp_server, client_data, sizeof(client_data) - 1, &client_address);
+    if (result < 0) {
+      error = net_error();
+      console_log("udp_read %d %s", error, error_cstr(error));
+      goto udp_client_exit;
     }
     console_log("udp client hears '%s'", client_data);
   udp_client_exit:
