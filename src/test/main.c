@@ -28,7 +28,7 @@ i32 main() {
     net_shutdown();
   }
   if (true) {
-    // 255845 bytes
+    // 256677 bytes
     i32 result;
     error = net_startup();
     if (error) {
@@ -41,21 +41,19 @@ i32 main() {
       error = net_error();
       console_log("udp_new %d %s", error, error_cstr(error));
       udp_free(udp_server);
-      goto udp_exit;
+      goto udp_server_exit;
     }
     error = udp_bind(udp_server, net_port_from_short(9100));
     if (error) {
       console_log("udp_bind %d %s", error, error_cstr(error));
-      goto udp_exit;
+      goto udp_server_exit;
     }
 
     udp_t udp_client = udp_new();
     if (!udp_client) {
       error = net_error();
       console_log("udp_new %d %s", error, error_cstr(error));
-      udp_free(udp_client);
-      udp_free(udp_server);
-      goto udp_exit;
+      goto udp_client_exit;
     }
 
     net_address_t server_address = {
@@ -63,30 +61,32 @@ i32 main() {
       .net_port = net_port_from_short(9100),
       .ip4 = ip4_from_bytes(127, 0, 0, 1)
     };
-    const char client_data [] = "test";
-    result = udp_send(udp_client, client_data, sizeof(client_data) - 1, &server_address);
+    const char server_data [] = "Hello World";
+    result = udp_send(udp_client, server_data, sizeof(server_data) - 1, &server_address);
+    console_log("udp server says  '%s'", server_data);
     if (result < 0) {
       error = net_error();
       console_log("udp_send %d %s", error, error_cstr(error));
     }
 
-    char server_data[TEXT_SIZE];
+    char client_data[TEXT_SIZE];
     net_address_t client_address;
     result = 0;
     while (result == 0) {
-      console_log("udp_read");
-      result = udp_read(udp_server, server_data, sizeof(server_data) - 1, &client_address);
+      result = udp_read(udp_server, client_data, sizeof(client_data) - 1, &client_address);
       if (result < 0) {
         error = net_error();
         console_log("udp_read %d %s", error, error_cstr(error));
-        goto udp_exit;
+        goto udp_client_exit;
       }
     }
-    console_log("data '%s'", server_data);
+    console_log("udp client hears '%s'", client_data);
+  udp_client_exit:
     udp_free(udp_client);
+  udp_server_exit:
     udp_free(udp_server);
-    net_shutdown();
   udp_exit:
+    net_shutdown();
   }
   return 0;
 }
