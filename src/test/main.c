@@ -81,8 +81,8 @@ i32 main() {
   udp_server_exit:
     udp_free(udp_server);
   }
-  if (true) {
-    // 255496 bytes
+  if (false) {
+    // 258115 bytes
     udp_t udp = udp_new();
     if (!udp) {
       error = net_error();
@@ -110,6 +110,42 @@ i32 main() {
     }
   snmp_udp_exit:
     udp_free(udp);
+  }
+  if (true) {
+    tcp_t tcp = tcp_new();
+    if (!tcp) {
+      error = net_error();
+      console_log("tcp_new %d %s", error, error_cstr(error));
+      tcp_free(tcp);
+      goto http_exit;
+    }
+    error = tcp_connect(tcp, ip4_from_bytes(142, 251, 129, 78), net_port_from_short(80), 1000);
+    if (error) {
+      console_log("tcp_connect %d %s", error, error_cstr(error));
+      goto http_exit;
+    }
+    const char http_request [] =
+      "GET / HTTP/1.0\r\n"
+      "Host: www.google.com.br\r\n"
+      "Connection: close\r\n"
+      "\r\n";
+    result = tcp_send(tcp, http_request, sizeof(http_request) - 1);
+    if (result < 0) {
+      error = net_error();
+      console_log("tcp_send %d %s", error, error_cstr(error));
+      goto http_exit;
+    }
+    char http_response[TEXT_SIZE + 1] = { '\0' };
+    result = tcp_read(tcp, http_response, TEXT_SIZE);
+    if (result < 0) {
+      error = net_error();
+      console_log("tcp_read %d %s", error, error_cstr(error));
+      goto http_exit;
+    }
+    console_log("http_response[%d]\n%s", result, http_response);
+
+  http_exit:
+    tcp_free(tcp);
   }
 exit:
   net_shutdown();
