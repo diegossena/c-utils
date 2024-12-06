@@ -1,5 +1,5 @@
-#ifndef SDK_SNOWFLAKE_H
-#define SDK_SNOWFLAKE_H
+#ifndef SNOWFLAKE_H
+#define SNOWFLAKE_H
 
 #include <sdk/types.h>
 
