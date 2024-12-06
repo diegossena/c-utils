@@ -8,9 +8,7 @@ u64 __snowflake_updated_at = 0;
 u64 __snowflake_sequence = 0;
 
 export u64 snowflake_uid() {
-  u64
-    current_time = date_now(),
-    uid_time = current_time - SNOWFLAKE_EPOCH;
+  u64 uid_time = date_now() - SNOWFLAKE_EPOCH;
   if (uid_time == __snowflake_updated_at) {
     ++__snowflake_sequence & SNOWFLAKE_MAX_SEQUENCE;
   } else {
