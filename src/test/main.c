@@ -135,7 +135,7 @@ i32 main() {
       console_log("tcp_send %d %s", error, error_cstr(error));
       goto http_exit;
     }
-    char http_response[TEXT_SIZE + 1] = { '\0' };
+    char http_response[TEXT_SIZE + 1];
     result = tcp_read(tcp, http_response, TEXT_SIZE);
     if (result < 0) {
       error = net_error();
