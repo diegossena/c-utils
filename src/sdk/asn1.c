@@ -1,12 +1,11 @@
 #include <sdk/asn1.h>
 
-export u8* ber_sequence_start(char** stream, u8 type) {
+export char* ber_sequence_start(char** stream, u8 type) {
   *(*stream)++ = type;
   return (*stream)++;
 }
-export void ber_sequence_end(char** stream, u8* sequence) {
-  *sequence = (*stream) - sequence - sizeof(u8);
-  console_log("ber_sequence_end %d", *sequence);
+export void ber_sequence_end(char** stream, char* sequence) {
+  *sequence = (*stream) - sequence - sizeof(char);
 }
 export void ber_write_i64(char** stream, i64 value) {
   if (value <= 0xFF) {
@@ -35,7 +34,7 @@ export void ber_write_str(char** stream, const char* string, u8 length) {
   (*stream) += length;
 }
 
-export void ber_write_oid_null(char** stream, char* oid, u64 size) {
+export void ber_write_oid_null(char** stream, const u8* oid, u64 size) {
   *(*stream)++ = ASN1_TYPE_OID;
   *(*stream)++ = size;
   memory_copy((*stream), oid, size);
@@ -112,7 +111,7 @@ export varbind_t ber_read_oid(char** stream) {
   ber_field_t varbind_sequence = ber_read_var(stream);
   char* varbind_sequence_end = (char*)varbind_sequence.cstr + varbind_sequence.size;
   ++(*stream);
-  varbind_t varbind = { .oid_length = *(*stream)++, .oid = (*stream) };
+  varbind_t varbind = { .oid_length = *(*stream)++, .oid = (u8*)(*stream) };
   (*stream) += varbind.oid_length;
   if ((*stream) < varbind_sequence_end) {
     varbind.value = ber_read_var(stream);

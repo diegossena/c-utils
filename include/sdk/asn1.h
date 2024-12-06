@@ -40,18 +40,17 @@ typedef struct ber_field_t {
 } ber_field_t;
 
 typedef struct varbind_t {
-  queue_t queue;
-  char* oid;
+  const u8* oid;
   u64 oid_length;
   ber_field_t value;
 } varbind_t;
 
-export u8* ber_sequence_start(char** stream, u8 type);
-export void ber_sequence_end(char** stream, u8* sequence);
+export char* ber_sequence_start(char** stream, u8 type);
+export void ber_sequence_end(char** stream, char* sequence);
 export void ber_write_i64(char** stream, i64 value);
 export void ber_write_var_integer(char** stream, u32 value);
 export void ber_write_str(char** stream, const char* string, u8 length);
-export void ber_write_oid_null(char** stream, char* oid, u64 size);
+export void ber_write_oid_null(char** stream, const u8* oid, u64 size);
 export u64 ber_read_u64(const char* stream, u8 length);
 export ber_field_t ber_read_var(char** stream);
 export varbind_t ber_read_oid(char** stream);

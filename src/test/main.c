@@ -4,38 +4,36 @@
 #include <sdk/string.h>
 #include <sdk/console.h>
 #include <sdk/math.h>
+#include <sdk/snmp.h>
 #include <sdk/unity.h>
 
 i32 main() {
-  error_t error;
+  i32 result;
+  error_t error = net_startup();
+  if (error) {
+    console_log("net_startup %d %s", error, error_cstr(error));
+    goto exit;
+  }
   if (false) {
     // 251864 bytes
     console_log("value %f", math_pow(2, 2));
   }
   if (false) {
     // 251926 bytes
-    char text[TEXT_SIZE + 1];
-    string_format(text, TEXT_SIZE, "test %s", "test");
+    char text[TINY_SIZE + 1];
+    string_format(text, TINY_SIZE, "test %s", "test");
     console_log("text '%s'", text);
   }
   if (false) {
     // 256757 bytes
-    net_startup();
     tcp_t tcp = tcp_new();
     error = tcp_connect(tcp, ip4_from_bytes(192, 168, 0, 189), net_port_from_short(9100), 1000);
     console_log("tcp_connect %d %s", error, error_cstr(error));
     tcp_free(tcp);
     net_shutdown();
   }
-  if (true) {
+  if (false) {
     // 256677 bytes
-    i32 result;
-    error = net_startup();
-    if (error) {
-      console_log("net_startup %d %s", error, error_cstr(error));
-      goto udp_exit;
-    }
-
     udp_t udp_server = udp_new();
     if (!udp_server) {
       error = net_error();
@@ -82,8 +80,38 @@ i32 main() {
     udp_free(udp_client);
   udp_server_exit:
     udp_free(udp_server);
-  udp_exit:
-    net_shutdown();
   }
+  if (true) {
+    // 255496 bytes
+    udp_t udp = udp_new();
+    if (!udp) {
+      error = net_error();
+      console_log("udp_new %d %s", error, error_cstr(error));
+      udp_free(udp);
+      goto snmp_udp_exit;
+    }
+    const char community [] = "public";
+    const u8 serial_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 5, 1, 1, 17, 1 };
+    varbind_t varbinds [] = {
+      { serial_oid, sizeof(serial_oid) }
+    };
+    pdu_t pdu = {
+      .type = PDU_TYPE_GET_REQUEST,
+      .version = SNMP_VERSION_1,
+      .varbinds = varbinds,
+      .varbinds_length = sizeof(varbinds) / sizeof(varbind_t),
+      .community = community,
+      .community_length = sizeof(community) - 1,
+    };
+    error = snmp_request(udp, &pdu, ip4_from_bytes(192, 168, 0, 255));
+    if (error) {
+      console_log("snmp_request %d %s", error, error_cstr(error));
+      goto snmp_udp_exit;
+    }
+  snmp_udp_exit:
+    udp_free(udp);
+  }
+exit:
+  net_shutdown();
   return 0;
 }

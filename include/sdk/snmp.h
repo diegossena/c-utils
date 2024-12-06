@@ -1,10 +1,9 @@
-#ifndef SDK_SNMP_H
-#define SDK_SNMP_H
+#ifndef SNMP_H
+#define SNMP_H
 
 #include <sdk/asn1.h>
-#include <sdk/hashset.h>
 #include <sdk/udp.h>
-#include <sdk/timer.h>
+#include <sdk/string.h>
 
 #define SNMP_PORT 161
 #define OID_MAX_SIZE 128
@@ -12,56 +11,32 @@
 #define SYSDESCR_OID { OID_PREFIX, 6, 1, 2, 1, 1, 2, 0 }
 
 typedef u32 oid_t;
-typedef struct snmp_message_t snmp_message_t;
 
-typedef void (*snmp_onmessage_t)(snmp_message_t*);
-typedef void (*snmp_onsend_t)(snmp_request_t*);
-
-/**
- * timeout?: u32
- */
-typedef struct snmp_t {
-  snmp_onmessage_t onmessage;
-  udp_t __udp;
-  u32 timeout;
-  queue_t __pending; // queue_t<snmp_request_t>
-} snmp_t;
 typedef enum snmp_version_t {
   SNMP_VERSION_1,
 } snmp_version_t;
+
 typedef enum pdu_type_t {
   PDU_TYPE_GET_REQUEST = 0xA0,
   PDU_TYPE_GET_NEXT_REQUEST,
   PDU_TYPE_GET_RESPONSE,
   PDU_TYPE_SET_REQUEST,
 } pdu_type_t;
-typedef struct snmp_pdu_t {
+/**
+ * Protocol Data Unit
+ */
+typedef struct pdu_t {
   snmp_version_t version;
-  char* community;
+  const char* community;
   u64 community_length;
   // pdu
   pdu_type_t type;
   u32 request_id;
   u8 error, error_index;
   // varbind_t
-  queue_t varbinds;
-} snmp_pdu_t;
-/**
- * id: u64
- */
-typedef struct snmp_request_t {
-  queue_t queue;
-  u64 id;
-  udp_send_t send;
-  snmp_onsend_t onend;
-  void* context;
-  timer_t __timer;
-} snmp_request_t;
-typedef struct snmp_message_t {
-  snmp_t* snmp;
-  snmp_pdu_t pdu;
-  udp_message_t* udp_message;
-} snmp_message_t;
+  varbind_t* varbinds;
+  u64 varbinds_length;
+} pdu_t;
 
 typedef enum snmp_error_t {
   SNMP_ERR_NOERROR,
@@ -85,17 +60,6 @@ typedef enum snmp_error_t {
   SNMP_ERR_INCONSISTENTNAME,
 } snmp_error_t;
 
-export snmp_t* snmp_new();
-export void snmp_free(snmp_t* this);
-
-export snmp_request_t* snmp_request(snmp_t*, snmp_pdu_t*);
-
-export void snmp_pdu_constructor(snmp_pdu_t* this);
-
-export void _snmp_constructor(snmp_t* this);
-export void _snmp_deconstructor(snmp_t* this);
-
-export void __snmp_onmessage(udp_message_t* udp_message);
-export void __snmp_onrequest(snmp_request_t* this);
+export error_t snmp_request(udp_t, pdu_t*, ip4_t host);
 
 #endif
