@@ -10,6 +10,7 @@
 i32 main() {
   char array [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
   console_write_buffer(array, sizeof(array));
+  console_write_cstr("\n");
   return 0;
   i32 result;
   error_t error = net_startup();

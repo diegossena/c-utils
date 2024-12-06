@@ -29,6 +29,7 @@ export bool string_startswith(const char* this, const char* needle);
 
 export i32 string_format_va(char* this, u64 size, const char* format, va_list args);
 export i32 string_format(char* stream, u64 size, const char* format, ...);
+
 export char* string_replace(const char* this, char* target, const char* pattern, const char* replacement);
 
 export char* url_encode(const char* this, char* target);

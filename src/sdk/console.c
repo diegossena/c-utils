@@ -37,14 +37,14 @@ export void console_write_bin(u64 value) {
   }
   console_write_str(str, ptr - str);
 }
-export void console_write_buffer(const char* buffer, u64 size) {
+export void console_write_buffer(const char* data, u64 size) {
   if (size) {
     char hex_str[TEXT_SIZE];
     char* ptr = hex_str;
-    string_format(ptr, 3, "%02x", *buffer++);
+    string_format(ptr, 3, "%02x", *data++);
     while (size--) {
       ptr += 3;
-      string_format(ptr, 4, " %02x", *buffer++);
+      string_format(ptr, 4, " %02x", *data++);
     }
     console_write_str(hex_str, ptr - hex_str);
   }
