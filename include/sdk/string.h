@@ -6,9 +6,9 @@
 #include <sdk/memory.h>
 #include <sdk/stdarg.h>
 
-#define TINY_SIZE 255
+#define TINY_SIZE (255 + 1)
 #define URL_SIZE 2048
-#define TEXT_SIZE 65535
+#define TEXT_SIZE (65535 + 1)
 
 #define IS_DIGIT(x)  ((x) >= '0' && (x) <= '9')
 #define IS_LOWER(x)  ((x) >= 'a' && (x) <= 'z')

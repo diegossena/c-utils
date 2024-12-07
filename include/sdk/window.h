@@ -1,9 +1,10 @@
-#ifndef SDK_WINDOW_H
-#define SDK_WINDOW_H
+#ifndef WINDOW_H
+#define WINDOW_H
 
 #include <sdk/types.h>
 #include <sdk/error.h>
 #include <sdk/keyboard.h>
+#include <sdk/console.h>
 
 extern bool __global_window_running;
 extern bool __global_window_focus;

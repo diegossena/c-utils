@@ -8,7 +8,7 @@
 #include <wincodec.h>
 #include <windows.h>
 
-HWND __global_window_handle;
+HWND __global_window;
 ID2D1Factory* __global_d2d_factory;
 ID2D1HwndRenderTarget* __global_d2d_render_target;
 IDWriteFactory* __global_d2d_write_factory;
@@ -30,7 +30,7 @@ export void window_clear() {
   ID2D1HwndRenderTarget_Clear(__global_d2d_render_target, 0);
 }
 export void window_close() {
-  DestroyWindow(__global_window_handle);
+  DestroyWindow(__global_window);
 }
 export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (__global_window_focus && __global_window_keyboard_count) {
@@ -81,7 +81,7 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
   return DefWindowProcA(handle, message, wParam, lParam);
 }
 export void window_redraw() {
-  RedrawWindow(__global_window_handle, 0, 0, RDW_INVALIDATE);
+  RedrawWindow(__global_window, 0, 0, RDW_INVALIDATE);
 }
 export void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
@@ -98,9 +98,10 @@ export void window_startup(
   const char* title,
   i32 width, i32 height
 ) {
+  i32 result;
   assert(__global_window_running == false);
   __global_window_running = true;
-  LPCSTR class_name = "SDK_WINDOW";
+  LPCSTR class_name = "window";
   // window_class_register
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -110,18 +111,19 @@ export void window_startup(
     .hCursor = LoadCursorA(0, IDC_ARROW),
     .lpszClassName = class_name,
   };
-  if (!RegisterClassExA(&wc)) {
-    return console_error("RegisterClassExA", ERR_UNKNOWN);
+  result = RegisterClassExA(&wc);
+  if (!result) {
+    console_log("RegisterClassExA %d %s", result, error_cstr(result));
   }
   u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
   // d2d.factory
-  HRESULT result = D2D1CreateFactory(
+  result = D2D1CreateFactory(
     D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, 0,
     (void**)&__global_d2d_factory
   );
   if (FAILED(result)) {
-    console_error("D2D1CreateFactory", result);
+    console_log("D2D1CreateFactory %d %s", result, error_cstr(result));
   }
   // d2d.write_factory
   result = DWriteCreateFactory(
@@ -129,12 +131,12 @@ export void window_startup(
     (IUnknown**)&__global_d2d_write_factory
   );
   if (FAILED(result)) {
-    console_error("DWriteCreateFactory", result);
+    console_log("DWriteCreateFactory %d %s", result, error_cstr(result));
   }
   // window_create
   RECT rect = { 0, 0, width, height };
   AdjustWindowRect(&rect, window_style, false);
-  __global_window_handle = CreateWindowExA(
+  __global_window = CreateWindowExA(
     window_ex_style, wc.lpszClassName, title, window_style,
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
     0, // handle to parent or owner window
@@ -142,8 +144,8 @@ export void window_startup(
     wc.hInstance,
     0 // pointer to window-creation data
   );
-  if (!__global_window_handle) {
-    return console_error("CreateWindowExA", ERR_UNKNOWN);
+  if (!__global_window) {
+    console_log("CreateWindowExA", __global_window, error_cstr((error_t)__global_window));
   }
   // d2d.render_target
   D2D1_RENDER_TARGET_PROPERTIES render_target_props = {
@@ -154,7 +156,7 @@ export void window_startup(
     }
   };
   D2D1_HWND_RENDER_TARGET_PROPERTIES window_render_target_props = {
-    .hwnd = __global_window_handle,
+    .hwnd = __global_window,
     .pixelSize = { width, height },
     .presentOptions = D2D1_PRESENT_OPTIONS_NONE
   };
@@ -165,7 +167,7 @@ export void window_startup(
     &__global_d2d_render_target
   );
   if (FAILED(result)) {
-    console_error("CreateHwndRenderTarget", result);
+    console_log("CreateHwndRenderTarget", result, error_cstr(result));
     goto onerror;
   }
   // onsuccess

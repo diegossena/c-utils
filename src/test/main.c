@@ -115,7 +115,7 @@ i32 main() {
   snmp_udp_exit:
     udp_free(udp);
   }
-  if (true) {
+  if (false) {
     tcp_t tcp = tcp_new();
     if (!tcp) {
       error = net_error();
