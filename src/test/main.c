@@ -143,6 +143,11 @@ i32 main() {
     }
     char http_response[TEXT_SIZE + 1];
     result = tcp_read(tcp, http_response, sizeof(http_response) - 1);
+    if (result < 0) {
+      error = net_error();
+      console_log("tcp_read %d %s", error, error_cstr(error));
+      goto http_exit;
+    }
     console_log("http_response[%d]\n%s", result, http_response);
   http_exit:
     tcp_free(tcp);
