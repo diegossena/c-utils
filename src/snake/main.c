@@ -49,8 +49,8 @@ void game_startup() {
   food_create();
 }
 void game_over_call() {
-  char message[TINY_SIZE];
-  string_format(message, TINY_SIZE, "SCORE: %lu", game_score());
+  char message[TINY_SIZE + 1];
+  string_format(message, sizeof(message), "SCORE: %lu", game_score());
   MessageBoxA(__global_window, message, "GAME OVER", MB_OK);
   game_over = true;
 }

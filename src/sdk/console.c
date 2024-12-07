@@ -4,7 +4,7 @@ export void console_write(const char* message, ...) {
   va_list args;
   va_start(args, message);
   char buffer[TEXT_SIZE + 1];
-  i32 length = string_format_va(buffer, TEXT_SIZE, message, args);
+  i32 length = string_format_va(buffer, sizeof(buffer), message, args);
   va_end(args);
   if (length < 0)
     return;
@@ -39,7 +39,7 @@ export void console_write_bin(u64 value) {
 }
 export void console_write_buffer(const char* data, u64 size) {
   if (size) {
-    char hex_str[TEXT_SIZE];
+    char hex_str[TEXT_SIZE + 1];
     char* ptr = hex_str;
     string_format(ptr, 3, "%02x", *data++);
     while (size--) {

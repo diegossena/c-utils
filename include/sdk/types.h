@@ -19,14 +19,18 @@
 #define true 1
 #define false 0
 
+#define MAX_U8 255U
+#define MIN_U8 0U
+#define MAX_I8 127U
+#define MIN_I8 -128U
 #define MAX_I16 32767
 #define MIN_I16 -32768
-#define MAX_U16 0xffffU
+#define MAX_U16 65535U
 #define MAX_I32 2147483647L
 #define MIN_I32 (-MAX_I32 - 1)
-#define MAX_U32 0xffffffffUL
-#define MAX_U64 0xffffffffffffffffull
-#define MAX_I64 9223372036854775807ll
+#define MAX_U32 4294967295UL
+#define MAX_U64 18446744073709551615ULL
+#define MAX_I64 9223372036854775807LL
 #define MIN_I64 (-MAX_I64 - 1)
 #define MAX_F32 3.40282e+38F
 #define MIN_F32 -MAX_F32

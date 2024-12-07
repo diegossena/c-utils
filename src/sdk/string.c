@@ -59,7 +59,7 @@ export u64 string_u64(const char* this) {
 export char* string_replace(const char* this, char* target, const char* pattern, const char* replacement) {
   u64 pattern_pass = string_length(pattern);
 
-  char copy[TEXT_SIZE + 1] = {};
+  char copy[TEXT_SIZE + 1] = { '\0' };
 
   const char* replacement_p;
   char

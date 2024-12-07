@@ -33,26 +33,11 @@ export error_t tcp_connect(tcp_t this, ip4_t ip4, net_port_t port, u64 timeout_m
   }
   return ERR_SUCCESS;
 }
-export i32 tcp_read(tcp_t this, char* target, u64 size) {
-  i32 result;
-  u64 length = 0;
-  do {
-    result = recv(this, target, size, 0);
-    if (result > 0) {
-      length += result;
-      target += result;
-      size -= result;
-    } else if (result == 0) {
-      break;
-    } else {
-      return -1;
-    }
-  } while (size > 0);
-  *target = '\0';
-  return length;
+export i32 tcp_read_stream(tcp_t this, char* target, u64 size) {
+  return recv(this, target, size, 0);
 }
-export i32 tcp_send(tcp_t this, const char* buffer, u64 length) {
-  return send(this, buffer, length, 0);
+export i32 tcp_send_stream(tcp_t this, const char* stream, u64 size) {
+  return send(this, stream, size, 0);
 }
 
 #endif

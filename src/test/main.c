@@ -8,10 +8,6 @@
 #include <sdk/unity.h>
 
 i32 main() {
-  char array [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-  console_write_buffer(array, sizeof(array));
-  console_write_cstr("\n");
-  return 0;
   i32 result;
   error_t error = net_startup();
   if (error) {
@@ -25,7 +21,7 @@ i32 main() {
   if (false) {
     // 251926 bytes
     char text[TINY_SIZE + 1];
-    string_format(text, TINY_SIZE, "test %s", "test");
+    string_format(text, sizeof(text), "test %s", "test");
     console_log("text '%s'", text);
   }
   if (false) {
@@ -35,6 +31,11 @@ i32 main() {
     console_log("tcp_connect %d %s", error, error_cstr(error));
     tcp_free(tcp);
     net_shutdown();
+  }
+  if (false) {
+    char array [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    console_write_buffer(array, sizeof(array));
+    console_write_cstr("\n");
   }
   if (false) {
     // 256677 bytes
@@ -71,7 +72,7 @@ i32 main() {
       console_log("udp_send %d %s", error, error_cstr(error));
     }
 
-    char client_data[TEXT_SIZE];
+    char client_data[TEXT_SIZE + 1];
     net_address_t client_address;
     result = udp_read(udp_server, client_data, sizeof(client_data) - 1, &client_address);
     if (result < 0) {
@@ -86,7 +87,7 @@ i32 main() {
     udp_free(udp_server);
   }
   if (false) {
-    // 258115 bytes
+    // 257041 bytes
     udp_t udp = udp_new();
     if (!udp) {
       error = net_error();
@@ -115,7 +116,8 @@ i32 main() {
   snmp_udp_exit:
     udp_free(udp);
   }
-  if (false) {
+  if (true) {
+    // 257041 bytes
     tcp_t tcp = tcp_new();
     if (!tcp) {
       error = net_error();
@@ -141,11 +143,6 @@ i32 main() {
     }
     char http_response[TEXT_SIZE + 1];
     result = tcp_read(tcp, http_response, TEXT_SIZE);
-    if (result < 0) {
-      error = net_error();
-      console_log("tcp_read %d %s", error, error_cstr(error));
-      goto http_exit;
-    }
     console_log("http_response[%d]\n%s", result, http_response);
   http_exit:
     tcp_free(tcp);
