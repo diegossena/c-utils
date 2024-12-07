@@ -117,7 +117,7 @@ i32 main() {
     udp_free(udp);
   }
   if (true) {
-    // 257041 bytes
+    // 295337 bytes
     tcp_t tcp = tcp_new();
     if (!tcp) {
       error = net_error();
@@ -142,12 +142,13 @@ i32 main() {
       goto http_exit;
     }
     char http_response[TEXT_SIZE + 1];
-    result = tcp_read(tcp, http_response, TEXT_SIZE);
+    result = tcp_read(tcp, http_response, sizeof(http_response) - 1);
     console_log("http_response[%d]\n%s", result, http_response);
   http_exit:
     tcp_free(tcp);
   }
 exit:
   net_shutdown();
+  memory_debug();
   return 0;
 }

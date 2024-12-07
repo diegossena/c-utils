@@ -1,7 +1,7 @@
 @ECHO OFF
 CLS
 SET package_name=%1
-SET defines=-DSDK_DEVELOPMENT -DSDK_UNITY
+SET defines=-DDEVELOPMENT
 SET compiler_flags=-O3 -Wall
 SET include_flags=-Iinclude -I.
 SET linker_flags=

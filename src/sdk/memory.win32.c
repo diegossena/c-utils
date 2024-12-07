@@ -9,7 +9,7 @@ export void* memory_alloc(u64 size) {
   if (block) {
     __leaks_count_increment();
   } else {
-    assert(this != 0);
+    assert(block != 0);
   }
   return block;
 }
@@ -19,7 +19,7 @@ export void* memory_alloc0(u64 size) {
   if (block) {
     __leaks_count_increment();
   } else {
-    assert(this != 0);
+    assert(block != 0);
   }
   return block;
 }
