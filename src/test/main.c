@@ -17,12 +17,18 @@ i32 main() {
   }
   if (true) {
     hashset_t* hashset = hashset_new();
-    for (u16 i = 0; i < 10; i++) {
+    for (u16 i = 0; i < MAX_U16; i++) {
       hashset_add(&hashset, i);
-      u64* data = (void*)hashset + sizeof(hashset_t);
-      console_log("%x hashset[%u] %llu", hashset, i, data[i]);
     }
-    console_log("hashset_free");
+    for (u16 i = 0; i < MAX_U16; i++) {
+      if (!hashset_contains(hashset, i)) {
+        console_log("contains %d", i);
+        break;
+      }
+    }
+    if (hashset_contains(hashset, MAX_U16 + 1)) {
+      console_log("contains %llu", MAX_U16 + 1);
+    }
     hashset_free(hashset);
   }
   // if (true) {
