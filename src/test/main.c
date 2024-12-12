@@ -5,6 +5,7 @@
 #include <sdk/console.h>
 #include <sdk/math.h>
 #include <sdk/snmp.h>
+#include <sdk/hashset.h>
 #include <sdk/unity.h>
 
 i32 main() {
@@ -14,6 +15,32 @@ i32 main() {
     console_log("net_startup %d %s", error, error_cstr(error));
     goto exit;
   }
+  if (true) {
+    hashset_t* hashset = hashset_new();
+    for (u16 i = 0; i < 10; i++) {
+      hashset_add(&hashset, i);
+      u64* data = (void*)hashset + sizeof(hashset_t);
+      console_log("%x hashset[%u] %llu", hashset, i, data[i]);
+    }
+    console_log("hashset_free");
+    hashset_free(hashset);
+  }
+  // if (true) {
+  //   // 295957 bytes
+  //   // 610ms
+  //   hashset_t hashset;
+  //   hashset_constructor(&hashset);
+  //   for (u16 i = 0; i < MAX_U16; i++) {
+  //     hashset_add(&hashset, i);
+  //   }
+  //   for (u16 i = 0; i < MAX_U16; i++) {
+  //     if (!hashset_contains(&hashset, i)) {
+  //       console_log("contains %d", i);
+  //       break;
+  //     }
+  //   }
+  //   hashset_deconstructor(&hashset);
+  // }
   if (false) {
     // 251864 bytes
     console_log("value %f", math_pow(2, 2));
@@ -116,7 +143,7 @@ i32 main() {
   snmp_udp_exit:
     udp_free(udp);
   }
-  if (true) {
+  if (false) {
     // 295337 bytes
     tcp_t tcp = tcp_new();
     if (!tcp) {
@@ -155,5 +182,6 @@ i32 main() {
 exit:
   net_shutdown();
   memory_debug();
+  console_log("SUCCESS");
   return 0;
 }

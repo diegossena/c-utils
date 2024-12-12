@@ -4,7 +4,6 @@
 #include <sdk/types.h>
 #include <sdk/math.h>
 #include <sdk/memory.h>
-#include <sdk/buffer.h>
 
 #define __HASHSET_BUCKETS_SIZE 512
 
@@ -20,15 +19,21 @@
 #define hashset_delete_cstr(this, key) \
   hashset_delete(this, math_hash_jenkins(key, sizeof(key) - 1))
 
+typedef struct hashmap_entry_t hashmap_entry_t;
+typedef struct hashmap_entry_t {
+  u64 __hash;
+  hashmap_entry_t* __next;
+} hashmap_entry_t;
+
 typedef struct hashset_t {
-  u64 length;
-  // ...data
+  const u64 length;
+  hashmap_entry_t* __buckets[__HASHSET_BUCKETS_SIZE];
 } hashset_t;
 
-export hashset_t* hashset_new();
-export void hashset_free(hashset_t* this);
-export bool hashset_contains(const hashset_t* this, u64 hash);
-export bool hashset_add(hashset_t** this, u64 hash);
+export void hashset_constructor(hashset_t* this);
+export void hashset_deconstructor(hashset_t* this);
+export bool hashset_contains(const hashset_t* this, const u64 hash);
+export void hashset_add(hashset_t* this, const u64 hash);
 export bool hashset_remove(hashset_t* this, const u64 hash);
 
 #endif

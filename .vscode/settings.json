@@ -20,6 +20,11 @@
     "tuple": "c",
     "utility": "c",
     "variant": "c",
-    "string": "c"
+    "string": "c",
+    "vector": "c",
+    "memory": "c",
+    "optional": "c",
+    "text_encoding": "c",
+    "cstdlib": "c"
   }
 }

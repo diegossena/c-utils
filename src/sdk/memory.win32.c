@@ -30,25 +30,20 @@ export void memory_free(void* this) {
 }
 export void* memory_realloc(void* this, u64 size) {
   assert(size > 0);
-  if (this) {
-    this = HeapReAlloc(GetProcessHeap(), 0, this, size);
-  } else {
-    this = HeapAlloc(GetProcessHeap(), 0, size);
-    __leaks_count_increment();
-  }
-  assert(this != 0);
-  return this;
+  assert(this != null);
+  console_log("size %llu %llu", size, (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1));
+  return HeapReAlloc(
+    GetProcessHeap(), 0, this,
+    (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1)
+  );
 }
 export void* memory_realloc0(void* this, u64 size) {
   assert(size > 0);
-  if (this) {
-    this = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, this, size);
-  } else {
-    this = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
-    __leaks_count_increment();
-  }
-  assert(this != 0);
-  return this;
+  assert(this != null);
+  return HeapReAlloc(
+    GetProcessHeap(), HEAP_ZERO_MEMORY, this,
+    (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1)
+  );
 }
 
 #endif

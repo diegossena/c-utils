@@ -19,6 +19,8 @@
 #define true 1
 #define false 0
 
+#define null ((void*)0)
+
 #define MAX_U8 255U
 #define MIN_U8 0U
 #define MAX_I8 127U
