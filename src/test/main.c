@@ -16,6 +16,8 @@ i32 main() {
     goto exit;
   }
   if (true) {
+    // 295975 bytes
+    // 780ms
     hashset_t* hashset = hashset_new();
     for (u16 i = 0; i < MAX_U16; i++) {
       hashset_add(&hashset, i);
@@ -27,7 +29,7 @@ i32 main() {
       }
     }
     if (hashset_contains(hashset, MAX_U16 + 1)) {
-      console_log("contains %llu", MAX_U16 + 1);
+      console_log("hashset_contains %llu", MAX_U16 + 1);
     }
     hashset_free(hashset);
   }

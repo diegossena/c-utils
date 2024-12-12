@@ -3,9 +3,12 @@
 
 #include <heapapi.h>
 
+#define ALIGNED_SIZE(size) \
+  ((size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1))
+
 export void* memory_alloc(u64 size) {
   assert(size > 0);
-  void* block = HeapAlloc(GetProcessHeap(), 0, size);
+  void* block = HeapAlloc(GetProcessHeap(), 0, ALIGNED_SIZE(size));
   if (block) {
     __leaks_count_increment();
   } else {
@@ -15,7 +18,7 @@ export void* memory_alloc(u64 size) {
 }
 export void* memory_alloc0(u64 size) {
   assert(size > 0);
-  void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
+  void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, ALIGNED_SIZE(size));
   if (block) {
     __leaks_count_increment();
   } else {
@@ -31,20 +34,14 @@ export void memory_free(void* this) {
 export void* memory_realloc(void* this, u64 size) {
   assert(size > 0);
   assert(this != null);
-  return HeapReAlloc(
-    GetProcessHeap(), 0, this,
-     // aligned size 
-    (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1)
-  );
+  return HeapReAlloc(GetProcessHeap(), 0, this, ALIGNED_SIZE(size));
 }
 export void* memory_realloc0(void* this, u64 size) {
   assert(size > 0);
   assert(this != null);
-  return HeapReAlloc(
-    GetProcessHeap(), HEAP_ZERO_MEMORY, this,
-    // aligned size 
-    (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1)
-  );
+  return HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, this, ALIGNED_SIZE(size));
 }
+
+#undef ALIGNED_SIZE
 
 #endif

@@ -22,6 +22,7 @@
 
 typedef struct hashset_t {
   u64 length;
+  u64 size;
   // ...data
 } hashset_t;
 
