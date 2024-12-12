@@ -31,9 +31,9 @@ export void memory_free(void* this) {
 export void* memory_realloc(void* this, u64 size) {
   assert(size > 0);
   assert(this != null);
-  console_log("size %llu %llu", size, (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1));
   return HeapReAlloc(
     GetProcessHeap(), 0, this,
+     // aligned size 
     (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1)
   );
 }
@@ -42,6 +42,7 @@ export void* memory_realloc0(void* this, u64 size) {
   assert(this != null);
   return HeapReAlloc(
     GetProcessHeap(), HEAP_ZERO_MEMORY, this,
+    // aligned size 
     (size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1)
   );
 }
