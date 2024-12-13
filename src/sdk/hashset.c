@@ -1,9 +1,9 @@
 #include <sdk/hashset.h>
 
-#define HASHSET_INITIAL_SIZE 512
-#define HASHSET_DATA(this) ((u64*)this + sizeof(hashset_t))
+#define HASHSET_INITIAL_SIZE 512LLU
+#define HASHSET_DATA(this) ((u64*)((void*)this + sizeof(hashset_t)))
 
-export i32 array_u64_search(u64* array, u64 length, u64 value) {
+export i64 array_u64_search(u64* array, u64 length, u64 value) {
   u64 low = 0;
   u64 high = length - 1;
   while (low <= high) {
@@ -38,33 +38,51 @@ export void hashset_free(hashset_t* this) {
 export bool hashset_contains(const hashset_t* this, u64 hash) {
   return array_u64_search((void*)this + sizeof(hashset_t), this->length, hash) != -1;
 }
+u64 count = 0;
 export bool hashset_add(hashset_t** this_p, u64 hash) {
   hashset_t* this = *this_p;
   u64* data = HASHSET_DATA(this);
   u64 length = this->length;
   u64 size = this->size;
-  u64 i = 0;
   if (length >= size) {
     size <<= 1;
-    hashset_t* block = memory_realloc(this, sizeof(hashset_t) + size * sizeof(u64));
-    if (block == null)
+    this = memory_realloc(this, sizeof(hashset_t) + size * sizeof(u64));
+    if (this == null)
       return false;
-    this = *this_p = block;
+    *this_p = this;
     this->size = size;
     data = HASHSET_DATA(this);
   }
-  while (i < length) {
-    if (data[i] == hash) {
-      return true;
-    } else if (data[i] > hash) {
-      memory_copy(data + i + 1, data + i, (length - i) * sizeof(u64));
-      break;
+  u64 i = 0;
+  console_log("hash %llu", hash);
+  console_log("length %llu", length);
+  if (length) {
+    u64 low = 0;
+    u64 high = length - 1;
+    while (low <= high) {
+      console_log("low %llu", low);
+      console_log("high %llu", high);
+      i = low + (high - low) / 2;
+      // Check if x is present at mid
+      if (data[i] == hash) {
+        return i;
+      }
+      if (data[i] < hash) {
+        // If x greater, ignore left half
+        low = i + 1;
+      } else {
+        // If x is smaller, ignore right half
+        high = i - 1;
+      }
     }
-    ++i;
   }
-  ++length;
+  console_log("i %llu", i);
+  console_log("");
   data[i] = hash;
-  this->length = length;
+  this->length = length + 1;
+  if (count++ == 1) {
+    exit(0);
+  }
   return true;
 }
 export bool hashset_remove(hashset_t* this, const u64 hash) {

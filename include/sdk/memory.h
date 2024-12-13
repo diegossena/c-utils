@@ -10,7 +10,7 @@
 #include <sdk/console.h>
 
 extern i64 __leaks_count;
-#define __leaks_count_increment() ++__leaks_count
+#define __leaks_count_increment(block) __leaks_count += block ? 1 : 0
 #define __leaks_count_decrement() --__leaks_count
 #define memory_debug() \
   if(__leaks_count != 0) { \
@@ -19,7 +19,7 @@ extern i64 __leaks_count;
 
 #else
 
-#define __leaks_count_increment()
+#define __leaks_count_increment(block)
 #define __leaks_count_decrement()
 #define memory_debug()
 

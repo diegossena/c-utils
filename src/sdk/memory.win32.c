@@ -9,21 +9,13 @@
 export void* memory_alloc(u64 size) {
   assert(size > 0);
   void* block = HeapAlloc(GetProcessHeap(), 0, ALIGNED_SIZE(size));
-  if (block) {
-    __leaks_count_increment();
-  } else {
-    assert(block != 0);
-  }
+  __leaks_count_increment(block);
   return block;
 }
 export void* memory_alloc0(u64 size) {
   assert(size > 0);
   void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, ALIGNED_SIZE(size));
-  if (block) {
-    __leaks_count_increment();
-  } else {
-    assert(block != 0);
-  }
+  __leaks_count_increment(block);
   return block;
 }
 export void memory_free(void* this) {

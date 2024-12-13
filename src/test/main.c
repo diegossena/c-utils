@@ -17,7 +17,7 @@ i32 main() {
   }
   if (true) {
     // 295975 bytes
-    // 780ms
+    // 1190ms
     hashset_t* hashset = hashset_new();
     for (u16 i = 0; i < MAX_U16; i++) {
       hashset_add(&hashset, i);
@@ -34,7 +34,7 @@ i32 main() {
     hashset_free(hashset);
   }
   // if (true) {
-  //   // 295957 bytes
+  //   // 295445 bytes
   //   // 610ms
   //   hashset_t hashset;
   //   hashset_constructor(&hashset);
