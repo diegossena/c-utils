@@ -187,8 +187,5 @@ i32 main() {
 exit:
   net_shutdown();
   debug();
-  console_color(ANSI_FORE_LIGHTGREEN);
-  console_log("SUCCESS");
-  console_color(ANSI_RESET);
   return 0;
 }
