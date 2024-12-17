@@ -1,5 +1,10 @@
 #include <sdk/net.h>
 
+#ifdef DEVELOPMENT
+bool __net_started = false;
+i64 __socket_count = 0;
+#endif
+
 export u32 ip4_from_bytes(u8 f1, u8 f2, u8 f3, u8 f4) {
   return f1 | f2 << 8 | f3 << 16 | f4 << 24;
 }

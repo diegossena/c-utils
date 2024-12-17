@@ -9,19 +9,19 @@
 export void* memory_alloc(u64 size) {
   assert(size > 0);
   void* block = HeapAlloc(GetProcessHeap(), 0, ALIGNED_SIZE(size));
-  __leaks_count_increment(block);
+  __memory_count_increment(block);
   return block;
 }
 export void* memory_alloc0(u64 size) {
   assert(size > 0);
   void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, ALIGNED_SIZE(size));
-  __leaks_count_increment(block);
+  __memory_count_increment(block);
   return block;
 }
 export void memory_free(void* this) {
   assert(this != 0);
   HeapFree(GetProcessHeap(), 0, this);
-  __leaks_count_decrement();
+  __memory_count_decrement();
 }
 export void* memory_realloc(void* this, u64 size) {
   assert(size > 0);

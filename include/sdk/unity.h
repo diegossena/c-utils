@@ -60,3 +60,21 @@
 #ifdef KEYBOARD_H
 #include <src/sdk/keyboard.win32.c>
 #endif
+
+
+#ifdef DEVELOPMENT
+static inline void debug() {
+#ifdef MEMORY_H
+  if (__memory_count != 0) {
+    console_log("memory_count %lld", __memory_count);
+  }
+#endif
+#ifdef NET_H
+  if (__socket_count != 0) {
+    console_log("socket_count %lld", __socket_count);
+  }
+#endif
+}
+#else
+#define debug()
+#endif

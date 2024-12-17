@@ -44,4 +44,18 @@ export error_t net_error();
 export u64 _socket_new(socket_type_t);
 export void _socket_free(socket_t fd);
 
+#ifdef DEVELOPMENT
+
+extern bool __net_started;
+extern i64 __socket_count;
+#define __socket_count_increment() ++__socket_count
+#define __socket_count_decrement() --__socket_count
+
+#else
+
+#define __socket_count_increment(this)
+#define __socket_count_decrement()
+
+#endif
+
 #endif
