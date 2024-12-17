@@ -15,9 +15,8 @@ i32 main() {
     console_log("net_startup %d %s", error, error_cstr(error));
     goto exit;
   }
-  if (true) {
-    // 256100 bytes
-    // 130ms
+  if (false) {
+    // 256100 bytes 130ms
     hashset_t* hashset = hashset_new();
     for (u16 i = 0; i < MAX_U16; i++) {
       hashset_add(&hashset, i);
@@ -33,30 +32,14 @@ i32 main() {
     }
     hashset_free(hashset);
   }
-  // if (true) {
-  //   // 295445 bytes
-  //   // 610ms
-  //   hashset_t hashset;
-  //   hashset_constructor(&hashset);
-  //   for (u16 i = 0; i < MAX_U16; i++) {
-  //     hashset_add(&hashset, i);
-  //   }
-  //   for (u16 i = 0; i < MAX_U16; i++) {
-  //     if (!hashset_contains(&hashset, i)) {
-  //       console_log("contains %d", i);
-  //       break;
-  //     }
-  //   }
-  //   hashset_deconstructor(&hashset);
-  // }
   if (false) {
-    // 251864 bytes
-    console_log("value %f", math_pow(2, 2));
+    // 255412 bytes 80ms
+    console_log("value %lf", math_pow(2, 2));
   }
   if (false) {
     // 251926 bytes
     char text[TINY_SIZE + 1];
-    string_format(text, sizeof(text), "test %s", "test");
+    string_format(text, sizeof(text), "test %s 123456789", "test");
     console_log("text '%s'", text);
   }
   if (false) {
@@ -68,12 +51,13 @@ i32 main() {
     net_shutdown();
   }
   if (false) {
+    // 255495 bytes 100ms
     char array [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     console_write_buffer(array, sizeof(array));
     console_write_cstr("\n");
   }
   if (false) {
-    // 256677 bytes
+    // 257701 bytes 720ms
     udp_t udp_server = udp_new();
     if (!udp_server) {
       error = net_error();
@@ -151,8 +135,10 @@ i32 main() {
   snmp_udp_exit:
     udp_free(udp);
   }
-  if (false) {
-    // 295337 bytes
+  if (true) {
+    // 258065 bytes 340ms
+    char* stream;
+    u64 remaining;
     tcp_t tcp = tcp_new();
     if (!tcp) {
       error = net_error();
@@ -170,19 +156,30 @@ i32 main() {
       "Host: www.google.com.br\r\n"
       "Connection: close\r\n"
       "\r\n";
-    result = tcp_send(tcp, http_request, sizeof(http_request) - 1);
+    stream = (char*)http_request;
+    remaining = sizeof(http_request) - 1;
+    while ((result = tcp_send(tcp, stream, remaining)) > 0) {
+      stream += result;
+      remaining -= result;
+    }
     if (result < 0) {
       error = net_error();
       console_log("tcp_send %d %s", error, error_cstr(error));
       goto http_exit;
     }
     char http_response[TEXT_SIZE + 1];
-    result = tcp_read(tcp, http_response, sizeof(http_response) - 1);
+    stream = http_response;
+    remaining = sizeof(http_response) - 1;
+    while ((result = tcp_read(tcp, stream, remaining)) > 0) {
+      stream += result;
+      remaining -= result;
+    }
     if (result < 0) {
       error = net_error();
       console_log("tcp_read %d %s", error, error_cstr(error));
       goto http_exit;
     }
+    *stream = '\0';
     console_log("http_response[%d]\n%s", result, http_response);
   http_exit:
     tcp_free(tcp);

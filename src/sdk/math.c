@@ -109,7 +109,7 @@ export f64 math_pow(f64 base, f64 exponent) {
 export f64 math_floor(f64 number) {
   return floor(number);
 }
-export f64 math_floor_f64(f64 number, u8 places) {
+export f64 math_floor_precision(f64 number, u8 places) {
   if (places > 0) {
     number *= math_pow(10, places);
   }
@@ -127,7 +127,7 @@ export i64 math_round(f64 number) {
   }
   return integer + 1;
 }
-export f64 math_round_f64(f64 number, u8 places) {
+export f64 math_round_precision(f64 number, u8 places) {
   if (places > 0) {
     number *= math_pow(10, places);
   }
@@ -137,7 +137,7 @@ export f64 math_round_f64(f64 number, u8 places) {
   }
   return number;
 }
-export f64 math_ceil_f64(f64 number, u8 places) {
+export f64 math_ceil_precision(f64 number, u8 places) {
   if (places > 0) {
     number *= math_pow(10, places);
   }

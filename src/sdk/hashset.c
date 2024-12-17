@@ -23,14 +23,11 @@ export bool hashset_contains(const hashset_t* this, u64 hash) {
   u64 high = this->length - 1;
   while (low <= high) {
     mid = low + (high - low) / 2;
-    // Check if x is present at mid
     if (data[mid] == hash) {
       return true;
     } else if (data[mid] < hash) {
-      // If x greater, ignore left half
       low = mid + 1;
     } else {
-      // If x is smaller, ignore right half
       high = mid - 1;
     }
   }
