@@ -74,12 +74,6 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 #define SDK_NOINLINE
 #endif
 
-// building
-
-#ifdef SDK_UNITY
 #define export SDK_INLINE
-#else
-#define export
-#endif
 
 #endif

@@ -31,5 +31,6 @@ export void hashset_free(hashset_t* this);
 export bool hashset_contains(const hashset_t* this, u64 hash);
 export bool hashset_add(hashset_t** this, u64 hash);
 export bool hashset_remove(hashset_t* this, const u64 hash);
+export u64* hashset_entries(const hashset_t* this);
 
 #endif

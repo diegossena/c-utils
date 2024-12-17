@@ -16,7 +16,7 @@ i32 main() {
     goto exit;
   }
   if (true) {
-    // 296116 bytes
+    // 256100 bytes
     // 130ms
     hashset_t* hashset = hashset_new();
     for (u16 i = 0; i < MAX_U16; i++) {
