@@ -168,7 +168,7 @@ void window_onkeyup() {}
 void window_onkeypress() {}
 // MAIN 305473 bytes
 i32 main(i32 argc, char** argv) {
-  window_startup("Test", SCREEN_SIZE, SCREEN_SIZE);
+  window_startup("Snake", SCREEN_SIZE, SCREEN_SIZE);
   game_startup();
   window_run();
   console_color(ANSI_FORE_LIGHTGREEN);

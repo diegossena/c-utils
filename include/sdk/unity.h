@@ -61,7 +61,6 @@
 #include <src/sdk/keyboard.win32.c>
 #endif
 
-
 #ifdef DEVELOPMENT
 static inline void debug() {
   bool success = true;

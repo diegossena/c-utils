@@ -135,7 +135,7 @@ i32 main() {
   snmp_udp_exit:
     udp_free(udp);
   }
-  if (true) {
+  if (false) {
     // 258065 bytes 340ms
     char* stream;
     u64 remaining;
