@@ -32,10 +32,12 @@ typedef struct ber_field_t {
   asn1_type_t type;
   u8 size;
   union {
+    bool boolean;
     i64 i64;
     u64 u64;
     f64 f64;
-    const char* cstr;
+    u8 oid[TINY_SIZE];
+    char str[TINY_SIZE];
   };
 } ber_field_t;
 
@@ -51,8 +53,9 @@ export void ber_write_i64(char** stream, i64 value);
 export void ber_write_var_integer(char** stream, u32 value);
 export void ber_write_str(char** stream, const char* string, u8 length);
 export void ber_write_oid_null(char** stream, const u8* oid, u64 size);
-export u64 ber_read_u64(const char* stream, u8 length);
-export ber_field_t ber_read_var(char** stream);
-export varbind_t ber_read_oid(char** stream);
+
+export u64 ber_read_size(char** this);
+export i64 ber_read_i64(char** stream, u8 length);
+export u64 ber_read_u64(char** stream, u8 length);
 
 #endif

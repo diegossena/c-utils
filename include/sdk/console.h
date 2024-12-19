@@ -11,7 +11,7 @@
   const char cstr[] = message; \
   console_write_str(cstr, sizeof(cstr) - 1); \
 }
-#define console_log(message, ...) console_write(message "\n", ##__VA_ARGS__)
+#define console_log(message, ...) console_write(message"\n", ##__VA_ARGS__)
 
 typedef enum ansi_t {
   ANSI_BOLD = 1,
@@ -60,7 +60,7 @@ typedef enum ansi_t {
 export void console_color(ansi_t ansi);
 export void console_write(const char* message, ...);
 export void console_write_bin(u64);
-export void console_write_buffer(const char* buffer, u64 size);
+export void console_write_buffer(const u8* buffer, u64 size);
 export void console_write_str(const char* message, u64 length);
 
 #endif

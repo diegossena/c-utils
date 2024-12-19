@@ -37,7 +37,7 @@ export void console_write_bin(u64 value) {
   }
   console_write_str(str, ptr - str);
 }
-export void console_write_buffer(const char* data, u64 size) {
+export void console_write_buffer(const u8* data, u64 size) {
   if (size) {
     char hex_str[TEXT_SIZE + 1];
     char* ptr = hex_str;

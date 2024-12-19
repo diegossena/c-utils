@@ -15,10 +15,8 @@ export u64 string_nlength(const char* this, u64 count) {
 }
 export bool string_equal(const char* this, const char* cstr) {
   while (*this != '\0') {
-    if (*this != *cstr)
+    if (*this++ != *cstr++)
       return false;
-    ++this;
-    ++cstr;
   }
   return true;
 }

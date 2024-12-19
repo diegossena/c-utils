@@ -52,7 +52,7 @@ i32 main() {
   }
   if (false) {
     // 255495 bytes 100ms
-    char array [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    u8 array [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     console_write_buffer(array, sizeof(array));
     console_write_cstr("\n");
   }
@@ -105,7 +105,7 @@ i32 main() {
   udp_server_exit:
     udp_free(udp_server);
   }
-  if (false) {
+  if (true) {
     // 257041 bytes
     udp_t udp = udp_new();
     if (!udp) {
@@ -132,6 +132,7 @@ i32 main() {
       console_log("snmp_request %d %s", error, error_cstr(error));
       goto snmp_udp_exit;
     }
+    console_log("value '%s'", pdu.varbinds[0].value.str);
   snmp_udp_exit:
     udp_free(udp);
   }
