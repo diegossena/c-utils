@@ -59,6 +59,7 @@ export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
   // error
   stream += 2; // 0x02 0x01
   pdu->error = ber_read_u64(&stream, 1);
+  console_log("error %d", pdu->error);
   // error_index
   stream += 2; // 0x02 0x01
   pdu->error_index = ber_read_u64(&stream, 1);
