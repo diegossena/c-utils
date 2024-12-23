@@ -37,7 +37,7 @@ typedef struct ber_field_t {
     u64 u64;
     f64 f64;
     u8 oid[TINY_SIZE];
-    char str[TINY_SIZE];
+    char str[TINY_SIZE + 1];
   };
 } ber_field_t;
 
@@ -49,6 +49,7 @@ typedef struct varbind_t {
 
 export char* ber_sequence_start(char** stream, u8 type);
 export void ber_sequence_end(char** stream, char* sequence);
+
 export void ber_write_i64(char** stream, i64 value);
 export void ber_write_var_integer(char** stream, u32 value);
 export void ber_write_str(char** stream, const char* string, u8 length);

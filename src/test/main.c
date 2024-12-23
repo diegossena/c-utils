@@ -116,9 +116,11 @@ i32 main() {
     }
     const char community [] = "public";
     const u8 serial_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 5, 1, 1, 17, 1 };
+    const u8 brand_name_oid [] = { OID_PREFIX, 6, 1, 2, 1, 43, 8, 2, 1, 14, 1, 1 };
     const u8 total_oid [] = { OID_PREFIX, 6, 1, 4, 1, asn1_int2(641), 6, 4, 2, 1, 1, 4, 1, 3 };
     varbind_t varbinds [] = {
       { serial_oid, sizeof(serial_oid) },
+      { brand_name_oid, sizeof(brand_name_oid) },
       { total_oid, sizeof(total_oid) }
     };
     pdu_t pdu = {
@@ -135,7 +137,8 @@ i32 main() {
       goto snmp_udp_exit;
     }
     console_log("serial '%s'", pdu.varbinds[0].value.str);
-    console_log("total %llu", pdu.varbinds[1].value.u64);
+    console_log("brand_name '%s'", pdu.varbinds[1].value.str);
+    console_log("total %llu", pdu.varbinds[2].value.u64);
   snmp_udp_exit:
     udp_free(udp);
   }
