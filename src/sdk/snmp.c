@@ -35,21 +35,6 @@ export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
   // response udp_read
   net_address_t response_address;
   result = udp_read(udp, buffer, sizeof(buffer), &response_address);
-  // console_write_buffer((u8*)buffer, result);
-  // console_log();
-  /*
-  30 3c - Sequence
-  02 01 00 - Version
-  04 06 70 75 62 6c 69 63 - [ASN.1 Octet String] [size] [community="public"]
-  a2 2f - [PDU TYPE = GetResponse] [size]
-  02 01 00 - Request ID
-  02 01 00 - Error
-  02 01 00 - Error Index
-  30 24 - [VARBIND LIST] [size]
-  30 22 - sequence
-  06 0b 2b 06 01 02 01 2b 05 01 01 11 01 - OID
-  04 13 37 34 36 33 36 43 36 36 30 32 30 4d 43 2d 31 33 30 2d 30
-  */
   stream = buffer + 7 + pdu->community_length;
   // pdu.type
   pdu->type = *stream;
@@ -59,7 +44,7 @@ export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
   // error
   stream += 2; // 0x02 0x01
   pdu->error = ber_read_u64(&stream, 1);
-  console_log("error %d", pdu->error);
+  assert(pdu->error == 0);
   // error_index
   stream += 2; // 0x02 0x01
   pdu->error_index = ber_read_u64(&stream, 1);
