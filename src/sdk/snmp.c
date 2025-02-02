@@ -1,27 +1,33 @@
 #include <sdk/snmp.h>
 
-export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
-  // pdu->bytes
-  char buffer[TEXT_SIZE];
-  char* stream = buffer;
-  char* sequence = ber_sequence_start(&stream, ASN1_TYPE_SEQUENCE);
-  ber_write_var_integer(&stream, pdu->version);
-  ber_write_str(&stream, pdu->community, pdu->community_length);
-  char* pdu_sequence = ber_sequence_start(&stream, pdu->type);
-  ber_write_var_integer(&stream, pdu->request_id);
-  ber_write_var_integer(&stream, pdu->error);
-  ber_write_var_integer(&stream, pdu->error_index);
-  char* varbind_list_sequence = ber_sequence_start(&stream, ASN1_TYPE_SEQUENCE);
-  for (u64 i = 0; i < pdu->varbinds_length; i++) {
+export error_t snmp_pdu_to_buffer(pdu_t* this, u8* target, u64 size) {
+  u8* stream = target;
+  u8* sequence = ber_sequence_start(&stream, ASN1_TYPE_SEQUENCE);
+  ber_write_var_integer(&stream, this->version);
+  ber_write_str(&stream, this->community, this->community_length);
+  u8* pdu_sequence = ber_sequence_start(&stream, this->type);
+  ber_write_var_integer(&stream, this->request_id);
+  ber_write_var_integer(&stream, this->error);
+  ber_write_var_integer(&stream, this->error_index);
+  u8* varbind_list_sequence = ber_sequence_start(&stream, ASN1_TYPE_SEQUENCE);
+  for (u64 i = 0; i < this->varbinds_length; i++) {
     char* varbind_start = ber_sequence_start(&stream, ASN1_TYPE_SEQUENCE);
-    ber_write_oid_null(&stream, pdu->varbinds[i].oid, pdu->varbinds[i].oid_length);
+    ber_write_oid_null(&stream, this->varbinds[i].oid, this->varbinds[i].oid_length);
     ber_sequence_end(&stream, varbind_start);
   }
   ber_sequence_end(&stream, varbind_list_sequence);
   ber_sequence_end(&stream, pdu_sequence);
   ber_sequence_end(&stream, sequence);
   // buffer
-  u64 size = stream - buffer;
+  u32 size = stream - buffer;
+  console_write("buffer[%llu] ", size);
+  console_write_buffer((u8*)buffer, size);
+  console_log();
+  assert(size <= TEXT_SIZE);
+}
+
+export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
+
   // udp_send
   net_address_t address = {
     .family = NET_FAMILY_IPV4,
@@ -51,20 +57,17 @@ export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
   // varbind_list
   stream += 2;
   for (u64 i = 0; i < pdu->varbinds_length; i++) {
-    /**
-     * 30: ASN.1 Sequence
-     *  ?: varbind.size
-     * 06: ASN.1 OID
-     * ...: OID size
-     */
+    // OID
     stream += 3;
     u64 size = ber_read_size(&stream);
     stream += size;
     // value
     pdu->varbinds[i].value.type = *stream++;
-    if (pdu->varbinds[i].value.type != ASN1_TYPE_NULL) {
-      pdu->varbinds[i].value.size = ber_read_size(&stream);
+    if (pdu->varbinds[i].value.type == ASN1_TYPE_NULL) {
+      ++stream;
+      continue;
     }
+    pdu->varbinds[i].value.size = ber_read_size(&stream);
     switch (pdu->varbinds[i].value.type) {
       case ASN1_TYPE_BOOLEAN:
         pdu->varbinds[i].value.boolean = *stream++;
@@ -84,10 +87,6 @@ export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
           *target++ = *stream++;
         break;
       }
-      // case ASN1_TYPE_BITSTRING:
-      //   break;
-      // case ASN1_TYPE_NULL:
-      //   break;
       default:
     }
   }

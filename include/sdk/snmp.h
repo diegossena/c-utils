@@ -13,7 +13,7 @@
 typedef u32 oid_t;
 
 typedef enum snmp_version_t {
-  SNMP_VERSION_1,
+  SNMP_VERSION_1
 } snmp_version_t;
 
 typedef enum pdu_type_t {
@@ -59,6 +59,8 @@ typedef enum snmp_error_t {
   SNMP_ERR_NOTWRITABLE,
   SNMP_ERR_INCONSISTENTNAME,
 } snmp_error_t;
+
+export error_t snmp_pdu_to_buffer(pdu_t* this, u8* target, u64 size);
 
 export error_t snmp_request(udp_t, pdu_t*, ip4_t host);
 

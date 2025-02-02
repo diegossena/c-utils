@@ -82,7 +82,10 @@ void window_onupdate(u32 time) {
   if (window_focused()) {
     u32 elapsed = time - updated_at;
     if (elapsed >= 100) {
-      snake_direction[0] = snake_direction[1];
+      if (snake_direction[1]) {
+        snake_direction[0] = snake_direction[1];
+        snake_direction[1] = 0;
+      }
       updated_at = time;
       u16 snake_tail = snake[snake_length - 1];
       // BODY UPDATE
@@ -134,12 +137,15 @@ void window_onupdate(u32 time) {
 }
 void window_onkeydown(key_code_t key) {
   switch (snake_direction[0]) {
+    // movement
     case KEY_DOWN:
     case KEY_UP:
       switch (key) {
         case KEY_LEFT:
         case KEY_RIGHT:
-          snake_direction[1] = key;
+          if (!snake_direction[1]) {
+            snake_direction[1] = key;
+          }
           return;
         default:
       }
@@ -148,12 +154,15 @@ void window_onkeydown(key_code_t key) {
       switch (key) {
         case KEY_DOWN:
         case KEY_UP:
-          snake_direction[1] = key;
+          if (!snake_direction[1]) {
+            snake_direction[1] = key;
+          }
           return;
         default:
       }
     default:
   }
+  // menu
   switch (key) {
     case KEY_SPACE:
       game_startup();
@@ -166,7 +175,7 @@ void window_onkeydown(key_code_t key) {
 }
 void window_onkeyup() {}
 void window_onkeypress() {}
-// MAIN 305473 bytes
+// MAIN 309322 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Snake", SCREEN_SIZE, SCREEN_SIZE);
   game_startup();

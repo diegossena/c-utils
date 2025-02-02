@@ -5,6 +5,7 @@
 #include <sdk/memory.h>
 #include <sdk/buffer.h>
 #include <sdk/queue.h>
+#include <sdk/string.h>
 
 #define asn1_int2(number) number >> 7 | 0x80, number & 0x7F
 #define varbind_from_const_u8(value) { .oid = (char*)serial_oid, .oid_length = sizeof(serial_oid) }
