@@ -27,4 +27,3 @@ export void queue_remove(queue_t* this) {
   this->prev->next = this->next;
   this->next->prev = this->prev;
 }
-export bool queue_is_empty(const queue_t* head) { return head == head->next; }

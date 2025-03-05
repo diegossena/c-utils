@@ -60,6 +60,10 @@
 #ifdef KEYBOARD_H
 #include <src/sdk/keyboard.win32.c>
 #endif
+#ifdef TASKMANAGER_H
+#include <src/sdk/taskmanager.c>
+#include <src/sdk/taskmanager.win32.c>
+#endif
 
 #ifdef DEVELOPMENT
 static inline void debug() {
