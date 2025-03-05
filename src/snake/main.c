@@ -51,7 +51,7 @@ void game_startup() {
 void game_over_call() {
   char message[TINY_SIZE + 1];
   string_format(message, sizeof(message), "SCORE: %lu", game_score());
-  MessageBoxA(__global_window, message, "GAME OVER", MB_OK);
+  MessageBoxA(global_window, message, "GAME OVER", MB_OK);
   game_over = true;
 }
 void slot_draw(u16 position, f32 r, f32 g, f32 b, f32 a) {
@@ -175,7 +175,7 @@ void window_onkeydown(key_code_t key) {
 }
 void window_onkeyup() {}
 void window_onkeypress() {}
-// MAIN 309322 bytes
+// MAIN 309306 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Snake", SCREEN_SIZE, SCREEN_SIZE);
   game_startup();

@@ -6,10 +6,10 @@
 #include <sdk/keyboard.h>
 #include <sdk/console.h>
 
-extern bool __global_window_running;
-extern bool __global_window_focus;
-extern u8 __global_window_keyboard_count;
-extern u8 __global_window_keyboard_state[32];
+extern bool global_window_running;
+extern bool global_window_focus;
+extern u8 global_window_keyboard_count;
+extern u8 global_window_keyboard_state[32];
 
 // METHODS
 

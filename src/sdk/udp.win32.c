@@ -9,19 +9,27 @@ export error_t udp_bind(udp_t this, net_port_t port) {
     .sin_addr.S_un.S_addr = INADDR_ANY
   };
   if (bind(this, (struct sockaddr*)&address, sizeof(struct sockaddr)) == SOCKET_ERROR) {
-    return net_error();
+    return WSAGetLastError();
   }
   return ERR_SUCCESS;
 }
-export i32 udp_read(udp_t this, char* target, u64 length, net_address_t* address) {
+export error_t udp_read(udp_t this, u8* target, u64 length, net_address_t* address) {
   i32 size = sizeof(net_address_t);
-  return recvfrom(this, target, length, 0, (struct sockaddr*)address, &size);
+  i32 result = recvfrom(this, (char*)target, length, 0, (struct sockaddr*)address, &size);
+  if (result < 0) {
+    return WSAGetLastError();
+  }
+  return ERR_SUCCESS;
 }
-export i32 udp_send(udp_t this, const char* data, u64 length, net_address_t* address) {
-  return sendto(
-    this, data, length, 0,
+export error_t udp_send(udp_t this, const u8* data, u64 length, net_address_t* address) {
+  i32 result = sendto(
+    this, (char*)data, length, 0,
     (struct sockaddr*)address, sizeof(net_address_t)
   );
+  if (result < 0) {
+    return WSAGetLastError();
+  }
+  return ERR_SUCCESS;
 }
 
 #endif

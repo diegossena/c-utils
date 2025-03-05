@@ -48,16 +48,16 @@ typedef struct varbind_t {
   ber_field_t value;
 } varbind_t;
 
-export char* ber_sequence_start(char** stream, u8 type);
-export void ber_sequence_end(char** stream, char* sequence);
+export u8* ber_sequence_start(u8** stream, u8 type);
+export void ber_sequence_end(u8** stream, u8* sequence);
 
-export void ber_write_i64(char** stream, i64 value);
-export void ber_write_var_integer(char** stream, u32 value);
-export void ber_write_str(char** stream, const char* string, u8 length);
-export void ber_write_oid_null(char** stream, const u8* oid, u64 size);
+export void ber_write_i64(u8** stream, i64 value);
+export void ber_write_var_integer(u8** stream, u32 value);
+export void ber_write_str(u8** stream, const char* string, u8 length);
+export void ber_write_oid_null(u8** stream, const u8* oid, u64 size);
 
-export u64 ber_read_size(char** this);
-export i64 ber_read_i64(char** stream, u8 length);
-export u64 ber_read_u64(char** stream, u8 length);
+export u64 ber_read_size(u8** this);
+export i64 ber_read_i64(u8** stream, u8 length);
+export u64 ber_read_u64(u8** stream, u8 length);
 
 #endif

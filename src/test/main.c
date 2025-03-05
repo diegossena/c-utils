@@ -9,7 +9,6 @@
 #include <sdk/unity.h>
 
 i32 main() {
-  i32 result;
   error_t error = net_startup();
   if (error) {
     console_log("net_startup %d %s", error, error_cstr(error));
@@ -83,19 +82,17 @@ i32 main() {
       .net_port = net_port_from_short(9100),
       .ip4 = ip4_from_bytes(127, 0, 0, 1)
     };
-    const char server_data [] = "Hello World";
-    result = udp_send(udp_client, server_data, sizeof(server_data) - 1, &server_address);
+    const u8 server_data [] = "Hello World";
+    error = udp_send(udp_client, server_data, sizeof(server_data) - 1, &server_address);
     console_log("udp server says  '%s'", server_data);
-    if (result < 0) {
-      error = net_error();
+    if (error) {
       console_log("udp_send %d %s", error, error_cstr(error));
     }
 
-    char client_data[TEXT_SIZE + 1];
+    u8 client_data[TEXT_SIZE + 1];
     net_address_t client_address;
-    result = udp_read(udp_server, client_data, sizeof(client_data) - 1, &client_address);
-    if (result < 0) {
-      error = net_error();
+    error = udp_read(udp_server, client_data, sizeof(client_data) - 1, &client_address);
+    if (error) {
       console_log("udp_read %d %s", error, error_cstr(error));
       goto udp_client_exit;
     }
@@ -105,7 +102,7 @@ i32 main() {
   udp_server_exit:
     udp_free(udp_server);
   }
-  if (true) {
+  if (false) {
     // 257041 bytes
     udp_t udp = udp_new();
     if (!udp) {
@@ -145,10 +142,9 @@ i32 main() {
   snmp_udp_exit:
     udp_free(udp);
   }
-  if (false) {
-    // 258065 bytes 340ms
-    char* stream;
-    u64 remaining;
+  if (true) {
+    console_write_cstr("TCP TEST\n");
+    // 259005 bytes 5950ms
     tcp_t tcp = tcp_new();
     if (!tcp) {
       error = net_error();
@@ -166,31 +162,18 @@ i32 main() {
       "Host: www.google.com.br\r\n"
       "Connection: close\r\n"
       "\r\n";
-    stream = (char*)http_request;
-    remaining = sizeof(http_request) - 1;
-    while ((result = tcp_send(tcp, stream, remaining)) > 0) {
-      stream += result;
-      remaining -= result;
-    }
-    if (result < 0) {
-      error = net_error();
+    error = tcp_send(tcp, http_request, sizeof(http_request) - 1);
+    if (error) {
       console_log("tcp_send %d %s", error, error_cstr(error));
       goto http_exit;
     }
     char http_response[TEXT_SIZE + 1];
-    stream = http_response;
-    remaining = sizeof(http_response) - 1;
-    while ((result = tcp_read(tcp, stream, remaining)) > 0) {
-      stream += result;
-      remaining -= result;
-    }
-    if (result < 0) {
-      error = net_error();
+    error = tcp_read(tcp, http_response, sizeof(http_response) - 1);
+    if (error) {
       console_log("tcp_read %d %s", error, error_cstr(error));
       goto http_exit;
     }
-    *stream = '\0';
-    console_log("http_response[%d]\n%s", result, http_response);
+    console_log("http_response\n%s", http_response);
   http_exit:
     tcp_free(tcp);
   }
