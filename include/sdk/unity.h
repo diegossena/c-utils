@@ -60,9 +60,14 @@
 #ifdef KEYBOARD_H
 #include <src/sdk/keyboard.win32.c>
 #endif
+#ifdef THREAD_H
+#include <src/sdk/thread.win32.c>
+#endif
+#ifdef OS_H
+#include <src/sdk/os.win32.c>
+#endif
 #ifdef TASKMANAGER_H
 #include <src/sdk/taskmanager.c>
-#include <src/sdk/taskmanager.win32.c>
 #endif
 
 #ifdef DEVELOPMENT
