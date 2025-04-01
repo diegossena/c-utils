@@ -27,3 +27,10 @@ export void queue_remove(queue_t* this) {
   this->prev->next = this->next;
   this->next->prev = this->prev;
 }
+
+export bool queue_is_empty(queue_t* this) {
+  return this == this->next;
+}
+export bool queue_is_not_empty(queue_t* this) {
+  return this != this->next;
+}

@@ -13,7 +13,7 @@ export void* memory_realloc(void* this, u64 size);
 export void* memory_realloc0(void* this, u64 size);
 export void memory_free(void* this);
 
-#ifdef DEVELOPMENT
+#ifdef DEBUG
 
 extern i64 __memory_count;
 #define __memory_count_increment(block) __memory_count += block ? 1 : 0

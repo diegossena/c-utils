@@ -1,4 +1,4 @@
-#ifdef DEVELOPMENT
+#ifdef DEBUG
 
 #include <sdk/types.h>
 #include <sdk/console.h>

@@ -44,7 +44,7 @@ export error_t net_error();
 export u64 _socket_new(socket_type_t);
 export void _socket_free(socket_t fd);
 
-#ifdef DEVELOPMENT
+#ifdef DEBUG
 
 extern bool __net_started;
 extern i64 __socket_count;

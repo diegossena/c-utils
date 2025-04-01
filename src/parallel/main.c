@@ -1,27 +1,14 @@
 #include <sdk/console.h>
 #include <sdk/queue.h>
+#include <sdk/async.h>
 #include <sdk/taskmanager.h>
 #include <sdk/unity.h>
 
-u64 count = 0;
-void task_handle(task_t* task) {
-  ++count;
-  console_log("task_handle count=%d", count);
-  if (count == 16) {
-    queue_remove(&task->__queue);
-  }
-  console_log("!task_handle");
-}
-
 i32 main() {
-  taskmanager_t taskmanager;
-  taskmanager_constructor(&taskmanager);
+  async_startup();
+  taskmanager_startup();
 
-  task_t task = {
-    .handle = (function_t)task_handle
-  };
-  queue_push(&taskmanager.tasks, &task.__queue);
-
-  taskmanager_run(&taskmanager);
+  taskmanager_shutdown();
+  async_shutdown();
   return 0;
 }

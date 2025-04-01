@@ -5,10 +5,9 @@
 export net_port_t net_port_from_short(u16 port) { return htons(port); }
 export u16 net_port_to_short(net_port_t port) { return ntohs(port); }
 export error_t net_startup() {
-  assert(__net_started == false);
   WSADATA wsaData;
   error_t error = WSAStartup(MAKEWORD(2, 2), &wsaData);
-#ifdef DEVELOPMENT
+#ifdef DEBUG
   __net_started = true;
 #endif
   if (error) {
@@ -17,9 +16,8 @@ export error_t net_startup() {
   return error;
 }
 export void net_shutdown() {
-  assert(__net_started == true);
   WSACleanup();
-#ifdef DEVELOPMENT
+#ifdef DEBUG
   __net_started = false;
 #endif
 }

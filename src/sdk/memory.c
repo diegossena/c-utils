@@ -1,6 +1,6 @@
 #include <sdk/memory.h>
 
-#ifdef DEVELOPMENT
+#ifdef DEBUG
 i64 __memory_count = 0;
 #endif
 

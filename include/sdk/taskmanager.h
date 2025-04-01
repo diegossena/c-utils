@@ -7,31 +7,31 @@
 #include <sdk/os.h>
 #include <sdk/thread.h>
 
+#define WORKERS_COUNT 16
+
+typedef struct worker_t {
+  queue_t tasks;
+  thread_t* thread;
+  thread_mutex_t mutex;
+} worker_t;
+
 typedef struct task_t {
-  // extends
   queue_t __queue;
-  // props
   function_t handle;
   function_t destroy;
-  void* context;
-  bool __busy;
-  thread_mutex_t __lock;
+  // ...context
 } task_t;
 
-typedef struct taskmanager_t {
-  queue_t tasks; // task_t
-  void** threads;
-  u8 threads_count;
-} taskmanager_t;
+extern u64 taskmanager_count;
+extern worker_t __workers[WORKERS_COUNT];
+extern u64 __worker_index;
 
-export void taskmanager_constructor(taskmanager_t* this);
-export void taskmanager_run(taskmanager_t* this);
+export void taskmanager_startup();
+export void taskmanager_shutdown();
 
-export void task_startup(taskmanager_t* this, task_t* task);
-export void task_shutdown(task_t* task);
+export void task_constructor(task_t* this);
+export void task_deconstructor(task_t* task);
 
-export void __taskmanager_run(queue_t* tasks);
-export void __taskmanager_startup(taskmanager_t* this);
-export void __taskmanager_shutdown(taskmanager_t* this);
+export void __worker_thread(worker_t* this);
 
 #endif

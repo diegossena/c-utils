@@ -69,8 +69,11 @@
 #ifdef TASKMANAGER_H
 #include <src/sdk/taskmanager.c>
 #endif
+#ifdef ASYNC_H
+#include <src/sdk/async.win32.c>
+#endif
 
-#ifdef DEVELOPMENT
+#ifdef DEBUG
 static inline void debug() {
   bool success = true;
   console_color(ANSI_FORE_LIGHTRED);

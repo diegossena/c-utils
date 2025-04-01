@@ -1,6 +1,6 @@
 #include <sdk/net.h>
 
-#ifdef DEVELOPMENT
+#ifdef DEBUG
 bool __net_started = false;
 i64 __socket_count = 0;
 #endif
