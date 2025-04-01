@@ -4,30 +4,24 @@
 #include <sdk/taskmanager.h>
 #include <sdk/unity.h>
 
-void task1_handle(task_t* this) {
-  console_log("task1_handle task=%x", this);
+void task_handle(task_t* this) {
+  console_log("task_handle task=%lld", (u64)this->context);
   this->destroy(this);
 }
-void task2_handle(task_t* this) {
-  console_log("task2_handle task=%x", this);
-  this->destroy(this);
-}
-
 i32 main() {
   async_startup();
   taskmanager_startup();
 
-  task_t task1 = {
-    .handle = (function_t)task1_handle,
-    .destroy = (function_t)task_deconstructor
-  };
-  task_constructor(&task1);
-  task_t task2 = {
-    .handle = (function_t)task2_handle,
-    .destroy = (function_t)task_deconstructor
-  };
-  task_constructor(&task2);
+  task_t tasks[16];
+  u64 tasks_length = sizeof(tasks) / sizeof(task_t);
 
+  for (u64 i = 0; i < tasks_length; i++) {
+    task_t* task = &tasks[i];
+    task->handle = (function_t)task_handle;
+    task->destroy = (function_t)task_deconstructor;
+    task->context = (void*)i;
+    task_constructor(task);
+  }
   taskmanager_await();
   async_shutdown();
   return 0;
