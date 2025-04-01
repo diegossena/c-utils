@@ -4,7 +4,7 @@
 #include <sdk/types.h>
 
 typedef void thread_t;
-typedef void event_t;
+typedef void sync_t;
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
@@ -20,9 +20,9 @@ export void mutex_lock(mutex_t* this);
 export void mutex_unlock(mutex_t* this);
 export void mutex_destroy(mutex_t* this);
 
-export event_t* event_new();
-export void event_free(event_t* this);
-export void event_wait(event_t* this);
-export void event_signal(event_t* this);
+export sync_t* sync_new();
+export void sync_free(sync_t* this);
+export void sync_wait(sync_t* this);
+export void sync_signal(sync_t* this);
 
 #endif

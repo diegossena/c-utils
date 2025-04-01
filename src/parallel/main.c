@@ -5,7 +5,6 @@
 #include <sdk/unity.h>
 
 void task_handle(task_t* this) {
-  console_log("task_handle task=%lld", (u64)this->context);
   this->destroy(this);
 }
 i32 main() {
@@ -22,11 +21,7 @@ i32 main() {
     task->context = (void*)i;
     task_init(task);
   }
-  console_log("taskmanager_wait");
   taskmanager_wait();
-  console_log("!taskmanager_wait");
-  console_log("async_shutdown");
   async_shutdown();
-  console_log("!async_shutdown");
   return 0;
 }

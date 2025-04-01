@@ -3,7 +3,7 @@
 #include <windows.h>
 
 export thread_t* thread_new(function_t handle, void* context) {
-  return CreateThread(
+  HANDLE this = CreateThread(
     0,                              // default security attributes
     0,                              // use default stack size  
     (LPTHREAD_START_ROUTINE)handle, // thread function
@@ -11,6 +11,7 @@ export thread_t* thread_new(function_t handle, void* context) {
     0,                              // use default creation flags 
     0                               // thread_id
   );
+  return this;
 }
 export void thread_wait(thread_t* this) {
   WaitForSingleObject((HANDLE)this, INFINITE);
@@ -40,16 +41,16 @@ export void mutex_unlock(mutex_t* this) {
   LeaveCriticalSection(this);
 }
 
-export event_t* event_new() {
-  return (event_t*)CreateEventW(NULL, FALSE, FALSE, NULL);
+export sync_t* sync_new() {
+  return (sync_t*)CreateEventW(NULL, FALSE, FALSE, NULL);
 }
-export void event_free(event_t* this) {
+export void sync_free(sync_t* this) {
   CloseHandle((HANDLE)this);
 }
-export void event_signal(event_t* this) {
+export void sync_signal(sync_t* this) {
   SetEvent((HANDLE)this);
 }
-export void event_wait(event_t* this) {
+export void sync_wait(sync_t* this) {
   WaitForSingleObject((HANDLE)this, INFINITE);
 }
 
