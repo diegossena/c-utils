@@ -13,8 +13,8 @@
 typedef struct worker_t {
   queue_t tasks;
   thread_t* thread;
-  mutex_t mutex;
-  event_t* cond;
+  mutex_t lock;
+  event_t* sleep;
   bool exiting;
 } worker_t;
 
@@ -31,8 +31,7 @@ extern worker_t __workers[WORKERS_COUNT];
 extern u8 __worker_index;
 
 export void taskmanager_startup();
-export void taskmanager_shutdown();
-export void taskmanager_await();
+export void taskmanager_wait();
 
 export void task_init(task_t* this);
 export void task_destroy(task_t* task);

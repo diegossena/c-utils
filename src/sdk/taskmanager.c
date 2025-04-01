@@ -11,32 +11,28 @@ export void taskmanager_startup() {
   __taskmanager_onexit = event_new();
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
-    mutex_init(&worker->mutex);
+    mutex_init(&worker->lock);
     queue_constructor(&worker->tasks);
     worker->exiting = false;
-    worker->cond = event_new();
+    worker->sleep = event_new();
     worker->thread = thread_new((function_t)__worker_thread, (void*)worker);
   }
 }
-export void taskmanager_await() {
+export void taskmanager_wait() {
   assert(__taskmanager_onexit != 0);
   event_wait(__taskmanager_onexit);
-}
-export void taskmanager_shutdown() {
-  assert(__taskmanager_onexit != 0);
   thread_t* workers_threads[WORKERS_COUNT];
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
     worker->exiting = true;
-    event_signal(worker->cond);
+    event_signal(worker->sleep);
     workers_threads[i] = worker->thread;
   }
   thread_wait_all(workers_threads, WORKERS_COUNT);
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
-    thread_free(worker->thread);
-    event_free(worker->cond);
-    mutex_destroy(&worker->mutex);
+    event_free(worker->sleep);
+    mutex_destroy(&worker->lock);
   }
 #ifdef DEBUG
   __taskmanager_onexit = 0;
@@ -46,10 +42,10 @@ export void task_init(task_t* this) {
   assert(__worker_index != -1);
   __worker_index = (__worker_index + 1) % WORKERS_COUNT;
   worker_t* worker = &__workers[__worker_index];
-  thread_mutex_lock(&worker->mutex);
+  mutex_lock(&worker->lock);
   queue_push(&worker->tasks, &this->__queue);
-  mutex_unlock(&worker->mutex);
-  event_signal(worker->cond);
+  mutex_unlock(&worker->lock);
+  event_signal(worker->sleep);
   ++taskmanager_count;
 }
 export void task_destroy(task_t* this) {
@@ -61,13 +57,13 @@ export void task_destroy(task_t* this) {
 }
 export void __worker_thread(worker_t* this) {
   while (this->exiting == false) {
-    event_wait(this->cond);
+    event_wait(this->sleep);
     task_t* it = (task_t*)this->tasks.next;
     task_t* next;
     while (this->tasks.next != &this->tasks) {
-      mutex_lock(&this->mutex);
+      mutex_lock(&this->lock);
       next = (task_t*)it->__queue.next;
-      mutex_unlock(&this->mutex);
+      mutex_unlock(&this->lock);
       if (it != (task_t*)&this->tasks) {
         it->handle(it);
       }

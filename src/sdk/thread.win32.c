@@ -19,11 +19,12 @@ export void thread_wait(thread_t* this) {
 export void thread_wait_all(thread_t** threads, u64 count) {
   WaitForMultipleObjects(count, (HANDLE*)threads, true, INFINITE);
   while (count) {
-    CloseHandle(*threads++);
+    CloseHandle(*threads);
+    if (count == 0)
+      break;
+    --count;
+    ++threads;
   }
-}
-export void thread_wait_once(thread_t** threads, u64 count) {
-  WaitForMultipleObjects(count, (HANDLE*)threads, false, INFINITE);
 }
 
 void mutex_init(mutex_t* this) {
