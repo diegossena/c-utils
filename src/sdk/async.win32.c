@@ -18,14 +18,15 @@ export void async_shutdown() {
 }
 
 void __async_worker() {
-  DWORD bytes_count;
-  OVERLAPPED* overlapped;
-  ULONG_PTR completion_key;
+  // DWORD bytes_count;
+  // OVERLAPPED* overlapped;
+  // ULONG_PTR completion_key;
   while (true) {
-    BOOL result = GetQueuedCompletionStatus(__iocp, &bytes_count, &completion_key, &overlapped, INFINITE);
-    if (!result) {
+    Sleep(INFINITE);
+    // BOOL result = GetQueuedCompletionStatus(__iocp, &bytes_count, &completion_key, &overlapped, INFINITE);
+    // if (!result) {
 
-    }
+    // }
   }
 }
 
