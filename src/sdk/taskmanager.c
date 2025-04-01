@@ -1,11 +1,12 @@
 #include <sdk/taskmanager.h>
 
-thread_cond_t* __taskmanager_onexit = 0;
+thread_signal_t* __taskmanager_onexit = 0;
 u64 taskmanager_count = 0;
 worker_t __workers[WORKERS_COUNT];
 u8 __worker_index = -1;
 
 export void taskmanager_startup() {
+  assert(__taskmanager_onexit == 0);
   __taskmanager_onexit = thread_cond_new();
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
@@ -18,7 +19,7 @@ export void taskmanager_startup() {
 }
 export void taskmanager_await() {
   assert(__taskmanager_onexit != 0);
-  thread_cond_await(__taskmanager_onexit);
+  thread_signal_await(__taskmanager_onexit);
   taskmanager_shutdown();
 }
 export void taskmanager_shutdown() {
@@ -26,39 +27,39 @@ export void taskmanager_shutdown() {
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
     worker->exiting = true;
-    thread_cond_signal(worker->cond);
+    thread_signal_emit(worker->cond);
 
   }
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
     thread_await(worker->thread);
-    thread_cond_free(worker->cond);
+    thread_signal_free(worker->cond);
     thread_mutex_destroy(&worker->mutex);
   }
 #ifdef DEBUG
   __taskmanager_onexit = 0;
 #endif
 }
-export void task_constructor(task_t* this) {
+export void task_init(task_t* this) {
   assert(__worker_index != -1);
   __worker_index = (__worker_index + 1) % WORKERS_COUNT;
   worker_t* worker = &__workers[__worker_index];
   thread_mutex_lock(&worker->mutex);
   queue_push(&worker->tasks, &this->__queue);
   thread_mutex_unlock(&worker->mutex);
-  thread_cond_signal(worker->cond);
+  thread_signal_emit(worker->cond);
   ++taskmanager_count;
 }
-export void task_deconstructor(task_t* this) {
+export void task_destroy(task_t* this) {
   queue_remove(&this->__queue);
   --taskmanager_count;
   if (taskmanager_count == 0) {
-    thread_cond_signal(__taskmanager_onexit);
+    thread_signal_emit(__taskmanager_onexit);
   }
 }
 export void __worker_thread(worker_t* this) {
   while (this->exiting == false) {
-    thread_cond_await(this->cond);
+    thread_signal_await(this->cond);
     task_t* it = (task_t*)this->tasks.next;
     task_t* next;
     while (this->tasks.next != &this->tasks) {

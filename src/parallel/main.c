@@ -18,9 +18,9 @@ i32 main() {
   for (u64 i = 0; i < tasks_length; i++) {
     task_t* task = &tasks[i];
     task->handle = (function_t)task_handle;
-    task->destroy = (function_t)task_deconstructor;
+    task->destroy = (function_t)task_destroy;
     task->context = (void*)i;
-    task_constructor(task);
+    task_init(task);
   }
   taskmanager_await();
   async_shutdown();

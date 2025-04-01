@@ -30,16 +30,16 @@ export void thread_mutex_unlock(thread_mutex_t* this) {
   LeaveCriticalSection(this);
 }
 
-export thread_cond_t* thread_cond_new() {
-  return (thread_cond_t*)CreateEventW(NULL, FALSE, FALSE, NULL);
+export thread_signal_t* thread_cond_new() {
+  return (thread_signal_t*)CreateEventW(NULL, FALSE, FALSE, NULL);
 }
-export void thread_cond_free(thread_cond_t* this) {
+export void thread_signal_free(thread_signal_t* this) {
   CloseHandle((HANDLE)this);
 }
-export void thread_cond_signal(thread_cond_t* this) {
+export void thread_signal_emit(thread_signal_t* this) {
   SetEvent((HANDLE)this);
 }
-export void thread_cond_await(thread_cond_t* this) {
+export void thread_signal_await(thread_signal_t* this) {
   WaitForSingleObject((HANDLE)this, INFINITE);
 }
 
