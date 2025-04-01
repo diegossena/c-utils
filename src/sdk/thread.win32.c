@@ -12,34 +12,43 @@ export thread_t* thread_new(function_t handle, void* context) {
     0                               // thread_id
   );
 }
-export void thread_await(thread_t* this) {
+export void thread_wait(thread_t* this) {
   WaitForSingleObject((HANDLE)this, INFINITE);
   CloseHandle(this);
 }
+export void thread_wait_all(thread_t** threads, u64 count) {
+  WaitForMultipleObjects(count, (HANDLE*)threads, true, INFINITE);
+  while (count) {
+    CloseHandle(*threads++);
+  }
+}
+export void thread_wait_once(thread_t** threads, u64 count) {
+  WaitForMultipleObjects(count, (HANDLE*)threads, false, INFINITE);
+}
 
-void thread_mutex_init(thread_mutex_t* this) {
+void mutex_init(mutex_t* this) {
   InitializeCriticalSection(this);
 }
-export void thread_mutex_destroy(thread_mutex_t* this) {
+export void mutex_destroy(mutex_t* this) {
   DeleteCriticalSection(this);
 }
-export void thread_mutex_lock(thread_mutex_t* this) {
+export void mutex_lock(mutex_t* this) {
   EnterCriticalSection(this);
 }
-export void thread_mutex_unlock(thread_mutex_t* this) {
+export void mutex_unlock(mutex_t* this) {
   LeaveCriticalSection(this);
 }
 
-export thread_signal_t* thread_cond_new() {
-  return (thread_signal_t*)CreateEventW(NULL, FALSE, FALSE, NULL);
+export event_t* event_new() {
+  return (event_t*)CreateEventW(NULL, FALSE, FALSE, NULL);
 }
-export void thread_signal_free(thread_signal_t* this) {
+export void event_free(event_t* this) {
   CloseHandle((HANDLE)this);
 }
-export void thread_signal_emit(thread_signal_t* this) {
+export void event_signal(event_t* this) {
   SetEvent((HANDLE)this);
 }
-export void thread_signal_await(thread_signal_t* this) {
+export void event_wait(event_t* this) {
   WaitForSingleObject((HANDLE)this, INFINITE);
 }
 

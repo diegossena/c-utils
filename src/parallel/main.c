@@ -23,6 +23,7 @@ i32 main() {
     task_init(task);
   }
   taskmanager_await();
+  taskmanager_shutdown();
   async_shutdown();
   return 0;
 }

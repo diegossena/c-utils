@@ -16,7 +16,7 @@ export void async_startup() {
 export void async_shutdown() {
   assert(__async_thread != 0);
   PostQueuedCompletionStatus(__iocp, 0, IOCP_SHUTDOWN, 0);
-  thread_await(__async_thread);
+  thread_wait(__async_thread);
 #if DEBUG
   __async_thread = 0;
 #endif
