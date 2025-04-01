@@ -5,11 +5,11 @@
 #include <sdk/unity.h>
 
 void task1_handle(task_t* this) {
-  console_log("task1_handle");
+  console_log("task1_handle task=%x", this);
   this->destroy(this);
 }
 void task2_handle(task_t* this) {
-  console_log("task2_handle");
+  console_log("task2_handle task=%x", this);
   this->destroy(this);
 }
 
@@ -29,7 +29,6 @@ i32 main() {
   task_constructor(&task2);
 
   taskmanager_await();
-  taskmanager_shutdown();
   async_shutdown();
   return 0;
 }

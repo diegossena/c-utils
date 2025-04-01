@@ -6,6 +6,7 @@
 #include <sdk/memory.h>
 #include <sdk/os.h>
 #include <sdk/thread.h>
+#include <sdk/assert.h>
 
 #define WORKERS_COUNT 16
 

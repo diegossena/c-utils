@@ -1,6 +1,6 @@
 #include <sdk/taskmanager.h>
 
-thread_cond_t* __taskmanager_onexit;
+thread_cond_t* __taskmanager_onexit = 0;
 u64 taskmanager_count = 0;
 worker_t __workers[WORKERS_COUNT];
 u8 __worker_index = -1;
@@ -17,24 +17,27 @@ export void taskmanager_startup() {
   }
 }
 export void taskmanager_await() {
-  thread_cond_wait(__taskmanager_onexit);
+  assert(__taskmanager_onexit != 0);
+  thread_cond_await(__taskmanager_onexit);
+  taskmanager_shutdown();
 }
 export void taskmanager_shutdown() {
+  assert(__taskmanager_onexit != 0);
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
-    for (task_t* it = (task_t*)worker->tasks.next;
-      (queue_t*)it != &worker->tasks;
-      it = (task_t*)it->__queue.next) {
-      it->destroy(it);
-    }
     worker->exiting = true;
     thread_cond_signal(worker->cond);
-    thread_wait(worker->thread);
-    thread_free(worker->thread);
+
+  }
+  for (u8 i = 0; i < WORKERS_COUNT; i++) {
+    worker_t* worker = &__workers[i];
+    thread_await(worker->thread);
     thread_cond_free(worker->cond);
     thread_mutex_destroy(&worker->mutex);
   }
-  thread_cond_signal(__taskmanager_onexit);
+#ifdef DEBUG
+  __taskmanager_onexit = 0;
+#endif
 }
 export void task_constructor(task_t* this) {
   assert(__worker_index != -1);
@@ -50,12 +53,12 @@ export void task_deconstructor(task_t* this) {
   queue_remove(&this->__queue);
   --taskmanager_count;
   if (taskmanager_count == 0) {
-    taskmanager_shutdown();
+    thread_cond_signal(__taskmanager_onexit);
   }
 }
 export void __worker_thread(worker_t* this) {
   while (this->exiting == false) {
-    thread_cond_wait(this->cond);
+    thread_cond_await(this->cond);
     task_t* it = (task_t*)this->tasks.next;
     task_t* next;
     while (this->tasks.next != &this->tasks) {
@@ -67,5 +70,10 @@ export void __worker_thread(worker_t* this) {
       }
       it = next;
     }
+  }
+  for (task_t* it = (task_t*)this->tasks.next;
+    (queue_t*)it != &this->tasks;
+    it = (task_t*)it->__queue.next) {
+    it->destroy(it);
   }
 }

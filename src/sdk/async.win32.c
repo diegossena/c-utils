@@ -8,10 +8,12 @@ HANDLE __iocp = 0;
 export void async_startup() {
   assert(__async_thread == 0);
   __async_thread = thread_new((function_t)__async_worker, null);
+  __iocp = (HANDLE)true;
 }
 export void async_shutdown() {
   assert(__async_thread != 0);
-  thread_free(__async_thread);
+  __iocp = 0;
+  thread_await(__async_thread);
 #if DEBUG
   __async_thread = 0;
 #endif
@@ -21,8 +23,8 @@ void __async_worker() {
   // DWORD bytes_count;
   // OVERLAPPED* overlapped;
   // ULONG_PTR completion_key;
-  while (true) {
-    Sleep(INFINITE);
+  while (__iocp) {
+    Sleep(100);
     // BOOL result = GetQueuedCompletionStatus(__iocp, &bytes_count, &completion_key, &overlapped, INFINITE);
     // if (!result) {
 
