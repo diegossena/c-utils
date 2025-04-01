@@ -34,6 +34,9 @@ void __async_worker() {
       break;
   }
   CloseHandle(__iocp);
+#if DEBUG
+  __iocp = 0;
+#endif
 }
 
 #undef IOCP_SHUTDOWN
