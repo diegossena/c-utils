@@ -20,7 +20,9 @@ export void taskmanager_startup() {
 }
 export void taskmanager_wait() {
   assert(__taskmanager_onexit != 0);
-  sync_wait(__taskmanager_onexit);
+  if (taskmanager_count != 0) {
+    sync_wait(__taskmanager_onexit);
+  }
   thread_t* workers_threads[WORKERS_COUNT];
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &__workers[i];
