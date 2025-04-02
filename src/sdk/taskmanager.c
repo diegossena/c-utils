@@ -30,11 +30,6 @@ export void taskmanager_wait() {
     workers_threads[i] = worker->thread;
   }
   thread_wait_all(workers_threads, WORKERS_COUNT);
-  for (u8 i = 0; i < WORKERS_COUNT; i++) {
-    worker_t* worker = &global_workers[i];
-    sync_free(worker->sync);
-    mutex_destroy(&worker->lock);
-  }
 #ifdef DEBUG
   global_taskmanager_sync = 0;
 #endif
@@ -74,9 +69,12 @@ export void __worker_thread(worker_t* this) {
       it = next;
     }
   }
+  sync_free(this->sync);
+  mutex_destroy(&this->lock);
   for (task_t* it = (task_t*)this->tasks.next;
     (queue_t*)it != &this->tasks;
     it = (task_t*)it->_queue.next) {
     it->destroy(it);
   }
+  console_log("__worker_thread %x", this);
 }
