@@ -1,6 +1,7 @@
 #include <sdk/taskmanager.h>
 
 sync_t* global_taskmanager_sync = 0;
+mutex_t global_taskmanager_lock;
 u64 global_taskmanager_count = 0;
 worker_t global_workers[WORKERS_COUNT];
 u8 global_worker_index = -1;
@@ -8,6 +9,7 @@ u8 global_worker_index = -1;
 export void taskmanager_startup() {
   assert(global_taskmanager_sync == 0);
   global_taskmanager_sync = sync_new();
+  mutex_init(&global_taskmanager_lock);
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
     worker_t* worker = &global_workers[i];
     mutex_init(&worker->lock);
@@ -33,6 +35,7 @@ export void taskmanager_wait() {
 #ifdef DEBUG
   global_taskmanager_sync = 0;
 #endif
+  mutex_destroy(&global_taskmanager_lock);
 }
 export void task_init(task_t* this) {
   assert(global_worker_index != -1);
@@ -42,14 +45,19 @@ export void task_init(task_t* this) {
   mutex_lock(&worker->lock);
   queue_push(&worker->tasks, &this->_queue);
   mutex_unlock(&worker->lock);
+  mutex_lock(&global_taskmanager_lock);
   ++global_taskmanager_count;
+  mutex_unlock(&global_taskmanager_lock);
   sync_signal(worker->sync);
 }
 export void task_destroy(task_t* this) {
   mutex_lock(&this->_worker->lock);
   queue_remove(&this->_queue);
   mutex_unlock(&this->_worker->lock);
+  mutex_lock(&global_taskmanager_lock);
   --global_taskmanager_count;
+  mutex_unlock(&global_taskmanager_lock);
+  console_log("global_taskmanager_count %llu", global_taskmanager_count);
   if (global_taskmanager_count == 0) {
     sync_signal(global_taskmanager_sync);
   }

@@ -2,7 +2,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 
-#define IOCP_SHUTDOWN ((u8)-1)
+#define IOCP_SHUTDOWN -1
 
 thread_t* __async_thread = 0;
 HANDLE __iocp = 0;
@@ -28,7 +28,7 @@ void __async_worker() {
   u64 completion_key;
   while (true) {
     bool success = GetQueuedCompletionStatus(__iocp, (DWORD*)&bytes_count, &completion_key, &overlapped, INFINITE);
-    if (!success)
+    if (success == false)
       continue;
     if (completion_key == IOCP_SHUTDOWN)
       break;

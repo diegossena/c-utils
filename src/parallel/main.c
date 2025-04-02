@@ -12,7 +12,7 @@ i32 main() {
   async_startup();
   taskmanager_startup();
 
-  task_t tasks[16];
+  task_t tasks[2048];
   u64 tasks_length = sizeof(tasks) / sizeof(task_t);
   for (u64 i = 0; i < tasks_length; i++) {
     task_t* task = &tasks[i];
