@@ -23,11 +23,11 @@ export void async_shutdown() {
 }
 
 void __async_worker() {
-  DWORD bytes_count;
+  u32 bytes_count;
   OVERLAPPED* overlapped;
-  ULONG_PTR completion_key;
+  u64 completion_key;
   while (true) {
-    bool success = GetQueuedCompletionStatus(__iocp, &bytes_count, &completion_key, &overlapped, INFINITE);
+    bool success = GetQueuedCompletionStatus(__iocp, (DWORD*)&bytes_count, &completion_key, &overlapped, INFINITE);
     if (!success)
       continue;
     if (completion_key == IOCP_SHUTDOWN)

@@ -20,11 +20,11 @@ typedef struct worker_t {
 
 typedef struct task_t {
   queue_t _queue;
-  mutex_t lock;
+  worker_t* _worker;
+  mutex_t _lock;
   function_t handle;
   function_t destroy;
   void* context;
-  worker_t* _worker;
 } task_t;
 
 extern sync_t* global_taskmanager_sync;

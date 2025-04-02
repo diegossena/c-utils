@@ -42,8 +42,8 @@ export void task_init(task_t* this) {
   mutex_lock(&worker->lock);
   queue_push(&worker->tasks, &this->_queue);
   mutex_unlock(&worker->lock);
-  sync_signal(worker->sync);
   ++global_taskmanager_count;
+  sync_signal(worker->sync);
 }
 export void task_destroy(task_t* this) {
   mutex_lock(&this->_worker->lock);
@@ -76,5 +76,4 @@ export void __worker_thread(worker_t* this) {
     it = (task_t*)it->_queue.next) {
     it->destroy(it);
   }
-  console_log("__worker_thread %x", this);
 }
