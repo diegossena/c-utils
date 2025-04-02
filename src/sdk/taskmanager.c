@@ -1,15 +1,15 @@
 #include <sdk/taskmanager.h>
 
-sync_t* __taskmanager_sync = 0;
-u64 taskmanager_count = 0;
-worker_t __workers[WORKERS_COUNT];
-u8 __worker_index = -1;
+sync_t* global_taskmanager_sync = 0;
+u64 global_taskmanager_count = 0;
+worker_t global_workers[WORKERS_COUNT];
+u8 global_worker_index = -1;
 
 export void taskmanager_startup() {
-  assert(__taskmanager_sync == 0);
-  __taskmanager_sync = sync_new();
+  assert(global_taskmanager_sync == 0);
+  global_taskmanager_sync = sync_new();
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
-    worker_t* worker = &__workers[i];
+    worker_t* worker = &global_workers[i];
     mutex_init(&worker->lock);
     queue_constructor(&worker->tasks);
     worker->exiting = false;
@@ -18,42 +18,45 @@ export void taskmanager_startup() {
   }
 }
 export void taskmanager_wait() {
-  assert(__taskmanager_sync != 0);
-  if (taskmanager_count != 0) {
-    sync_wait(__taskmanager_sync);
+  assert(global_taskmanager_sync != 0);
+  if (global_taskmanager_count != 0) {
+    sync_wait(global_taskmanager_sync);
   }
   thread_t* workers_threads[WORKERS_COUNT];
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
-    worker_t* worker = &__workers[i];
+    worker_t* worker = &global_workers[i];
     worker->exiting = true;
     sync_signal(worker->sync);
     workers_threads[i] = worker->thread;
   }
   thread_wait_all(workers_threads, WORKERS_COUNT);
   for (u8 i = 0; i < WORKERS_COUNT; i++) {
-    worker_t* worker = &__workers[i];
+    worker_t* worker = &global_workers[i];
     sync_free(worker->sync);
     mutex_destroy(&worker->lock);
   }
 #ifdef DEBUG
-  __taskmanager_onexit = 0;
+  global_taskmanager_sync = 0;
 #endif
 }
 export void task_init(task_t* this) {
-  assert(__worker_index != -1);
-  __worker_index = (__worker_index + 1) % WORKERS_COUNT;
-  worker_t* worker = &__workers[__worker_index];
+  assert(global_worker_index != -1);
+  global_worker_index = (global_worker_index + 1) % WORKERS_COUNT;
+  worker_t* worker = &global_workers[global_worker_index];
+  this->_worker = worker;
   mutex_lock(&worker->lock);
-  queue_push(&worker->tasks, &this->__queue);
+  queue_push(&worker->tasks, &this->_queue);
   mutex_unlock(&worker->lock);
   sync_signal(worker->sync);
-  ++taskmanager_count;
+  ++global_taskmanager_count;
 }
 export void task_destroy(task_t* this) {
-  queue_remove(&this->__queue);
-  --taskmanager_count;
-  if (taskmanager_count == 0) {
-    sync_signal(__taskmanager_sync);
+  mutex_lock(&this->_worker->lock);
+  queue_remove(&this->_queue);
+  mutex_unlock(&this->_worker->lock);
+  --global_taskmanager_count;
+  if (global_taskmanager_count == 0) {
+    sync_signal(global_taskmanager_sync);
   }
 }
 export void __worker_thread(worker_t* this) {
@@ -63,7 +66,7 @@ export void __worker_thread(worker_t* this) {
     task_t* next;
     while (this->tasks.next != &this->tasks) {
       mutex_lock(&this->lock);
-      next = (task_t*)it->__queue.next;
+      next = (task_t*)it->_queue.next;
       mutex_unlock(&this->lock);
       if (it != (task_t*)&this->tasks) {
         it->handle(it);
@@ -73,7 +76,7 @@ export void __worker_thread(worker_t* this) {
   }
   for (task_t* it = (task_t*)this->tasks.next;
     (queue_t*)it != &this->tasks;
-    it = (task_t*)it->__queue.next) {
+    it = (task_t*)it->_queue.next) {
     it->destroy(it);
   }
 }

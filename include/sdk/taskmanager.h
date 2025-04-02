@@ -19,16 +19,18 @@ typedef struct worker_t {
 } worker_t;
 
 typedef struct task_t {
-  queue_t __queue;
+  queue_t _queue;
+  mutex_t lock;
   function_t handle;
   function_t destroy;
   void* context;
+  worker_t* _worker;
 } task_t;
 
-extern sync_t* __taskmanager_sync;
-extern u64 taskmanager_count;
-extern worker_t __workers[WORKERS_COUNT];
-extern u8 __worker_index;
+extern sync_t* global_taskmanager_sync;
+extern u64 global_taskmanager_count;
+extern worker_t global_workers[WORKERS_COUNT];
+extern u8 global_worker_index;
 
 export void taskmanager_startup();
 export void taskmanager_wait();
