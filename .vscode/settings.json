@@ -2,29 +2,9 @@
   "files.associations": {
     ".htaccess": "ruby",
     "*.h": "c",
-    "cmath": "c",
-    "type_traits": "c",
-    "cstdio": "c",
-    "limits": "c",
     "*.tcc": "c",
-    "array": "c",
-    "string_view": "c",
     "format": "c",
-    "initializer_list": "c",
-    "span": "c",
-    "system_error": "c",
-    "charconv": "c",
-    "compare": "c",
-    "complex": "c",
-    "functional": "c",
-    "tuple": "c",
-    "utility": "c",
-    "variant": "c",
-    "string": "c",
-    "vector": "c",
-    "memory": "c",
-    "optional": "c",
-    "text_encoding": "c",
-    "cstdlib": "c"
+    "stacktrace": "c",
+    "thread": "c"
   }
 }

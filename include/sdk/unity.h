@@ -57,6 +57,12 @@
 #include <src/sdk/window.c>
 #include <src/sdk/window.win32.c>
 #endif
+#ifdef GFX_TEXT_H
+#include <src/sdk/gfx.text.win32.c>
+#endif
+#ifdef GFX_COLOR_H
+#include <src/sdk/gfx.color.win32.c>
+#endif
 #ifdef KEYBOARD_H
 #include <src/sdk/keyboard.win32.c>
 #endif

@@ -1,8 +1,6 @@
 #include <game/game.h>
 
-game_t state;
+#include <game/scenes/titlescreen.h>
 
-export void game_load() {
-  state.repaint = true;
-  titlescreen_load();
-}
+bool global_repaint = true;
+const wchar_t* font_family_megaman = L"MegaMan 2";

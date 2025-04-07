@@ -1,14 +1,15 @@
 #include <sdk/window.h>
 #ifdef PLATFORM_WINDOWS
+#include <sdk/window.win32.h>
 
 HWND global_window;
 ID2D1Factory* global_d2d_factory;
-ID2D1HwndRenderTarget* global_d2d_render_target;
+ID2D1RenderTarget* global_d2d_render_target;
 IDWriteFactory* global_dwrite_factory;
 IDWriteFontCollection* global_dwrite_collection = 0;
 
 export void window_clear() {
-  ID2D1HwndRenderTarget_Clear(global_d2d_render_target, 0);
+  ID2D1RenderTarget_Clear(global_d2d_render_target, 0);
 }
 export void window_close() {
   DestroyWindow(global_window);
@@ -21,9 +22,9 @@ export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     // case WM_PAINT:
-    //   ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
+    //   ID2D1RenderTarget_BeginDraw(global_d2d_render_target);
     //   window_onrender();
-    //   ID2D1HwndRenderTarget_EndDraw(global_d2d_render_target, 0, 0);
+    //   ID2D1RenderTarget_EndDraw(global_d2d_render_target, 0, 0);
     //   break;
     case WM_KEYDOWN:
       window_onkeydown(wParam);
@@ -49,12 +50,11 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
       global_window_focus = false;
       return 0;
     case WM_DESTROY:
-      window_onclose();
       KillTimer(0, 0);
       thread_free(global_window_thread);
       global_window_thread = 0;
       IDWriteFactory_Release(global_dwrite_factory);
-      ID2D1HwndRenderTarget_Release(global_d2d_render_target);
+      ID2D1RenderTarget_Release(global_d2d_render_target);
       ID2D1Factory_Release(global_d2d_factory);
       IDWriteFontCollection_Release(global_dwrite_collection);
       if (global_dwrite_collection) {
@@ -69,9 +69,9 @@ export void window_set_title(const char* title) {
   SetWindowTextA(global_window, title);
 }
 export void window_redraw() {
-  ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
+  ID2D1RenderTarget_BeginDraw(global_d2d_render_target);
   window_onrender();
-  ID2D1HwndRenderTarget_EndDraw(global_d2d_render_target, 0, 0);
+  ID2D1RenderTarget_EndDraw(global_d2d_render_target, 0, 0);
 }
 export void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
@@ -80,8 +80,8 @@ export void window_fill_rectangle(
   D2D1_RECT_F rect = { left, top, right, bottom };
   ID2D1SolidColorBrush* brush;
   D2D1_COLOR_F color = { r, g, b, a };
-  ID2D1HwndRenderTarget_CreateSolidColorBrush(global_d2d_render_target, &color, 0, &brush);
-  ID2D1HwndRenderTarget_FillRectangle(global_d2d_render_target, &rect, (ID2D1Brush*)brush);
+  ID2D1RenderTarget_CreateSolidColorBrush(global_d2d_render_target, &color, 0, &brush);
+  ID2D1RenderTarget_FillRectangle(global_d2d_render_target, &rect, (ID2D1Brush*)brush);
   ID2D1SolidColorBrush_Release(brush);
 }
 void __window_thread() {
@@ -151,7 +151,7 @@ void __window_thread() {
     global_d2d_factory,
     &render_target_props,
     &window_render_target_props,
-    &global_d2d_render_target
+    (ID2D1HwndRenderTarget**)&global_d2d_render_target
   );
   if (FAILED(result)) {
     console_log("CreateHwndRenderTarget", result, error_cstr(result));

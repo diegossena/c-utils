@@ -1,16 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <game/scenes/titlescreen.h>
+#include <sdk/types.h>
 
-typedef struct game_t {
-  // gfx_color_t white;
-  titlescreen_t titlescreen;
-  bool repaint;
-} game_t;
-
-extern game_t state;
-
-export void game_load();
+extern bool global_repaint;
+extern const wchar_t* font_family_megaman;
 
 #endif

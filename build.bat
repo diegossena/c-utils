@@ -15,7 +15,7 @@ IF "%package_name%" == "http" (
   SET linker_flags=-lws2_32
 )
 IF "%package_name%" == "game" (
-  SET linker_flags=-lDwrite -ld2d1
+  SET linker_flags=-ld3d11 -ld2d1 -lDwrite -ld3dcompiler -lole32 -ldxguid -lgdi32
 )
 :: clear exe
 if EXIST .\bin\%package_name%.exe DEL .\bin\%package_name%.exe
@@ -25,9 +25,9 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
   SET /A "start=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"
 )
 :: compile
-SET cFilenames=
-FOR /R ./src/%package_name% %%f IN (*.c) DO CALL SET cFilenames=%%cFilenames%% "%%f"
-gcc %compiler_flags%%cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
+SET cFilenames=./src/%package_name%/main.c
+@REM FOR /R ./src/%package_name% %%f IN (*.c) DO CALL SET cFilenames=%%cFilenames%% "%%f"
+gcc %compiler_flags% %cFilenames% -o ./bin/%package_name% %defines% %include_flags% %linker_flags%
 :: get end time
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
   set /A "end=((((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100)*10"

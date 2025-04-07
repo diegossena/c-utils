@@ -1,5 +1,5 @@
-#ifndef WINDOW_COLOR_H
-#define WINDOW_COLOR_H
+#ifndef GFX_COLOR_H
+#define GFX_COLOR_H
 
 #include <sdk/types.h>
 #include <sdk/window.h>

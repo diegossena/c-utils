@@ -24,18 +24,18 @@ typedef void gfx_text_style_t;
 typedef struct gfx_text_t {
   const wchar_t text[TINY_SIZE];
   f32 rect[4]; // [left, top, right, bottom]
-  const gfx_text_style_t* style;
-  const gfx_color_t* color;
+  gfx_text_style_t* style;
+  gfx_color_t* color;
 } gfx_text_t;
 
 typedef void gfx_font_t;
 
 export void gfx_text_draw(const gfx_text_t* this);
-export void gfx_text_adjust(gfx_text_t* this);
+export void gfx_text_update(gfx_text_t* this);
 
 export void gfx_font_load(const wchar_t** paths, u64 count);
 
-export gfx_text_style_t* gfx_text_style_new(const char* family, f32 size, font_weight_t weight, font_style_t style);
+export gfx_text_style_t* gfx_text_style_new(const wchar_t* family, f32 size, font_weight_t weight, font_style_t style);
 export void gfx_text_style_free(gfx_text_style_t* this);
 
 #endif

@@ -1,11 +1,11 @@
 #include <sdk/gfx.text.h>
 #ifdef PLATFORM_WINDOWS
 
-typedef struct IUnknown {
-  void* lpVtbl;
-} IUnknown;
+#include <sdk/window.win32.h>
+
 typedef struct FontFileEnumerator {
   IDWriteFontFileEnumeratorVtbl* lpVtbl;
+  IDWriteFontFile* file;
   IDWriteFontFile** files;
   u64 count;
 } FontFileEnumerator;
@@ -14,9 +14,7 @@ typedef struct FontCollectionLoader {
   FontFileEnumerator enumerator;
 } FontCollectionLoader;
 
-ULONG STDMETHODCALLTYPE IUnknown_AddRef(IUnknown* This) {
-  return 0;
-}
+ULONG STDMETHODCALLTYPE IUnknown_AddRef(IUnknown* This) { return 0; }
 export HRESULT STDMETHODCALLTYPE IUnknown_QueryInterface(IUnknown* This, REFIID object_riid, REFIID riid, void** ppvObject) {
   if (IsEqualIID(riid, &IID_IUnknown) || IsEqualIID(riid, object_riid)) {
     *ppvObject = This;
@@ -27,26 +25,23 @@ export HRESULT STDMETHODCALLTYPE IUnknown_QueryInterface(IUnknown* This, REFIID 
     return E_NOINTERFACE;
   }
 }
-ULONG STDMETHODCALLTYPE IUnknown_Release(IUnknown* This) {
-  return 0;
-}
+ULONG STDMETHODCALLTYPE IUnknown_Release(IUnknown* this) { return 0; }
 export HRESULT STDMETHODCALLTYPE FontFileEnumerator_QueryInterface(FontFileEnumerator* This, REFIID riid, void** ppvObject) {
   return IUnknown_QueryInterface((IUnknown*)This, &IID_IDWriteFontFileEnumerator, riid, ppvObject);
 }
 HRESULT STDMETHODCALLTYPE FontFileEnumerator_MoveNext(FontFileEnumerator* this, WINBOOL* has_current_file) {
-  if (this->count) {
-    ++this->files;
+  this->file = 0;
+  while (this->count > 0 && this->file == 0) {
+    this->file = *this->files++;
     --this->count;
-    *has_current_file = true;
-  } else {
-    *has_current_file = false;
   }
+  *has_current_file = this->file != 0;
   return S_OK;
 }
 HRESULT STDMETHODCALLTYPE FontFileEnumerator_GetCurrentFontFile(
   FontFileEnumerator* this, IDWriteFontFile** font_file
 ) {
-  *font_file = *this->files;
+  *font_file = this->file;
   return S_OK;
 }
 HRESULT STDMETHODCALLTYPE FontCollectionLoader_QueryInterface(FontCollectionLoader* This, const IID* const riid, void** ppvObject) {
@@ -60,20 +55,12 @@ HRESULT STDMETHODCALLTYPE FontCollectionLoader_CreateEnumeratorFromKey(
   return S_OK;
 }
 
-export void gfx_text_draw(const gfx_text_t* this) {
-  u8 text_length = wstring_length(this->text);
-  global_d2d_render_target->lpVtbl->Base.DrawTextW(
-    global_d2d_render_target, this->text, text_length, (IDWriteTextFormat*)this->style,
-    (D2D1_RECT_F*)&this->rect, (ID2D1Brush*)this->color,
-    D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
-  );
-}
-export void gfx_text_adjust(gfx_text_t* this) {
-  IDWriteTextFormat* text_format = this->style;
+export void gfx_text_update(gfx_text_t* this) {
+  IDWriteTextFormat* text_format = (IDWriteTextFormat*)this->style;
   IDWriteTextLayout* text_layout;
   DWRITE_TEXT_METRICS metrics;
   u8 text_length = wstring_length(this->text);
-  global_dwrite_factory->lpVtbl->CreateTextLayout(
+  IDWriteFactory_CreateTextLayout(
     global_dwrite_factory, this->text, text_length, text_format, MAX_F32, MAX_F32,
     &text_layout
   );
@@ -89,20 +76,20 @@ export void gfx_font_load(const wchar_t** paths, u64 count) {
   for (u8 i = 0; i < count;i++) {
     const wchar_t* path = paths[i];
     IDWriteFontFile* file;
-    global_dwrite_factory->lpVtbl->CreateFontFileReference(
+    IDWriteFactory_CreateFontFileReference(
       global_dwrite_factory, path, 0, &file
     );
     files[i] = file;
   }
   // FontCollectionLoader_Inicialize
-  FontCollectionLoader* loader;
+  FontCollectionLoader loader;
   const IDWriteFontCollectionLoaderVtbl g_FontCollectionLoaderVtbl = {
     (void*)FontCollectionLoader_QueryInterface,
     (void*)IUnknown_AddRef,
     (void*)IUnknown_Release,
     (void*)FontCollectionLoader_CreateEnumeratorFromKey
   };
-  loader->lpVtbl = (IDWriteFontCollectionLoaderVtbl*)&g_FontCollectionLoaderVtbl;
+  loader.lpVtbl = (IDWriteFontCollectionLoaderVtbl*)&g_FontCollectionLoaderVtbl;
   // FontFileEnumerator_Inicialize
   const IDWriteFontFileEnumeratorVtbl g_FontFileEnumeratorVtbl = {
     (void*)FontFileEnumerator_QueryInterface,
@@ -111,9 +98,9 @@ export void gfx_font_load(const wchar_t** paths, u64 count) {
     (void*)FontFileEnumerator_MoveNext,
     (void*)FontFileEnumerator_GetCurrentFontFile
   };
-  loader->enumerator.lpVtbl = (IDWriteFontFileEnumeratorVtbl*)&g_FontFileEnumeratorVtbl;
-  loader->enumerator.files = (IDWriteFontFile**)files;
-  loader->enumerator.count = count;
+  loader.enumerator.lpVtbl = (IDWriteFontFileEnumeratorVtbl*)&g_FontFileEnumeratorVtbl;
+  loader.enumerator.files = (IDWriteFontFile**)files;
+  loader.enumerator.count = count;
   // RegisterFontCollectionLoader 
   global_dwrite_factory->lpVtbl->RegisterFontCollectionLoader(
     global_dwrite_factory, (IDWriteFontCollectionLoader*)&loader
@@ -129,7 +116,7 @@ export void gfx_font_load(const wchar_t** paths, u64 count) {
   );
 }
 
-export gfx_text_style_t* gfx_text_style_new(const char* family, f32 size, font_weight_t weight, font_style_t style) {
+export gfx_text_style_t* gfx_text_style_new(const wchar_t* family, f32 size, font_weight_t weight, font_style_t style) {
   assert(global_window_thread);
   assert(size > 0);
   assert(family);
@@ -148,26 +135,10 @@ export void gfx_text_style_free(gfx_text_style_t* this) {
   IDWriteTextFormat_Release(format);
 }
 
-void gfx_text_adjust(gfx_text_t* this) {
-  IDWriteTextFormat* text_format = this->style;
-  IDWriteTextLayout* text_layout;
-  DWRITE_TEXT_METRICS metrics;
-  u64 text_length = wstring_length(this->text);
-  IDWriteFactory_CreateTextLayout(
-    global_dwrite_factory, this->text, text_length, text_format, MAX_F32, MAX_F32,
-    &text_layout
-  );
-  IDWriteTextLayout_GetMetrics(text_layout, &metrics);
-  IDWriteTextLayout_Release(text_layout);
-  this->rect[2] = this->rect[0] + metrics.width;
-  this->rect[3] = this->rect[1] + metrics.height;
-}
-
 export void gfx_text_draw(const gfx_text_t* this) {
-  IDWriteTextFormat* text_format = this->style;
   u64 text_length = wstring_length(this->text);
-  global_d2d_render_target->lpVtbl->Base.DrawTextW(
-    global_d2d_render_target, this->text, text_length, this->style,
+  ID2D1RenderTarget_DrawText(
+    global_d2d_render_target, this->text, text_length, (IDWriteTextFormat*)this->style,
     (D2D1_RECT_F*)&this->rect, (ID2D1Brush*)this->color,
     D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
   );

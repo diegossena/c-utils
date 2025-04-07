@@ -29,12 +29,6 @@ export void window_fill_rectangle(
 /**
  * - Event Listener
  * - Externally-defined function
- * The `close` event occurs when window is closing.
- */
-extern void window_onclose();
-/**
- * - Event Listener
- * - Externally-defined function
  * The `onrender` event occurs when a draw is requested.
  */
 extern void window_onrender();
@@ -67,21 +61,5 @@ extern sync_t* global_window_onload_sync;
 extern u8 global_window_keyboard_count;
 extern u8 global_window_keyboard_state[32];
 extern thread_t* global_window_thread;
-
-#ifdef PLATFORM_WINDOWS
-
-#define COBJMACROS 1
-#include <initguid.h>
-#include <d2d1.h>
-#include <dwrite.h>
-#include <wincodec.h>
-#include <windows.h>
-
-extern HWND global_window;
-extern ID2D1HwndRenderTarget* global_d2d_render_target;
-extern IDWriteFactory* global_dwrite_factory;
-extern IDWriteFontCollection* global_dwrite_collection;
-
-#endif
 
 #endif

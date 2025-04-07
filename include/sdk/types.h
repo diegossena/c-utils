@@ -40,6 +40,7 @@
 // types
 
 typedef _Bool bool;
+typedef short unsigned int wchar_t;
 
 typedef signed char i8; // -128 ~ 127
 typedef signed short i16; // -32768 ~ 32767
