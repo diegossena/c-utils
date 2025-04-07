@@ -13,19 +13,14 @@ export thread_t* thread_new(function_t handle, void* context) {
   );
   return this;
 }
+export void thread_free(thread_t* this) {
+  CloseHandle(this);
+}
 export void thread_wait(thread_t* this) {
   WaitForSingleObject((HANDLE)this, INFINITE);
-  CloseHandle(this);
 }
 export void thread_wait_all(thread_t** threads, u64 count) {
   WaitForMultipleObjects(count, (HANDLE*)threads, true, INFINITE);
-  while (count) {
-    CloseHandle(*threads);
-    if (count == 0)
-      break;
-    --count;
-    ++threads;
-  }
 }
 
 void mutex_init(mutex_t* this) {

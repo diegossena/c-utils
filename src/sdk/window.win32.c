@@ -13,19 +13,6 @@ ID2D1Factory* global_d2d_factory;
 ID2D1HwndRenderTarget* global_d2d_render_target;
 IDWriteFactory* global_d2d_write_factory;
 
-export void window_run() {
-  MSG msg;
-  while (global_window_running) {
-    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
-      // TranslateMessage(&msg);
-      DispatchMessageA(&msg);
-      if (msg.message == WM_QUIT) {
-        global_window_running = false;
-      }
-    }
-    Sleep(1);
-  }
-}
 export void window_clear() {
   ID2D1HwndRenderTarget_Clear(global_d2d_render_target, 0);
 }
@@ -36,31 +23,29 @@ export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (global_window_focus && global_window_keyboard_count) {
     window_onkeypress();
   }
-  window_onupdate(time);
 }
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_PAINT:
       ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
-
       window_onrender();
       ID2D1HwndRenderTarget_EndDraw(global_d2d_render_target, 0, 0);
       break;
     case WM_KEYDOWN:
+      window_onkeydown(wParam);
       if (wParam != 91 && !window_key_pressed(wParam)) {
         u8 byte_index = wParam / 8;
         u8 bit_index = wParam % 8;
         global_window_keyboard_state[byte_index] |= (1 << bit_index);
         ++global_window_keyboard_count;
       }
-      window_onkeydown(wParam);
       return 0;
     case WM_KEYUP: {
+      window_onkeyup();
       u8 byte_index = wParam / 8;
       u8 bit_index = wParam % 8;
       global_window_keyboard_state[byte_index] &= ~(1 << bit_index);
       --global_window_keyboard_count;
-      window_onkeyup();
       return 0;
     }
     case WM_SETFOCUS:
@@ -71,17 +56,20 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
       return 0;
     case WM_DESTROY:
       KillTimer(0, 0);
+      thread_free(global_window_thread);
+      global_window_thread = 0;
       IDWriteFactory_Release(global_d2d_write_factory);
       ID2D1HwndRenderTarget_Release(global_d2d_render_target);
       ID2D1Factory_Release(global_d2d_factory);
       PostQuitMessage(0);
-      global_window_running = false;
       return 0;
   }
   return DefWindowProcA(handle, message, wParam, lParam);
 }
 export void window_redraw() {
-  RedrawWindow(global_window, 0, 0, RDW_INVALIDATE);
+  ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
+  window_onrender();
+  ID2D1HwndRenderTarget_EndDraw(global_d2d_render_target, 0, 0);
 }
 export void window_fill_rectangle(
   f32 left, f32 top, f32 right, f32 bottom,
@@ -94,14 +82,12 @@ export void window_fill_rectangle(
   ID2D1HwndRenderTarget_FillRectangle(global_d2d_render_target, &rect, (ID2D1Brush*)brush);
   ID2D1SolidColorBrush_Release(brush);
 }
-export void window_startup(
-  const char* title,
-  i32 width, i32 height
-) {
+void __window_thread() {
   i32 result;
-  assert(global_window_running == false);
-  global_window_running = true;
   LPCSTR class_name = "window";
+  const char* title = "window";
+  u32 width = 800;
+  u32 height = 600;
   // window_class_register
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -170,9 +156,25 @@ export void window_startup(
     console_log("CreateHwndRenderTarget", result, error_cstr(result));
     goto onerror;
   }
-  // onsuccess
+  sync_signal(global_window_onload_sync);
   SetTimer(0, 0, 0, (TIMERPROC)__window_onupdate);
-  return;
+  MSG msg;
+  while (true) {
+    MsgWaitForMultipleObjectsEx(
+      0,
+      0,
+      INFINITE,
+      QS_ALLINPUT,
+      MWMO_INPUTAVAILABLE
+    );
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessageA(&msg);
+      if (msg.message == WM_QUIT) {
+        return;
+      }
+    }
+  }
 onerror:
   return;
 }

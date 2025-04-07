@@ -14,7 +14,7 @@ IF "%package_name%" == "test" (
 IF "%package_name%" == "http" (
   SET linker_flags=-lws2_32
 )
-IF "%package_name%" == "snake" (
+IF "%package_name%" == "game" (
   SET linker_flags=-lDwrite -ld2d1
 )
 :: clear exe

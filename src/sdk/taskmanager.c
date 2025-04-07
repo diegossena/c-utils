@@ -4,7 +4,6 @@ sync_t* global_taskmanager_sync = 0;
 mutex_t global_taskmanager_lock;
 u64 global_taskmanager_count = 0;
 worker_t global_workers[WORKERS_COUNT];
-u8 global_worker_index = -1;
 
 export void taskmanager_startup() {
   assert(global_taskmanager_sync == 0);
@@ -37,9 +36,18 @@ export void taskmanager_wait() {
 #endif
   mutex_destroy(&global_taskmanager_lock);
 }
+
+u8 global_worker_index = 0;
+u8 global_worker_counter = 0;
 export void task_init(task_t* this) {
   assert(global_worker_index != -1);
-  global_worker_index = (global_worker_index + 1) % WORKERS_COUNT;
+
+  if (global_worker_counter++ == MAX_U8) {
+    global_worker_index = (global_worker_index + 1) % WORKERS_COUNT;
+  }
+
+  // global_worker_index = (global_worker_index + 1) % WORKERS_COUNT;
+
   worker_t* worker = &global_workers[global_worker_index];
   this->_worker = worker;
   mutex_lock(&worker->lock);
@@ -57,7 +65,6 @@ export void task_destroy(task_t* this) {
   mutex_lock(&global_taskmanager_lock);
   --global_taskmanager_count;
   mutex_unlock(&global_taskmanager_lock);
-  console_log("global_taskmanager_count %llu", global_taskmanager_count);
   if (global_taskmanager_count == 0) {
     sync_signal(global_taskmanager_sync);
   }
