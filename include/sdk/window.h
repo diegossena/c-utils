@@ -6,12 +6,8 @@
 #include <sdk/keyboard.h>
 #include <sdk/console.h>
 #include <sdk/thread.h>
-
-extern bool global_window_focus;
-extern sync_t* global_window_onload_sync;
-extern u8 global_window_keyboard_count;
-extern u8 global_window_keyboard_state[32];
-extern thread_t* global_window_thread;
+#include <sdk/gfx.text.h>
+#include <sdk/gfx.color.h>
 
 // METHODS
 
@@ -30,6 +26,12 @@ export void window_fill_rectangle(
 
 // EVENTS
 
+/**
+ * - Event Listener
+ * - Externally-defined function
+ * The `close` event occurs when window is closing.
+ */
+extern void window_onclose();
 /**
  * - Event Listener
  * - Externally-defined function
@@ -59,5 +61,27 @@ extern void window_onkeyup();
 export bool window_key_pressed(key_code_t);
 
 void __window_thread();
+
+extern bool global_window_focus;
+extern sync_t* global_window_onload_sync;
+extern u8 global_window_keyboard_count;
+extern u8 global_window_keyboard_state[32];
+extern thread_t* global_window_thread;
+
+#ifdef PLATFORM_WINDOWS
+
+#define COBJMACROS 1
+#include <initguid.h>
+#include <d2d1.h>
+#include <dwrite.h>
+#include <wincodec.h>
+#include <windows.h>
+
+extern HWND global_window;
+extern ID2D1HwndRenderTarget* global_d2d_render_target;
+extern IDWriteFactory* global_dwrite_factory;
+extern IDWriteFontCollection* global_dwrite_collection;
+
+#endif
 
 #endif

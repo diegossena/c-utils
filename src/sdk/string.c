@@ -107,3 +107,9 @@ export char* url_encode(const char* this, char* target) {
 export i32 string_format_va(char* this, u64 size, const char* format, va_list args) {
   return vsnprintf(this, size, format, args);
 }
+
+export u64 wstring_length(const wchar_t* cstr) {
+  const wchar_t* begin = cstr;
+  while (*cstr != L'\0') ++cstr;
+  return cstr - begin;
+}

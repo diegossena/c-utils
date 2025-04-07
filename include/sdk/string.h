@@ -37,4 +37,7 @@ export char* url_encode(const char* this, char* target);
 export i64 string_i64(const char* this);
 export u64 string_u64(const char* this);
 
+
+export u64 wstring_length(const wchar_t* cstr);
+
 #endif
