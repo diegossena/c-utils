@@ -117,7 +117,7 @@ export gfx_text_style_t* gfx_textstyle_new(const wchar_t* family, f32 size, font
 export void gfx_textstyle_line_height(const gfx_text_style_t* this, f32 line_height) {
   IDWriteTextFormat* format = (IDWriteTextFormat*)this;
   format->lpVtbl->SetLineSpacing(
-    format, DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, line_height, 1.5f
+    format, DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, line_height, 1.f
   );
 }
 export void gfx_textstyle_free(gfx_text_style_t* this) {
