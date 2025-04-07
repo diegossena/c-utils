@@ -55,22 +55,7 @@ HRESULT STDMETHODCALLTYPE FontCollectionLoader_CreateEnumeratorFromKey(
   return S_OK;
 }
 
-export void gfx_text_update(gfx_text_t* this) {
-  IDWriteTextFormat* text_format = (IDWriteTextFormat*)this->style;
-  IDWriteTextLayout* text_layout;
-  DWRITE_TEXT_METRICS metrics;
-  u8 text_length = wstring_length(this->text);
-  IDWriteFactory_CreateTextLayout(
-    global_dwrite_factory, this->text, text_length, text_format, MAX_F32, MAX_F32,
-    &text_layout
-  );
-  IDWriteTextLayout_GetMetrics(text_layout, &metrics);
-  IDWriteTextLayout_Release(text_layout);
-  this->rect[2] = this->rect[0] + metrics.width;
-  this->rect[3] = this->rect[1] + metrics.height;
-}
-
-export void gfx_font_load(const wchar_t** paths, u64 count) {
+export void gfx_font_load(const wchar_t** paths, u8 count) {
   IDWriteFontFile* files[TINY_SIZE];
   // CreateFontFileReference
   for (u8 i = 0; i < count;i++) {
@@ -116,7 +101,7 @@ export void gfx_font_load(const wchar_t** paths, u64 count) {
   );
 }
 
-export gfx_text_style_t* gfx_text_style_new(const wchar_t* family, f32 size, font_weight_t weight, font_style_t style) {
+export gfx_text_style_t* gfx_textstyle_new(const wchar_t* family, f32 size, font_weight_t weight, font_style_t style) {
   assert(global_window_thread);
   assert(size > 0);
   assert(family);
@@ -129,7 +114,13 @@ export gfx_text_style_t* gfx_text_style_new(const wchar_t* family, f32 size, fon
   );
   return this;
 }
-export void gfx_text_style_free(gfx_text_style_t* this) {
+export void gfx_textstyle_line_height(const gfx_text_style_t* this, f32 line_height) {
+  IDWriteTextFormat* format = (IDWriteTextFormat*)this;
+  format->lpVtbl->SetLineSpacing(
+    format, DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, line_height, 1.5f
+  );
+}
+export void gfx_textstyle_free(gfx_text_style_t* this) {
   assert(this);
   IDWriteTextFormat* format = this;
   IDWriteTextFormat_Release(format);

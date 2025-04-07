@@ -31,11 +31,11 @@ typedef struct gfx_text_t {
 typedef void gfx_font_t;
 
 export void gfx_text_draw(const gfx_text_t* this);
-export void gfx_text_update(gfx_text_t* this);
 
-export void gfx_font_load(const wchar_t** paths, u64 count);
+export void gfx_font_load(const wchar_t** paths, u8 count);
 
-export gfx_text_style_t* gfx_text_style_new(const wchar_t* family, f32 size, font_weight_t weight, font_style_t style);
-export void gfx_text_style_free(gfx_text_style_t* this);
+export gfx_text_style_t* gfx_textstyle_new(const wchar_t* family, f32 size, font_weight_t weight, font_style_t style);
+export void gfx_textstyle_free(gfx_text_style_t* this);
+export void gfx_textstyle_line_height(const gfx_text_style_t* this, f32 line_height);
 
 #endif
