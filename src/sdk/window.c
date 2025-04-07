@@ -6,10 +6,7 @@ u8 global_window_keyboard_count = 0;
 u8 global_window_keyboard_state[32] = {};
 thread_t* global_window_thread = 0;
 
-export void window_startup(
-  const char* title,
-  i32 width, i32 height
-) {
+export void window_startup() {
   assert(global_window_thread == 0);
   global_window_onload_sync = sync_new();
   global_window_thread = thread_new(__window_thread, 0);

@@ -15,10 +15,8 @@ extern thread_t* global_window_thread;
 
 // METHODS
 
-export void window_startup(
-  const char* title,
-  i32 width, i32 height
-);
+export void window_startup();
+export void window_set_title(const char* title);
 export void window_clear();
 export void window_close();
 

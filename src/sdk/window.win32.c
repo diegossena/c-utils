@@ -26,11 +26,11 @@ export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
 }
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
-    case WM_PAINT:
-      ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
-      window_onrender();
-      ID2D1HwndRenderTarget_EndDraw(global_d2d_render_target, 0, 0);
-      break;
+    // case WM_PAINT:
+    //   ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
+    //   window_onrender();
+    //   ID2D1HwndRenderTarget_EndDraw(global_d2d_render_target, 0, 0);
+    //   break;
     case WM_KEYDOWN:
       window_onkeydown(wParam);
       if (wParam != 91 && !window_key_pressed(wParam)) {
@@ -66,6 +66,9 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
   }
   return DefWindowProcA(handle, message, wParam, lParam);
 }
+export void window_set_title(const char* title) {
+  SetWindowTextA(global_window, title);
+}
 export void window_redraw() {
   ID2D1HwndRenderTarget_BeginDraw(global_d2d_render_target);
   window_onrender();
@@ -84,8 +87,7 @@ export void window_fill_rectangle(
 }
 void __window_thread() {
   i32 result;
-  LPCSTR class_name = "window";
-  const char* title = "window";
+  const char* title = " ";
   u32 width = 800;
   u32 height = 600;
   // window_class_register
@@ -95,7 +97,7 @@ void __window_thread() {
     .lpfnWndProc = __window_procedure,
     .hInstance = GetModuleHandleA(0),
     .hCursor = LoadCursorA(0, IDC_ARROW),
-    .lpszClassName = class_name,
+    .lpszClassName = title,
   };
   result = RegisterClassExA(&wc);
   if (!result) {

@@ -7,6 +7,7 @@
 
 u64 render_time = 0;
 f32 position [] = { 0, 0 };
+bool repaint = true;
 
 void window_onkeyup() {}
 void window_onkeydown(key_code_t key) {}
@@ -22,13 +23,13 @@ void window_onkeypress() {
   } else if (window_key_pressed(KEY_RIGHT)) {
     position[0] += 1;
   }
-  window_redraw();
+  char buffer[256] = "";
+  string_format(buffer, sizeof(buffer), "Square %.0f, %.0f", position[0], position[1]);
+  window_set_title(buffer);
+  repaint = true;
 }
 
 void window_onrender() {
-  u64 time = date_now();
-  console_log("window_onrender %lu", time - render_time);
-  render_time = time;
   f32 size [] = { 100, 100 };
   window_clear();
   window_fill_rectangle(
@@ -39,18 +40,20 @@ void window_onrender() {
 }
 
 i32 main(i32 argc, char** argv) {
-  window_startup("Game", 800, 600);
+  window_startup();
   sync_wait(global_window_onload_sync);
+  window_set_title("Game");
   u64 time = date_now();
   while (global_window_thread) {
     u64 now = date_now();
     u64 delta_time = now - time;
     if (delta_time > 15) {
       time = now;
-      position[0] += 1;
-      window_redraw();
+      if (repaint) {
+        window_redraw();
+        repaint = false;
+      }
     }
   }
-  console_log("global_window_thread %d", global_window_thread);
   return 0;
 }
