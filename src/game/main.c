@@ -3,7 +3,7 @@
 #include <sdk/assert.h>
 #include <sdk/window.h>
 #include <sdk/date.h>
-#include <sdk/unity.h>
+#include <game/unity.h>
 
 u64 render_time = 0;
 f32 position [] = { 0, 0 };
@@ -30,19 +30,17 @@ void window_onkeypress() {
 }
 
 void window_onrender() {
-  f32 size [] = { 100, 100 };
   window_clear();
-  window_fill_rectangle(
-    position[0], position[1],
-    position[0] + size[0], position[1] + size[1],
-    1, 0, 0, 1
-  );
+  if (state.titlescreen.loaded) {
+    titlescreen_render();
+  }
 }
 
 i32 main(i32 argc, char** argv) {
   window_startup();
   sync_wait(global_window_onload_sync);
   window_set_title("Game");
+  titlescreen_load();
   u64 time = date_now();
   while (global_window_thread) {
     u64 now = date_now();
