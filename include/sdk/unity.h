@@ -36,7 +36,8 @@
 #include <src/sdk/events.c>
 #endif
 #ifdef TIME_H
-#include <src/sdk/date.c>
+#include <src/sdk/time.c>
+#include <src/sdk/time.win32.c>
 #endif
 #ifdef SNMP_H
 #include <src/sdk/snmp.c>
@@ -62,6 +63,9 @@
 #endif
 #ifdef GFX_COLOR_H
 #include <src/sdk/gfx.color.win32.c>
+#endif
+#ifdef GFX_RECT_H
+#include <src/sdk/gfx.rect.win32.c>
 #endif
 #ifdef GFX_IMAGE_H
 #include <src/sdk/gfx.image.win32.c>

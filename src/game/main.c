@@ -1,8 +1,6 @@
 #include <sdk/types.h>
-#include <sdk/error.h>
-#include <sdk/assert.h>
 #include <sdk/window.h>
-#include <sdk/date.h>
+#include <sdk/time.h>
 #include <game/unity.h>
 
 void window_onkeyup() {}
@@ -20,10 +18,13 @@ void window_onrender() {
   if (titlescreen.loaded) {
     titlescreen_render();
   }
+  if (transition.loading) {
+    transition_render();
+  }
 }
 
 i32 main(i32 argc, char** argv) {
-  // window.create
+  // window
   window_startup();
   sync_wait(global_window_onload_sync);
   window_set_title("Game");
@@ -33,15 +34,19 @@ i32 main(i32 argc, char** argv) {
   };
   gfx_font_load(paths, sizeof(paths) / sizeof(wchar_t*));
   titlescreen_load();
-  u64 time = time_now();
+  // loop
+  f64 time = time_now_f64();
+  const f64 frame_rate = 1. / 60;
   while (global_window_thread) {
-    u64 now = time_now();
-    u64 delta_time = now - time;
-    if (delta_time > 15) {
+    f64 now = time_now_f64();
+    global_delta_time = now - time;
+    if (global_delta_time > frame_rate) {
       time = now;
       if (global_repaint) {
         window_redraw();
-        global_repaint = false;
+        if (!transition.loading) {
+          global_repaint = false;
+        }
       }
     }
   }

@@ -5,14 +5,9 @@
 #include <sdk/gfx.color.h>
 #include <sdk/gfx.stroke.h>
 
-typedef struct gfx_rect_t {
-  f32 rect[4]; // [left, top, right, bottom]
-  gfx_color_t* color;
-  f32 border_width;
-  f32 border_radius;
-} gfx_rect_t;
+#define MAX_RECT 7680.f
 
-export void gfx_fill_rect(f32 rect[4], gfx_color_t* color);
-export void gfx_draw_rect(f32 rect[4], gfx_color_t* color, f32 width);
+export void gfx_fill_rect(const f32 rect[4], gfx_color_t* color);
+export void gfx_draw_rect(const f32 rect[4], gfx_color_t* color, f32 width, gfx_stroke_t* stroke);
 
 #endif

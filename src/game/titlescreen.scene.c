@@ -1,5 +1,6 @@
 #include <game/titlescreen.scene.h>
 #include <game/game.h>
+#include <game/tilemap.scene.h>
 
 titlescreen_t titlescreen = {
   .title = {
@@ -47,6 +48,7 @@ export void titlescreen_unload() {
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {
     case KEY_SPACE:
+      transition_load(titlescreen_unload, titlescreen_load);
       break;
     default:
       return;
