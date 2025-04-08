@@ -3,17 +3,9 @@
 
 #include <sdk/types.h>
 
-typedef enum img_extend_t {
-  BITMAP_EXTEND_REPEAT,
-  BITMAP_EXTEND_NO_REPEAT,
-  BITMAP_EXTEND_COVER
-} img_extend_t;
-
 typedef struct gfx_image_t {
   f32 rect[4]; // [left, top, right, bottom]
-  // optional
-  img_extend_t extend_mode;
-
+  bool repeat;
   void* src;
   f32 src_rect[4]; // [left, top, right, bottom]
   u16 src_width, src_height;

@@ -17,7 +17,7 @@ titlescreen_t titlescreen = {
   .pallet_town_interiors = {
     .rect = { 0, 0, 76, 76},
     .src_rect = { 5, 5, 16, 16 },
-    .extend_mode = BITMAP_EXTEND_COVER,
+    .repeat = true,
   }
 };
 

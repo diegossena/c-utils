@@ -4,79 +4,61 @@
 #include <sdk/window.win32.h>
 
 export void gfx_image_draw(const gfx_image_t* this) {
-  ID2D1Bitmap* bitmap = (ID2D1Bitmap*)this->src;
-  switch (this->extend_mode) {
-    case BITMAP_EXTEND_COVER:
-      global_d2d_render_target->lpVtbl->DrawBitmap(
-        global_d2d_render_target, bitmap, (D2D1_RECT_F*)&this->rect, 1.f,
-        D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-        (D2D1_RECT_F*)&this->src_rect
-      );
-      break;
-    case BITMAP_EXTEND_NO_REPEAT: {
-      D2D1_RECT_F rect = {
-        .left = this->rect[0],
-        .top = this->rect[1],
-        .right = math_min(this->rect[2], rect.left + this->src_width),
-        .bottom = math_min(this->rect[3], rect.top + this->src_height),
-      };
-      global_d2d_render_target->lpVtbl->DrawBitmap(
-        global_d2d_render_target, bitmap, &rect, 1.f,
-        D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-        (D2D1_RECT_F*)&this->src_rect
-      );
-      break;
-    }
-    default: {
-      // repeat
-      D2D1_RECT_F position = {
-        this->src_rect[0], this->src_rect[1],
-        this->src_rect[0] + this->src_width, this->src_rect[1] + this->src_height,
-      };
-      D2D1_RECT_F rect = {
-        .top = this->rect[1],
-        .bottom = this->rect[1] + this->src_width,
-      };
-      f32 rect_right_start = this->rect[0] + this->src_width;
-      f32 position_right_start = position.right;
-      while (true) {
-        if (rect.bottom > this->rect[3]) {
-          f32 y_remaining = this->rect[3] - rect.top;
-          if (y_remaining < 0) {
-            break;
-          }
-          position.bottom = position.top + y_remaining;
-          rect.bottom = this->rect[3];
+  if (this->repeat) {
+// repeat
+    D2D1_RECT_F position = {
+      this->src_rect[0], this->src_rect[1],
+      this->src_rect[0] + this->src_width, this->src_rect[1] + this->src_height,
+    };
+    D2D1_RECT_F rect = {
+      .top = this->rect[1],
+      .bottom = this->rect[1] + this->src_width,
+    };
+    f32 rect_right_start = this->rect[0] + this->src_width;
+    f32 position_right_start = position.right;
+    while (true) {
+      if (rect.bottom > this->rect[3]) {
+        f32 y_remaining = this->rect[3] - rect.top;
+        if (y_remaining < 0) {
+          break;
         }
-        if (rect.bottom >= 0 && rect.top <= global_window_height) {
-          // reset x
-          rect.left = this->rect[0];
-          rect.right = rect_right_start;
-          position.right = position_right_start;
-          while (true) {
-            if (rect.right > this->rect[2]) {
-              f32 x_remaining = this->rect[2] - rect.left;
-              if (x_remaining < 0) {
-                break;
-              }
-              position.right = position.left + x_remaining;
-              rect.right = this->rect[2];
-            }
-            if (rect.right >= 0 && rect.left <= global_window_width) {
-              global_d2d_render_target->lpVtbl->DrawBitmap(
-                global_d2d_render_target, bitmap, &rect, 1.f,
-                D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-                (D2D1_RECT_F*)&this->src_rect
-              );
-            }
-            rect.left += this->src_width;
-            rect.right += this->src_width;
-          }
-        }
-        rect.top += this->src_height;
-        rect.bottom += this->src_height;
+        position.bottom = position.top + y_remaining;
+        rect.bottom = this->rect[3];
       }
+      if (rect.bottom >= 0 && rect.top <= global_window_height) {
+        // reset x
+        rect.left = this->rect[0];
+        rect.right = rect_right_start;
+        position.right = position_right_start;
+        while (true) {
+          if (rect.right > this->rect[2]) {
+            f32 x_remaining = this->rect[2] - rect.left;
+            if (x_remaining < 0) {
+              break;
+            }
+            position.right = position.left + x_remaining;
+            rect.right = this->rect[2];
+          }
+          if (rect.right >= 0 && rect.left <= global_window_width) {
+            global_d2d_render_target->lpVtbl->DrawBitmap(
+              global_d2d_render_target, (ID2D1Bitmap*)this->src, &rect, 1.f,
+              D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
+              (D2D1_RECT_F*)&this->src_rect
+            );
+          }
+          rect.left += this->src_width;
+          rect.right += this->src_width;
+        }
+      }
+      rect.top += this->src_height;
+      rect.bottom += this->src_height;
     }
+  } else {
+    global_d2d_render_target->lpVtbl->DrawBitmap(
+      global_d2d_render_target, (ID2D1Bitmap*)this->src, (D2D1_RECT_F*)&this->rect, 1.f,
+      D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
+      (D2D1_RECT_F*)&this->src_rect
+    );
   }
 }
 export void gfx_image_src(gfx_image_t* this, const wchar_t* path) {
