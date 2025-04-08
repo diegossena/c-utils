@@ -15,6 +15,7 @@
 
 extern HWND global_window;
 extern ID2D1RenderTarget* global_d2d_render_target;
+extern ID2D1Factory* global_d2d_factory;
 extern IDWriteFactory* global_dwrite_factory;
 extern IDWriteFontCollection* global_dwrite_collection;
 

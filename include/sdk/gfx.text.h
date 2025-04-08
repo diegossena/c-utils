@@ -24,8 +24,8 @@ typedef void gfx_text_style_t;
 typedef struct gfx_text_t {
   const wchar_t text[TINY_SIZE];
   f32 rect[4]; // [left, top, right, bottom]
-  gfx_text_style_t* style;
   gfx_color_t* color;
+  gfx_text_style_t* style;
 } gfx_text_t;
 
 typedef void gfx_font_t;

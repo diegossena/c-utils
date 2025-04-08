@@ -35,7 +35,7 @@
 #ifdef EVENTS_H
 #include <src/sdk/events.c>
 #endif
-#ifdef DATE_H
+#ifdef TIME_H
 #include <src/sdk/date.c>
 #endif
 #ifdef SNMP_H

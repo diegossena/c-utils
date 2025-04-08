@@ -33,9 +33,9 @@ i32 main(i32 argc, char** argv) {
   };
   gfx_font_load(paths, sizeof(paths) / sizeof(wchar_t*));
   titlescreen_load();
-  u64 time = date_now();
+  u64 time = time_now();
   while (global_window_thread) {
-    u64 now = date_now();
+    u64 now = time_now();
     u64 delta_time = now - time;
     if (delta_time > 15) {
       time = now;

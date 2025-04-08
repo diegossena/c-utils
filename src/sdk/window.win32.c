@@ -73,17 +73,6 @@ export void window_redraw() {
   window_onrender();
   ID2D1RenderTarget_EndDraw(global_d2d_render_target, 0, 0);
 }
-export void window_fill_rectangle(
-  f32 left, f32 top, f32 right, f32 bottom,
-  f32 r, f32 g, f32 b, f32 a
-) {
-  D2D1_RECT_F rect = { left, top, right, bottom };
-  ID2D1SolidColorBrush* brush;
-  D2D1_COLOR_F color = { r, g, b, a };
-  ID2D1RenderTarget_CreateSolidColorBrush(global_d2d_render_target, &color, 0, &brush);
-  ID2D1RenderTarget_FillRectangle(global_d2d_render_target, &rect, (ID2D1Brush*)brush);
-  ID2D1SolidColorBrush_Release(brush);
-}
 void __window_thread() {
   i32 result;
   const char* title = " ";

@@ -19,10 +19,6 @@ export void window_close();
 // DRAW
 
 export void window_redraw();
-export void window_fill_rectangle(
-  f32 left, f32 top, f32 right, f32 bottom,
-  f32 r, f32 g, f32 b, f32 a
-);
 
 // EVENTS
 

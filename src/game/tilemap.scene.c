@@ -8,8 +8,8 @@ export void tilemap_load() {
   f32 visible_tiles_y = (f32)global_window_height / TILE_SIZE;
   tilemap.visible_tiles_x = math_ceil(visible_tiles_x);
   tilemap.visible_tiles_y = math_ceil(visible_tiles_y);
-  tilemap.offset_limit.x = (f32)TILEMAP_WIDTH - visible_tiles_x;
-  tilemap.offset_limit.y = (f32)TILEMAP_WIDTH - visible_tiles_y;
+  tilemap.offset_limit[0] = (f32)TILEMAP_WIDTH - visible_tiles_x;
+  tilemap.offset_limit[1] = (f32)TILEMAP_WIDTH - visible_tiles_y;
 
   tilemap.loaded = true;
 }
