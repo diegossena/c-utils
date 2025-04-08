@@ -5,6 +5,8 @@
     "*.tcc": "c",
     "format": "c",
     "stacktrace": "c",
-    "thread": "c"
+    "thread": "c",
+    "expected": "c",
+    "regex": "c"
   }
 }

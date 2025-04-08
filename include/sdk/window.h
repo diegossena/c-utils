@@ -57,6 +57,8 @@ export bool window_key_pressed(key_code_t);
 void __window_thread();
 
 extern bool global_window_focus;
+extern const u16 global_window_width;
+extern const u16 global_window_height;
 extern sync_t* global_window_onload_sync;
 extern u8 global_window_keyboard_count;
 extern u8 global_window_keyboard_state[32];

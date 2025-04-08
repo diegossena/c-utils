@@ -2,6 +2,7 @@
 #define ERROR_H
 
 #include <sdk/types.h>
+#include <sdk/console.h>
 
 typedef enum error_t {
   ERR_MIN = MIN_I16,
@@ -65,6 +66,7 @@ typedef enum error_t {
   ERR_CO_E_NOTINITIALIZED = 0x800401f0
 } error_t;
 
+void error(const char* message, error_t code);
 export const char* error_cstr(error_t code);
 
 #endif

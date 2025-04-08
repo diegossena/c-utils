@@ -94,3 +94,13 @@ export const char* error_cstr(error_t code) {
       return "ERR_UNKNOWN";
   }
 }
+void error(const char* message, error_t code) {
+  const char* error_str = error_cstr(code);
+  console_color(ANSI_FORE_RED);
+  console_write_cstr("Error:");
+  console_color(ANSI_RESET);
+  console_log(
+    " %s %x %s",
+    error_str, code, message
+  );
+}

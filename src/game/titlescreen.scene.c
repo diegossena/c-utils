@@ -1,4 +1,4 @@
-#include <game/scenes/titlescreen.h>
+#include <game/titlescreen.scene.h>
 #include <game/game.h>
 
 titlescreen_t titlescreen = {
@@ -13,11 +13,15 @@ titlescreen_t titlescreen = {
   .to_play = {
     .text = L"TO PLAY",
     .rect = { 545.f, 530.f,MAX_F32, MAX_F32 }
+  },
+  .pallet_town_interiors = {
+    .rect = { 0, 0, 76, 76},
+    .src_rect = { 5, 5, 16, 16 },
+    .extend_mode = BITMAP_EXTEND_COVER,
   }
 };
 
 export void titlescreen_load() {
-  titlescreen.loaded = true;
   gfx_color_t* white = gfx_color_new(1, 1, 1, 1);
   // title
   titlescreen.title.color = white;
@@ -28,12 +32,17 @@ export void titlescreen_load() {
   // to_play
   titlescreen.to_play.color = white;
   titlescreen.to_play.style = titlescreen.press_space.style;
+  // pallet_town_interiors
+  gfx_image_src(&titlescreen.pallet_town_interiors, L"assets/pallet_town_interiors.png");
+  // loaded
+  titlescreen.loaded = true;
 }
 export void titlescreen_unload() {
   titlescreen.loaded = false;
   gfx_color_free(titlescreen.title.color);
   gfx_textstyle_free(titlescreen.title.style);
   gfx_textstyle_free(titlescreen.press_space.style);
+  gfx_image_free(&titlescreen.pallet_town_interiors);
 }
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {
@@ -47,4 +56,5 @@ export void titlescreen_render() {
   gfx_text_draw(&titlescreen.title);
   gfx_text_draw(&titlescreen.press_space);
   gfx_text_draw(&titlescreen.to_play);
+  gfx_image_draw(&titlescreen.pallet_town_interiors);
 }

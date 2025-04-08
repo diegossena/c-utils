@@ -29,7 +29,7 @@ i32 main(i32 argc, char** argv) {
   window_set_title("Game");
   // load
   const wchar_t* paths [] = {
-    L"megaman_2.ttf"
+    L"assets/megaman_2.ttf"
   };
   gfx_font_load(paths, sizeof(paths) / sizeof(wchar_t*));
   titlescreen_load();

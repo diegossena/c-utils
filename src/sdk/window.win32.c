@@ -87,8 +87,6 @@ export void window_fill_rectangle(
 void __window_thread() {
   i32 result;
   const char* title = " ";
-  u32 width = 800;
-  u32 height = 600;
   // window_class_register
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -121,7 +119,7 @@ void __window_thread() {
     console_log("DWriteCreateFactory %d %s", result, error_cstr(result));
   }
   // window_create
-  RECT rect = { 0, 0, width, height };
+  RECT rect = { 0, 0, global_window_width, global_window_height };
   AdjustWindowRect(&rect, window_style, false);
   global_window = CreateWindowExA(
     window_ex_style, wc.lpszClassName, title, window_style,
@@ -144,7 +142,7 @@ void __window_thread() {
   };
   D2D1_HWND_RENDER_TARGET_PROPERTIES window_render_target_props = {
     .hwnd = global_window,
-    .pixelSize = { width, height },
+    .pixelSize = { global_window_width, global_window_height },
     .presentOptions = D2D1_PRESENT_OPTIONS_NONE
   };
   result = ID2D1Factory_CreateHwndRenderTarget(

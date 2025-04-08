@@ -63,6 +63,9 @@
 #ifdef GFX_COLOR_H
 #include <src/sdk/gfx.color.win32.c>
 #endif
+#ifdef GFX_IMAGE_H
+#include <src/sdk/gfx.image.win32.c>
+#endif
 #ifdef KEYBOARD_H
 #include <src/sdk/keyboard.win32.c>
 #endif
