@@ -5,10 +5,6 @@
 
 export void gfx_image_draw(const gfx_image_t* this) {
   ID2D1Bitmap* bitmap = (ID2D1Bitmap*)this->src;
-  D2D1_RECT_F position = {
-    this->src_rect[0], this->src_rect[1],
-    this->src_rect[0] + this->src_width, this->src_rect[1] + this->src_height,
-  };
   switch (this->extend_mode) {
     case BITMAP_EXTEND_COVER:
       global_d2d_render_target->lpVtbl->DrawBitmap(
@@ -21,17 +17,22 @@ export void gfx_image_draw(const gfx_image_t* this) {
       D2D1_RECT_F rect = {
         .left = this->rect[0],
         .top = this->rect[1],
-        .right = rect.left + this->src_width,
-        .bottom = rect.top + this->src_height,
+        .right = math_min(this->rect[2], rect.left + this->src_width),
+        .bottom = math_min(this->rect[3], rect.top + this->src_height),
       };
-      ID2D1RenderTarget_DrawBitmap(
+      global_d2d_render_target->lpVtbl->DrawBitmap(
         global_d2d_render_target, bitmap, &rect, 1.f,
         D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
         (D2D1_RECT_F*)&this->src_rect
       );
-    } break;
+      break;
+    }
     default: {
       // repeat
+      D2D1_RECT_F position = {
+        this->src_rect[0], this->src_rect[1],
+        this->src_rect[0] + this->src_width, this->src_rect[1] + this->src_height,
+      };
       D2D1_RECT_F rect = {
         .top = this->rect[1],
         .bottom = this->rect[1] + this->src_width,
@@ -62,9 +63,10 @@ export void gfx_image_draw(const gfx_image_t* this) {
               rect.right = this->rect[2];
             }
             if (rect.right >= 0 && rect.left <= global_window_width) {
-              ID2D1RenderTarget_DrawBitmap(
+              global_d2d_render_target->lpVtbl->DrawBitmap(
                 global_d2d_render_target, bitmap, &rect, 1.f,
-                D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, (D2D1_RECT_F*)&position
+                D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
+                (D2D1_RECT_F*)&this->src_rect
               );
             }
             rect.left += this->src_width;
