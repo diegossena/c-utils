@@ -71,10 +71,19 @@ export void window_startup() {
   }
 }
 export void window_shutdown() {
+  IDWriteFactory_Release(global_dwrite_factory);
+  ID2D1RenderTarget_Release(global_d2d_render_target);
+  ID2D1Factory_Release(global_d2d_factory);
+  if (global_dwrite_collection) {
+    IDWriteFontCollection_Release(global_dwrite_collection);
+  }
   CoUninitialize();
 }
-LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT __window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
+    case WM_PAINT:
+      ValidateRect(window_id, 0);
+      break;
     case WM_KEYDOWN:
       window_onkeydown(wParam);
       if (wParam != 91 && !window_key_pressed(wParam)) {
@@ -99,20 +108,10 @@ LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
       global_window_focus = false;
       return 0;
     case WM_DESTROY:
-      KillTimer(0, 0);
-      thread_free(global_window_thread);
-      global_window_thread = 0;
-      IDWriteFactory_Release(global_dwrite_factory);
-      ID2D1RenderTarget_Release(global_d2d_render_target);
-      ID2D1Factory_Release(global_d2d_factory);
-      IDWriteFontCollection_Release(global_dwrite_collection);
-      if (global_dwrite_collection) {
-        global_dwrite_collection->lpVtbl->Release(global_dwrite_collection);
-      }
       PostQuitMessage(0);
       return 0;
   }
-  return DefWindowProcA(handle, message, wParam, lParam);
+  return DefWindowProcA(window_id, message, wParam, lParam);
 }
 export void window_set_title(const char* title) {
   SetWindowTextA(global_window, title);
@@ -168,8 +167,12 @@ void __window_thread() {
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
-      if (msg.message == WM_QUIT)
+      if (msg.message == WM_QUIT) {
+        KillTimer(0, 0);
+        thread_free(global_window_thread);
+        global_window_thread = 0;
         return;
+      }
     }
   } while (true);
 }
