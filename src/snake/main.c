@@ -131,7 +131,7 @@ void window_onupdate(u32 time) {
           return game_over_call();
         }
       }
-      window_redraw();
+      window_draw();
     }
   }
 }

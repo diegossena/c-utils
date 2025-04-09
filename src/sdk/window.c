@@ -2,7 +2,6 @@
 
 const u16 global_window_width = 800;
 const u16 global_window_height = 600;
-sync_t* global_window_onload_sync = 0;
 bool global_window_focus = false;
 u8 global_window_keyboard_count = 0;
 u8 global_window_keyboard_state[32] = {};

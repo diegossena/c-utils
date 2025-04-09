@@ -42,7 +42,7 @@ i32 main(i32 argc, char** argv) {
     if (global_delta_time > frame_rate) {
       time = now;
       if (global_repaint) {
-        window_redraw();
+        window_draw();
         if (!transition.loading) {
           global_repaint = false;
         }

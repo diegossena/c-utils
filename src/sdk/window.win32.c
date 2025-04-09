@@ -22,9 +22,9 @@ export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
 }
 export void window_startup() {
   assert(global_window_thread == 0);
-  global_window_onload_sync = sync_new();
-  global_window_thread = thread_new(__window_thread, 0);
-  sync_wait(global_window_onload_sync);
+  sync_t* onload_sync = sync_new();
+  global_window_thread = thread_new(_window_thread, onload_sync);
+  sync_wait(onload_sync);
   i32 result;
   // CoInitialize
   result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
@@ -79,7 +79,7 @@ export void window_shutdown() {
   }
   CoUninitialize();
 }
-LRESULT __window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_PAINT:
       ValidateRect(window_id, 0);
@@ -114,21 +114,22 @@ LRESULT __window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM l
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
 export void window_set_title(const char* title) {
+  assert(global_window != 0);
   SetWindowTextA(global_window, title);
 }
-export void window_redraw() {
+export void window_draw() {
   ID2D1RenderTarget_BeginDraw(global_d2d_render_target);
   window_onrender();
   ID2D1RenderTarget_EndDraw(global_d2d_render_target, 0, 0);
 }
-void __window_thread() {
+void _window_thread(sync_t* onload_sync) {
   i32 result;
   const char* title = " ";
   // window_class_register
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
     .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
-    .lpfnWndProc = __window_procedure,
+    .lpfnWndProc = _window_procedure,
     .hInstance = GetModuleHandleA(0),
     .hCursor = LoadCursorA(0, IDC_ARROW),
     .lpszClassName = title,
@@ -139,7 +140,7 @@ void __window_thread() {
   }
   u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
-  // window_create
+  // CreateWindowExA
   RECT rect = { 0, 0, global_window_width, global_window_height };
   AdjustWindowRect(&rect, window_style, false);
   global_window = CreateWindowExA(
@@ -153,7 +154,7 @@ void __window_thread() {
   if (!global_window) {
     error("CreateWindowExA", (error_t)global_window);
   }
-  sync_signal(global_window_onload_sync);
+  sync_signal(onload_sync);
   SetTimer(0, 0, 0, (TIMERPROC)__window_onupdate);
   MSG msg;
   do {

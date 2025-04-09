@@ -20,17 +20,13 @@ typedef enum font_weight_t {
 typedef enum font_style_t {
   FONT_STYLE_NORMAL
 } font_style_t;
+
 typedef void gfx_text_style_t;
-typedef struct gfx_text_t {
-  const wchar_t text[TINY_SIZE];
-  f32 rect[4]; // [left, top, right, bottom]
-  gfx_color_t* color;
-  gfx_text_style_t* style;
-} gfx_text_t;
 
-typedef void gfx_font_t;
-
-export void gfx_text_draw(const gfx_text_t* this);
+export void gfx_text_draw(
+  const wchar_t* text, u64 length,
+  const f32 rect[4], gfx_color_t* color, gfx_text_style_t* style
+);
 
 export void gfx_font_load(const wchar_t** paths, u8 count);
 

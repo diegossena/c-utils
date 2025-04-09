@@ -126,11 +126,13 @@ export void gfx_textstyle_free(gfx_text_style_t* this) {
   IDWriteTextFormat_Release(format);
 }
 
-export void gfx_text_draw(const gfx_text_t* this) {
-  u64 text_length = wstring_length(this->text);
+export void gfx_text_draw(
+  const wchar_t* text, u64 length,
+  const f32 rect[4], gfx_color_t* color, gfx_text_style_t* style
+) {
   ID2D1RenderTarget_DrawText(
-    global_d2d_render_target, this->text, text_length, (IDWriteTextFormat*)this->style,
-    (D2D1_RECT_F*)&this->rect, (ID2D1Brush*)this->color,
+    global_d2d_render_target, text, length, (IDWriteTextFormat*)style,
+    (D2D1_RECT_F*)rect, (ID2D1Brush*)color,
     D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL
   );
 }

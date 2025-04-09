@@ -67,6 +67,9 @@
 #ifdef GFX_RECT_H
 #include <src/sdk/gfx.rect.win32.c>
 #endif
+#ifdef GFX_STROKE_H
+#include <src/sdk/gfx.stroke.win32.c>
+#endif
 #ifdef GFX_IMAGE_H
 #include <src/sdk/gfx.image.win32.c>
 #endif

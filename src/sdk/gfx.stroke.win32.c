@@ -20,8 +20,7 @@ export gfx_stroke_t* gfx_stroke_new() {
   stroke_properties.dashOffset = 0.f;
   ID2D1StrokeStyle* this;
   global_d2d_factory->lpVtbl->CreateStrokeStyle(
-    global_d2d_factory, &stroke_properties, null, null,
-    (ID2D1StrokeStyle**)&this
+    global_d2d_factory, &stroke_properties, 0, 0, (ID2D1StrokeStyle**)&this
   );
   return this;
 }
