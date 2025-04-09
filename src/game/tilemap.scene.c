@@ -18,6 +18,7 @@ export void tilemap_load() {
 export void tilemap_unload() {
   gfx_image_free(&tilemap.pallet_town_interiors);
 }
+export void tilemap_onkeydown(key_code_t key) {}
 export u8 tilemap_tiles_get(const u8* tiles, i32 x, i32 y) {
   if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
     return tiles[y * TILEMAP_WIDTH + x];

@@ -1,6 +1,7 @@
 #include <game/titlescreen.scene.h>
 #include <game/game.h>
 #include <game/tilemap.scene.h>
+#include <game/hero_home_2f.map.h>
 
 titlescreen_t titlescreen;
 
@@ -21,7 +22,7 @@ export void titlescreen_unload() {
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {
     case KEY_SPACE:
-      transition_load(titlescreen_unload, tilemap_load);
+      transition_load(titlescreen_unload, hero_home_2f_load);
       break;
     default:
       return;
