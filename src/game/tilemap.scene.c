@@ -7,8 +7,12 @@ tilemap_t tilemap;
 export void tilemap_load() {
   f32 visible_tiles_x = (f32)global_window_width / TILE_SIZE;
   f32 visible_tiles_y = (f32)global_window_height / TILE_SIZE;
-  tilemap.visible_tiles_x = math_ceil(visible_tiles_x);
-  tilemap.visible_tiles_y = math_ceil(visible_tiles_y);
+  tilemap.visible_tiles_x = visible_tiles_x != (u8)visible_tiles_x
+    ? (u8)visible_tiles_x + 1
+    : (u8)visible_tiles_x;
+  tilemap.visible_tiles_y = visible_tiles_y != (u8)visible_tiles_y
+    ? (u8)visible_tiles_y + 1
+    : (u8)visible_tiles_y;
   tilemap.offset_limit[0] = (f32)TILEMAP_WIDTH - visible_tiles_x;
   tilemap.offset_limit[1] = (f32)TILEMAP_WIDTH - visible_tiles_y;
   // tilemap
@@ -52,6 +56,8 @@ export void tilemap_render() {
     tilemap.player[0] - (f32)tilemap.visible_tiles_x / 2.f,
     tilemap.player[1] - (f32)tilemap.visible_tiles_y / 2.f
   };
+  offset[0] = math_floorf(offset[0] * 1000.f) / 1000.f;
+  offset[1] = math_floorf(offset[1] * 1000.f) / 1000.f;
   // clamp camera to game boudaries
   offset[0] = math_clamp(offset[0], 0.f, tilemap.offset_limit[0]);
   offset[1] = math_clamp(offset[1], 0.f, tilemap.offset_limit[1]);

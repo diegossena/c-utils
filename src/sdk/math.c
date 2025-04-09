@@ -99,18 +99,14 @@ export u64 math_hash_jenkins(const char* data, u64 size) {
 export f64 math_pow(f64 base, f64 exponent) {
   return pow(base, exponent);
 }
+export f64 math_ceil(f64 number) {
+  return ceil(number);
+}
+export f32 math_floorf(f32 number) {
+  return floorf(number);
+}
 export f64 math_floor(f64 number) {
   return floor(number);
-}
-export f64 math_floor_precision(f64 number, u8 places) {
-  if (places > 0) {
-    number *= math_pow(10, places);
-  }
-  number = math_floor(number);
-  if (places > 0) {
-    number *= math_pow(10, -places);
-  }
-  return number;
 }
 export i64 math_round(f64 number) {
   i64 integer = number;
