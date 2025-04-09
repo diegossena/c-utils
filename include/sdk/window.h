@@ -6,20 +6,22 @@
 #include <sdk/keyboard.h>
 #include <sdk/console.h>
 #include <sdk/thread.h>
-#include <sdk/gfx.text.h>
-#include <sdk/gfx.color.h>
+
+typedef struct vertex_tex {
+  f32 pos[2]; // posição
+  f32 tex[2]; // coordenadas de textura
+} vertex_tex;
 
 // METHODS
 
 export void window_startup();
-export void window_shutdown();
 export void window_set_title(const char* title);
-export void window_clear();
 export void window_close();
+extern void window_run();
 
 // DRAW
 
-export void window_draw();
+export void window_draw(const f32 color[4]);
 
 // EVENTS
 
@@ -51,13 +53,19 @@ extern void window_onkeyup();
 
 export bool window_key_pressed(key_code_t);
 
-void _window_thread();
-
+export void _window_resize();
+export void _window_thread();
+// events
+extern bool global_window_repaint;
+extern bool global_window_resize;
+// control
+extern f32 global_gfx_deltatime;
+extern thread_t* global_window_thread;
+// props
 extern bool global_window_focus;
-extern const u16 global_window_width;
-extern const u16 global_window_height;
+extern u16 global_window_width;
+extern u16 global_window_height;
 extern u8 global_window_keyboard_count;
 extern u8 global_window_keyboard_state[32];
-extern thread_t* global_window_thread;
 
 #endif

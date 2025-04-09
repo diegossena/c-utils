@@ -18,6 +18,10 @@
     "array": "c",
     "tuple": "c",
     "type_traits": "c",
-    "utility": "c"
+    "utility": "c",
+    "bit": "c",
+    "compare": "c",
+    "limits": "c",
+    "new": "c"
   }
 }

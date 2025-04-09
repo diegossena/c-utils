@@ -1,7 +1,13 @@
 #include <sdk/window.h>
 
-const u16 global_window_width = 800;
-const u16 global_window_height = 600;
+// events
+bool global_window_repaint = true;
+bool global_window_resize = true;
+// control
+f32 global_gfx_deltatime = 0;
+// render
+u16 global_window_width = 800;
+u16 global_window_height = 600;
 bool global_window_focus = false;
 u8 global_window_keyboard_count = 0;
 u8 global_window_keyboard_state[32] = {};
