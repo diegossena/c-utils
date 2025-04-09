@@ -3,7 +3,7 @@
 #include <sdk/window.h>
 #include <sdk/window.win32.h>
 
-export void gfx_image_repeat(const gfx_image_t* this, f32 rect[4], f32 src_rect[4]) {
+export void gfx_image_repeat(const gfx_image_t* this, const f32 rect[4], const f32 src_rect[4]) {
   D2D1_RECT_F position = {
     src_rect[0], src_rect[1],
     src_rect[0] + this->width, src_rect[1] + this->height,
@@ -51,7 +51,7 @@ export void gfx_image_repeat(const gfx_image_t* this, f32 rect[4], f32 src_rect[
     local_rect.bottom += this->height;
   }
 }
-export void gfx_image_draw(const gfx_image_t* this, f32 rect[4], f32 src_rect[4], f32 opacity) {
+export void gfx_image_draw(const gfx_image_t* this, const f32 rect[4], const f32 src_rect[4], f32 opacity) {
   global_d2d_render_target->lpVtbl->DrawBitmap(
     global_d2d_render_target, (ID2D1Bitmap*)this->src, (D2D1_RECT_F*)rect,
     opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,

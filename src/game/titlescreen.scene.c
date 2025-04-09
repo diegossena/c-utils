@@ -10,8 +10,6 @@ export void titlescreen_load() {
   titlescreen.title_style = gfx_textstyle_new(font_family_megaman, 32, FONT_WEIGHT_BOLD, FONT_STYLE_NORMAL);
   // press_space
   titlescreen.press_space_style = gfx_textstyle_new(font_family_megaman, 26, FONT_WEIGHT_BOLD, FONT_STYLE_NORMAL);
-  // pallet_town_interiors
-  gfx_image_src(&titlescreen.pallet_town_interiors, L"assets/pallet_town_interiors.png");
   // loaded
   titlescreen.loaded = true;
 }
@@ -19,12 +17,11 @@ export void titlescreen_unload() {
   titlescreen.loaded = false;
   gfx_color_free(titlescreen.white);
   gfx_textstyle_free(titlescreen.title_style);
-  gfx_image_free(&titlescreen.pallet_town_interiors);
 }
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {
     case KEY_SPACE:
-      transition_load(titlescreen_unload, titlescreen_load);
+      transition_load(titlescreen_unload, tilemap_load);
       break;
     default:
       return;
@@ -51,12 +48,5 @@ export void titlescreen_render() {
   gfx_text_draw(
     to_play_text, sizeof(to_play_text) / sizeof(wchar_t),
     to_play_rect, titlescreen.white, titlescreen.press_space_style
-  );
-  // pallet_town_interiors
-  const f32 pallet_town_interiors_rect[4] = { 0, 0, 76, 76 };
-  const f32 pallet_town_interiors_src_rect[4] = { 5, 5, 76, 76 };
-  gfx_image_draw(
-    &titlescreen.pallet_town_interiors, pallet_town_interiors_rect,
-    pallet_town_interiors_src_rect, 1.f
   );
 }

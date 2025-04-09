@@ -18,6 +18,9 @@ void window_onrender() {
   if (titlescreen.loaded) {
     titlescreen_render();
   }
+  if (tilemap.loaded) {
+    tilemap_render();
+  }
   if (transition.loading) {
     transition_render();
   }

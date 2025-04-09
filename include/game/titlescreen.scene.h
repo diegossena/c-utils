@@ -8,7 +8,6 @@
 
 typedef struct titlescreen_t {
   bool loaded;
-  gfx_image_t pallet_town_interiors;
   gfx_color_t* white;
   gfx_text_style_t* title_style, * press_space_style;
 } titlescreen_t;
