@@ -37,4 +37,5 @@ export void transition_render() {
   if (!transition.loading) {
     gfx_color_free(transition.color);
   }
+  global_repaint = true;
 }

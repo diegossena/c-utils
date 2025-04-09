@@ -12,7 +12,11 @@ void window_onkeydown(key_code_t key) {
     titlescreen_onkeydown(key);
   }
 }
-void window_onkeypress() {}
+void window_onkeypress() {
+  if (tilemap.loaded) {
+    tilemap_onkeypress();
+  }
+}
 void window_onrender() {
   window_clear();
   if (titlescreen.loaded) {
@@ -45,10 +49,8 @@ i32 main(i32 argc, char** argv) {
     if (global_delta_time > frame_rate) {
       time = now;
       if (global_repaint) {
+        global_repaint = false;
         window_draw();
-        if (!transition.loading) {
-          global_repaint = false;
-        }
       }
     }
   }

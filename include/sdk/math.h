@@ -16,6 +16,7 @@
 #define math_max(a, b) (a < b ? b : a)
 #define math_clamp(value, min, max) math_min(math_max(value, min), max)
 #define math_abs(value) (value < 0 ? -(value) : value)
+#define math_ceil(value) (i64)(value + 0.9999999999999999)
 
 #define math_digits(number) ( \
   number > 0 \
@@ -33,7 +34,6 @@
 export f64 math_log10(f64);
 export u64 math_next2pow(u64 number);
 export u64 math_hash_jenkins(const char* data, u64 size);
-export i64 math_ceil(f64 number);
 export f64 math_pow(f64 base, f64 exponent);
 export f64 math_floor(f64 number);
 export f64 math_floor_precision(f64 number, u8 places);

@@ -13,6 +13,7 @@ export void titlescreen_load() {
   titlescreen.press_space_style = gfx_textstyle_new(font_family_megaman, 26, FONT_WEIGHT_BOLD, FONT_STYLE_NORMAL);
   // loaded
   titlescreen.loaded = true;
+  global_repaint = true;
 }
 export void titlescreen_unload() {
   titlescreen.loaded = false;

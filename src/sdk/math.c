@@ -96,13 +96,6 @@ export u64 math_hash_jenkins(const char* data, u64 size) {
   hash += hash << 15;
   return hash;
 }
-export i64 math_ceil(f64 number) {
-  i64 integer = (i64)number;
-  if (number > 0 && number != integer) {
-    ++integer;
-  }
-  return integer;
-}
 export f64 math_pow(f64 base, f64 exponent) {
   return pow(base, exponent);
 }

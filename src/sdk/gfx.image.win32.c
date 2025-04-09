@@ -108,7 +108,6 @@ export void gfx_image_src(gfx_image_t* this, const wchar_t* path) {
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
-  console_log("Bitmap %x", this->src);
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:
