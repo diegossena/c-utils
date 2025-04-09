@@ -11,6 +11,8 @@ export void tilemap_load() {
   tilemap.visible_tiles_y = math_ceil(visible_tiles_y);
   tilemap.offset_limit[0] = (f32)TILEMAP_WIDTH - visible_tiles_x;
   tilemap.offset_limit[1] = (f32)TILEMAP_WIDTH - visible_tiles_y;
+  tilemap.offset_limit[0] = math_floor(tilemap.offset_limit[0] * 1000.f) / 1000.f;
+  tilemap.offset_limit[1] = math_floor(tilemap.offset_limit[1] * 1000.f) / 1000.f;
   // tilemap
   gfx_image_src(&tilemap.pallet_town_interiors, L"assets/pallet_town_interiors.png");
   // player
@@ -39,12 +41,6 @@ export void tilemap_onkeypress() {
     tilemap.player[0] += .1f;
     global_repaint = true;
   }
-}
-export u8 tilemap_tiles_get(const u8* tiles, i32 x, i32 y) {
-  if (x >= 0 && x < TILEMAP_WIDTH && y >= 0 && y < TILEMAP_WIDTH) {
-    return tiles[y * TILEMAP_WIDTH + x];
-  }
-  return -1;
 }
 export void tilemap_render() {
   // calculate top-leftmost visible tile
