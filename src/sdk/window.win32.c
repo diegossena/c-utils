@@ -1,6 +1,7 @@
 #include <sdk/window.h>
 #ifdef PLATFORM_WINDOWS
 #include <sdk/window.win32.h>
+#include <sdk/time.h>
 
 HWND global_window;
 ID2D1Factory* global_d2d_factory;
@@ -19,13 +20,61 @@ export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
     window_onkeypress();
   }
 }
+export void window_startup() {
+  assert(global_window_thread == 0);
+  global_window_onload_sync = sync_new();
+  global_window_thread = thread_new(__window_thread, 0);
+  sync_wait(global_window_onload_sync);
+  i32 result;
+  // CoInitialize
+  result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+  if (FAILED(result)) {
+    error("CoInitializeEx", result);
+  }
+  // global_d2d_factory
+  result = D2D1CreateFactory(
+    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, 0,
+    (void**)&global_d2d_factory
+  );
+  if (FAILED(result)) {
+    error("D2D1CreateFactory", result);
+  }
+  // global_dwrite_factory
+  result = DWriteCreateFactory(
+    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
+    (IUnknown**)&global_dwrite_factory
+  );
+  if (FAILED(result)) {
+    error("DWriteCreateFactory", result);
+  }
+  // global_d2d_render_target
+  D2D1_RENDER_TARGET_PROPERTIES render_target_props = {
+    .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
+    .pixelFormat = {
+      .format = DXGI_FORMAT_UNKNOWN,
+      .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
+    }
+  };
+  D2D1_HWND_RENDER_TARGET_PROPERTIES window_render_target_props = {
+    .hwnd = global_window,
+    .pixelSize = { global_window_width, global_window_height },
+    .presentOptions = D2D1_PRESENT_OPTIONS_NONE
+  };
+  result = ID2D1Factory_CreateHwndRenderTarget(
+    global_d2d_factory,
+    &render_target_props,
+    &window_render_target_props,
+    (ID2D1HwndRenderTarget**)&global_d2d_render_target
+  );
+  if (FAILED(result)) {
+    error("CreateHwndRenderTarget", result);
+  }
+}
+export void window_shutdown() {
+  CoUninitialize();
+}
 LRESULT __window_procedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
-    // case WM_PAINT:
-    //   ID2D1RenderTarget_BeginDraw(global_d2d_render_target);
-    //   window_onrender();
-    //   ID2D1RenderTarget_EndDraw(global_d2d_render_target, 0, 0);
-    //   break;
     case WM_KEYDOWN:
       window_onkeydown(wParam);
       if (wParam != 91 && !window_key_pressed(wParam)) {
@@ -87,26 +136,10 @@ void __window_thread() {
   };
   result = RegisterClassExA(&wc);
   if (!result) {
-    console_log("RegisterClassExA %d %s", result, error_cstr(result));
+    error("RegisterClassExA", result);
   }
   u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
-  // d2d.factory
-  result = D2D1CreateFactory(
-    D2D1_FACTORY_TYPE_SINGLE_THREADED, &IID_ID2D1Factory, 0,
-    (void**)&global_d2d_factory
-  );
-  if (FAILED(result)) {
-    console_log("D2D1CreateFactory %d %s", result, error_cstr(result));
-  }
-  // d2d.write_factory
-  result = DWriteCreateFactory(
-    DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory,
-    (IUnknown**)&global_dwrite_factory
-  );
-  if (FAILED(result)) {
-    console_log("DWriteCreateFactory %d %s", result, error_cstr(result));
-  }
   // window_create
   RECT rect = { 0, 0, global_window_width, global_window_height };
   AdjustWindowRect(&rect, window_style, false);
@@ -119,35 +152,12 @@ void __window_thread() {
     0 // pointer to window-creation data
   );
   if (!global_window) {
-    console_log("CreateWindowExA", global_window, error_cstr((error_t)global_window));
-  }
-  // d2d.render_target
-  D2D1_RENDER_TARGET_PROPERTIES render_target_props = {
-    .type = D2D1_RENDER_TARGET_TYPE_DEFAULT,
-    .pixelFormat = {
-      .format = DXGI_FORMAT_UNKNOWN,
-      .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
-    }
-  };
-  D2D1_HWND_RENDER_TARGET_PROPERTIES window_render_target_props = {
-    .hwnd = global_window,
-    .pixelSize = { global_window_width, global_window_height },
-    .presentOptions = D2D1_PRESENT_OPTIONS_NONE
-  };
-  result = ID2D1Factory_CreateHwndRenderTarget(
-    global_d2d_factory,
-    &render_target_props,
-    &window_render_target_props,
-    (ID2D1HwndRenderTarget**)&global_d2d_render_target
-  );
-  if (FAILED(result)) {
-    console_log("CreateHwndRenderTarget", result, error_cstr(result));
-    goto onerror;
+    error("CreateWindowExA", (error_t)global_window);
   }
   sync_signal(global_window_onload_sync);
   SetTimer(0, 0, 0, (TIMERPROC)__window_onupdate);
   MSG msg;
-  while (true) {
+  do {
     MsgWaitForMultipleObjectsEx(
       0,
       0,
@@ -158,13 +168,10 @@ void __window_thread() {
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
-      if (msg.message == WM_QUIT) {
+      if (msg.message == WM_QUIT)
         return;
-      }
     }
-  }
-onerror:
-  return;
+  } while (true);
 }
 
 #endif

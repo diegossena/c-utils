@@ -8,6 +8,8 @@
     "thread": "c",
     "expected": "c",
     "regex": "c",
-    "random": "c"
+    "random": "c",
+    "chrono": "c",
+    "functional": "c"
   }
 }

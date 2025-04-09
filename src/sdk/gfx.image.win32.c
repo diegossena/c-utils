@@ -69,11 +69,6 @@ export void gfx_image_src(gfx_image_t* this, const wchar_t* path) {
   IWICBitmapDecoder* decoder;
   IWICBitmapFrameDecode* frame_decode;
   IWICFormatConverter* converter;
-  result = CoInitialize(NULL);
-  if (FAILED(result)) {
-    error("CoInitialize", result);
-    return;
-  }
   CLSID clsid = CLSID_WICImagingFactory;
   IID iid = IID_IWICImagingFactory;
   result = CoCreateInstance(
@@ -111,7 +106,6 @@ export void gfx_image_src(gfx_image_t* this, const wchar_t* path) {
     error("IWICFormatConverter::Initialize", result);
     goto frame_decode_free;
   }
-
   result = global_d2d_render_target->lpVtbl->CreateBitmapFromWicBitmap(
     global_d2d_render_target, (IWICBitmapSource*)converter, null,
     (ID2D1Bitmap**)&this->src
@@ -119,6 +113,10 @@ export void gfx_image_src(gfx_image_t* this, const wchar_t* path) {
   if (FAILED(result)) {
     error("CreateBitmapFromWicBitmap", result);
   }
+  ID2D1Bitmap* bitmap = this->src;
+  // console_log("GetPixelSize");
+  // D2D1_SIZE_U size = bitmap->lpVtbl->GetPixelSize(bitmap);
+  // console_log("size %u %u", size.width, size.height);
 frame_decode_free:
   frame_decode->lpVtbl->Release(frame_decode);
 decoder_free:

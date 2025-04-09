@@ -26,7 +26,6 @@ void window_onrender() {
 i32 main(i32 argc, char** argv) {
   // window
   window_startup();
-  sync_wait(global_window_onload_sync);
   window_set_title("Game");
   // load
   const wchar_t* paths [] = {
@@ -54,5 +53,6 @@ i32 main(i32 argc, char** argv) {
   if (titlescreen.loaded) {
     titlescreen_unload();
   }
+  window_shutdown();
   return 0;
 }

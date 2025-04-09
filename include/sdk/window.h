@@ -12,6 +12,7 @@
 // METHODS
 
 export void window_startup();
+export void window_shutdown();
 export void window_set_title(const char* title);
 export void window_clear();
 export void window_close();
