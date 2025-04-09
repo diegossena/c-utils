@@ -34,7 +34,7 @@ typedef struct tilemap_t {
   f32 player_walking_duration;
   // camera
   u8 visible_tiles_x, visible_tiles_y;
-  f64 offset_limit[2];
+  f32 offset_limit[2];
 } tilemap_t;
 
 export void tilemap_load();

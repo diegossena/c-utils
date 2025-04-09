@@ -67,9 +67,10 @@ export void tilemap_render() {
           : 0;
         if (tile_id == 0)
           continue;
-        f32 rect[4];
-        rect[0] = x * TILE_SIZE - tile_offset_x;
-        rect[1] = y * TILE_SIZE - tile_offset_y;
+        f32 rect[4] = {
+          x * TILE_SIZE - tile_offset_x,
+          y * TILE_SIZE - tile_offset_y
+        };
         rect[2] = rect[0] + TILE_SIZE;
         rect[3] = rect[1] + TILE_SIZE;
         f32 src_rect[4];
@@ -166,10 +167,49 @@ export void tilemap_render() {
             src_rect[1] = 117;
           }
         }
-        src_rect[2] = src_rect[0] + 16.f;
-        src_rect[3] = src_rect[1] + 16.f;
+        const f32 sprite_size = 16.f;
+        src_rect[2] = src_rect[0] + sprite_size;
+        src_rect[3] = src_rect[1] + sprite_size;
         gfx_image_draw(&tilemap.pallet_town_interiors, rect, src_rect, 1.f);
       }
     }
   }
+  // player render
+  const f32 scale = 4.f;
+  f32 rect[4] = {
+    (tilemap.player[0] - offset[0]) * TILE_SIZE + 6.f,
+    (tilemap.player[1] - offset[1]) * TILE_SIZE + -58.f,
+  };
+  rect[2] = rect[0] + 15.f * scale;
+  rect[3] = rect[1] + 31.f * scale;
+  f32 src_rect[4];
+  switch (tilemap.player_walking_state) {
+    case PLAYER_STATE_STANDING_1:
+    case PLAYER_STATE_STANDING_2:
+      src_rect[0] = 25;
+      break;
+    case PLAYER_STATE_WALKING_1:
+      src_rect[0] = 8;
+      break;
+    case PLAYER_STATE_WALKING_2:
+      src_rect[0] = 42;
+      break;
+  }
+  switch (tilemap.player_direction) {
+    case PLAYER_UP:
+      src_rect[1] = 75;
+      break;
+    case PLAYER_DOWN:
+      src_rect[1] = 42;
+      break;
+    case PLAYER_RIGHT:
+      src_rect[1] = 141;
+      break;
+    case PLAYER_LEFT:
+      src_rect[1] = 108;
+      break;
+  }
+  src_rect[2] = src_rect[0] + 15.f;
+  src_rect[3] = src_rect[1] + 31.f;
+  gfx_image_draw(&tilemap.character_img, rect, src_rect, 1.f);
 }
