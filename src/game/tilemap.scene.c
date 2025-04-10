@@ -12,10 +12,6 @@ export void tilemap_load() {
   // tilemap.offset_limit[1] = (f32)TILEMAP_WIDTH - visible_tiles_y;
   // tilemap.offset_limit[0] = math_floor(tilemap.offset_limit[0] * 1000.f) / 1000.f;
   // tilemap.offset_limit[1] = math_floor(tilemap.offset_limit[1] * 1000.f) / 1000.f;
-  // // tilemap
-  // gfx_image_src(&tilemap.pallet_town_interiors, L"assets/pallet_town_interiors.png");
-  // // player
-  // gfx_image_src(&tilemap.character_img, L"assets/character.png");
   // // walking animate
   // // loaded
   // tilemap.loaded = true;

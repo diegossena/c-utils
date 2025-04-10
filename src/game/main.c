@@ -34,7 +34,7 @@ void window_onrender() {
 i32 main(i32 argc, char** argv) {
   window_startup();
   window_set_title("Game");
-  window_atlas_load(L"assets/atlas.png");
+  window_atlas_load("assets/atlas.bin");
   titlescreen_load();
   window_run();
   if (titlescreen.loaded) {

@@ -17,6 +17,9 @@ IF "%package_name%" == "http" (
 IF "%package_name%" == "game" (
   SET linker_flags=-ld3d11 -ld2d1 -lDwrite -ld3dcompiler -lole32 -ldxguid -lgdi32
 )
+IF "%package_name%" == "png_bin" (
+  SET linker_flags=-ld3d11 -ld2d1 -lDwrite -ld3dcompiler -lole32 -ldxguid -lgdi32 -lwindowscodecs
+)
 :: clear exe
 if EXIST .\bin\%package_name%.exe DEL .\bin\%package_name%.exe
 ECHO %package_name% compiling...

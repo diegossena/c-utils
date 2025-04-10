@@ -204,104 +204,23 @@ export void window_startup() {
   // IWICImagingFactory
 
 }
-extern void window_atlas_load(const wchar_t* path) {
+extern void window_atlas_load(const char* path) {
   assert(global_atlas == 0);
   i32 result;
-
-  // // CoInitialize
-  // result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
-  // if (FAILED(result)) {
-  //   error("CoInitializeEx", result);
-  // }
-  // // wic_factory
-  // IWICImagingFactory* wic_factory;
-  // result = CoCreateInstance(
-  //   &CLSID_WICImagingFactory,
-  //   NULL,
-  //   CLSCTX_INPROC_SERVER,
-  //   &IID_IWICImagingFactory,
-  //   (void**)&wic_factory
-  // );
-  // if (FAILED(result)) {
-  //   error("CoCreateInstance_IWICImagingFactory", result);
-  // }
-  // CoUninitialize();
-  // // decoder
-  // IWICBitmapDecoder* decoder;
-  // result = wic_factory->lpVtbl->CreateDecoderFromFilename(
-  //   wic_factory, path, 0, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder
-  // );
-  // if (FAILED(result)) {
-  //   error("CreateDecoderFromFilename", result);
-  // }
-  // // frame
-  // IWICBitmapFrameDecode* frame;
-  // result = decoder->lpVtbl->GetFrame(decoder, 0, &frame);
-  // if (FAILED(result)) {
-  //   error("IWICBitmapDecoder_GetFrame", result);
-  // }
-  // decoder->lpVtbl->Release(decoder);
-  // // CreateFormatConverter
-  // IWICFormatConverter* converter;
-  // result = wic_factory->lpVtbl->CreateFormatConverter(wic_factory, &converter);
-  // if (FAILED(result)) {
-  //   error("IWICImagingFactory_CreateFormatConverter", result);
-  // }
-  // wic_factory->lpVtbl->Release(wic_factory);
-  // // IWICFormatConverter_Inicialize
-  // result = converter->lpVtbl->Initialize(
-  //   converter, (IWICBitmapSource*)frame, &GUID_WICPixelFormat32bppRGBA,
-  //   WICBitmapDitherTypeNone, 0, 0., WICBitmapPaletteTypeCustom
-  // );
-  // if (FAILED(result)) {
-  //   error("IWICFormatConverter_Initialize", result);
-  // }
-  // // IWICBitmapFrameDecode_GetSize
-  // image_t image;
-  // result = frame->lpVtbl->GetSize(frame, &image.width, &image.height);
-  // if (FAILED(result)) {
-  //   error("GetSize", result);
-  // }
-  // frame->lpVtbl->Release(frame);
-  // // image_load
-  // const u32 image_stride = image.width * 4;
-  // const u32 image_size = image_stride * image.height;
-  // u8* image_data = memory_alloc(image_size);
-  // console_log("width %lu height %lu stride %lu image_size %llu", image.width, image.height, image_stride, image_size);
-  // // IWICFormatConverter_CopyPixels
-  // result = converter->lpVtbl->CopyPixels(
-  //   converter,
-  //   0, // full rect
-  //   image_stride,
-  //   image_size,
-  //   image_data
-  // );
-  // if (FAILED(result)) {
-  //   error("IWICFormatConverter_CopyPixels", result);
-  // }
-  // converter->lpVtbl->Release(converter);
-  // // cache_file
-  // FILE* file = fopen("atlas.bmp", "w");
-  // if (file == 0) {
-  //   error("fopen", (error_t)file);
-  // }
-  // fwrite(&image, 1, sizeof(image), file);
-  // fwrite(image_data, 1, image_size, file);
-  // fclose(file);
-
-  image_t image;
-  FILE* file = fopen("assets/atlas.bmp", "r");
-  fread(&image, sizeof(image), 1, file);
-  u64 image_size = image.width * image.height * 4; // RGBA8
-  u8* image_data = memory_alloc(image_size);
+  // load_image
+  u32 image_width, image_height;
+  FILE* file = fopen(path, "r");
+  fread(&image_width, sizeof(image_width), 1, file);
+  fread(&image_height, sizeof(image_height), 1, file);
+  u64 image_size = image_width * image_height * 4; // RGBA8
+  u8 image_data[MEDIUM_SIZE];
   fread(image_data, 1, image_size, file);
   fclose(file);
-  const u32 image_stride = image.width * 4;
-
+  const u32 image_stride = image_width * 4;
   // CreateTexture2D
   D3D11_TEXTURE2D_DESC texture_desc = {
-    .Width = image.width,
-    .Height = image.height,
+    .Width = image_width,
+    .Height = image_height,
     .MipLevels = 1,
     .ArraySize = 1,
     .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -322,7 +241,6 @@ extern void window_atlas_load(const wchar_t* path) {
   if (FAILED(result)) {
     error("CreateTexture2D", result);
   }
-  memory_free(image_data);
   // CreateShaderResourceView
   D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
     .Format = texture_desc.Format,

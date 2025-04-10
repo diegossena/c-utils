@@ -9,6 +9,7 @@
 #define TINY_SIZE 255
 #define URL_SIZE 2048
 #define TEXT_SIZE 65535ULL
+#define MEDIUM_SIZE 1048575ULL // 2^20-1
 
 #define IS_DIGIT(x)  ((x) >= '0' && (x) <= '9')
 #define IS_LOWER(x)  ((x) >= 'a' && (x) <= 'z')

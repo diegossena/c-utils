@@ -7,7 +7,6 @@
 #include <d3d11.h>
 #include <dxgi.h>
 #include <initguid.h>
-#include <wincodec.h>
 #undef COBJMACROS
 
 // window
