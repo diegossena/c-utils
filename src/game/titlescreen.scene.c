@@ -55,5 +55,4 @@ export void titlescreen_render() {
   global_indices[indices->length++] = 0;
   global_indices[indices->length++] = 2;
   global_indices[indices->length++] = 3;
-  console_log("titlescreen_render");
 }
