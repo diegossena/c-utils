@@ -153,10 +153,10 @@ export void window_startup() {
   global_d3d_device_context->lpVtbl->IASetInputLayout(global_d3d_device_context, global_input_layout);
   // global_sampler_state
   const D3D11_SAMPLER_DESC sampler_desc = {
-    .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
-    .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
-    .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
-    .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
+    .Filter = D3D11_FILTER_MIN_MAG_MIP_POINT,
+    .AddressU = D3D11_TEXTURE_ADDRESS_CLAMP,
+    .AddressV = D3D11_TEXTURE_ADDRESS_CLAMP,
+    .AddressW = D3D11_TEXTURE_ADDRESS_CLAMP,
     .ComparisonFunc = D3D11_COMPARISON_NEVER,
     .MinLOD = 0,
     .MinLOD = D3D11_FLOAT32_MAX
@@ -254,7 +254,7 @@ extern void window_atlas_load(const char* path, const u64 width, const u64 heigh
 LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_PAINT:
-      global_window_repaint = true;
+      // global_window_repaint = true;
       ValidateRect(window_id, 0);
       break;
     case WM_KEYDOWN:
@@ -280,7 +280,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
     case WM_SIZE:
       if (global_d3d_device) {
         global_window_width = LOWORD(lParam);
-        global_window_height = LOWORD(lParam);
+        global_window_height = HIWORD(lParam);
         global_window_resize = true;
       }
       break;
@@ -399,6 +399,8 @@ extern void window_run() {
         error("IDXGISwapChain_ResizeBuffers", result);
       }
       _window_resize();
+      global_window_repaint = true;
+      global_window_resize = false;
     }
     f64 now = time_now_f64();
     global_window_deltatime = now - time;

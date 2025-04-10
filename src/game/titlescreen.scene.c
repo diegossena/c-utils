@@ -28,28 +28,58 @@ export void titlescreen_onkeydown(key_code_t key) {
   }
 }
 export void titlescreen_render() {
-  const f32 tile_size = 1.f / (6.f / 160.f);
+  // tile
+  const u8 tile_x = 0;
+  const u8 tile_y = 0;
+  const f32 tile_size = (1.f / 160.f) * 16.f;
+
+  // const f32 u0 = tile_size * tile_x;
+  // const f32 v0 = tile_size * tile_y;
+  // const f32 u1 = u0 + tile_size;
+  // const f32 v1 = v0 + tile_size;
+
+  const f32 u0 = 0.f;
+  const f32 v0 = 0.f;
+  const f32 u1 = 1.f;
+  const f32 v1 = 1.f;
+
   // vertices
+  const f32 px = 0.f;
+  const f32 py = 0.f;
+  const f32 size = 64.f;
+  const f32 ndc_w = 2.f / (f32)global_window_width;
+  const f32 ndc_h = 2.f / (f32)global_window_height;
+
+  // const f32 x0 = -1.f + px * ndc_w;
+  // const f32 y0 = 1.f + py * ndc_h;
+  // const f32 x1 = x0 + ndc_w * size;
+  // const f32 y1 = y0 - ndc_h * size;
+
+  const f32 x0 = -1.f;
+  const f32 y0 = 1.f;
+  const f32 x1 = 1.f;
+  const f32 y1 = -1.f;
+
   vertex_t vertex;
-  vertex.x = -.5f;
-  vertex.y = -.5f;
-  vertex.u = 0.f;
-  vertex.v = 1.f;
+  vertex.x = x0;
+  vertex.y = y0;
+  vertex.u = u0;
+  vertex.v = v0;
   global_vertices_virtual[global_vertices_length++] = vertex;
-  vertex.x = -.5f;
-  vertex.y = .5f;
-  vertex.u = 0.f;
-  vertex.v = 0.f;
+  vertex.x = x1;
+  vertex.y = y0;
+  vertex.u = u1;
+  vertex.v = v0;
   global_vertices_virtual[global_vertices_length++] = vertex;
-  vertex.x = .5f;
-  vertex.y = .5f;
-  vertex.u = 1.f;
-  vertex.v = 0.f;
+  vertex.x = x1;
+  vertex.y = y1;
+  vertex.u = u1;
+  vertex.v = v1;
   global_vertices_virtual[global_vertices_length++] = vertex;
-  vertex.x = .5f;
-  vertex.y = -.5f;
-  vertex.u = 1.f;
-  vertex.v = 1.f;
+  vertex.x = x0;
+  vertex.y = y1;
+  vertex.u = u0;
+  vertex.v = v1;
   global_vertices_virtual[global_vertices_length++] = vertex;
   // indexes
   global_indexes_virtual[global_indexes_length++] = 0;
