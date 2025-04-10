@@ -20,7 +20,7 @@ ID3D11SamplerState* global_sampler_state;
 
 ID3D11ShaderResourceView* global_atlas;
 
-ID3D11Buffer* global_vertex_buffer = 0;
+ID3D11Buffer* global_vertex_buffer;
 
 export void _window_resize() {
   HRESULT result;
@@ -80,6 +80,8 @@ extern void window_run() {
     }
   }
   // dx11_cleanup
+  buffer_free(global_vertices);
+  global_vertex_buffer->lpVtbl->Release(global_vertex_buffer);
   global_sampler_state->lpVtbl->Release(global_sampler_state);
   global_pixel_shader->lpVtbl->Release(global_pixel_shader);
   global_vertex_shader->lpVtbl->Release(global_vertex_shader);
@@ -202,9 +204,25 @@ export void window_startup() {
     error("CreateSamplerState", result);
   }
   global_d3d_device_context->lpVtbl->PSSetSamplers(global_d3d_device_context, 0, 1, &global_sampler_state);
-
-  // IWICImagingFactory
-
+  // vertex_buffer
+  const u64 vertices_size = 256;
+  global_vertices = buffer_new(sizeof(vertex_t) * vertices_size);
+  // CreateVertexBuffer
+  const u32 vertex_stride = sizeof(vertex_t);
+  const u32 vertex_offset = 0;
+  D3D11_BUFFER_DESC vertex_desc = {
+    .ByteWidth = vertices_size * sizeof(vertex_t),
+    .Usage = D3D11_USAGE_DYNAMIC,
+    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+    .BindFlags = D3D11_BIND_VERTEX_BUFFER,
+  };
+  result = global_d3d_device->lpVtbl->CreateBuffer(
+    global_d3d_device, &vertex_desc, 0, &global_vertex_buffer
+  );
+  if (FAILED(result)) {
+    error("VertexShader_CreateBuffer", result);
+  }
+  global_d3d_device_context->lpVtbl->IASetVertexBuffers(global_d3d_device_context, 0, 1, &global_vertex_buffer, &vertex_stride, &vertex_offset);
 }
 extern void window_atlas_load(const char* path, const u64 width, const u64 height) {
   assert(global_atlas == 0);

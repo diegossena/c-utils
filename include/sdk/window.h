@@ -7,6 +7,11 @@
 #include <sdk/console.h>
 #include <sdk/thread.h>
 
+typedef struct vertex_t {
+  f32 x, y; // position
+  f32 u, v; // textcoord
+} vertex_t;
+
 export void window_startup();
 export void window_set_title(const char* title);
 export void window_close();
@@ -50,17 +55,19 @@ export bool window_key_pressed(key_code_t);
 
 export void _window_resize();
 export void _window_thread();
-// events
+
 extern bool global_window_repaint;
 extern bool global_window_resize;
-// control
+
 extern f32 global_gfx_deltatime;
 extern thread_t* global_window_thread;
-// props
+
 extern bool global_window_focus;
 extern u16 global_window_width;
 extern u16 global_window_height;
 extern u8 global_window_keyboard_count;
 extern u8 global_window_keyboard_state[32];
+
+extern vertex_t* global_vertices;
 
 #endif
