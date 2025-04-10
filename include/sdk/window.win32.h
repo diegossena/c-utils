@@ -24,4 +24,6 @@ extern ID3D11SamplerState* global_sampler_state;
 
 extern ID3D11ShaderResourceView* global_atlas;
 
+extern ID3D11Buffer* global_vertex_buffer;
+
 #endif

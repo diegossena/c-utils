@@ -20,6 +20,8 @@ ID3D11SamplerState* global_sampler_state;
 
 ID3D11ShaderResourceView* global_atlas;
 
+ID3D11Buffer* global_vertex_buffer = 0;
+
 export void _window_resize() {
   HRESULT result;
   // global_d3d_render_target_view
