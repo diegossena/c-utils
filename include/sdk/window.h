@@ -7,7 +7,10 @@
 #include <sdk/console.h>
 #include <sdk/thread.h>
 
-// METHODS
+typedef struct image_t {
+  u32 width, height;
+  // ...data
+} image_t;
 
 export void window_startup();
 export void window_set_title(const char* title);

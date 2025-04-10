@@ -3,6 +3,8 @@
 #include <sdk/window.win32.h>
 #include <sdk/time.h>
 
+#include <stdio.h>
+
 HWND global_window;
 
 ID3D11Device* global_d3d_device = 0;
@@ -205,82 +207,101 @@ export void window_startup() {
 extern void window_atlas_load(const wchar_t* path) {
   assert(global_atlas == 0);
   i32 result;
-  // CoInitialize
-  result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
-  if (FAILED(result)) {
-    error("CoInitializeEx", result);
-  }
-  // wic_factory
-  IWICImagingFactory* wic_factory;
-  result = CoCreateInstance(
-    &CLSID_WICImagingFactory,
-    NULL,
-    CLSCTX_INPROC_SERVER,
-    &IID_IWICImagingFactory,
-    (void**)&wic_factory
-  );
-  if (FAILED(result)) {
-    error("CoCreateInstance_IWICImagingFactory", result);
-  }
-  CoUninitialize();
-  // decoder
-  IWICBitmapDecoder* decoder;
-  result = wic_factory->lpVtbl->CreateDecoderFromFilename(
-    wic_factory, path, 0, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder
-  );
-  if (FAILED(result)) {
-    error("CreateDecoderFromFilename", result);
-  }
-  // frame
-  IWICBitmapFrameDecode* frame;
-  result = decoder->lpVtbl->GetFrame(decoder, 0, &frame);
-  if (FAILED(result)) {
-    error("IWICBitmapDecoder_GetFrame", result);
-  }
-  decoder->lpVtbl->Release(decoder);
-  // CreateFormatConverter
-  IWICFormatConverter* converter;
-  result = wic_factory->lpVtbl->CreateFormatConverter(wic_factory, &converter);
-  if (FAILED(result)) {
-    error("IWICImagingFactory_CreateFormatConverter", result);
-  }
-  wic_factory->lpVtbl->Release(wic_factory);
-  // IWICFormatConverter_Inicialize
-  result = converter->lpVtbl->Initialize(
-    converter, (IWICBitmapSource*)frame, &GUID_WICPixelFormat32bppRGBA,
-    WICBitmapDitherTypeNone, 0, 0., WICBitmapPaletteTypeCustom
-  );
-  if (FAILED(result)) {
-    error("IWICFormatConverter_Initialize", result);
-  }
-  // IWICBitmapFrameDecode_GetSize
-  u32 width = 0, height = 0;
-  result = frame->lpVtbl->GetSize(frame, &width, &height);
-  if (FAILED(result)) {
-    error("GetSize", result);
-  }
-  frame->lpVtbl->Release(frame);
-  // image_load
-  const u32 image_stride = width * 4;
-  const u32 image_size = image_stride * height;
+
+  // // CoInitialize
+  // result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+  // if (FAILED(result)) {
+  //   error("CoInitializeEx", result);
+  // }
+  // // wic_factory
+  // IWICImagingFactory* wic_factory;
+  // result = CoCreateInstance(
+  //   &CLSID_WICImagingFactory,
+  //   NULL,
+  //   CLSCTX_INPROC_SERVER,
+  //   &IID_IWICImagingFactory,
+  //   (void**)&wic_factory
+  // );
+  // if (FAILED(result)) {
+  //   error("CoCreateInstance_IWICImagingFactory", result);
+  // }
+  // CoUninitialize();
+  // // decoder
+  // IWICBitmapDecoder* decoder;
+  // result = wic_factory->lpVtbl->CreateDecoderFromFilename(
+  //   wic_factory, path, 0, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder
+  // );
+  // if (FAILED(result)) {
+  //   error("CreateDecoderFromFilename", result);
+  // }
+  // // frame
+  // IWICBitmapFrameDecode* frame;
+  // result = decoder->lpVtbl->GetFrame(decoder, 0, &frame);
+  // if (FAILED(result)) {
+  //   error("IWICBitmapDecoder_GetFrame", result);
+  // }
+  // decoder->lpVtbl->Release(decoder);
+  // // CreateFormatConverter
+  // IWICFormatConverter* converter;
+  // result = wic_factory->lpVtbl->CreateFormatConverter(wic_factory, &converter);
+  // if (FAILED(result)) {
+  //   error("IWICImagingFactory_CreateFormatConverter", result);
+  // }
+  // wic_factory->lpVtbl->Release(wic_factory);
+  // // IWICFormatConverter_Inicialize
+  // result = converter->lpVtbl->Initialize(
+  //   converter, (IWICBitmapSource*)frame, &GUID_WICPixelFormat32bppRGBA,
+  //   WICBitmapDitherTypeNone, 0, 0., WICBitmapPaletteTypeCustom
+  // );
+  // if (FAILED(result)) {
+  //   error("IWICFormatConverter_Initialize", result);
+  // }
+  // // IWICBitmapFrameDecode_GetSize
+  // image_t image;
+  // result = frame->lpVtbl->GetSize(frame, &image.width, &image.height);
+  // if (FAILED(result)) {
+  //   error("GetSize", result);
+  // }
+  // frame->lpVtbl->Release(frame);
+  // // image_load
+  // const u32 image_stride = image.width * 4;
+  // const u32 image_size = image_stride * image.height;
+  // u8* image_data = memory_alloc(image_size);
+  // console_log("width %lu height %lu stride %lu image_size %llu", image.width, image.height, image_stride, image_size);
+  // // IWICFormatConverter_CopyPixels
+  // result = converter->lpVtbl->CopyPixels(
+  //   converter,
+  //   0, // full rect
+  //   image_stride,
+  //   image_size,
+  //   image_data
+  // );
+  // if (FAILED(result)) {
+  //   error("IWICFormatConverter_CopyPixels", result);
+  // }
+  // converter->lpVtbl->Release(converter);
+  // // cache_file
+  // FILE* file = fopen("atlas.bmp", "w");
+  // if (file == 0) {
+  //   error("fopen", (error_t)file);
+  // }
+  // fwrite(&image, 1, sizeof(image), file);
+  // fwrite(image_data, 1, image_size, file);
+  // fclose(file);
+
+  image_t image;
+  FILE* file = fopen("assets/atlas.bmp", "r");
+  fread(&image, sizeof(image), 1, file);
+  u64 image_size = image.width * image.height * 4; // RGBA8
   u8* image_data = memory_alloc(image_size);
-  // IWICFormatConverter_CopyPixels
-  result = converter->lpVtbl->CopyPixels(
-    converter,
-    0, // full rect
-    image_stride,
-    image_size,
-    image_data
-  );
-  if (FAILED(result)) {
-    error("IWICFormatConverter_CopyPixels", result);
-  }
-  converter->lpVtbl->Release(converter);
+  fread(image_data, 1, image_size, file);
+  fclose(file);
+  const u32 image_stride = image.width * 4;
+
   // CreateTexture2D
-  ID3D11Texture2D* texture;
   D3D11_TEXTURE2D_DESC texture_desc = {
-    .Width = width,
-    .Height = height,
+    .Width = image.width,
+    .Height = image.height,
     .MipLevels = 1,
     .ArraySize = 1,
     .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -294,6 +315,7 @@ extern void window_atlas_load(const wchar_t* path) {
     .pSysMem = image_data,
     .SysMemPitch = image_stride,
   };
+  ID3D11Texture2D* texture;
   result = global_d3d_device->lpVtbl->CreateTexture2D(
     global_d3d_device, &texture_desc, &subresource_data, &texture
   );
