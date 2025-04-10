@@ -346,7 +346,7 @@ export void _window_thread(sync_t* onload_sync) {
   if (!result) {
     error("RegisterClassExA", result);
   }
-  u32 window_style = WS_VISIBLE | WS_OVERLAPPEDWINDOW;
+  u32 window_style = WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
   // CreateWindowExA
   RECT rect = { 0, 0, global_window_width, global_window_height };
