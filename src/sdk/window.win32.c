@@ -2,6 +2,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <sdk/window.win32.h>
 #include <sdk/time.h>
+#include <sdk/memory.h>
 
 #include <stdio.h>
 
@@ -20,8 +21,9 @@ ID3D11SamplerState* global_sampler_state;
 
 ID3D11ShaderResourceView* global_atlas;
 
-ID3D11Buffer* global_vertex_buffer;
-ID3D11Buffer* global_index_buffer;
+ID3D11Buffer* global_vertices_buffer;
+ID3D11Buffer* global_indexes_buffer;
+
 
 export void _window_resize() {
   HRESULT result;
@@ -166,36 +168,39 @@ export void window_startup() {
     error("CreateSamplerState", result);
   }
   global_d3d_device_context->lpVtbl->PSSetSamplers(global_d3d_device_context, 0, 1, &global_sampler_state);
-  // vertex_buffer
-  const u64 vertices_size = 256;
+  // global_vertices
+  global_vertices_capacity = TINY_SIZE;
   D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
   };
-  global_vertices = buffer_new(sizeof(vertex_t) * vertices_size);
-  // CreateVertexBuffer
-  buffer_desc.ByteWidth = vertices_size * sizeof(vertex_t);
+  global_vertices_virtual = memory_alloc(sizeof(vertex_t) * global_vertices_capacity);
+  buffer_desc.ByteWidth = global_vertices_capacity * sizeof(vertex_t);
   buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   result = global_d3d_device->lpVtbl->CreateBuffer(
-    global_d3d_device, &buffer_desc, 0, &global_vertex_buffer
+    global_d3d_device, &buffer_desc, 0, &global_vertices_buffer
   );
   if (FAILED(result)) {
     error("CreateVertexBuffer", result);
   }
   const u32 vertex_stride = sizeof(vertex_t);
   const u32 vertex_offset = 0;
-  global_d3d_device_context->lpVtbl->IASetVertexBuffers(global_d3d_device_context, 0, 1, &global_vertex_buffer, &vertex_stride, &vertex_offset);
-  // CreateIndexBuffer
-  global_indices = buffer_new(sizeof(u32) * vertices_size);
-  buffer_desc.ByteWidth = sizeof(u32) * vertices_size;
+  global_d3d_device_context->lpVtbl->IASetVertexBuffers(
+    global_d3d_device_context, 0, 1, &global_vertices_buffer, &vertex_stride,
+    &vertex_offset
+  );
+  // global_indexes
+  global_indexes_capacity = TINY_SIZE;
+  global_indexes_virtual = memory_alloc(sizeof(u32) * global_indexes_capacity);
+  buffer_desc.ByteWidth = sizeof(u32) * global_indexes_capacity;
   buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
   result = global_d3d_device->lpVtbl->CreateBuffer(
-    global_d3d_device, &buffer_desc, 0, &global_index_buffer
+    global_d3d_device, &buffer_desc, 0, &global_indexes_buffer
   );
   if (FAILED(result)) {
     error("CreateIndexBuffer", result);
   }
-  global_d3d_device_context->lpVtbl->IASetIndexBuffer(global_d3d_device_context, global_index_buffer, DXGI_FORMAT_R32_UINT, 0);
+  global_d3d_device_context->lpVtbl->IASetIndexBuffer(global_d3d_device_context, global_indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
 }
 extern void window_atlas_load(const char* path, const u64 width, const u64 height) {
   assert(global_atlas == 0);
@@ -296,35 +301,33 @@ export void window_set_title(const char* title) {
   SetWindowTextA(global_window, title);
 }
 export void window_draw(const f32 color[4]) {
-  buffer_t* vertices = buffer_header(global_vertices);
-  buffer_t* indices = buffer_header(global_indices);
-  vertices->length = 0;
-  indices->length = 0;
+  global_vertices_length = 0;
+  global_indexes_length = 0;
   window_onrender();
   D3D11_MAPPED_SUBRESOURCE subresource;
   // vertices
   global_d3d_device_context->lpVtbl->Map(
-    global_d3d_device_context, (ID3D11Resource*)global_vertex_buffer, 0,
+    global_d3d_device_context, (ID3D11Resource*)global_vertices_buffer, 0,
     D3D11_MAP_WRITE_DISCARD, 0, &subresource
   );
-  memory_copy(subresource.pData, global_vertices, sizeof(vertex_t) * vertices->length);
+  memory_copy(subresource.pData, global_vertices_virtual, sizeof(vertex_t) * global_vertices_length);
   global_d3d_device_context->lpVtbl->Unmap(
-    global_d3d_device_context, (ID3D11Resource*)global_vertex_buffer, 0
+    global_d3d_device_context, (ID3D11Resource*)global_vertices_buffer, 0
   );
   // indices
   global_d3d_device_context->lpVtbl->Map(
-    global_d3d_device_context, (ID3D11Resource*)global_index_buffer, 0,
+    global_d3d_device_context, (ID3D11Resource*)global_indexes_buffer, 0,
     D3D11_MAP_WRITE_DISCARD, 0, &subresource
   );
-  memory_copy(subresource.pData, global_indices, sizeof(u32) * indices->length);
+  memory_copy(subresource.pData, global_indexes_virtual, sizeof(u32) * global_indexes_length);
   global_d3d_device_context->lpVtbl->Unmap(
-    global_d3d_device_context, (ID3D11Resource*)global_index_buffer, 0
+    global_d3d_device_context, (ID3D11Resource*)global_indexes_buffer, 0
   );
   // draw
   global_d3d_device_context->lpVtbl->ClearRenderTargetView(
     global_d3d_device_context, global_d3d_render_target_view, color
   );
-  global_d3d_device_context->lpVtbl->DrawIndexed(global_d3d_device_context, indices->length, 0, 0);
+  global_d3d_device_context->lpVtbl->DrawIndexed(global_d3d_device_context, global_indexes_length, 0, 0);
   global_d3d_swapchain->lpVtbl->Present(global_d3d_swapchain, 0, 0);
 }
 export void _window_thread(sync_t* onload_sync) {
@@ -398,8 +401,8 @@ extern void window_run() {
       _window_resize();
     }
     f64 now = time_now_f64();
-    global_gfx_deltatime = now - time;
-    if (global_gfx_deltatime > frame_rate) {
+    global_window_deltatime = now - time;
+    if (global_window_deltatime > frame_rate) {
       time = now;
       if (global_window_repaint) {
         global_window_repaint = false;
@@ -409,10 +412,10 @@ extern void window_run() {
     }
   }
   // dx11_cleanup
-  buffer_free(global_indices);
-  buffer_free(global_vertices);
-  global_index_buffer->lpVtbl->Release(global_index_buffer);
-  global_vertex_buffer->lpVtbl->Release(global_vertex_buffer);
+  memory_free(global_indexes_virtual);
+  memory_free(global_vertices_virtual);
+  global_indexes_buffer->lpVtbl->Release(global_indexes_buffer);
+  global_vertices_buffer->lpVtbl->Release(global_vertices_buffer);
   global_sampler_state->lpVtbl->Release(global_sampler_state);
   global_pixel_shader->lpVtbl->Release(global_pixel_shader);
   global_vertex_shader->lpVtbl->Release(global_vertex_shader);

@@ -30,6 +30,7 @@
     "slist": "c",
     "initializer_list": "c",
     "span": "c",
-    "valarray": "c"
+    "valarray": "c",
+    "vector": "c"
   }
 }

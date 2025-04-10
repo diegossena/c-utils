@@ -7,9 +7,6 @@
 #include <src/sdk/memory.c>
 #include <src/sdk/memory.win32.c>
 #endif
-#ifdef BUFFER_H
-#include <src/sdk/buffer.c>
-#endif
 #ifdef STRING_H
 #include <src/sdk/string.c>
 #endif

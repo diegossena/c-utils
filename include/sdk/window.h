@@ -59,7 +59,7 @@ export void _window_thread();
 extern bool global_window_repaint;
 extern bool global_window_resize;
 
-extern f32 global_gfx_deltatime;
+extern f32 global_window_deltatime;
 extern thread_t* global_window_thread;
 
 extern bool global_window_focus;
@@ -68,7 +68,14 @@ extern u16 global_window_height;
 extern u8 global_window_keyboard_count;
 extern u8 global_window_keyboard_state[32];
 
-extern vertex_t* global_vertices;
-extern u32* global_indices;
+extern vertex_t* global_vertices_virtual;
+extern u64 global_vertices_length;
+extern u64 global_vertices_capacity;
+extern u64 global_vertices_used;
+
+extern u32* global_indexes_virtual;
+extern u64 global_indexes_length;
+extern u64 global_indexes_capacity;
+extern u64 global_indexes_used;
 
 #endif

@@ -1,4 +1,6 @@
 #include <sdk/types.h>
+#ifndef WINDOW_WIN32_H
+#define WINDOW_WIN32_H
 
 #ifdef PLATFORM_WINDOWS
 
@@ -24,7 +26,9 @@ extern ID3D11SamplerState* global_sampler_state;
 
 extern ID3D11ShaderResourceView* global_atlas;
 
-extern ID3D11Buffer* global_vertex_buffer;
-extern ID3D11Buffer* global_index_buffer;
+extern ID3D11Buffer* global_vertices_buffer;
+extern ID3D11Buffer* global_indexes_buffer;
+
+#endif
 
 #endif

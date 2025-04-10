@@ -2,7 +2,6 @@
 #define CONSOLE_H
 
 #include <sdk/types.h>
-#include <sdk/buffer.h>
 #include <sdk/string.h>
 #include <sdk/error.h>
 #include <sdk/stdarg.h>
