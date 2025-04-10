@@ -5,8 +5,6 @@
 #define COBJMACROS 1
 #include <windows.h>
 #include <d3d11.h>
-#include <dxgi.h>
-#include <initguid.h>
 #undef COBJMACROS
 
 // window
