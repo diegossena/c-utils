@@ -7,11 +7,11 @@
 
 HWND global_window;
 
-ID3D11Device* global_d3d_device = 0;
-IDXGISwapChain* global_d3d_swapchain = 0;
-ID3D11DeviceContext* global_d3d_device_context = 0;
-ID3D11RasterizerState* global_d3d_rasterizer = 0;
-ID3D11RenderTargetView* global_d3d_render_target_view = 0;
+ID3D11Device* global_d3d_device;
+IDXGISwapChain* global_d3d_swapchain;
+ID3D11DeviceContext* global_d3d_device_context;
+ID3D11RasterizerState* global_d3d_rasterizer;
+ID3D11RenderTargetView* global_d3d_render_target_view;
 
 ID3D11InputLayout* global_input_layout;
 ID3D11VertexShader* global_vertex_shader;
@@ -204,23 +204,20 @@ export void window_startup() {
   // IWICImagingFactory
 
 }
-extern void window_atlas_load(const char* path) {
+extern void window_atlas_load(const char* path, const u64 width, const u64 height) {
   assert(global_atlas == 0);
   i32 result;
   // load_image
-  u32 image_width, image_height;
+  u64 image_size = width * height * 4; // RGBA8
+  const u32 image_stride = width * 4;
   FILE* file = fopen(path, "r");
-  fread(&image_width, sizeof(image_width), 1, file);
-  fread(&image_height, sizeof(image_height), 1, file);
-  u64 image_size = image_width * image_height * 4; // RGBA8
-  u8 image_data[MEDIUM_SIZE];
+  u8 image_data[image_size];
   fread(image_data, 1, image_size, file);
   fclose(file);
-  const u32 image_stride = image_width * 4;
   // CreateTexture2D
   D3D11_TEXTURE2D_DESC texture_desc = {
-    .Width = image_width,
-    .Height = image_height,
+    .Width = width,
+    .Height = height,
     .MipLevels = 1,
     .ArraySize = 1,
     .Format = DXGI_FORMAT_R8G8B8A8_UNORM,

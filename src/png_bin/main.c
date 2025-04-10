@@ -85,9 +85,11 @@ i32 main(i32 argc, char** argv) {
   if (file == 0) {
     error("fopen", (error_t)file);
   }
-  fwrite(&image_width, 1, sizeof(image_width), file);
-  fwrite(&image_height, 1, sizeof(image_height), file);
   fwrite(image_data, 1, image_size, file);
+  printf(
+    "window_atlas_load(\"%s\", %u, %u);\n",
+    out_path, image_width, image_height
+  );
   fclose(file);
   // cleanup
   CoUninitialize();

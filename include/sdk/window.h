@@ -12,7 +12,7 @@ export void window_set_title(const char* title);
 export void window_close();
 extern void window_run();
 
-extern void window_atlas_load(const char* path);
+extern void window_atlas_load(const char* path, const u64 width, const u64 height);
 
 // DRAW
 
