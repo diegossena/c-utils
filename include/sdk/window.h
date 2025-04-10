@@ -69,5 +69,6 @@ extern u8 global_window_keyboard_count;
 extern u8 global_window_keyboard_state[32];
 
 extern vertex_t* global_vertices;
+extern u32* global_indices;
 
 #endif

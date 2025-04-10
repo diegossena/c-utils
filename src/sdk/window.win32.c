@@ -21,6 +21,7 @@ ID3D11SamplerState* global_sampler_state;
 ID3D11ShaderResourceView* global_atlas;
 
 ID3D11Buffer* global_vertex_buffer;
+ID3D11Buffer* global_index_buffer;
 
 export void _window_resize() {
   HRESULT result;
@@ -52,45 +53,6 @@ export void _window_resize() {
   global_d3d_device_context->lpVtbl->RSSetViewports(
     global_d3d_device_context, 1, &viewport
   );
-}
-extern void window_run() {
-  f64 time = time_now_f64();
-  const f64 frame_rate = 1. / 60.;
-  while (global_window_thread) {
-    if (global_window_resize) {
-      global_d3d_render_target_view->lpVtbl->Release(global_d3d_render_target_view);
-      HRESULT result = global_d3d_swapchain->lpVtbl->ResizeBuffers(
-        global_d3d_swapchain, 1, global_window_width, global_window_height,
-        DXGI_FORMAT_R8G8B8A8_UNORM, 0
-      );
-      if (FAILED(result)) {
-        error("IDXGISwapChain_ResizeBuffers", result);
-      }
-      _window_resize();
-    }
-    f64 now = time_now_f64();
-    global_gfx_deltatime = now - time;
-    if (global_gfx_deltatime > frame_rate) {
-      time = now;
-      if (global_window_repaint) {
-        global_window_repaint = false;
-        const f32 color[4] = { 0, 0, 0, 1 };
-        window_draw(color);
-      }
-    }
-  }
-  // dx11_cleanup
-  buffer_free(global_vertices);
-  global_vertex_buffer->lpVtbl->Release(global_vertex_buffer);
-  global_sampler_state->lpVtbl->Release(global_sampler_state);
-  global_pixel_shader->lpVtbl->Release(global_pixel_shader);
-  global_vertex_shader->lpVtbl->Release(global_vertex_shader);
-  global_input_layout->lpVtbl->Release(global_input_layout);
-  ID3D11RasterizerState_Release(global_d3d_rasterizer);
-  ID3D11RenderTargetView_Release(global_d3d_render_target_view);
-  ID3D11DeviceContext_Release(global_d3d_device_context);
-  ID3D11Device_Release(global_d3d_device);
-  IDXGISwapChain_Release(global_d3d_swapchain);
 }
 export void window_close() { DestroyWindow(global_window); }
 export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
@@ -206,23 +168,34 @@ export void window_startup() {
   global_d3d_device_context->lpVtbl->PSSetSamplers(global_d3d_device_context, 0, 1, &global_sampler_state);
   // vertex_buffer
   const u64 vertices_size = 256;
-  global_vertices = buffer_new(sizeof(vertex_t) * vertices_size);
-  // CreateVertexBuffer
-  const u32 vertex_stride = sizeof(vertex_t);
-  const u32 vertex_offset = 0;
-  D3D11_BUFFER_DESC vertex_desc = {
-    .ByteWidth = vertices_size * sizeof(vertex_t),
+  D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-    .BindFlags = D3D11_BIND_VERTEX_BUFFER,
   };
+  global_vertices = buffer_new(sizeof(vertex_t) * vertices_size);
+  // CreateVertexBuffer
+  buffer_desc.ByteWidth = vertices_size * sizeof(vertex_t);
+  buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   result = global_d3d_device->lpVtbl->CreateBuffer(
-    global_d3d_device, &vertex_desc, 0, &global_vertex_buffer
+    global_d3d_device, &buffer_desc, 0, &global_vertex_buffer
   );
   if (FAILED(result)) {
-    error("VertexShader_CreateBuffer", result);
+    error("CreateVertexBuffer", result);
   }
+  const u32 vertex_stride = sizeof(vertex_t);
+  const u32 vertex_offset = 0;
   global_d3d_device_context->lpVtbl->IASetVertexBuffers(global_d3d_device_context, 0, 1, &global_vertex_buffer, &vertex_stride, &vertex_offset);
+  // CreateIndexBuffer
+  global_indices = buffer_new(sizeof(u32) * vertices_size);
+  buffer_desc.ByteWidth = sizeof(u32) * vertices_size;
+  buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  result = global_d3d_device->lpVtbl->CreateBuffer(
+    global_d3d_device, &buffer_desc, 0, &global_index_buffer
+  );
+  if (FAILED(result)) {
+    error("CreateIndexBuffer", result);
+  }
+  global_d3d_device_context->lpVtbl->IASetIndexBuffer(global_d3d_device_context, global_index_buffer, DXGI_FORMAT_R32_UINT, 0);
 }
 extern void window_atlas_load(const char* path, const u64 width, const u64 height) {
   assert(global_atlas == 0);
@@ -323,11 +296,36 @@ export void window_set_title(const char* title) {
   SetWindowTextA(global_window, title);
 }
 export void window_draw(const f32 color[4]) {
+  buffer_t* vertices = buffer_header(global_vertices);
+  buffer_t* indices = buffer_header(global_indices);
+  vertices->length = 0;
+  indices->length = 0;
+  window_onrender();
+  D3D11_MAPPED_SUBRESOURCE subresource;
+  // vertices
+  global_d3d_device_context->lpVtbl->Map(
+    global_d3d_device_context, (ID3D11Resource*)global_vertex_buffer, 0,
+    D3D11_MAP_WRITE_DISCARD, 0, &subresource
+  );
+  memory_copy(subresource.pData, global_vertices, sizeof(vertex_t) * vertices->length);
+  global_d3d_device_context->lpVtbl->Unmap(
+    global_d3d_device_context, (ID3D11Resource*)global_vertex_buffer, 0
+  );
+  // indices
+  global_d3d_device_context->lpVtbl->Map(
+    global_d3d_device_context, (ID3D11Resource*)global_index_buffer, 0,
+    D3D11_MAP_WRITE_DISCARD, 0, &subresource
+  );
+  memory_copy(subresource.pData, global_indices, sizeof(u32) * indices->length);
+  global_d3d_device_context->lpVtbl->Unmap(
+    global_d3d_device_context, (ID3D11Resource*)global_index_buffer, 0
+  );
+  // draw
   global_d3d_device_context->lpVtbl->ClearRenderTargetView(
     global_d3d_device_context, global_d3d_render_target_view, color
   );
-  window_onrender();
-  // global_d3d_swapchain->lpVtbl->Present(global_d3d_swapchain, 0, 0);
+  global_d3d_device_context->lpVtbl->DrawIndexed(global_d3d_device_context, indices->length, 0, 0);
+  global_d3d_swapchain->lpVtbl->Present(global_d3d_swapchain, 0, 0);
 }
 export void _window_thread(sync_t* onload_sync) {
   i32 result;
@@ -383,6 +381,47 @@ export void _window_thread(sync_t* onload_sync) {
       }
     }
   } while (true);
+}
+extern void window_run() {
+  f64 time = time_now_f64();
+  const f64 frame_rate = 1. / 60.;
+  while (global_window_thread) {
+    if (global_window_resize) {
+      global_d3d_render_target_view->lpVtbl->Release(global_d3d_render_target_view);
+      HRESULT result = global_d3d_swapchain->lpVtbl->ResizeBuffers(
+        global_d3d_swapchain, 1, global_window_width, global_window_height,
+        DXGI_FORMAT_R8G8B8A8_UNORM, 0
+      );
+      if (FAILED(result)) {
+        error("IDXGISwapChain_ResizeBuffers", result);
+      }
+      _window_resize();
+    }
+    f64 now = time_now_f64();
+    global_gfx_deltatime = now - time;
+    if (global_gfx_deltatime > frame_rate) {
+      time = now;
+      if (global_window_repaint) {
+        global_window_repaint = false;
+        const f32 color[4] = { 0, 0, 0, 1 };
+        window_draw(color);
+      }
+    }
+  }
+  // dx11_cleanup
+  buffer_free(global_indices);
+  buffer_free(global_vertices);
+  global_index_buffer->lpVtbl->Release(global_index_buffer);
+  global_vertex_buffer->lpVtbl->Release(global_vertex_buffer);
+  global_sampler_state->lpVtbl->Release(global_sampler_state);
+  global_pixel_shader->lpVtbl->Release(global_pixel_shader);
+  global_vertex_shader->lpVtbl->Release(global_vertex_shader);
+  global_input_layout->lpVtbl->Release(global_input_layout);
+  ID3D11RasterizerState_Release(global_d3d_rasterizer);
+  ID3D11RenderTargetView_Release(global_d3d_render_target_view);
+  ID3D11DeviceContext_Release(global_d3d_device_context);
+  ID3D11Device_Release(global_d3d_device);
+  IDXGISwapChain_Release(global_d3d_swapchain);
 }
 
 #endif
