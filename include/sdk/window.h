@@ -7,17 +7,14 @@
 #include <sdk/console.h>
 #include <sdk/thread.h>
 
-typedef struct vertex_tex {
-  f32 pos[2]; // posição
-  f32 tex[2]; // coordenadas de textura
-} vertex_tex;
-
 // METHODS
 
 export void window_startup();
 export void window_set_title(const char* title);
 export void window_close();
 extern void window_run();
+
+extern void window_atlas_load(const wchar_t* path);
 
 // DRAW
 

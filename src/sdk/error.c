@@ -90,6 +90,8 @@ export const char* error_cstr(error_t code) {
       return "ERR_NOTINITIALISED";
     case ERR_CO_E_NOTINITIALIZED:
       return "ERR_CO_E_NOTINITIALIZED";
+    case ERR_WIC_FILE_NOT_FOUND:
+      return "ERR_WIC_FILE_NOT_FOUND";
     default:
       return "ERR_UNKNOWN";
   }

@@ -63,7 +63,8 @@ typedef enum error_t {
   ERR_ETIMEDOUT = 10060,
   ERR_ECONNREFUSED = 10061,
   ERR_NOTINITIALISED = 10093,
-  ERR_CO_E_NOTINITIALIZED = 0x800401f0
+  ERR_CO_E_NOTINITIALIZED = 0x800401f0,
+  ERR_WIC_FILE_NOT_FOUND = 0x80070002
 } error_t;
 
 void error(const char* message, error_t code);

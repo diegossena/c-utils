@@ -4,7 +4,6 @@
 #include <sdk/time.h>
 
 HWND global_window;
-IWICImagingFactory* global_wic_factory;
 
 ID3D11Device* global_d3d_device = 0;
 IDXGISwapChain* global_d3d_swapchain = 0;
@@ -12,14 +11,12 @@ ID3D11DeviceContext* global_d3d_device_context = 0;
 ID3D11RasterizerState* global_d3d_rasterizer = 0;
 ID3D11RenderTargetView* global_d3d_render_target_view = 0;
 
-ID3D11InputLayout* global_color_input_layout;
-ID3D11VertexShader* global_color_vertex_shader;
-ID3D11PixelShader* global_color_pixel_shader;
-
 ID3D11InputLayout* global_input_layout;
 ID3D11VertexShader* global_vertex_shader;
 ID3D11PixelShader* global_pixel_shader;
 ID3D11SamplerState* global_sampler_state;
+
+ID3D11ShaderResourceView* global_atlas;
 
 export void _window_resize() {
   HRESULT result;
@@ -88,8 +85,6 @@ extern void window_run() {
   ID3D11DeviceContext_Release(global_d3d_device_context);
   ID3D11Device_Release(global_d3d_device);
   IDXGISwapChain_Release(global_d3d_swapchain);
-  global_wic_factory->lpVtbl->Release(global_wic_factory);
-  CoUninitialize();
 }
 export void window_close() { DestroyWindow(global_window); }
 export void __window_onupdate(void* _1, void* _2, void* _3, u32 time) {
@@ -203,22 +198,123 @@ export void window_startup() {
     error("CreateSamplerState", result);
   }
   global_d3d_device_context->lpVtbl->PSSetSamplers(global_d3d_device_context, 0, 1, &global_sampler_state);
+
+  // IWICImagingFactory
+
+}
+extern void window_atlas_load(const wchar_t* path) {
+  assert(global_atlas == 0);
+  i32 result;
   // CoInitialize
   result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
   if (FAILED(result)) {
     error("CoInitializeEx", result);
   }
-  // IWICImagingFactory
+  // wic_factory
+  IWICImagingFactory* wic_factory;
   result = CoCreateInstance(
     &CLSID_WICImagingFactory,
     NULL,
     CLSCTX_INPROC_SERVER,
     &IID_IWICImagingFactory,
-    (void**)&global_wic_factory
+    (void**)&wic_factory
   );
   if (FAILED(result)) {
-    error("IWICImagingFactory::CoCreateInstance", result);
+    error("CoCreateInstance_IWICImagingFactory", result);
   }
+  CoUninitialize();
+  // decoder
+  IWICBitmapDecoder* decoder;
+  result = wic_factory->lpVtbl->CreateDecoderFromFilename(
+    wic_factory, path, 0, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder
+  );
+  if (FAILED(result)) {
+    error("CreateDecoderFromFilename", result);
+  }
+  // frame
+  IWICBitmapFrameDecode* frame;
+  result = decoder->lpVtbl->GetFrame(decoder, 0, &frame);
+  if (FAILED(result)) {
+    error("IWICBitmapDecoder_GetFrame", result);
+  }
+  decoder->lpVtbl->Release(decoder);
+  // CreateFormatConverter
+  IWICFormatConverter* converter;
+  result = wic_factory->lpVtbl->CreateFormatConverter(wic_factory, &converter);
+  if (FAILED(result)) {
+    error("IWICImagingFactory_CreateFormatConverter", result);
+  }
+  wic_factory->lpVtbl->Release(wic_factory);
+  // IWICFormatConverter_Inicialize
+  result = converter->lpVtbl->Initialize(
+    converter, (IWICBitmapSource*)frame, &GUID_WICPixelFormat32bppRGBA,
+    WICBitmapDitherTypeNone, 0, 0., WICBitmapPaletteTypeCustom
+  );
+  if (FAILED(result)) {
+    error("IWICFormatConverter_Initialize", result);
+  }
+  // IWICBitmapFrameDecode_GetSize
+  u32 width = 0, height = 0;
+  result = frame->lpVtbl->GetSize(frame, &width, &height);
+  if (FAILED(result)) {
+    error("GetSize", result);
+  }
+  frame->lpVtbl->Release(frame);
+  // image_load
+  const u32 image_stride = width * 4;
+  const u32 image_size = image_stride * height;
+  u8* image_data = memory_alloc(image_size);
+  // IWICFormatConverter_CopyPixels
+  result = converter->lpVtbl->CopyPixels(
+    converter,
+    0, // full rect
+    image_stride,
+    image_size,
+    image_data
+  );
+  if (FAILED(result)) {
+    error("IWICFormatConverter_CopyPixels", result);
+  }
+  converter->lpVtbl->Release(converter);
+  // CreateTexture2D
+  ID3D11Texture2D* texture;
+  D3D11_TEXTURE2D_DESC texture_desc = {
+    .Width = width,
+    .Height = height,
+    .MipLevels = 1,
+    .ArraySize = 1,
+    .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+    .SampleDesc = {.Count = 1, .Quality = 0 },
+    .Usage = D3D11_USAGE_DEFAULT,
+    .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+    .CPUAccessFlags = 0,
+    .MiscFlags = 0,
+  };
+  D3D11_SUBRESOURCE_DATA subresource_data = {
+    .pSysMem = image_data,
+    .SysMemPitch = image_stride,
+  };
+  result = global_d3d_device->lpVtbl->CreateTexture2D(
+    global_d3d_device, &texture_desc, &subresource_data, &texture
+  );
+  if (FAILED(result)) {
+    error("CreateTexture2D", result);
+  }
+  memory_free(image_data);
+  // CreateShaderResourceView
+  D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
+    .Format = texture_desc.Format,
+    .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+    .Texture2D.MipLevels = 1
+  };
+  result = global_d3d_device->lpVtbl->CreateShaderResourceView(
+    global_d3d_device, (ID3D11Resource*)texture, &srv_desc, &global_atlas
+  );
+  if (FAILED(result)) {
+    error("CreateShaderResourceView", result);
+  }
+  // PSSetShaderResources
+  global_d3d_device_context->lpVtbl->PSSetShaderResources(global_d3d_device_context, 0, 1, &global_atlas);
 }
 LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {

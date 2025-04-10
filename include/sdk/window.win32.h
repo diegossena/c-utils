@@ -12,7 +12,6 @@
 
 // window
 extern HWND global_window;
-extern IWICImagingFactory* global_wic_factory;
 // dx11
 extern ID3D11Device* global_d3d_device;
 extern IDXGISwapChain* global_d3d_swapchain;
@@ -25,5 +24,7 @@ extern ID3D11VertexShader* global_vertex_shader;
 extern ID3D11PixelShader* global_pixel_shader;
 extern ID3D11InputLayout* global_input_layout;
 extern ID3D11SamplerState* global_sampler_state;
+
+extern ID3D11ShaderResourceView* global_atlas;
 
 #endif
