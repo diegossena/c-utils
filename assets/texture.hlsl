@@ -1,21 +1,19 @@
-struct VS_INPUT {
-  float2 pos : POSITION;
-  float2 uv : TEXCOORD0;
-};
-struct PS_INPUT {
-  float4 pos : SV_POSITION;
-  float2 uv : TEXCOORD0;
+struct vs_out {
+  float4 position : SV_POSITION;
+  float2 uv : TEXCOORD;
 };
 
-Texture2D tex : register(t0);
-SamplerState sample_linear : register(s0);
+Texture2D texture_2d : register(t0);
+SamplerState sample_state : register(s0);
 
-PS_INPUT vs_main(VS_INPUT input) {
-  PS_INPUT output;
-  output.pos = float4(input.pos, 1.0, 1.0);
-  output.uv = input.uv;
+vs_out vs_main(float2 position : POSITION, float2 uv : TEXCOORD) {
+  vs_out output;
+  output.position = float4(position, 1.f, 1.f);
+  output.uv = uv;
   return output;
 }
-float4 ps_main(VS_INPUT input) : SV_TARGET {
-  return tex.Sample(sample_linear, input.uv);
+float4 ps_main(vs_out input) : SV_TARGET {
+  float3 pixel_color = texture_2d.Sample(sample_state, input.uv);
+  // return float4(1.f, 0.f, 0.f, 1.f);
+  return float4(pixel_color, 1.f);
 }
