@@ -27,7 +27,7 @@ ID3D11Buffer* global_vertices_buffer;
 ID3D11Buffer* global_indexes_buffer;
 
 
-export void _window_resize() {
+export void _window_size_update() {
   ndc_per_px_x = 2.f / (f32)window_width;
   ndc_per_px_y = 2.f / (f32)window_height;
   HRESULT result;
@@ -99,7 +99,7 @@ export void window_startup() {
     error("D3D11CreateDeviceAndSwapChain", result);
   }
   global_d3d_device_context->lpVtbl->IASetPrimitiveTopology(global_d3d_device_context, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  _window_resize();
+  _window_size_update();
   // global_d3d_rasterizer
   D3D11_RASTERIZER_DESC rasterizer_props = {
     .FillMode = D3D11_FILL_SOLID,
@@ -324,36 +324,6 @@ export void window_set_title(const char* title) {
   assert(global_window != 0);
   SetWindowTextA(global_window, title);
 }
-export void window_draw(const f32 color[4]) {
-  vertices_length = 0;
-  indexes_length = 0;
-  window_onrender();
-  D3D11_MAPPED_SUBRESOURCE subresource;
-  // vertices
-  global_d3d_device_context->lpVtbl->Map(
-    global_d3d_device_context, (ID3D11Resource*)global_vertices_buffer, 0,
-    D3D11_MAP_WRITE_DISCARD, 0, &subresource
-  );
-  memory_copy(subresource.pData, vertices_virtual, sizeof(vertex_t) * vertices_length);
-  global_d3d_device_context->lpVtbl->Unmap(
-    global_d3d_device_context, (ID3D11Resource*)global_vertices_buffer, 0
-  );
-  // indices
-  global_d3d_device_context->lpVtbl->Map(
-    global_d3d_device_context, (ID3D11Resource*)global_indexes_buffer, 0,
-    D3D11_MAP_WRITE_DISCARD, 0, &subresource
-  );
-  memory_copy(subresource.pData, indexes_virtual, sizeof(u32) * indexes_length);
-  global_d3d_device_context->lpVtbl->Unmap(
-    global_d3d_device_context, (ID3D11Resource*)global_indexes_buffer, 0
-  );
-  // draw
-  global_d3d_device_context->lpVtbl->ClearRenderTargetView(
-    global_d3d_device_context, global_d3d_render_target_view, color
-  );
-  global_d3d_device_context->lpVtbl->DrawIndexed(global_d3d_device_context, indexes_length, 0, 0);
-  global_d3d_swapchain->lpVtbl->Present(global_d3d_swapchain, 0, 0);
-}
 export void _window_thread(sync_t* onload_sync) {
   i32 result;
   const char* title = " ";
@@ -422,7 +392,7 @@ extern void window_run() {
       if (FAILED(result)) {
         error("IDXGISwapChain_ResizeBuffers", result);
       }
-      _window_resize();
+      _window_size_update();
       window_has_update = true;
       window_resized = false;
     }
@@ -432,8 +402,35 @@ extern void window_run() {
       time = now;
       if (window_has_update) {
         window_has_update = false;
-        const f32 color[4] = { 0, 0, 0, 1 };
-        window_draw(color);
+        // render
+        vertices_length = 0;
+        indexes_length = 0;
+        window_onrender();
+        D3D11_MAPPED_SUBRESOURCE subresource;
+        // vertices
+        global_d3d_device_context->lpVtbl->Map(
+          global_d3d_device_context, (ID3D11Resource*)global_vertices_buffer, 0,
+          D3D11_MAP_WRITE_DISCARD, 0, &subresource
+        );
+        memory_copy(subresource.pData, vertices_virtual, sizeof(vertex_t) * vertices_length);
+        global_d3d_device_context->lpVtbl->Unmap(
+          global_d3d_device_context, (ID3D11Resource*)global_vertices_buffer, 0
+        );
+        // indices
+        global_d3d_device_context->lpVtbl->Map(
+          global_d3d_device_context, (ID3D11Resource*)global_indexes_buffer, 0,
+          D3D11_MAP_WRITE_DISCARD, 0, &subresource
+        );
+        memory_copy(subresource.pData, indexes_virtual, sizeof(u32) * indexes_length);
+        global_d3d_device_context->lpVtbl->Unmap(
+          global_d3d_device_context, (ID3D11Resource*)global_indexes_buffer, 0
+        );
+        // draw
+        global_d3d_device_context->lpVtbl->ClearRenderTargetView(
+          global_d3d_device_context, global_d3d_render_target_view, window_background
+        );
+        global_d3d_device_context->lpVtbl->DrawIndexed(global_d3d_device_context, indexes_length, 0, 0);
+        global_d3d_swapchain->lpVtbl->Present(global_d3d_swapchain, 0, 0);
       }
     }
   }

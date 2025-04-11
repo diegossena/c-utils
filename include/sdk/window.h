@@ -19,10 +19,6 @@ extern void window_run();
 
 extern void window_atlas_load(const char* path, const u64 width, const u64 height);
 
-// DRAW
-
-export void window_draw(const f32 color[4]);
-
 // EVENTS
 
 /**
@@ -53,7 +49,7 @@ extern void window_onkeyup();
 
 export bool window_key_pressed(key_code_t);
 
-export void _window_resize();
+export void _window_size_update();
 export void _window_thread();
 
 extern bool window_has_update;
@@ -80,5 +76,6 @@ extern u64 indexes_length;
 extern u64 indexes_capacity;
 extern u64 indexes_used;
 
+extern f32 window_background[4];
 
 #endif
