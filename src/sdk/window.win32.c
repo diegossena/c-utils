@@ -193,7 +193,7 @@ export void window_startup() {
     global_d3d_device_context, global_blend_state, blend_factor, 0xffffffff
   );
   // global_vertices
-  vertices_capacity = TINY_SIZE;
+  vertices_capacity = 400;
   D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
@@ -214,7 +214,7 @@ export void window_startup() {
     &vertex_offset
   );
   // global_indexes
-  indexes_capacity = TINY_SIZE;
+  indexes_capacity = 600;
   indexes_virtual = memory_alloc(sizeof(u32) * indexes_capacity);
   buffer_desc.ByteWidth = sizeof(u32) * indexes_capacity;
   buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;

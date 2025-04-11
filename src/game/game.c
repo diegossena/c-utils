@@ -30,7 +30,7 @@ void rect_fill_draw(
   indexes_virtual[indexes_length++] = vertex_offset + 2;
   indexes_virtual[indexes_length++] = vertex_offset + 3;
 }
-void rect_draw(
+void tile_rect_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y
 ) {
@@ -71,11 +71,6 @@ void rect_draw(
   indexes_virtual[indexes_length++] = vertex_offset + 2;
   indexes_virtual[indexes_length++] = vertex_offset + 3;
 }
-void tile_draw(f32 x0, f32 y0, u8 tile_x, u8 tile_y) {
-  const f32 x1 = x0 + ndc_per_px_x * tile_screen_size;
-  const f32 y1 = y0 - ndc_per_px_y * tile_screen_size;
-  rect_draw(x0, y0, x1, y1, tile_x, tile_y);
-}
 void text_draw(const char* text, f32 size, f32 x, f32 y) {
   const f32 spacing = size * ndc_per_px_x * .31f;
   while (*text != '\0') {
@@ -107,7 +102,7 @@ void text_draw(const char* text, f32 size, f32 x, f32 y) {
     if (*text != ' ') {
       const f32 x1 = x + ndc_per_px_x * size;
       const f32 y1 = y - ndc_per_px_y * size;
-      rect_draw(x, y, x1, y1, tile_x, tile_y);
+      tile_rect_draw(x, y, x1, y1, tile_x, tile_y);
       x += spacing;
     } else {
       x += spacing * .5f;

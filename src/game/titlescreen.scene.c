@@ -7,12 +7,20 @@
 
 titlescreen_t titlescreen;
 const u32 titlescreen_vertices_used = (
-  4 * 10 // "PRESS SPACE"
+  4 * 4 // "GAME"
+  + 4 * 10 // "PRESS SPACE"
   + 4 * 6 // "TO PLAY"
   );
+const u32 titlescreen_indexes_used = (
+  6 * 4 // "GAME"
+  + 6 * 10 // "PRESS SPACE"
+  + 6 * 6 // "TO PLAY"
+  );
+
 
 export void titlescreen_load() {
   vertices_used += titlescreen_vertices_used;
+  vertices_used += titlescreen_indexes_used;
   titlescreen.loaded = true;
   window_has_update = true;
   // background
@@ -23,6 +31,7 @@ export void titlescreen_load() {
 export void titlescreen_unload() {
   titlescreen.loaded = false;
   vertices_used -= titlescreen_vertices_used;
+  vertices_used -= titlescreen_indexes_used;
   window_background[0] = 0.f;
   window_background[1] = 0.f;
   window_background[2] = 0.f;

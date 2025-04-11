@@ -102,36 +102,19 @@ export f64 math_pow(f64 base, f64 exponent) {
 export f64 math_ceil(f64 number) {
   return ceil(number);
 }
+export f64 math_round(f64 number) {
+  return round(number);
+}
 export f64 math_floor(f64 number) {
   return floor(number);
 }
-export i64 math_round(f64 number) {
+export i64 math_roundi(f64 number) {
   i64 integer = number;
   f64 decimals = number - integer;
-  if (decimals < .5) {
+  if (decimals <= .5) {
     return integer;
   }
   return integer + 1;
-}
-export f64 math_round_precision(f64 number, u8 places) {
-  if (places > 0) {
-    number *= math_pow(10, places);
-  }
-  number = math_round(number);
-  if (places > 0) {
-    number *= math_pow(10, -places);
-  }
-  return number;
-}
-export f64 math_ceil_precision(f64 number, u8 places) {
-  if (places > 0) {
-    number *= math_pow(10, places);
-  }
-  number = math_ceil(number);
-  if (places > 0) {
-    number *= math_pow(10, -places);
-  }
-  return number;
 }
 export i32 math_random() {
   return rand();

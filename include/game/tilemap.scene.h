@@ -6,12 +6,11 @@
 
 #define TILEMAP_WIDTH 60
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
-#define TILE_SIZE 76
+#define TILE_SIZE 60.f
 #define TILEMAP_LAYERS 3
 
 typedef struct tilemap_t {
   bool loaded;
-  // gfx_image_t pallet_town_interiors;
   u8 tiles[3][TILEMAP_SIZE];
   // player
   // gfx_image_t character_img;
@@ -29,14 +28,10 @@ typedef struct tilemap_t {
   bool player_walking;
   // camera
   u8 visible_tiles_x, visible_tiles_y;
-  f32 offset_limit[2];
 } tilemap_t;
 
 export void tilemap_load();
 export void tilemap_unload();
-
-export void tilemap_render();
-
 export void tilemap_onkeydown(key_code_t);
 export void tilemap_render();
 

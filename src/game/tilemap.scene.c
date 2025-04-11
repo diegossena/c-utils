@@ -1,25 +1,39 @@
+#include <game/game.h>
 #include <game/tilemap.scene.h>
+#include <game/transition.scene.h>
 #include <sdk/window.h>
 
 tilemap_t tilemap;
 
 export void tilemap_load() {
-  // f32 visible_tiles_x = (f32)global_window_width / TILE_SIZE;
-  // f32 visible_tiles_y = (f32)global_window_height / TILE_SIZE;
-  // tilemap.visible_tiles_x = math_ceil(visible_tiles_x);
-  // tilemap.visible_tiles_y = math_ceil(visible_tiles_y);
-  // tilemap.offset_limit[0] = (f32)TILEMAP_WIDTH - visible_tiles_x;
-  // tilemap.offset_limit[1] = (f32)TILEMAP_WIDTH - visible_tiles_y;
-  // tilemap.offset_limit[0] = math_floor(tilemap.offset_limit[0] * 1000.f) / 1000.f;
-  // tilemap.offset_limit[1] = math_floor(tilemap.offset_limit[1] * 1000.f) / 1000.f;
-  // // walking animate
-  // // loaded
-  // tilemap.loaded = true;
-  // global_repaint = true;
+  // camera
+  f32 visible_tiles_x = (f32)window_width / TILE_SIZE;
+  f32 visible_tiles_y = (f32)window_height / TILE_SIZE;
+  tilemap.visible_tiles_x = math_ceil(visible_tiles_x) + 1;
+  tilemap.visible_tiles_y = math_ceil(visible_tiles_y) + 1;
+  // loaded
+  tilemap.loaded = true;
+  window_has_update = true;
 }
 export void tilemap_unload() {
+  tilemap.loaded = false;
 }
 export void tilemap_onkeydown(key_code_t key) {
+  if (key == KEY_UP) {
+    tilemap.player[1] -= .1f;
+    window_has_update = true;
+  } else if (key == KEY_DOWN) {
+    tilemap.player[1] += .1f;
+    window_has_update = true;
+  }
+  if (key == KEY_LEFT) {
+    tilemap.player[0] -= .1f;
+    window_has_update = true;
+  } else if (key == KEY_RIGHT) {
+    tilemap.player[0] += .1f;
+    window_has_update = true;
+  }
+  return;
   if (tilemap.player_walking == false) {
     switch (key) {
       case KEY_UP:
@@ -37,137 +51,72 @@ export void tilemap_onkeydown(key_code_t key) {
   }
 }
 export void tilemap_render() {
-  // // calculate top-leftmost visible tile
-  // f32 offset[2] = {
-  //   tilemap.player[0] - (f32)tilemap.visible_tiles_x / 2.f,
-  //   tilemap.player[1] - (f32)tilemap.visible_tiles_y / 2.f
-  // };
-  // offset[0] = math_floor(offset[0] * 1000.f) / 1000.f;
-  // offset[1] = math_floor(offset[1] * 1000.f) / 1000.f;
-  // // clamp camera to game boudaries
-  // offset[0] = math_clamp(offset[0], 0.f, tilemap.offset_limit[0]);
-  // offset[1] = math_clamp(offset[1], 0.f, tilemap.offset_limit[1]);
-  // // Get offsets for smooth movement
-  // i8 tile_offset_x = (offset[0] - (i8)offset[0]) * TILE_SIZE;
-  // i8 tile_offset_y = (offset[1] - (i8)offset[1]) * TILE_SIZE;
-  // // layers render
-  // for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
-  //   for (i8 x = -1; x < tilemap.visible_tiles_x + 1; x++) {
-  //     for (i8 y = -1; y < tilemap.visible_tiles_y + 1; y++) {
-  //       i8 tile_x = x + offset[0];
-  //       i8 tile_y = y + offset[1];
-  //       u8 tile_id = (tile_x >= 0 && tile_x < TILEMAP_WIDTH) && (tile_y >= 0 && tile_y < TILEMAP_WIDTH)
-  //         ? tilemap.tiles[layer][tile_y * TILEMAP_WIDTH + tile_x]
-  //         : 0;
-  //       if (tile_id == 0)
-  //         continue;
-  //       f32 rect[4] = {
-  //         x * TILE_SIZE - tile_offset_x,
-  //         y * TILE_SIZE - tile_offset_y
-  //       };
-  //       rect[2] = rect[0] + TILE_SIZE;
-  //       rect[3] = rect[1] + TILE_SIZE;
-  //       f32 src_rect[4];
-  //       if (tile_id <= 49) {
-  //         // HERO HOME 2F
-  //         switch (tile_id) {
-  //           case 1:
-  //           case 6:
-  //           case 14:
-  //           case 28:
-  //           case 36:
-  //           case 43:
-  //             src_rect[0] = 5;
-  //             break;
-  //           case 2:
-  //           case 7:
-  //           case 15:
-  //           case 23:
-  //           case 29:
-  //           case 37:
-  //           case 44:
-  //             src_rect[0] = 21;
-  //             break;
-  //           case 8:
-  //           case 16:
-  //           case 30:
-  //           case 38:
-  //           case 45:
-  //             src_rect[0] = 37;
-  //             break;
-  //           case 3:
-  //           case 9:
-  //           case 17:
-  //           case 31:
-  //           case 39:
-  //           case 47:
-  //             src_rect[0] = 53;
-  //             break;
-  //           case 4:
-  //           case 10:
-  //           case 18:
-  //           case 32:
-  //           case 40:
-  //           case 48:
-  //             src_rect[0] = 69;
-  //             break;
-  //           case 11:
-  //           case 19:
-  //           case 24:
-  //           case 33:
-  //           case 41:
-  //           case 46:
-  //             src_rect[0] = 85;
-  //             break;
-  //           case 34:
-  //             src_rect[0] = 101;
-  //             break;
-  //           case 12:
-  //           case 20:
-  //           case 25:
-  //           case 35:
-  //           case 42:
-  //           case 49:
-  //             src_rect[0] = 117;
-  //             break;
-  //           case 21:
-  //           case 26:
-  //             src_rect[0] = 133;
-  //             break;
-  //           case 22:
-  //           case 27:
-  //             src_rect[0] = 149;
-  //             break;
-  //           case 5:
-  //           case 13:
-  //             src_rect[0] = 165;
-  //             break;
-  //         }
-  //         if (tile_id <= 5) {
-  //           src_rect[1] = 5;
-  //         } else if (tile_id <= 13) {
-  //           src_rect[1] = 21;
-  //         } else if (tile_id <= 22) {
-  //           src_rect[1] = 37;
-  //         } else if (tile_id <= 27) {
-  //           src_rect[1] = 53;
-  //         } else if (tile_id <= 35) {
-  //           src_rect[1] = 69;
-  //         } else if (tile_id <= 42) {
-  //           src_rect[1] = 85;
-  //         } else if (tile_id <= 46) {
-  //           src_rect[1] = 101;
-  //         } else if (tile_id <= 49) {
-  //           src_rect[1] = 117;
-  //         }
-  //       }
-  //       const f32 sprite_size = 16.f;
-  //       src_rect[2] = src_rect[0] + sprite_size;
-  //       src_rect[3] = src_rect[1] + sprite_size;
-  //       gfx_image_draw(&tilemap.pallet_town_interiors, rect, src_rect, 1.f);
-  //     }
-  //   }
-  // }
+  // calculate top-leftmost visible tile
+  f32 offset[2] = {
+    tilemap.player[0] - (f32)tilemap.visible_tiles_x / 2.f,
+    tilemap.player[1] - (f32)tilemap.visible_tiles_y / 2.f
+  };
+  // offset[0] = math_floor(offset[0] * 100.f) / 100.f;
+  // offset[1] = math_floor(offset[1] * 100.f) / 100.f;
+
+  // Get offsets for smooth movement
+  f32 tile_offset[2] = {
+    (offset[0] - math_floor(offset[0])),
+    (offset[1] - math_floor(offset[1]))
+  };
+  const f32 tile_ndc_per_px[2] = {
+    TILE_SIZE * ndc_per_px_x,
+    TILE_SIZE * ndc_per_px_y
+  };
+
+  const f32 x0_start = -1.f - (tile_offset[0] * tile_ndc_per_px[0]);
+  const f32 y0_start = 1.f + (tile_offset[1] * tile_ndc_per_px[1]);
+
+  if (!transition.loading) {
+    console_log("offset %f %f", offset[0], offset[1]);
+    console_log("(i32)offset %d %d", (i32)math_floor(offset[0]), (i32)math_floor(offset[1]));
+    console_log("tile_offset %f %f", tile_offset[0], tile_offset[1]);
+    console_log("ndc_per_px %f %f", ndc_per_px_x, ndc_per_px_y);
+    console_log("x0_start %f", x0_start);
+    console_log("y0_start %f", y0_start);
+    console_log("visible_tiles %d %d", tilemap.visible_tiles_x, tilemap.visible_tiles_y);
+  }
+  // layers render
+  for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
+    f32 x0 = x0_start;
+    for (u8 x = 0; x < tilemap.visible_tiles_x; x++) {
+      const f32 x1 = x0 + tile_ndc_per_px[0];
+      f32 y0 = y0_start;
+      for (u8 y = 0; y < tilemap.visible_tiles_y; y++) {
+        const f32 y1 = y0 - tile_ndc_per_px[1];
+        // tile_id
+        i8 map_tile_x = math_floor(x + offset[0]);
+        i8 map_tile_y = math_floor(y + offset[1]);
+        u8 tile_id = (map_tile_x >= 0 && map_tile_x < TILEMAP_WIDTH) && (map_tile_y >= 0 && map_tile_y < TILEMAP_WIDTH)
+          ? tilemap.tiles[layer][map_tile_y * TILEMAP_WIDTH + map_tile_x]
+          : 0;
+        if (tile_id != 0) {
+          // tile_draw
+          u8 tile_x = (tile_id - 1) % 10;
+          u8 tile_y = math_ceil((f32)tile_id / 10.f) - 1.f;
+          if (!transition.loading && layer == 0 && y == 1) {
+            console_log("xy(%d %d) tile_id=%d tile_draw(%f %f %f %f) sprite(%d %d)",
+              x, y,
+              tile_id,
+              x0, x1, y0, y1,
+              tile_x, tile_y
+            );
+          }
+          tile_rect_draw(x0, y0, x1, y1, tile_x, tile_y);
+        }
+        y0 = y1;
+      }
+      x0 = x1;
+    }
+  }
+  if (!transition.loading) {
+    console_log();
+  }
   // // player render
   // const f32 scale = 4.f;
   // f32 rect[4] = {
