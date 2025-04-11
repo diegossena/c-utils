@@ -42,7 +42,7 @@ void tile_rect_draw(
   const f32 v1 = v0 + image_ngc_per_px;
   // vertex
   u32 vertex_offset = vertices_length;
-  vertex_t vertex;
+  vertex_t vertex = {};
   vertex.x = x0;
   vertex.y = y0;
   vertex.uv[0] = u0;
