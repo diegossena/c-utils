@@ -12,7 +12,7 @@ export void transition_load(function_t unload, function_t load) {
   transition.fade_in_out = true;
   // transition.color = gfx_color_new(1, 1, 1, 1);
   transition.loading = true;
-  global_window_repaint = true;
+  window_has_update = true;
 }
 export void transition_render() {
   // const f32 duration = .85f;

@@ -8,15 +8,16 @@ const u32 titlescreen_vertices_used = (
   4 * 11 // "PRESS SPACE"
   + 4 * 7 // "TO PLAY"
   );
+const f32 tile_screen_size = 60.f;
 
 export void titlescreen_load() {
-  global_vertices_used += titlescreen_vertices_used;
+  vertices_used += titlescreen_vertices_used;
   titlescreen.loaded = true;
-  global_window_repaint = true;
+  window_has_update = true;
 }
 export void titlescreen_unload() {
   titlescreen.loaded = false;
-  global_vertices_used -= titlescreen_vertices_used;
+  vertices_used -= titlescreen_vertices_used;
 }
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {
@@ -27,54 +28,53 @@ export void titlescreen_onkeydown(key_code_t key) {
       return;
   }
 }
-export void titlescreen_render() {
-  // texture
-  const u8 tile_x = 0;
-  const u8 tile_y = 0;
-  const f32 tile_size = (1.f / 160.f) * 16.f;
-  const f32 u0 = tile_size * tile_x;
-  const f32 v0 = tile_size * tile_y;
-  const f32 u1 = u0 + tile_size;
-  const f32 v1 = v0 + tile_size;
-  // vertices
-  const f32 px = 0.f;
-  const f32 py = 0.f;
-  const f32 size = 64.f;
-  const f32 ndc_w = 2.f / (f32)global_window_width;
-  const f32 ndc_h = 2.f / (f32)global_window_height;
-
-  const f32 x0 = -1.f + px * ndc_w;
-  const f32 y0 = 1.f + py * ndc_h;
-  const f32 x1 = x0 + ndc_w * size;
-  const f32 y1 = y0 - ndc_h * size;
-
+void tile_render(f32 x0, f32 y0, u8 tile_x, u8 tile_y) {
+  // tile
+  const f32 image_ngc_per_px = (1.f / 160.f) * 16.f;
+  const f32 u0 = image_ngc_per_px * tile_x;
+  const f32 v0 = image_ngc_per_px * tile_y;
+  const f32 u1 = u0 + image_ngc_per_px;
+  const f32 v1 = v0 + image_ngc_per_px;
+  // vertex
+  const f32 x1 = x0 + ndc_per_px_x * tile_screen_size;
+  const f32 y1 = y0 - ndc_per_px_y * tile_screen_size;
+  u32 vertex_offset = vertices_length;
   vertex_t vertex;
   vertex.x = x0;
   vertex.y = y0;
   vertex.u = u0;
   vertex.v = v0;
-  global_vertices_virtual[global_vertices_length++] = vertex;
+  vertices_virtual[vertices_length++] = vertex;
   vertex.x = x1;
   vertex.y = y0;
   vertex.u = u1;
   vertex.v = v0;
-  global_vertices_virtual[global_vertices_length++] = vertex;
+  vertices_virtual[vertices_length++] = vertex;
   vertex.x = x1;
   vertex.y = y1;
   vertex.u = u1;
   vertex.v = v1;
-  global_vertices_virtual[global_vertices_length++] = vertex;
+  vertices_virtual[vertices_length++] = vertex;
   vertex.x = x0;
   vertex.y = y1;
   vertex.u = u0;
   vertex.v = v1;
-  global_vertices_virtual[global_vertices_length++] = vertex;
+  vertices_virtual[vertices_length++] = vertex;
   // indexes
-  global_indexes_virtual[global_indexes_length++] = 0;
-  global_indexes_virtual[global_indexes_length++] = 1;
-  global_indexes_virtual[global_indexes_length++] = 2;
-  global_indexes_virtual[global_indexes_length++] = 0;
-  global_indexes_virtual[global_indexes_length++] = 2;
-  global_indexes_virtual[global_indexes_length++] = 3;
-
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 1;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset + 3;
+}
+export void titlescreen_render() {
+  // PRESS SPACE
+  f32 x = .5f;
+  f32 px_space = 35.f;
+  tile_render(x, 0.f, 3, 6);
+  x += px_space * ndc_per_px_x;
+  tile_render(x, 0.f, 5, 6);
+  // x += px_space * ndc_per_px_x;
+  // tile_render(x, 0.f, 2, 6);
 }

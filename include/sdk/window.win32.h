@@ -23,6 +23,7 @@ extern ID3D11VertexShader* global_vertex_shader;
 extern ID3D11PixelShader* global_pixel_shader;
 extern ID3D11InputLayout* global_input_layout;
 extern ID3D11SamplerState* global_sampler_state;
+extern ID3D11BlendState* global_blend_state;
 
 extern ID3D11ShaderResourceView* global_atlas;
 

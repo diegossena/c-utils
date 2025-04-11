@@ -56,26 +56,29 @@ export bool window_key_pressed(key_code_t);
 export void _window_resize();
 export void _window_thread();
 
-extern bool global_window_repaint;
-extern bool global_window_resize;
+extern bool window_has_update;
+extern bool window_resized;
 
-extern f32 global_window_deltatime;
-extern thread_t* global_window_thread;
+extern f32 window_deltatime;
+extern thread_t* window_thread;
 
-extern bool global_window_focus;
-extern u16 global_window_width;
-extern u16 global_window_height;
-extern u8 global_window_keyboard_count;
-extern u8 global_window_keyboard_state[32];
+extern bool window_focus;
+extern u16 window_width;
+extern u16 window_height;
+extern f32 ndc_per_px_x;
+extern f32 ndc_per_px_y;
+extern u8 keyboard_count;
+extern u8 keyboard_state[32];
 
-extern vertex_t* global_vertices_virtual;
-extern u64 global_vertices_length;
-extern u64 global_vertices_capacity;
-extern u64 global_vertices_used;
+extern vertex_t* vertices_virtual;
+extern u64 vertices_length;
+extern u64 vertices_capacity;
+extern u64 vertices_used;
 
-extern u32* global_indexes_virtual;
-extern u64 global_indexes_length;
-extern u64 global_indexes_capacity;
-extern u64 global_indexes_used;
+extern u32* indexes_virtual;
+extern u64 indexes_length;
+extern u64 indexes_capacity;
+extern u64 indexes_used;
+
 
 #endif

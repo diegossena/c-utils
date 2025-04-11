@@ -30,7 +30,7 @@ export void tilemap_onkeydown(key_code_t key) {
         tilemap.player_direction = key;
         tilemap.player_walking_timer = 0;
         tilemap.player_walking_duration =
-          global_window_repaint = true;
+          window_has_update = true;
         break;
       default:
     }
