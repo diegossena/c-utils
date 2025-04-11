@@ -39,4 +39,8 @@ export void titlescreen_render() {
   text_draw("GAME", 120.f, -.5f, 1.f);
   text_draw("PRESS SPACE", 90.f, .1f, -.5f);
   text_draw("TO START", 90.f, .22f, -.66f);
+  rect_fill_draw(
+    -1, 1, 1, -1,
+    1, 1, 1, .5f
+  );
 }

@@ -9,7 +9,10 @@
 
 typedef struct vertex_t {
   f32 x, y; // position
-  f32 u, v; // textcoord
+  union {
+    f32 uv[2]; // textcoord
+    f32 color[4]; // color
+  };
 } vertex_t;
 
 export void window_startup();

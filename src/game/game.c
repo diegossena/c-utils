@@ -1,6 +1,35 @@
 #include <game/game.h>
 #include <sdk/window.h>
 
+void rect_fill_draw(
+  f32 x0, f32 y0, f32 x1, f32 y1,
+  f32 r, f32 g, f32 b, f32 a
+) {
+  // vertex
+  u32 vertex_offset = vertices_length;
+  vertex_t vertex = {
+    .color = { r, g, b, a }
+  };
+  vertex.x = x0;
+  vertex.y = y0;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x1;
+  vertex.y = y0;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x1;
+  vertex.y = y1;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x0;
+  vertex.y = y1;
+  vertices_virtual[vertices_length++] = vertex;
+  // indexes
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 1;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset + 3;
+}
 void rect_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y
@@ -16,23 +45,23 @@ void rect_draw(
   vertex_t vertex;
   vertex.x = x0;
   vertex.y = y0;
-  vertex.u = u0;
-  vertex.v = v0;
+  vertex.uv[0] = u0;
+  vertex.uv[1] = v0;
   vertices_virtual[vertices_length++] = vertex;
   vertex.x = x1;
   vertex.y = y0;
-  vertex.u = u1;
-  vertex.v = v0;
+  vertex.uv[0] = u1;
+  vertex.uv[1] = v0;
   vertices_virtual[vertices_length++] = vertex;
   vertex.x = x1;
   vertex.y = y1;
-  vertex.u = u1;
-  vertex.v = v1;
+  vertex.uv[0] = u1;
+  vertex.uv[1] = v1;
   vertices_virtual[vertices_length++] = vertex;
   vertex.x = x0;
   vertex.y = y1;
-  vertex.u = u0;
-  vertex.v = v1;
+  vertex.uv[0] = u0;
+  vertex.uv[1] = v1;
   vertices_virtual[vertices_length++] = vertex;
   // indexes
   indexes_virtual[indexes_length++] = vertex_offset;
