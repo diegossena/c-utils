@@ -10,7 +10,6 @@ export void transition_load(function_t unload, function_t load) {
   transition.unload = unload;
   transition.load = load;
   transition.fade_in_out = true;
-  // transition.color = gfx_color_new(1, 1, 1, 1);
   transition.loading = true;
   window_has_update = true;
 }
@@ -28,7 +27,7 @@ export void transition_render() {
       transition.fade_in_out = false;
     }
   } else {
-    opacity = 1.f - progress;
+    opacity = math_max(1.f - progress, 0.001f);
     if (transition.timer >= duration) {
       transition.loading = false;
     }
