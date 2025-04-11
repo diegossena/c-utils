@@ -4,6 +4,7 @@
 
 #include <sdk/unity.h>
 
+#include <src/game/game.c>
 #include <src/game/titlescreen.scene.c>
 #include <src/game/transition.scene.c>
 #include <src/game/tilemap.scene.c>
