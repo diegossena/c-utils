@@ -81,13 +81,45 @@ void tile_draw(f32 x0, f32 y0, u8 tile_x, u8 tile_y) {
   const f32 y1 = y0 - ndc_per_px_y * tile_screen_size;
   rect_draw(x0, y0, x1, y1, tile_x, tile_y);
 }
+void text_draw(const char* text, f32 size, f32 x, f32 y) {
+  while (*text != '\0') {
+    u8 tile_x = 0, tile_y = 0;
+    if (*text >= 'A' && *text <= 'B') {
+      tile_x = *text - 57;
+      tile_y = 4;
+    } else if (*text >= 'C' && *text <= 'L') {
+      tile_x = *text - 'C';
+      tile_y = 5;
+    } else if (*text >= 'M' && *text <= 'V') {
+      tile_x = *text - 'M';
+      tile_y = 6;
+    } else if (*text >= 'W' && *text <= 'Z') {
+      tile_x = *text - 'W';
+      tile_y = 7;
+    } else {
+      switch (*text) {
+        case '.':
+          tile_x = 4;
+          tile_y = 7;
+          break;
+        case ',':
+          tile_x = 5;
+          tile_y = 7;
+          break;
+      }
+    }
+    if (*text != ' ') {
+      const f32 x1 = x + ndc_per_px_x * size;
+      const f32 y1 = y - ndc_per_px_y * size;
+      rect_draw(x, y, x1, y1, tile_x, tile_y);
+      x += size * .31f * ndc_per_px_x;
+    } else {
+      x += size * .31f * ndc_per_px_x * .5f;
+    }
+    ++text;
+  }
+}
 export void titlescreen_render() {
-  // PRESS SPACE
-  f32 x = .5f;
-  const f32 px_space = 23.f;
-  tile_draw(x, 0.f, 3, 6);
-  x += px_space * ndc_per_px_x;
-  tile_draw(x, 0.f, 5, 6);
-  // x += px_space * ndc_per_px_x;
-  // tile_render(x, 0.f, 2, 6);
+  text_draw("PRESS SPACE", 90.f, .1f, -.5f);
+  text_draw("TO START", 90.f, .22f, -.66f);
 }
