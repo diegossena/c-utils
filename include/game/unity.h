@@ -1,6 +1,6 @@
 #include <game/titlescreen.scene.h>
-// #include <game/transition.scene.h>
-// #include <game/tilemap.scene.h>
+#include <game/transition.scene.h>
+#include <game/tilemap.scene.h>
 
 #include <sdk/unity.h>
 

@@ -2,6 +2,7 @@
 #include <game/tilemap.scene.h>
 #include <game/hero_home_2f.map.h>
 #include <game/game.h>
+#include <game/transition.scene.h>
 #include <sdk/window.h>
 
 titlescreen_t titlescreen;
@@ -29,7 +30,7 @@ export void titlescreen_unload() {
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {
     case KEY_SPACE:
-      // transition_load(titlescreen_unload, hero_home_2f_load);
+      transition_load(titlescreen_unload, hero_home_2f_load);
       break;
     default:
       return;
@@ -39,8 +40,4 @@ export void titlescreen_render() {
   text_draw("GAME", 120.f, -.5f, 1.f);
   text_draw("PRESS SPACE", 90.f, .1f, -.5f);
   text_draw("TO START", 90.f, .22f, -.66f);
-  rect_fill_draw(
-    -1, 1, 1, -1,
-    1, 1, 1, .5f
-  );
 }
