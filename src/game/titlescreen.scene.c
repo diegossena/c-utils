@@ -1,6 +1,7 @@
 #include <game/titlescreen.scene.h>
 #include <game/tilemap.scene.h>
 #include <game/hero_home_2f.map.h>
+#include <game/game.h>
 #include <sdk/window.h>
 
 titlescreen_t titlescreen;
@@ -35,6 +36,7 @@ export void titlescreen_onkeydown(key_code_t key) {
   }
 }
 export void titlescreen_render() {
+  text_draw("GAME", 120.f, -.5f, 1.f);
   text_draw("PRESS SPACE", 90.f, .1f, -.5f);
   text_draw("TO START", 90.f, .22f, -.66f);
 }
