@@ -7,10 +7,13 @@ tilemap_t tilemap;
 
 export void tilemap_load() {
   // camera
-  f32 visible_tiles_x = (f32)window_width / TILE_SIZE;
-  f32 visible_tiles_y = (f32)window_height / TILE_SIZE;
-  tilemap.visible_tiles_x = math_ceil(visible_tiles_x) + 1;
-  tilemap.visible_tiles_y = math_ceil(visible_tiles_y) + 1;
+  f32 visible_tiles [] = {
+    (f32)window_width / TILE_SIZE,
+    (f32)window_height / TILE_SIZE
+  };
+  tilemap.visible_tiles_x = math_ceil(visible_tiles[0]) + 1;
+  tilemap.visible_tiles_y = math_ceil(visible_tiles[1]) + 1;
+  console_log("visible_tiles %f %f", visible_tiles[0], visible_tiles[1]);
   // loaded
   tilemap.loaded = true;
   window_has_update = true;
@@ -21,17 +24,17 @@ export void tilemap_unload() {
 export void tilemap_onkeydown(key_code_t key) {
   const f32 speed = .1f;
   if (key == KEY_UP) {
-    tilemap.player[1] -= speed;
+    tilemap.offset[1] -= speed;
     window_has_update = true;
   } else if (key == KEY_DOWN) {
-    tilemap.player[1] += speed;
+    tilemap.offset[1] += speed;
     window_has_update = true;
   }
   if (key == KEY_LEFT) {
-    tilemap.player[0] -= speed;
+    tilemap.offset[0] -= speed;
     window_has_update = true;
   } else if (key == KEY_RIGHT) {
-    tilemap.player[0] += speed;
+    tilemap.offset[0] += speed;
     window_has_update = true;
   }
   return;
@@ -52,18 +55,10 @@ export void tilemap_onkeydown(key_code_t key) {
   }
 }
 export void tilemap_render() {
-  // calculate top-leftmost visible tile
-  f32 offset[2] = {
-    tilemap.player[0] - (f32)tilemap.visible_tiles_x / 2.f,
-    tilemap.player[1] - (f32)tilemap.visible_tiles_y / 2.f
-  };
-  // offset[0] = math_floor(offset[0] * 100.f) / 100.f;
-  // offset[1] = math_floor(offset[1] * 100.f) / 100.f;
-
   // Get offsets for smooth movement
   f32 tile_offset[2] = {
-    (offset[0] - math_floor(offset[0])),
-    (offset[1] - math_floor(offset[1]))
+    (tilemap.offset[0] - math_floor(tilemap.offset[0])),
+    (tilemap.offset[1] - math_floor(tilemap.offset[1]))
   };
   const f32 tile_ndc_per_px[2] = {
     TILE_SIZE * ndc_per_px_x,
@@ -72,19 +67,31 @@ export void tilemap_render() {
   const f32 x0_start = -1.f - (tile_offset[0] * tile_ndc_per_px[0]);
   const f32 y0_start = 1.f + (tile_offset[1] * tile_ndc_per_px[1]);
   // layers
+  const i8 start_x = (i8)math_floor(tilemap.offset[0]);
+  const i8 start_y = (i8)math_floor(tilemap.offset[1]);
+  const i8 end_x = start_x + tilemap.visible_tiles_x;
+  const i8 end_y = start_y + tilemap.visible_tiles_y;
   for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
     f32 x0 = x0_start;
-    for (u8 x = 0; x < tilemap.visible_tiles_x; x++) {
+    for (i8 x = start_x; x < end_x; x++) {
       const f32 x1 = x0 + tile_ndc_per_px[0];
       f32 y0 = y0_start;
-      for (u8 y = 0; y < tilemap.visible_tiles_y; y++) {
+      for (i8 y = start_y; y < end_y; y++) {
         const f32 y1 = y0 - tile_ndc_per_px[1];
-        i8 map_tile_x = math_floor(x + offset[0]);
-        i8 map_tile_y = math_floor(y + offset[1]);
         // tile_id
-        u8 tile_id = (map_tile_x >= 0 && map_tile_x < TILEMAP_WIDTH) && (map_tile_y >= 0 && map_tile_y < TILEMAP_WIDTH)
-          ? tilemap.tiles[layer][map_tile_y * TILEMAP_WIDTH + map_tile_x]
+        u8 tile_id = (x >= 0 && x < TILEMAP_WIDTH) && (y >= 0 && y < TILEMAP_WIDTH)
+          ? tilemap.tiles[layer][y * TILEMAP_WIDTH + x]
           : 0;
+        if (!transition.loading && layer == 0 && y == 0) {
+          console_log(
+            "[%d %d] "
+            "rect %f %f %f %f "
+            "tile_id %d ",
+            x, y,
+            x0, x1, y0, y1,
+            tile_id
+          );
+        }
         if (tile_id != 0) {
           // tile
           u8 tile_x = (tile_id - 1) % 10;
@@ -102,8 +109,8 @@ export void tilemap_render() {
   // player render
   // const f32 scale = 4.f;
   // f32 rect[4] = {
-  //   (tilemap.player[0] - offset[0]) * TILE_SIZE + 6.f,
-  //   (tilemap.player[1] - offset[1]) * TILE_SIZE + -58.f,
+  //   (tilemap.player[0] - tilemap.offset[0]) * TILE_SIZE + 6.f,
+  //   (tilemap.player[1] - tilemap.offset[1]) * TILE_SIZE + -58.f,
   // };
   // rect[2] = rect[0] + 15.f * scale;
   // rect[3] = rect[1] + 31.f * scale;

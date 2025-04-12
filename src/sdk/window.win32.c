@@ -26,7 +26,6 @@ ID3D11ShaderResourceView* global_atlas;
 ID3D11Buffer* global_vertices_buffer;
 ID3D11Buffer* global_indexes_buffer;
 
-
 export void _window_size_update() {
   ndc_per_px_x = 2.f / (f32)window_width;
   ndc_per_px_y = 2.f / (f32)window_height;
@@ -193,7 +192,7 @@ export void window_startup() {
     global_d3d_device_context, global_blend_state, blend_factor, 0xffffffff
   );
   // global_vertices
-  vertices_capacity = 400;
+  vertices_capacity = 500;
   D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
@@ -214,7 +213,7 @@ export void window_startup() {
     &vertex_offset
   );
   // global_indexes
-  indexes_capacity = 600;
+  indexes_capacity = 700;
   indexes_virtual = memory_alloc(sizeof(u32) * indexes_capacity);
   buffer_desc.ByteWidth = sizeof(u32) * indexes_capacity;
   buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
