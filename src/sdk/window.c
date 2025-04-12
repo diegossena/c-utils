@@ -31,3 +31,68 @@ export bool window_key_pressed(key_code_t key) {
   u8 bit_index = key % 8;
   return keyboard_state[byte_index] & (1 << bit_index);
 }
+
+extern void window_rect_draw(
+  f32 x0, f32 y0, f32 x1, f32 y1,
+  f32 u0, f32 v0, f32 u1, f32 v1
+) {
+  // vertex
+  u32 vertex_offset = vertices_length;
+  vertex_t vertex = {};
+  vertex.x = x0;
+  vertex.y = y0;
+  vertex.uv[0] = u0;
+  vertex.uv[1] = v0;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x1;
+  vertex.y = y0;
+  vertex.uv[0] = u1;
+  vertex.uv[1] = v0;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x1;
+  vertex.y = y1;
+  vertex.uv[0] = u1;
+  vertex.uv[1] = v1;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x0;
+  vertex.y = y1;
+  vertex.uv[0] = u0;
+  vertex.uv[1] = v1;
+  vertices_virtual[vertices_length++] = vertex;
+  // indexes
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 1;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset + 3;
+}
+extern void window_rect_fill(
+  f32 x0, f32 y0, f32 x1, f32 y1,
+  f32 r, f32 g, f32 b, f32 a
+) {
+  // vertex
+  u32 vertex_offset = vertices_length;
+  vertex_t vertex = {
+    .color = { r, g, b, a }
+  };
+  vertex.x = x0;
+  vertex.y = y0;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x1;
+  vertex.y = y0;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x1;
+  vertex.y = y1;
+  vertices_virtual[vertices_length++] = vertex;
+  vertex.x = x0;
+  vertex.y = y1;
+  vertices_virtual[vertices_length++] = vertex;
+  // indexes
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 1;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset;
+  indexes_virtual[indexes_length++] = vertex_offset + 2;
+  indexes_virtual[indexes_length++] = vertex_offset + 3;
+}

@@ -22,6 +22,15 @@ extern void window_run();
 
 extern void window_atlas_load(const char* path, const u64 width, const u64 height);
 
+extern void window_rect_draw(
+  f32 x0, f32 y0, f32 x1, f32 y1,
+  f32 u0, f32 v0, f32 u1, f32 v1
+);
+extern void window_rect_fill(
+  f32 x0, f32 y0, f32 x1, f32 y1,
+  f32 r, f32 g, f32 b, f32 a
+);
+
 // EVENTS
 
 /**

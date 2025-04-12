@@ -27,6 +27,8 @@ export void titlescreen_load() {
   window_background[0] = 120.f / 255.f;
   window_background[1] = 168.f / 255.f;
   window_background[2] = 192.f / 255.f;
+
+  // transition_load(titlescreen_unload, hero_home_2f_load); // TEST
 }
 export void titlescreen_unload() {
   titlescreen.loaded = false;

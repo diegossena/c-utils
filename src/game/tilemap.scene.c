@@ -19,18 +19,19 @@ export void tilemap_unload() {
   tilemap.loaded = false;
 }
 export void tilemap_onkeydown(key_code_t key) {
+  const f32 speed = .1f;
   if (key == KEY_UP) {
-    tilemap.player[1] -= .1f;
+    tilemap.player[1] -= speed;
     window_has_update = true;
   } else if (key == KEY_DOWN) {
-    tilemap.player[1] += .1f;
+    tilemap.player[1] += speed;
     window_has_update = true;
   }
   if (key == KEY_LEFT) {
-    tilemap.player[0] -= .1f;
+    tilemap.player[0] -= speed;
     window_has_update = true;
   } else if (key == KEY_RIGHT) {
-    tilemap.player[0] += .1f;
+    tilemap.player[0] += speed;
     window_has_update = true;
   }
   return;
@@ -68,20 +69,9 @@ export void tilemap_render() {
     TILE_SIZE * ndc_per_px_x,
     TILE_SIZE * ndc_per_px_y
   };
-
   const f32 x0_start = -1.f - (tile_offset[0] * tile_ndc_per_px[0]);
   const f32 y0_start = 1.f + (tile_offset[1] * tile_ndc_per_px[1]);
-
-  if (!transition.loading) {
-    console_log("offset %f %f", offset[0], offset[1]);
-    console_log("(i32)offset %d %d", (i32)math_floor(offset[0]), (i32)math_floor(offset[1]));
-    console_log("tile_offset %f %f", tile_offset[0], tile_offset[1]);
-    console_log("ndc_per_px %f %f", ndc_per_px_x, ndc_per_px_y);
-    console_log("x0_start %f", x0_start);
-    console_log("y0_start %f", y0_start);
-    console_log("visible_tiles %d %d", tilemap.visible_tiles_x, tilemap.visible_tiles_y);
-  }
-  // layers render
+  // layers
   for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
     f32 x0 = x0_start;
     for (u8 x = 0; x < tilemap.visible_tiles_x; x++) {
@@ -89,25 +79,17 @@ export void tilemap_render() {
       f32 y0 = y0_start;
       for (u8 y = 0; y < tilemap.visible_tiles_y; y++) {
         const f32 y1 = y0 - tile_ndc_per_px[1];
-        // tile_id
         i8 map_tile_x = math_floor(x + offset[0]);
         i8 map_tile_y = math_floor(y + offset[1]);
+        // tile_id
         u8 tile_id = (map_tile_x >= 0 && map_tile_x < TILEMAP_WIDTH) && (map_tile_y >= 0 && map_tile_y < TILEMAP_WIDTH)
           ? tilemap.tiles[layer][map_tile_y * TILEMAP_WIDTH + map_tile_x]
           : 0;
         if (tile_id != 0) {
-          // tile_draw
+          // tile
           u8 tile_x = (tile_id - 1) % 10;
           u8 tile_y = math_ceil((f32)tile_id / 10.f) - 1.f;
-          if (!transition.loading && layer == 0 && y == 1) {
-            console_log("xy(%d %d) tile_id=%d tile_draw(%f %f %f %f) sprite(%d %d)",
-              x, y,
-              tile_id,
-              x0, x1, y0, y1,
-              tile_x, tile_y
-            );
-          }
-          tile_rect_draw(x0, y0, x1, y1, tile_x, tile_y);
+          tile_draw(x0, y0, x1, y1, tile_x, tile_y, false, false);
         }
         y0 = y1;
       }
@@ -117,7 +99,7 @@ export void tilemap_render() {
   if (!transition.loading) {
     console_log();
   }
-  // // player render
+  // player render
   // const f32 scale = 4.f;
   // f32 rect[4] = {
   //   (tilemap.player[0] - offset[0]) * TILE_SIZE + 6.f,

@@ -32,7 +32,7 @@ export void transition_render() {
       transition.loading = false;
     }
   }
-  rect_fill_draw(
+  window_rect_fill(
     -1, 1, 1, -1,
     1, 1, 1, opacity
   );
