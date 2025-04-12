@@ -57,9 +57,6 @@ export void tilemap_render() {
     tilemap.player[0] - (f32)tilemap.visible_tiles_x / 2.f,
     tilemap.player[1] - (f32)tilemap.visible_tiles_y / 2.f
   };
-  // offset[0] = math_floor(offset[0] * 100.f) / 100.f;
-  // offset[1] = math_floor(offset[1] * 100.f) / 100.f;
-
   // Get offsets for smooth movement
   f32 tile_offset[2] = {
     (offset[0] - math_floor(offset[0])),
@@ -95,9 +92,6 @@ export void tilemap_render() {
       }
       x0 = x1;
     }
-  }
-  if (!transition.loading) {
-    console_log();
   }
   // player render
   // const f32 scale = 4.f;
