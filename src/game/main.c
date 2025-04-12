@@ -14,9 +14,6 @@ void window_onkeydown(key_code_t key) {
   if (tilemap.loaded) {
     tilemap_onkeydown(key);
   }
-  if (tilemap.loaded) {
-    tilemap_onkeydown(key);
-  }
 }
 void window_onkeypress() {}
 void window_onrender() {

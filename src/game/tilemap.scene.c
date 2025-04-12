@@ -19,7 +19,7 @@ export void tilemap_unload() {
   tilemap.loaded = false;
 }
 export void tilemap_onkeydown(key_code_t key) {
-  const f32 speed = .1f;
+  const f32 speed = 1.f;
   if (key == KEY_UP) {
     tilemap.player[1] -= speed;
     window_has_update = true;
@@ -44,8 +44,8 @@ export void tilemap_onkeydown(key_code_t key) {
         tilemap.player_walking = true;
         tilemap.player_direction = key;
         tilemap.player_walking_timer = 0;
-        tilemap.player_walking_duration =
-          window_has_update = true;
+        tilemap.player_walking_duration = 1.f;
+        window_has_update = true;
         break;
       default:
     }
@@ -76,6 +76,7 @@ export void tilemap_render() {
       f32 y0 = y0_start;
       for (u8 y = 0; y < tilemap.visible_tiles_y; y++) {
         const f32 y1 = y0 - tile_ndc_per_px[1];
+        // tilemap
         i8 map_tile_x = math_floor(x + offset[0]);
         i8 map_tile_y = math_floor(y + offset[1]);
         // tile_id
@@ -94,6 +95,14 @@ export void tilemap_render() {
     }
   }
   // player render
+  f32 x0 = tile_ndc_per_px[0] * -.5f;
+  f32 y0 = tile_ndc_per_px[1] * .5f;
+  f32 x1 = x0 + tile_ndc_per_px[0];
+  f32 y1 = y0 - tile_ndc_per_px[1];
+  window_rect_fill(
+    x0, y0, x1, y1,
+    1, 0, 0, 1.f
+  );
   // const f32 scale = 4.f;
   // f32 rect[4] = {
   //   (tilemap.player[0] - offset[0]) * TILE_SIZE + 6.f,
