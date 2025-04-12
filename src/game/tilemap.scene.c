@@ -56,7 +56,7 @@ export void tilemap_onkeydown(key_code_t key) {
 }
 export void tilemap_render() {
   // Get offsets for smooth movement
-  f32 tile_offset[2] = {
+  const f32 tile_offset[2] = {
     (tilemap.offset[0] - math_floor(tilemap.offset[0])),
     (tilemap.offset[1] - math_floor(tilemap.offset[1]))
   };
@@ -64,18 +64,18 @@ export void tilemap_render() {
     TILE_SIZE * ndc_per_px_x,
     TILE_SIZE * ndc_per_px_y
   };
-  const f32 x0_start = -1.f - (tile_offset[0] * tile_ndc_per_px[0]);
-  const f32 y0_start = 1.f + (tile_offset[1] * tile_ndc_per_px[1]);
-  // layers
+  // layers_draw
+  const f32 start_x0 = -1.f - (tile_offset[0] * tile_ndc_per_px[0]);
+  const f32 start_y0 = 1.f + (tile_offset[1] * tile_ndc_per_px[1]);
   const i8 start_x = (i8)math_floor(tilemap.offset[0]);
   const i8 start_y = (i8)math_floor(tilemap.offset[1]);
   const i8 end_x = start_x + tilemap.visible_tiles_x;
   const i8 end_y = start_y + tilemap.visible_tiles_y;
   for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
-    f32 x0 = x0_start;
+    f32 x0 = start_x0;
     for (i8 x = start_x; x < end_x; x++) {
       const f32 x1 = x0 + tile_ndc_per_px[0];
-      f32 y0 = y0_start;
+      f32 y0 = start_y0;
       for (i8 y = start_y; y < end_y; y++) {
         const f32 y1 = y0 - tile_ndc_per_px[1];
         // tile_id
