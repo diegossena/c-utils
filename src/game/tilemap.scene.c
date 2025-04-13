@@ -6,14 +6,7 @@
 tilemap_t tilemap;
 
 export void tilemap_load() {
-  // camera
-  f32 visible_tiles [] = {
-    (f32)window_width / TILE_SIZE,
-    (f32)window_height / TILE_SIZE
-  };
-  tilemap.visible_tiles_x = math_ceil(visible_tiles[0]) + 1;
-  tilemap.visible_tiles_y = math_ceil(visible_tiles[1]) + 1;
-  console_log("visible_tiles %f %f", visible_tiles[0], visible_tiles[1]);
+  tilemap_onresize();
   // loaded
   tilemap.loaded = true;
   window_has_update = true;
@@ -21,20 +14,28 @@ export void tilemap_load() {
 export void tilemap_unload() {
   tilemap.loaded = false;
 }
+export void tilemap_onresize() {
+  tilemap.visible_tilesf[0] = (f32)window_width / TILE_SIZE;
+  tilemap.visible_tilesf[1] = (f32)window_height / TILE_SIZE;
+  tilemap.visible_tiles[0] = math_ceil(tilemap.visible_tilesf[0]) + 1;
+  tilemap.visible_tiles[1] = math_ceil(tilemap.visible_tilesf[1]) + 1;
+  tilemap.tile_ndc_per_px[0] = TILE_SIZE * ndc_per_px_x;
+  tilemap.tile_ndc_per_px[1] = TILE_SIZE * ndc_per_px_y;
+}
 export void tilemap_onkeydown(key_code_t key) {
   const f32 speed = .1f;
   if (key == KEY_UP) {
-    tilemap.offset[1] -= speed;
+    tilemap.player[1] -= speed;
     window_has_update = true;
   } else if (key == KEY_DOWN) {
-    tilemap.offset[1] += speed;
+    tilemap.player[1] += speed;
     window_has_update = true;
   }
   if (key == KEY_LEFT) {
-    tilemap.offset[0] -= speed;
+    tilemap.player[0] -= speed;
     window_has_update = true;
   } else if (key == KEY_RIGHT) {
-    tilemap.offset[0] += speed;
+    tilemap.player[0] += speed;
     window_has_update = true;
   }
   return;
@@ -47,42 +48,42 @@ export void tilemap_onkeydown(key_code_t key) {
         tilemap.player_walking = true;
         tilemap.player_direction = key;
         tilemap.player_walking_timer = 0;
-        tilemap.player_walking_duration =
-          window_has_update = true;
+        tilemap.player_walking_duration = 1.f;
+        window_has_update = true;
         break;
       default:
     }
   }
 }
 export void tilemap_render() {
+  const f32 offset[2] = {
+    tilemap.player[0],
+    tilemap.player[1]
+  };
   // Get offsets for smooth movement
   const f32 tile_offset[2] = {
-    (tilemap.offset[0] - math_floor(tilemap.offset[0])),
-    (tilemap.offset[1] - math_floor(tilemap.offset[1]))
-  };
-  const f32 tile_ndc_per_px[2] = {
-    TILE_SIZE * ndc_per_px_x,
-    TILE_SIZE * ndc_per_px_y
+    (offset[0] - math_floor(offset[0])),
+    (offset[1] - math_floor(offset[1]))
   };
   // layers_draw
-  const f32 start_x0 = -1.f - (tile_offset[0] * tile_ndc_per_px[0]);
-  const f32 start_y0 = 1.f + (tile_offset[1] * tile_ndc_per_px[1]);
-  const i8 start_x = (i8)math_floor(tilemap.offset[0]);
-  const i8 start_y = (i8)math_floor(tilemap.offset[1]);
-  const i8 end_x = start_x + tilemap.visible_tiles_x;
-  const i8 end_y = start_y + tilemap.visible_tiles_y;
+  const f32 start_x0 = -1.f - (tile_offset[0] * tilemap.tile_ndc_per_px[0]);
+  const f32 start_y0 = 1.f + (tile_offset[1] * tilemap.tile_ndc_per_px[1]);
+  const i8 start_x = (i8)math_floor(offset[0]);
+  const i8 start_y = (i8)math_floor(offset[1]);
+  const i8 end_x = start_x + tilemap.visible_tiles[0];
+  const i8 end_y = start_y + tilemap.visible_tiles[1];
   for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
     f32 x0 = start_x0;
     for (i8 x = start_x; x < end_x; x++) {
-      const f32 x1 = x0 + tile_ndc_per_px[0];
+      const f32 x1 = x0 + tilemap.tile_ndc_per_px[0];
       f32 y0 = start_y0;
       for (i8 y = start_y; y < end_y; y++) {
-        const f32 y1 = y0 - tile_ndc_per_px[1];
+        const f32 y1 = y0 - tilemap.tile_ndc_per_px[1];
         // tile_id
         u8 tile_id = (x >= 0 && x < TILEMAP_WIDTH) && (y >= 0 && y < TILEMAP_WIDTH)
           ? tilemap.tiles[layer][y * TILEMAP_WIDTH + x]
           : 0;
-        if (!transition.loading && layer == 0 && y == 0) {
+        if (!transition.loading && layer == 0 && x == 0) {
           console_log(
             "[%d %d] "
             "rect %f %f %f %f "
@@ -109,8 +110,8 @@ export void tilemap_render() {
   // player render
   // const f32 scale = 4.f;
   // f32 rect[4] = {
-  //   (tilemap.player[0] - tilemap.offset[0]) * TILE_SIZE + 6.f,
-  //   (tilemap.player[1] - tilemap.offset[1]) * TILE_SIZE + -58.f,
+  //   (tilemap.player[0] - offset[0]) * TILE_SIZE + 6.f,
+  //   (tilemap.player[1] - offset[1]) * TILE_SIZE + -58.f,
   // };
   // rect[2] = rect[0] + 15.f * scale;
   // rect[3] = rect[1] + 31.f * scale;

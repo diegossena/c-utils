@@ -33,6 +33,7 @@ extern void window_rect_fill(
 
 // EVENTS
 
+extern void window_onresize();
 /**
  * - Event Listener
  * - Externally-defined function
@@ -89,5 +90,8 @@ extern u64 indexes_capacity;
 extern u64 indexes_used;
 
 extern f32 window_background[4];
+
+extern u16 atlas_width;
+extern u16 atlas_height;
 
 #endif

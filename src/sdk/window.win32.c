@@ -227,6 +227,8 @@ export void window_startup() {
 }
 extern void window_atlas_load(const char* path, const u64 width, const u64 height) {
   assert(global_atlas == 0);
+  atlas_width = width;
+  atlas_width = width;
   i32 result;
   // load_image
   u64 image_size = width * height * 4; // RGBA8
@@ -282,22 +284,22 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       break;
     case WM_KEYDOWN:
       if (window_focus) {
-        window_onkeydown(wParam);
         if (wParam != 91 && !window_key_pressed(wParam)) {
           u8 byte_index = wParam / 8;
           u8 bit_index = wParam % 8;
           keyboard_state[byte_index] |= (1 << bit_index);
           ++keyboard_count;
         }
+        window_onkeydown(wParam);
       }
       return 0;
     case WM_KEYUP:
       if (window_focus) {
-        window_onkeyup();
         u8 byte_index = wParam / 8;
         u8 bit_index = wParam % 8;
         keyboard_state[byte_index] &= ~(1 << bit_index);
         --keyboard_count;
+        window_onkeyup();
       }
       return 0;
     case WM_SIZE:

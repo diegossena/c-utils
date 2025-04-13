@@ -4,6 +4,11 @@
 #include <game/unity.h>
 
 void window_onkeyup() {}
+void window_onresize() {
+  if (tilemap.loaded) {
+    tilemap_onresize();
+  }
+}
 void window_onkeydown(key_code_t key) {
   if (key == KEY_ESCAPE) {
     return window_close();

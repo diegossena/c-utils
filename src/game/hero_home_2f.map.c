@@ -17,7 +17,7 @@ export void hero_home_2f_load() {
     }
   };
   memory_copy(tilemap.tiles, tiles, sizeof(tilemap.tiles));
-  tilemap.offset[0] = 0.f;
-  tilemap.offset[1] = 0.f;
+  tilemap.player[0] = 0.f;
+  tilemap.player[1] = 0.f;
   tilemap.player_direction = KEY_UP;
 }

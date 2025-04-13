@@ -26,6 +26,9 @@ u64 indexes_used;
 
 f32 window_background[4] = { 0, 0, 0, 1 };
 
+u16 atlas_width;
+u16 atlas_height;
+
 export bool window_key_pressed(key_code_t key) {
   u8 byte_index = key / 8;
   u8 bit_index = key % 8;
