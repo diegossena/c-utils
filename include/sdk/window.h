@@ -18,11 +18,10 @@ typedef struct vertex_t {
   };
 } vertex_t;
 
-export void window_startup();
+export void window_startup(const char* atlas_path);
 export void window_set_title(const char* title);
 export void window_close();
 extern void window_run();
-extern void window_atlas_load(const char* path);
 extern void window_rect_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   f32 u0, f32 v0, f32 u1, f32 v1

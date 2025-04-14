@@ -190,7 +190,7 @@ export void _window_onresize() {
   );
 }
 export void window_close() { DestroyWindow(window_id); }
-export void window_startup() {
+export void window_startup(const char* atlas_path) {
   assert(window_thread_id == 0);
   sync_t* onload_sync = sync_new();
   window_thread_id = thread_new(_window_thread, onload_sync);
@@ -316,6 +316,51 @@ export void window_startup() {
   d3d_device_context->lpVtbl->OMSetBlendState(
     d3d_device_context, d3d_blend_state, blend_factor, 0xffffffff
   );
+  // load_image
+  const u64 image_size = atlas_width * atlas_height * 4; // RGBA8
+  const u32 image_stride = atlas_width * 4;
+  FILE* file = fopen(atlas_path, "r");
+  u8 image_data[image_size];
+  fread(image_data, 1, image_size, file);
+  fclose(file);
+  // CreateTexture2D
+  D3D11_TEXTURE2D_DESC texture_desc = {
+    .Width = atlas_width,
+    .Height = atlas_height,
+    .MipLevels = 1,
+    .ArraySize = 1,
+    .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+    .SampleDesc = {.Count = 1, .Quality = 0 },
+    .Usage = D3D11_USAGE_DEFAULT,
+    .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+    .CPUAccessFlags = 0,
+    .MiscFlags = 0,
+  };
+  D3D11_SUBRESOURCE_DATA subresource_data = {
+    .pSysMem = image_data,
+    .SysMemPitch = image_stride,
+  };
+  ID3D11Texture2D* texture;
+  result = d3d_device->lpVtbl->CreateTexture2D(
+    d3d_device, &texture_desc, &subresource_data, &texture
+  );
+  if (FAILED(result)) {
+    error("CreateTexture2D", result);
+  }
+  // CreateShaderResourceView
+  D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
+    .Format = texture_desc.Format,
+    .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+    .Texture2D.MipLevels = 1
+  };
+  result = d3d_device->lpVtbl->CreateShaderResourceView(
+    d3d_device, (ID3D11Resource*)texture, &srv_desc, &d3d_shader_resource
+  );
+  if (FAILED(result)) {
+    error("CreateShaderResourceView", result);
+  }
+  // PSSetShaderResources
+  d3d_device_context->lpVtbl->PSSetShaderResources(d3d_device_context, 0, 1, &d3d_shader_resource);
 }
 export void vertices_alloc(u64 size) {
   if (size == 0) {
@@ -371,55 +416,6 @@ export void indexes_alloc(u64 size) {
   indexes_capacity = size;
   _d3d_buffer_create(buffer_size, D3D11_BIND_INDEX_BUFFER, &indexes_buffer);
   d3d_device_context->lpVtbl->IASetIndexBuffer(d3d_device_context, indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
-}
-extern void window_atlas_load(const char* path) {
-  assert(d3d_shader_resource == 0);
-  i32 result;
-  // load_image
-  const u64 image_size = atlas_width * atlas_height * 4; // RGBA8
-  const u32 image_stride = atlas_width * 4;
-  FILE* file = fopen(path, "r");
-  u8 image_data[image_size];
-  fread(image_data, 1, image_size, file);
-  fclose(file);
-  // CreateTexture2D
-  D3D11_TEXTURE2D_DESC texture_desc = {
-    .Width = atlas_width,
-    .Height = atlas_height,
-    .MipLevels = 1,
-    .ArraySize = 1,
-    .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-    .SampleDesc = {.Count = 1, .Quality = 0 },
-    .Usage = D3D11_USAGE_DEFAULT,
-    .BindFlags = D3D11_BIND_SHADER_RESOURCE,
-    .CPUAccessFlags = 0,
-    .MiscFlags = 0,
-  };
-  D3D11_SUBRESOURCE_DATA subresource_data = {
-    .pSysMem = image_data,
-    .SysMemPitch = image_stride,
-  };
-  ID3D11Texture2D* texture;
-  result = d3d_device->lpVtbl->CreateTexture2D(
-    d3d_device, &texture_desc, &subresource_data, &texture
-  );
-  if (FAILED(result)) {
-    error("CreateTexture2D", result);
-  }
-  // CreateShaderResourceView
-  D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
-    .Format = texture_desc.Format,
-    .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-    .Texture2D.MipLevels = 1
-  };
-  result = d3d_device->lpVtbl->CreateShaderResourceView(
-    d3d_device, (ID3D11Resource*)texture, &srv_desc, &d3d_shader_resource
-  );
-  if (FAILED(result)) {
-    error("CreateShaderResourceView", result);
-  }
-  // PSSetShaderResources
-  d3d_device_context->lpVtbl->PSSetShaderResources(d3d_device_context, 0, 1, &d3d_shader_resource);
 }
 export void window_set_title(const char* title) {
   assert(window_id != 0);
