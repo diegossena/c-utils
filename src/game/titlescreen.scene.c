@@ -23,9 +23,6 @@ export void titlescreen_load() {
 }
 export void titlescreen_unload() {
   titlescreen.loaded = false;
-  window_background[0] = 0.f;
-  window_background[1] = 0.f;
-  window_background[2] = 0.f;
   vertices_alloc(vertices_capacity - TITLESCREEN_VERTICES_USED);
   indexes_alloc(indexes_capacity - TITLESCREEN_INDEXES_USED);
 }

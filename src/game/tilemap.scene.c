@@ -6,6 +6,9 @@
 tilemap_t tilemap;
 
 export void tilemap_load() {
+  window_background[0] = 0.f;
+  window_background[1] = 0.f;
+  window_background[2] = 0.f;
   tilemap.rendered_tiles[0] = 0;
   tilemap.rendered_tiles[1] = 0;
   tilemap_onresize();

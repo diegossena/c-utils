@@ -38,7 +38,7 @@ void window_onrender() {
     transition_render();
   }
 }
-
+// 518714 bytes
 i32 main(i32 argc, char** argv) {
   window_startup();
   window_atlas_load("assets/atlas.bin");
