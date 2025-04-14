@@ -2,7 +2,7 @@
 CLS
 SET package_name=%1
 SET defines=-DDEBUG
-SET compiler_flags=-O3 -Wall
+SET compiler_flags=-O2 -Wall
 SET include_flags=-Iinclude -I.
 SET linker_flags=
 SET params=192.168.0.18 192.168.0.18

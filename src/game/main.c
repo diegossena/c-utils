@@ -38,7 +38,7 @@ void window_onrender() {
     transition_render();
   }
 }
-// 518888 bytes
+// 511820 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("assets/atlas.bin");
   window_set_title("Game");
