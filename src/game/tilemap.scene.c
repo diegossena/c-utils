@@ -6,19 +6,29 @@
 tilemap_t tilemap;
 
 export void tilemap_load() {
+  tilemap.rendered_tiles[0] = 0;
+  tilemap.rendered_tiles[1] = 0;
   tilemap_onresize();
   // loaded
   tilemap.loaded = true;
-  window_has_update = true;
+  window_updated = true;
 }
 export void tilemap_unload() {
   tilemap.loaded = false;
 }
 export void tilemap_onresize() {
-  tilemap.visible_tilesf[0] = (f32)window_width / TILE_SIZE;
-  tilemap.visible_tilesf[1] = (f32)window_height / TILE_SIZE;
-  tilemap.visible_tiles[0] = math_ceil(tilemap.visible_tilesf[0]) + 1;
-  tilemap.visible_tiles[1] = math_ceil(tilemap.visible_tilesf[1]) + 1;
+  tilemap.visible_tilesf[0] = (f32)global_window_width / TILE_SIZE;
+  tilemap.visible_tilesf[1] = (f32)global_window_height / TILE_SIZE;
+  u64 tilemap_vertices_capacity = vertices_capacity - tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1] * 4;
+  u64 tilemap_indexes_capacity = indexes_capacity - tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1] * 6;
+  tilemap.rendered_tiles[0] = math_ceil(tilemap.visible_tilesf[0]) + 1;
+  tilemap.rendered_tiles[1] = math_ceil(tilemap.visible_tilesf[1]) + 1;
+  tilemap_vertices_capacity += tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1] * 4;
+  tilemap_indexes_capacity += tilemap.rendered_tiles[1] * tilemap.rendered_tiles[1] * 6;
+  if (tilemap_vertices_capacity != vertices_capacity) {
+    vertices_alloc(tilemap_vertices_capacity);
+    indexes_alloc(tilemap_indexes_capacity);
+  }
   tilemap.tile_ndc_per_px[0] = TILE_SIZE * ndc_per_px_x;
   tilemap.tile_ndc_per_px[1] = TILE_SIZE * ndc_per_px_y;
 }
@@ -26,17 +36,17 @@ export void tilemap_onkeydown(key_code_t key) {
   const f32 speed = .1f;
   if (key == KEY_UP) {
     tilemap.player[1] -= speed;
-    window_has_update = true;
+    window_updated = true;
   } else if (key == KEY_DOWN) {
     tilemap.player[1] += speed;
-    window_has_update = true;
+    window_updated = true;
   }
   if (key == KEY_LEFT) {
     tilemap.player[0] -= speed;
-    window_has_update = true;
+    window_updated = true;
   } else if (key == KEY_RIGHT) {
     tilemap.player[0] += speed;
-    window_has_update = true;
+    window_updated = true;
   }
   return;
   if (tilemap.player_walking == false) {
@@ -49,7 +59,7 @@ export void tilemap_onkeydown(key_code_t key) {
         tilemap.player_direction = key;
         tilemap.player_walking_timer = 0;
         tilemap.player_walking_duration = 1.f;
-        window_has_update = true;
+        window_updated = true;
         break;
       default:
     }
@@ -70,8 +80,8 @@ export void tilemap_render() {
   const f32 start_y0 = 1.f + (tile_offset[1] * tilemap.tile_ndc_per_px[1]);
   const i8 start_x = (i8)math_floor(offset[0]);
   const i8 start_y = (i8)math_floor(offset[1]);
-  const i8 end_x = start_x + tilemap.visible_tiles[0];
-  const i8 end_y = start_y + tilemap.visible_tiles[1];
+  const i8 end_x = start_x + tilemap.rendered_tiles[0];
+  const i8 end_y = start_y + tilemap.rendered_tiles[1];
   for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
     f32 x0 = start_x0;
     for (i8 x = start_x; x < end_x; x++) {

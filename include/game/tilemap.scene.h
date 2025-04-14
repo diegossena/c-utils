@@ -30,7 +30,7 @@ typedef struct tilemap_t {
   f32 tile_ndc_per_px[2];
   // camera
   f32 visible_tilesf[2];
-  u8 visible_tiles[2];
+  u8 rendered_tiles[2];
 } tilemap_t;
 
 export void tilemap_load();

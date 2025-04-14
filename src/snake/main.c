@@ -51,7 +51,7 @@ void game_startup() {
 void game_over_call() {
   char message[TINY_SIZE + 1];
   string_format(message, sizeof(message), "SCORE: %lu", game_score());
-  MessageBoxA(global_window, message, "GAME OVER", MB_OK);
+  MessageBoxA(window_id, message, "GAME OVER", MB_OK);
   game_over = true;
 }
 void slot_draw(u16 position, f32 r, f32 g, f32 b, f32 a) {

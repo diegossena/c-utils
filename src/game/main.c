@@ -3,6 +3,9 @@
 #include <sdk/time.h>
 #include <game/unity.h>
 
+u16 global_window_width = 800;
+u16 global_window_height = 600;
+
 void window_onkeyup() {}
 void window_onresize() {
   if (tilemap.loaded) {
@@ -38,12 +41,8 @@ void window_onrender() {
 
 i32 main(i32 argc, char** argv) {
   window_startup();
-  window_set_title("Game");
   window_atlas_load("assets/atlas.bin");
   titlescreen_load();
   window_run();
-  if (titlescreen.loaded) {
-    titlescreen_unload();
-  }
   return 0;
 }

@@ -31,6 +31,10 @@
     "initializer_list": "c",
     "span": "c",
     "valarray": "c",
-    "vector": "c"
+    "vector": "c",
+    "variant": "c",
+    "any": "c",
+    "complex": "c",
+    "scoped_allocator": "c"
   }
 }
