@@ -20,7 +20,7 @@ export void window_set_title(const char* title);
 export void window_close();
 extern void window_run();
 
-extern void window_atlas_load(const char* path, const u64 width, const u64 height);
+extern void window_atlas_load(const char* path);
 
 extern void window_rect_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
@@ -30,8 +30,6 @@ extern void window_rect_fill(
   f32 x0, f32 y0, f32 x1, f32 y1,
   f32 r, f32 g, f32 b, f32 a
 );
-
-// EVENTS
 
 extern void window_onresize();
 /**
@@ -91,7 +89,7 @@ extern u64 indexes_used;
 
 extern f32 window_background[4];
 
-extern u16 atlas_width;
-extern u16 atlas_height;
+extern const u16 atlas_width;
+extern const u16 atlas_height;
 
 #endif

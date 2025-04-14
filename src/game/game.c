@@ -1,6 +1,8 @@
 #include <game/game.h>
 #include <sdk/window.h>
 
+const u16 atlas_width = 160;
+const u16 atlas_height = 160;
 
 export void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,

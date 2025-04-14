@@ -225,22 +225,20 @@ export void window_startup() {
   }
   global_d3d_device_context->lpVtbl->IASetIndexBuffer(global_d3d_device_context, global_indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
 }
-extern void window_atlas_load(const char* path, const u64 width, const u64 height) {
+extern void window_atlas_load(const char* path) {
   assert(global_atlas == 0);
-  atlas_width = width;
-  atlas_width = width;
   i32 result;
   // load_image
-  u64 image_size = width * height * 4; // RGBA8
-  const u32 image_stride = width * 4;
+  u64 image_size = atlas_width * atlas_height * 4; // RGBA8
+  const u32 image_stride = atlas_width * 4;
   FILE* file = fopen(path, "r");
   u8 image_data[image_size];
   fread(image_data, 1, image_size, file);
   fclose(file);
   // CreateTexture2D
   D3D11_TEXTURE2D_DESC texture_desc = {
-    .Width = width,
-    .Height = height,
+    .Width = atlas_width,
+    .Height = atlas_height,
     .MipLevels = 1,
     .ArraySize = 1,
     .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
