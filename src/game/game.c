@@ -22,8 +22,9 @@ export void tile_draw(
     y_flip ? v0 : v1
   );
 }
-export void text_draw(const char* text, f32 size, f32 x, f32 y) {
+export void text_draw(const char* text, f32 size, f32 x0, f32 y0) {
   const f32 spacing = size * ndc_per_px_x * .31f;
+  const f32 y1 = y0 - ndc_per_px_y * size;
   while (*text != '\0') {
     u8 tile_x = 0, tile_y = 0;
     if (*text >= 'A' && *text <= 'B') {
@@ -51,14 +52,13 @@ export void text_draw(const char* text, f32 size, f32 x, f32 y) {
       }
     }
     if (*text != ' ') {
-      const f32 x1 = x + ndc_per_px_x * size;
-      const f32 y1 = y - ndc_per_px_y * size;
+      const f32 x1 = x0 + ndc_per_px_x * size;
       // draw
-      tile_draw(x, y, x1, y1, tile_x, tile_y, false, false);
+      tile_draw(x0, y0, x1, y1, tile_x, tile_y, false, false);
       // spacing
-      x += spacing;
+      x0 += spacing;
     } else {
-      x += spacing * .5f;
+      x0 += spacing * .5f;
     }
     ++text;
   }

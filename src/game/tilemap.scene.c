@@ -17,8 +17,8 @@ export void tilemap_unload() {
   tilemap.loaded = false;
 }
 export void tilemap_onresize() {
-  tilemap.visible_tilesf[0] = (f32)global_window_width / TILE_SIZE;
-  tilemap.visible_tilesf[1] = (f32)global_window_height / TILE_SIZE;
+  tilemap.visible_tilesf[0] = (f32)window_width / TILE_SIZE;
+  tilemap.visible_tilesf[1] = (f32)window_height / TILE_SIZE;
   u64 tilemap_vertices_capacity = vertices_capacity - tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1] * 4;
   u64 tilemap_indexes_capacity = indexes_capacity - tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1] * 6;
   tilemap.rendered_tiles[0] = math_ceil(tilemap.visible_tilesf[0]) + 1;

@@ -3,8 +3,8 @@
 #include <sdk/time.h>
 #include <game/unity.h>
 
-u16 global_window_width = 800;
-u16 global_window_height = 600;
+u16 window_width = 800;
+u16 window_height = 600;
 
 void window_onkeyup() {}
 void window_onresize() {

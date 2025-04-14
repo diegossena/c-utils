@@ -66,11 +66,11 @@ extern f32 window_deltatime;
 /**
  * - Externally-defined function
  */
-extern u16 global_window_width;
+extern u16 window_width;
 /**
  * - Externally-defined function
  */
-extern u16 global_window_height;
+extern u16 window_height;
 extern bool window_focus;
 
 extern f32 ndc_per_px_x;

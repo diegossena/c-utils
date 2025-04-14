@@ -71,8 +71,8 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       return 0;
     case WM_SIZE:
       if (d3d_device) {
-        global_window_width = LOWORD(lParam);
-        global_window_height = HIWORD(lParam);
+        window_width = LOWORD(lParam);
+        window_height = HIWORD(lParam);
         window_resized = true;
       }
       break;
@@ -107,7 +107,7 @@ export void _window_thread(sync_t* onload_sync) {
   u32 window_style = WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
   u32 window_ex_style = WS_EX_APPWINDOW;
   // CreateWindowExA
-  RECT rect = { 0, 0, global_window_width, global_window_height };
+  RECT rect = { 0, 0, window_width, window_height };
   AdjustWindowRect(&rect, window_style, false);
   window_id = CreateWindowExA(
     window_ex_style, wc.lpszClassName, title, window_style,
@@ -158,8 +158,8 @@ export void _d3d_buffer_create(u64 size, UINT BindFlags, ID3D11Buffer** ppBuffer
   }
 }
 export void _window_onresize() {
-  ndc_per_px_x = 2.f / (f32)global_window_width;
-  ndc_per_px_y = 2.f / (f32)global_window_height;
+  ndc_per_px_x = 2.f / (f32)window_width;
+  ndc_per_px_y = 2.f / (f32)window_height;
   // global_d3d_render_target_view
   ID3D11Texture2D* back_buffer;
   HRESULT result = d3d_swapchain->lpVtbl->GetBuffer(
@@ -180,8 +180,8 @@ export void _window_onresize() {
   D3D11_VIEWPORT viewport = {
     .TopLeftX = 0.f,
     .TopLeftY = 0.f,
-    .Width = (f32)global_window_width,
-    .Height = (f32)global_window_height,
+    .Width = (f32)window_width,
+    .Height = (f32)window_height,
     .MinDepth = 0.f,
     .MaxDepth = 1.f,
   };
@@ -200,8 +200,8 @@ export void window_startup() {
   DXGI_SWAP_CHAIN_DESC swap_chain_desc = {
     .BufferCount = 1,                                // one back buffer
     .BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM, // use 32-bit color
-    .BufferDesc.Width = global_window_width,                // set the back buffer width
-    .BufferDesc.Height = global_window_height,              // set the back buffer height
+    .BufferDesc.Width = window_width,                // set the back buffer width
+    .BufferDesc.Height = window_height,              // set the back buffer height
     .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,  // how swap chain is to be used
     .OutputWindow = window_id,                       // the window to be used
     .SampleDesc.Count = 4,                           // how many multisamples
@@ -434,7 +434,7 @@ extern void window_run() {
       window_resized = false;
       d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
       HRESULT result = d3d_swapchain->lpVtbl->ResizeBuffers(
-        d3d_swapchain, 1, global_window_width, global_window_height,
+        d3d_swapchain, 1, window_width, window_height,
         DXGI_FORMAT_R8G8B8A8_UNORM, 0
       );
       if (FAILED(result)) {
