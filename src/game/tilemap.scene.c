@@ -44,7 +44,6 @@ export void tilemap_onresize() {
   tilemap.tile_ndc_per_px[1] = TILE_SIZE * ndc_per_px_y;
 }
 export void tilemap_onkeydown(key_code_t key) {
-  const f32 speed = .1f;
   if (tilemap.moving == false) {
     // camera_moveto
     if (key >= KEY_LEFT && key <= KEY_DOWN) {
