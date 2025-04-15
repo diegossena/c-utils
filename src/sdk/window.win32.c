@@ -480,6 +480,8 @@ extern void window_run() {
         d3d_swapchain->lpVtbl->Present(d3d_swapchain, 1, 0);
       }
       Sleep(1);
+    } else {
+      Sleep(0);
     }
   }
   // dx11_cleanup
