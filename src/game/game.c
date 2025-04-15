@@ -3,13 +3,14 @@
 
 const u16 atlas_width = 160;
 const u16 atlas_height = 160;
+#define ATLAS_TILE_SIZE 16
 
 export void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y,
   bool x_flip, bool y_flip
 ) {
-  const f32 atlas_ngc_per_px = (1.f / 160.f) * 16.f;
+  const f32 atlas_ngc_per_px = (1.f / atlas_width) * ATLAS_TILE_SIZE;
   const f32 u0 = atlas_ngc_per_px * tile_x;
   const f32 v0 = atlas_ngc_per_px * tile_y;
   const f32 u1 = u0 + atlas_ngc_per_px;

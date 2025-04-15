@@ -442,10 +442,10 @@ extern void window_run() {
     now = time_now_f64();
     window_deltatime = now - time;
     if (window_deltatime >= frame_time) {
-      if (window_deltatime > frame_time + .01) {
-        console_log("render %f %f", frame_time, window_deltatime);
-      }
       time = now;
+      if (window_deltatime > frame_time + .001) {
+        console_log("lazy %f %f", frame_time, window_deltatime);
+      }
       if (window_updated) {
         window_updated = false;
         vertices_length = 0;
@@ -478,8 +478,9 @@ extern void window_run() {
         );
         d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
         d3d_swapchain->lpVtbl->Present(d3d_swapchain, 0, 0);
+      } else {
+        Sleep(2);
       }
-      Sleep(10);
     }
   }
   // dx11_cleanup

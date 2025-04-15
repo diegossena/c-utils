@@ -89,11 +89,10 @@ export void tilemap_render() {
     tilemap.offset[1] = (tilemap.target_offset[1] - tilemap.start_offset[1]) * progress + tilemap.start_offset[1];
     window_updated = true;
   }
-  // tilemap_draw
   // Get offsets for smooth movement
   const i8 start_x = (i8)math_floor(tilemap.offset[0]);
   const i8 start_y = (i8)math_floor(tilemap.offset[1]);
-  const f32 tile_offset[2] = {
+  f32 tile_offset[2] = {
     tilemap.offset[0] - start_x,
     tilemap.offset[1] - start_y
   };
@@ -103,28 +102,16 @@ export void tilemap_render() {
   const i8 end_x = start_x + tilemap.rendered_tiles[0];
   const i8 end_y = start_y + tilemap.rendered_tiles[1];
   x0 = start_x0;
-  for (i8 x = start_x; x < end_x; x++) {
+  for (i8 x = start_x, i = 0; x < end_x; x++, i++) {
     x1 = x0 + tilemap.tile_ndc_per_px[0];
     y0 = start_y0;
     for (i8 y = start_y; y < end_y; y++) {
       y1 = y0 - tilemap.tile_ndc_per_px[1];
       for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
-        // tile_id
         u8 tile_id = (x >= 0 && x < TILEMAP_WIDTH) && (y >= 0 && y < TILEMAP_WIDTH)
           ? tilemap.tiles[layer][y * TILEMAP_WIDTH + x]
           : 0;
-        // if (!transition.loading && layer == 0 && x == 0) {
-        //   console_log(
-        //     "[%d %d] "
-        //     "rect %f %f %f %f "
-        //     "tile_id %d ",
-        //     x, y,
-        //     x0, x1, y0, y1,
-        //     tile_id
-        //   );
-        // }
         if (tile_id != 0) {
-          // tile
           u8 tile_x = (tile_id - 1) % 10;
           u8 tile_y = math_ceil((f32)tile_id / 10.f) - 1.f;
           tile_draw(x0, y0, x1, y1, tile_x, tile_y, false, false);

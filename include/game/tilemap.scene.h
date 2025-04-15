@@ -6,7 +6,6 @@
 
 #define TILEMAP_WIDTH 60
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
-#define TILE_SIZE 60.f
 #define TILEMAP_LAYERS 3
 
 typedef struct tilemap_t {

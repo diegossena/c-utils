@@ -32,7 +32,7 @@ extern void window_rect_draw(
 ) {
   // vertex
   u32 vertex_offset = vertices_length;
-  vertex_t vertex = {};
+  vertex_t vertex = { 0 };
   vertex.x = x0;
   vertex.y = y0;
   vertex.uv[0] = u0;

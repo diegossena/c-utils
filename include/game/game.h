@@ -3,7 +3,7 @@
 
 #include <sdk/types.h>
 
-#define TILE_SIZE 60.f
+#define TILE_SIZE 60
 
 typedef enum transition_state_t {
   TRANSITION_ENTERING,
