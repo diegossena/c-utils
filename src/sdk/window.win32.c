@@ -443,10 +443,10 @@ extern void window_run() {
     window_deltatime = now - time;
     if (window_deltatime >= frame_time) {
       time = now;
-      if (window_deltatime > frame_time + .001) {
-        console_log("FPS DROP %f %f", frame_time, window_deltatime);
-      }
       if (window_updated) {
+        if (window_deltatime > frame_time + .001) {
+          console_log("FPS DROP %f %f", frame_time, window_deltatime);
+        }
         window_updated = false;
         vertices_length = 0;
         indexes_length = 0;
@@ -478,9 +478,8 @@ extern void window_run() {
         );
         d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
         d3d_swapchain->lpVtbl->Present(d3d_swapchain, 1, 0);
-      } else {
-        Sleep(1);
       }
+      Sleep(1);
     }
   }
   // dx11_cleanup
