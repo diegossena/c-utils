@@ -71,8 +71,8 @@ export void tilemap_onkeypress() {
     }
   }
 }
-export void tilemap_render() {
-  // camera_moveto_render
+export void tilemap_draw() {
+  // moveto_draw
   if (tilemap.moving) {
     tilemap.move_timer += window_deltatime;
     f32 progress = tilemap.move_timer / tilemap.move_duration;
@@ -84,7 +84,7 @@ export void tilemap_render() {
     tilemap.offset[1] = (tilemap.target_offset[1] - tilemap.start_offset[1]) * progress + tilemap.start_offset[1];
     window_updated = true;
   }
-  // Get offsets for smooth movement
+  // tilemap_draw
   const i8 start_x = (i8)math_floor(tilemap.offset[0]);
   const i8 start_y = (i8)math_floor(tilemap.offset[1]);
   f32 tile_offset[2] = {
@@ -97,7 +97,7 @@ export void tilemap_render() {
   const i8 end_x = start_x + tilemap.rendered_tiles[0];
   const i8 end_y = start_y + tilemap.rendered_tiles[1];
   x0 = start_x0;
-  for (i8 x = start_x, i = 0; x < end_x; x++, i++) {
+  for (i8 x = start_x; x < end_x; x++) {
     x1 = x0 + tilemap.tile_ndc_per_px[0];
     y0 = start_y0;
     for (i8 y = start_y; y < end_y; y++) {

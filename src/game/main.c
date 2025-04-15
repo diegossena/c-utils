@@ -30,7 +30,7 @@ void window_onrender() {
     titlescreen_render();
   }
   if (tilemap.loaded) {
-    tilemap_render();
+    tilemap_draw();
   }
   if (transition.loading) {
     transition_render();

@@ -38,7 +38,7 @@ export void tilemap_load();
 export void tilemap_unload();
 export void tilemap_onkeypress();
 export void tilemap_onresize();
-export void tilemap_render();
+export void tilemap_draw();
 export void tilemap_set_player(f32 x, f32 y);
 export void tilemap_moveto(f32 x, f32 y);
 
