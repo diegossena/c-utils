@@ -444,7 +444,7 @@ extern void window_run() {
     if (window_deltatime >= frame_time) {
       time = now;
       if (window_deltatime > frame_time + .001) {
-        console_log("DPS DROP %f %f", frame_time, window_deltatime);
+        console_log("FPS DROP %f %f", frame_time, window_deltatime);
       }
       if (window_updated) {
         window_updated = false;
