@@ -19,12 +19,11 @@ void window_onkeydown(key_code_t key) {
   if (titlescreen.loaded) {
     titlescreen_onkeydown(key);
   }
-}
-void window_onkeypress() {
   if (tilemap.loaded) {
-    tilemap_onkeypress();
+    tilemap_onkeydown(key);
   }
 }
+void window_onkeypress() {}
 void window_onrender() {
   if (titlescreen.loaded) {
     titlescreen_render();
@@ -36,7 +35,7 @@ void window_onrender() {
     transition_render();
   }
 }
-// 511820 bytes
+// 512332 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("assets/atlas.bin");
   window_set_title("Game");

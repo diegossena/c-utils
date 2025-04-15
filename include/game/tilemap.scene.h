@@ -12,9 +12,13 @@
 typedef struct tilemap_t {
   bool loaded;
   u8 tiles[3][TILEMAP_SIZE];
+  // camera_movement
+  f32 start_offset[2];
+  f32 target_offset[2];
+  f32 move_timer;
+  f32 move_duration;
+  bool moving;
   // player
-  // gfx_image_t character_img;
-  f32 player[2];
   key_code_t player_direction;
   enum {
     PLAYER_STATE_STANDING_1,
@@ -22,22 +26,21 @@ typedef struct tilemap_t {
     PLAYER_STATE_STANDING_2,
     PLAYER_STATE_WALKING_2,
     PLAYER_STATE_MAX
-  } player_walking_state;
-  f32 player_walking_timer;
-  f32 player_walking_duration;
-  bool player_walking;
+  } moving_state;
   // rendering
   f32 tile_ndc_per_px[2];
   // camera
+  f32 offset[2];
   f32 visible_tilesf[2];
   u8 rendered_tiles[2];
 } tilemap_t;
 
 export void tilemap_load();
 export void tilemap_unload();
-export void tilemap_onkeypress();
+export void tilemap_onkeydown(key_code_t key);
 export void tilemap_onresize();
 export void tilemap_render();
+export void tilemap_set_player(f32 x, f32 y);
 
 extern tilemap_t tilemap;
 
