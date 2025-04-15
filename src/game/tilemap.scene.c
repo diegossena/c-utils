@@ -43,35 +43,35 @@ export void tilemap_onresize() {
   tilemap.tile_ndc_per_px[0] = TILE_SIZE * ndc_per_px_x;
   tilemap.tile_ndc_per_px[1] = TILE_SIZE * ndc_per_px_y;
 }
-export void tilemap_onkeydown(key_code_t key) {
+export void tilemap_onkeypress() {
   if (tilemap.moving == false) {
     // camera_moveto
-    if (key >= KEY_LEFT && key <= KEY_DOWN) {
+    if (window_key_pressed(KEY_UP)) {
+      tilemap.target_offset[0] = tilemap.offset[0];
+      tilemap.target_offset[1] = tilemap.offset[1] - 1.f;
+      tilemap.player_direction = KEY_UP;
       tilemap.moving = true;
-      tilemap.player_direction = key;
+    } else if (window_key_pressed(KEY_DOWN)) {
+      tilemap.target_offset[0] = tilemap.offset[0];
+      tilemap.target_offset[1] = tilemap.offset[1] + 1.f;
+      tilemap.player_direction = KEY_DOWN;
+      tilemap.moving = true;
+    } else if (window_key_pressed(KEY_LEFT)) {
+      tilemap.target_offset[0] = tilemap.offset[0] - 1.f;
+      tilemap.target_offset[1] = tilemap.offset[1];
+      tilemap.player_direction = KEY_LEFT;
+      tilemap.moving = true;
+    } if (window_key_pressed(KEY_RIGHT)) {
+      tilemap.target_offset[0] = tilemap.offset[0] + 1.f;
+      tilemap.target_offset[1] = tilemap.offset[1];
+      tilemap.player_direction = KEY_RIGHT;
+      tilemap.moving = true;
+    }
+    if (tilemap.moving) {
       tilemap.move_timer = 0;
       tilemap.move_duration = .5f;
       tilemap.start_offset[0] = tilemap.offset[0];
       tilemap.start_offset[1] = tilemap.offset[1];
-      switch (key) {
-        case KEY_UP:
-          tilemap.target_offset[0] = tilemap.offset[0];
-          tilemap.target_offset[1] = tilemap.offset[1] - 1.f;
-          break;
-        case KEY_DOWN:
-          tilemap.target_offset[0] = tilemap.offset[0];
-          tilemap.target_offset[1] = tilemap.offset[1] + 1.f;
-          break;
-        case KEY_LEFT:
-          tilemap.target_offset[0] = tilemap.offset[0] - 1.f;
-          tilemap.target_offset[1] = tilemap.offset[1];
-          break;
-        case KEY_RIGHT:
-          tilemap.target_offset[0] = tilemap.offset[0] + 1.f;
-          tilemap.target_offset[1] = tilemap.offset[1];
-          break;
-        default:
-      }
       window_updated = true;
     }
   }

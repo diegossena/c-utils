@@ -37,7 +37,7 @@ typedef struct tilemap_t {
 
 export void tilemap_load();
 export void tilemap_unload();
-export void tilemap_onkeydown(key_code_t key);
+export void tilemap_onkeypress();
 export void tilemap_onresize();
 export void tilemap_render();
 export void tilemap_set_player(f32 x, f32 y);

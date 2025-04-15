@@ -424,7 +424,7 @@ export void window_set_title(const char* title) {
 extern void window_run() {
   f64 time = time_now_f64();
   f64 now;
-  const f64 frame_rate = 1. / 60.;
+  const f64 frame_time = 1. / 60;
   while (window_thread_id) {
     if (window_resized) {
       window_resized = false;
@@ -441,7 +441,10 @@ extern void window_run() {
     }
     now = time_now_f64();
     window_deltatime = now - time;
-    if (window_deltatime > frame_rate) {
+    if (window_deltatime >= frame_time) {
+      if (window_deltatime > frame_time + .01) {
+        console_log("render %f %f", frame_time, window_deltatime);
+      }
       time = now;
       if (window_updated) {
         window_updated = false;
@@ -476,6 +479,7 @@ extern void window_run() {
         d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
         d3d_swapchain->lpVtbl->Present(d3d_swapchain, 0, 0);
       }
+      Sleep(10);
     }
   }
   // dx11_cleanup
