@@ -40,6 +40,7 @@ export void tilemap_onkeypress();
 export void tilemap_onresize();
 export void tilemap_render();
 export void tilemap_set_player(f32 x, f32 y);
+export void tilemap_moveto(f32 x, f32 y);
 
 extern tilemap_t tilemap;
 

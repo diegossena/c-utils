@@ -43,36 +43,31 @@ export void tilemap_onresize() {
   tilemap.tile_ndc_per_px[0] = TILE_SIZE * ndc_per_px_x;
   tilemap.tile_ndc_per_px[1] = TILE_SIZE * ndc_per_px_y;
 }
+export void tilemap_moveto(f32 x, f32 y) {
+  tilemap.move_timer = 0;
+  tilemap.move_duration = .5f;
+  tilemap.start_offset[0] = tilemap.offset[0];
+  tilemap.start_offset[1] = tilemap.offset[1];
+  tilemap.target_offset[0] = x;
+  tilemap.target_offset[1] = y;
+  tilemap.moving = true;
+  window_updated = true;
+}
 export void tilemap_onkeypress() {
   if (tilemap.moving == false) {
     // camera_moveto
     if (window_key_pressed(KEY_UP)) {
-      tilemap.target_offset[0] = tilemap.offset[0];
-      tilemap.target_offset[1] = tilemap.offset[1] - 1.f;
+      tilemap_moveto(tilemap.offset[0], tilemap.offset[1] - 1.f);
       tilemap.player_direction = KEY_UP;
-      tilemap.moving = true;
     } else if (window_key_pressed(KEY_DOWN)) {
-      tilemap.target_offset[0] = tilemap.offset[0];
-      tilemap.target_offset[1] = tilemap.offset[1] + 1.f;
+      tilemap_moveto(tilemap.offset[0], tilemap.offset[1] + 1.f);
       tilemap.player_direction = KEY_DOWN;
-      tilemap.moving = true;
     } else if (window_key_pressed(KEY_LEFT)) {
-      tilemap.target_offset[0] = tilemap.offset[0] - 1.f;
-      tilemap.target_offset[1] = tilemap.offset[1];
+      tilemap_moveto(tilemap.offset[0] - 1.f, tilemap.offset[1]);
       tilemap.player_direction = KEY_LEFT;
-      tilemap.moving = true;
     } if (window_key_pressed(KEY_RIGHT)) {
-      tilemap.target_offset[0] = tilemap.offset[0] + 1.f;
-      tilemap.target_offset[1] = tilemap.offset[1];
+      tilemap_moveto(tilemap.offset[0] + 1.f, tilemap.offset[1]);
       tilemap.player_direction = KEY_RIGHT;
-      tilemap.moving = true;
-    }
-    if (tilemap.moving) {
-      tilemap.move_timer = 0;
-      tilemap.move_duration = .5f;
-      tilemap.start_offset[0] = tilemap.offset[0];
-      tilemap.start_offset[1] = tilemap.offset[1];
-      window_updated = true;
     }
   }
 }
