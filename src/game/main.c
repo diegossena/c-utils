@@ -19,14 +19,12 @@ void window_onkeydown(key_code_t key) {
   if (titlescreen.loaded) {
     titlescreen_onkeydown(key);
   }
+}
+void window_onkeypress() {
   if (tilemap.loaded) {
-    tilemap_onkeydown(key);
-  }
-  if (tilemap.loaded) {
-    tilemap_onkeydown(key);
+    tilemap_onkeypress();
   }
 }
-void window_onkeypress() {}
 void window_onrender() {
   if (titlescreen.loaded) {
     titlescreen_render();

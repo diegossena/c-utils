@@ -35,38 +35,37 @@ export void tilemap_onresize() {
   tilemap.tile_ndc_per_px[0] = TILE_SIZE * ndc_per_px_x;
   tilemap.tile_ndc_per_px[1] = TILE_SIZE * ndc_per_px_y;
 }
-export void tilemap_onkeydown(key_code_t key) {
+export void tilemap_onkeypress() {
   const f32 speed = .1f;
-  if (key == KEY_UP) {
+  if (window_key_pressed(KEY_UP)) {
     tilemap.player[1] -= speed;
     window_updated = true;
-  } else if (key == KEY_DOWN) {
+  } else if (window_key_pressed(KEY_DOWN)) {
     tilemap.player[1] += speed;
     window_updated = true;
   }
-  if (key == KEY_LEFT) {
+  if (window_key_pressed(KEY_LEFT)) {
     tilemap.player[0] -= speed;
     window_updated = true;
-  } else if (key == KEY_RIGHT) {
+  } else if (window_key_pressed(KEY_RIGHT)) {
     tilemap.player[0] += speed;
     window_updated = true;
   }
-  return;
-  if (tilemap.player_walking == false) {
-    switch (key) {
-      case KEY_UP:
-      case KEY_DOWN:
-      case KEY_LEFT:
-      case KEY_RIGHT:
-        tilemap.player_walking = true;
-        tilemap.player_direction = key;
-        tilemap.player_walking_timer = 0;
-        tilemap.player_walking_duration = 1.f;
-        window_updated = true;
-        break;
-      default:
-    }
-  }
+  // if (tilemap.player_walking == false) {
+  //   switch (key) {
+  //     case KEY_UP:
+  //     case KEY_DOWN:
+  //     case KEY_LEFT:
+  //     case KEY_RIGHT:
+  //       tilemap.player_walking = true;
+  //       tilemap.player_direction = key;
+  //       tilemap.player_walking_timer = 0;
+  //       tilemap.player_walking_duration = 1.f;
+  //       window_updated = true;
+  //       break;
+  //     default:
+  //   }
+  // }
 }
 export void tilemap_render() {
   const f32 offset[2] = {
