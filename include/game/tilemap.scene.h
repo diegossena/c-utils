@@ -6,14 +6,20 @@
 
 #define TILEMAP_WIDTH 60
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
+/**
+ * Camada base (grama, chão, água)
+ * Camada de overlay (cercas, árvores pela metade)
+ * Sprites (player, NPCs)
+ * Camada superior (copas de árvore, telhado por cima)
+ */
 #define TILEMAP_LAYERS 3
 
 typedef struct tilemap_t {
   bool loaded;
   u8 tiles[3][TILEMAP_SIZE];
   // camera_movement
-  f32 start_offset[2];
-  f32 target_offset[2];
+  vec2_t start_offset;
+  vec2_t target_offset;
   f32 move_timer;
   f32 move_duration;
   bool moving;
@@ -27,10 +33,10 @@ typedef struct tilemap_t {
     PLAYER_STATE_MAX
   } moving_state;
   // rendering
-  f32 tile_ndc_per_px[2];
+  f32 tile_ndc_pixel[2];
   // camera
-  f32 offset[2];
-  f32 visible_tilesf[2];
+  vec2_t offset;
+  f32 visible_tiles[2];
   u8 rendered_tiles[2];
 } tilemap_t;
 

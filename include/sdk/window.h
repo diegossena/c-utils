@@ -13,7 +13,7 @@
 typedef struct vertex_t {
   f32 x, y; // position
   union {
-    f32 uv[2]; // textcoord
+    f32 textcoord[2]; // textcoord
     f32 color[4]; // color
   };
 } vertex_t;
@@ -72,8 +72,7 @@ extern u16 window_width;
 extern u16 window_height;
 extern bool window_focus;
 
-extern f32 ndc_per_px_x;
-extern f32 ndc_per_px_y;
+extern f32 window_pixel_ndc[2];
 
 extern u8 keyboard_count;
 extern u8 keyboard_state[32];

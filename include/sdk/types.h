@@ -37,8 +37,6 @@
 #define MAX_F32 3.40282e+38F
 #define MIN_F32 -MAX_F32
 
-// types
-
 typedef _Bool bool;
 typedef short unsigned int wchar_t;
 
@@ -56,6 +54,10 @@ typedef float f32; // -3.40282e+38 ~ 3.40282e+38
 typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef void (*function_t)();
+
+typedef struct vec2_t {
+  f32 x, y;
+} vec2_t;
 
 // inlining
 

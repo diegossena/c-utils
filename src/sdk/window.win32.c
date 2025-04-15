@@ -158,8 +158,8 @@ export void _d3d_buffer_create(u64 size, UINT BindFlags, ID3D11Buffer** ppBuffer
   }
 }
 export void _window_onresize() {
-  ndc_per_px_x = 2.f / (f32)window_width;
-  ndc_per_px_y = 2.f / (f32)window_height;
+  window_pixel_ndc[0] = 2.f / (f32)window_width;
+  window_pixel_ndc[1] = 2.f / (f32)window_height;
   // global_d3d_render_target_view
   ID3D11Texture2D* back_buffer;
   HRESULT result = d3d_swapchain->lpVtbl->GetBuffer(

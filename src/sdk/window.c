@@ -4,8 +4,7 @@ bool window_updated = true;
 
 f32 window_deltatime = 0;
 
-f32 ndc_per_px_x;
-f32 ndc_per_px_y;
+f32 window_pixel_ndc[2];
 bool window_focus = false;
 u8 keyboard_count = 0;
 u8 keyboard_state[32] = {};
@@ -35,23 +34,23 @@ extern void window_rect_draw(
   vertex_t vertex = { 0 };
   vertex.x = x0;
   vertex.y = y0;
-  vertex.uv[0] = u0;
-  vertex.uv[1] = v0;
+  vertex.textcoord[0] = u0;
+  vertex.textcoord[1] = v0;
   vertices_push(vertex);
   vertex.x = x1;
   vertex.y = y0;
-  vertex.uv[0] = u1;
-  vertex.uv[1] = v0;
+  vertex.textcoord[0] = u1;
+  vertex.textcoord[1] = v0;
   vertices_push(vertex);
   vertex.x = x1;
   vertex.y = y1;
-  vertex.uv[0] = u1;
-  vertex.uv[1] = v1;
+  vertex.textcoord[0] = u1;
+  vertex.textcoord[1] = v1;
   vertices_push(vertex);
   vertex.x = x0;
   vertex.y = y1;
-  vertex.uv[0] = u0;
-  vertex.uv[1] = v1;
+  vertex.textcoord[0] = u0;
+  vertex.textcoord[1] = v1;
   vertices_push(vertex);
   // indexes
   indexes_push(vertex_offset);
