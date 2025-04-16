@@ -19,6 +19,7 @@ export void tilemap_load() {
   window_background[2] = 0.f;
   tilemap.rendered_tiles[0] = 0;
   tilemap.rendered_tiles[1] = 0;
+  tilemap.player_direction = KEY_DOWN;
   tilemap_onresize();
   // loaded
   tilemap.loaded = true;
