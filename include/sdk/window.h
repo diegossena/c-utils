@@ -17,6 +17,12 @@ typedef struct vertex_t {
     f32 color[4]; // color
   };
 } vertex_t;
+typedef enum mouse_btn_t {
+  MOUSE_BUTTON_LEFT,
+  MOUSE_BUTTON_RIGHT,
+  MOUSE_BUTTON_MIDDLE,
+  MOUSE_BUTTON_AUX
+} mouse_btn_t;
 
 export void window_startup(const char* atlas_path);
 export void window_set_title(const char* title);
@@ -30,6 +36,10 @@ extern void window_rect_fill(
   f32 x0, f32 y0, f32 x1, f32 y1,
   f32 r, f32 g, f32 b, f32 a
 );
+extern void window_dblclick();
+extern void window_onmouseup(i32 x, i32 y, mouse_btn_t);
+extern void window_onmousedown(i32 x, i32 y, mouse_btn_t);
+extern void window_onscroll(i32 delta);
 extern void window_onresize();
 /**
  * - Event Listener

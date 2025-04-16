@@ -6,6 +6,7 @@
 
 #define COBJMACROS 1
 #include <windows.h>
+#include <windowsx.h>
 #include <d3d11.h>
 #undef COBJMACROS
 

@@ -6,7 +6,6 @@
 u16 window_width = 800;
 u16 window_height = 600;
 
-void window_onkeyup() {}
 void window_onresize() {
   if (tilemap.loaded) {
     tilemap_onresize();
@@ -36,6 +35,10 @@ void window_onrender() {
     transition_render();
   }
 }
+void window_dblclick() {}
+void window_onmousedown() {}
+void window_onmouseup() {}
+void window_onkeyup() {}
 // 512332 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("assets/atlas.bin");

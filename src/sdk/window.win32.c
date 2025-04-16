@@ -56,8 +56,8 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
           u8 bit_index = wParam % 8;
           keyboard_state[byte_index] |= (1 << bit_index);
           ++keyboard_count;
+          window_onkeydown(wParam);
         }
-        window_onkeydown(wParam);
       }
       return 0;
     case WM_KEYUP:
@@ -68,6 +68,46 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
         --keyboard_count;
         window_onkeyup();
       }
+      return 0;
+    case WM_MOUSELEAVE:
+      // this->__mouse_tracking = false;
+      // this->cursor = (vector2d_t) { -1, -1 };
+      // emitter_emit(&this->onmousemove);
+      return 0;
+    case WM_MOUSEMOVE:
+      // __window_mouse_tracking(this);
+      // vec2_t position = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+      // emitter_emit(&this->onmousemove);
+      return 0;
+    case WM_LBUTTONDOWN:
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
+      return 0;
+    case WM_RBUTTONDOWN:
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
+      return 0;
+    case WM_MBUTTONDOWN:
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
+      return 0;
+    case WM_XBUTTONDOWN:
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
+      return 0;
+    case WM_LBUTTONUP:
+      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
+      return 0;
+    case WM_RBUTTONUP:
+      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
+      return 0;
+    case WM_MBUTTONUP:
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
+      return 0;
+    case WM_XBUTTONUP:
+      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
+      return 0;
+    case WM_LBUTTONDBLCLK:
+      window_dblclick();
+      return 0;
+    case WM_MOUSEWHEEL:
+      window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
       return 0;
     case WM_SIZE:
       if (d3d_device) {

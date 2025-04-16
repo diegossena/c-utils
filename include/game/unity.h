@@ -1,3 +1,4 @@
+#include <game/game.h>
 #include <game/titlescreen.scene.h>
 #include <game/transition.scene.h>
 #include <game/tilemap.scene.h>

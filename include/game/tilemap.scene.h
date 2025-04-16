@@ -6,12 +6,6 @@
 
 #define TILEMAP_WIDTH 60
 #define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
-/**
- * Camada base (grama, chão, água)
- * Camada de overlay (cercas, árvores pela metade)
- * Sprites (player, NPCs)
- * Camada superior (copas de árvore, telhado por cima)
- */
 #define TILEMAP_LAYERS 3
 
 typedef struct tilemap_t {
