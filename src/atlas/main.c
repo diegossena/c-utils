@@ -86,9 +86,13 @@ i32 main(i32 argc, char** argv) {
     error("fopen", (error_t)file);
   }
   fwrite(image_data, 1, image_size, file);
-  printf(
-    "window_atlas_load(\"%s\", %u, %u);\n",
-    out_path, image_width, image_height
+  console_log(
+    "const u16 atlas_width = %lu;\n"
+    "const u16 atlas_height = %lu;\n"
+    "window_startup(\"window_name\", \"%s\");",
+    image_width,
+    image_height,
+    out_path
   );
   fclose(file);
   // cleanup

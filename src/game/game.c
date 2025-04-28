@@ -2,9 +2,9 @@
 #include <game/tilemap.scene.h>
 #include <sdk/window.h>
 
-const u16 atlas_width = 160;
-const u16 atlas_height = 160;
-#define ATLAS_TILE_SIZE 16
+const u16 atlas_width = 256;
+const u16 atlas_height = 256;
+#define ATLAS_TILE_SIZE 8
 
 export void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,

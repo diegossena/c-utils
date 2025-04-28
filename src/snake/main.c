@@ -50,7 +50,7 @@ void game_startup() {
 }
 void game_over_call() {
   char message[TINY_SIZE + 1];
-  string_nformat(message, sizeof(message), "SCORE: %lu", game_score());
+  string_format(message, sizeof(message), "SCORE: %lu", game_score());
   MessageBoxA(window_id, message, "GAME OVER", MB_OK);
   game_over = true;
 }

@@ -20,7 +20,7 @@ IF "%package_name%" == "game" (
 IF "%package_name%" == "tilemap" (
   SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
 )
-IF "%package_name%" == "image_bin" (
+IF "%package_name%" == "atlas" (
   SET linker_flags=-lole32 -lwindowscodecs
 )
 :: clear exe

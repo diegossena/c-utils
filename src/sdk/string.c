@@ -27,23 +27,13 @@ export bool string_startswith(const char* this, const char* neddle) {
   }
   return true;
 }
-export i32 string_format_va(char* this, const char* format, va_list args) {
-  return sprintf(this, format, args);
-}
-export i32 string_format(char* stream, const char* format, ...) {
-  va_list argv;
-  va_start(argv, format);
-  i32 length = string_format_va(stream, format, argv);
-  va_end(argv);
-  return length;
-}
-export i32 string_nformat_va(char* this, u64 size, const char* format, va_list args) {
+export i32 string_format_va(char* this, u64 size, const char* format, va_list args) {
   return vsnprintf(this, size, format, args);
 }
-export i32 string_nformat(char* target, u64 size, const char* format, ...) {
+export i32 string_format(char* target, u64 size, const char* format, ...) {
   va_list argv;
   va_start(argv, format);
-  i32 length = string_nformat_va(target, size, format, argv);
+  i32 length = string_format_va(target, size, format, argv);
   va_end(argv);
   return length;
 }
