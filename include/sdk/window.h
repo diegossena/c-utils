@@ -24,7 +24,7 @@ typedef enum mouse_btn_t {
   MOUSE_BUTTON_AUX
 } mouse_btn_t;
 
-export void window_startup(const char* atlas_path);
+export void window_startup(const char* title, const char* atlas_path);
 export void window_set_title(const char* title);
 export void window_close();
 extern void window_run();

@@ -164,13 +164,13 @@ export void _renderer_thread() {
   DWORD task_index = 0;
   HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
   if (!mmtask) {
-    console_log("Error: AvSetMmThreadCharacteristicsA %d", GetLastError());
+    console_log("Error: _renderer_thread AvSetMmThreadCharacteristicsA %x", GetLastError());
   }
   // timer
   HANDLE timer = CreateWaitableTimerA(0, false, 0);
   const LARGE_INTEGER due_time = { 0 };
   if (!SetWaitableTimer(timer, &due_time, 16, 0, 0, false)) {
-    console_log("Error: SetWaitableTimer %d", GetLastError());
+    console_log("Error: _renderer_thread SetWaitableTimer %x", GetLastError());
   }
   timeBeginPeriod(1);
   // loop
@@ -267,9 +267,8 @@ export void _d3d_buffer_create(u64 size, UINT BindFlags, ID3D11Buffer** ppBuffer
   }
 }
 export void window_close() { DestroyWindow(window_id); }
-export void window_startup(const char* atlas_path) {
+export void window_startup(const char* title, const char* atlas_path) {
   i32 result;
-  const char* title = " ";
   // window_class_register
   WNDCLASSEXA wc = {
     .cbSize = sizeof(WNDCLASSEXA),
@@ -473,7 +472,7 @@ export void vertices_reserve(u64 size) {
   if (vertices_capacity != 0) {
     void* buffer = memory_realloc(vertices_virtual, buffer_size);
     if (!buffer) {
-      error("vertices_alloc::memory_realloc", ERR_NOT_ENOUGH_MEMORY);
+      console_log("Error: ERR_NOT_ENOUGH_MEMORY vertices_alloc memory_realloc(%llu)", buffer_size);
       return;
     }
     vertices_virtual = buffer;
@@ -481,8 +480,7 @@ export void vertices_reserve(u64 size) {
   } else {
     vertices_virtual = memory_alloc(buffer_size);
     if (!vertices_virtual) {
-      console_log("Error: memory_alloc %llu", buffer_size);
-      error("vertices_alloc::memory_alloc", ERR_NOT_ENOUGH_MEMORY);
+      console_log("Error: ERR_NOT_ENOUGH_MEMORY vertices_alloc memory_alloc(%llu)", buffer_size);
       return;
     }
   }
@@ -503,7 +501,7 @@ export void indexes_reserve(u64 size) {
   if (indexes_capacity != 0) {
     void* buffer = memory_realloc(indexes_virtual, buffer_size);
     if (!buffer) {
-      error("indexes_alloc::memory_realloc", ERR_NOT_ENOUGH_MEMORY);
+      console_log("Error: ERR_NOT_ENOUGH_MEMORY indexes_alloc memory_realloc(%llu)", buffer_size);
       return;
     }
     indexes_virtual = buffer;
@@ -511,8 +509,7 @@ export void indexes_reserve(u64 size) {
   } else {
     indexes_virtual = memory_alloc(buffer_size);
     if (!indexes_virtual) {
-      console_log("Error: indexes_alloc %llu", buffer_size);
-      error("indexes_alloc::memory_alloc", ERR_NOT_ENOUGH_MEMORY);
+      console_log("Error: ERR_NOT_ENOUGH_MEMORY indexes_alloc memory_alloc(%llu)", buffer_size);
       return;
     }
   }

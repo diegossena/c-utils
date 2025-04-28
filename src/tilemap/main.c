@@ -106,8 +106,7 @@ void window_onkeyup() {}
 void window_onresize() {}
 // 508855 bytes
 i32 main(i32 argc, char** argv) {
-  window_startup("assets/atlas.bin");
-  window_set_title("Tilemap");
+  window_startup("Tilemap", "assets/atlas.bin");
   tilemap_load();
   hero_home_2f_load();
   window_run();
