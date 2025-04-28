@@ -35,7 +35,8 @@ void window_onkeypress() {
     tilemap.offset.y -= speed;
   } else if (window_key_pressed(KEY_DOWN)) {
     tilemap.offset.y += speed;
-  } else if (window_key_pressed(KEY_LEFT)) {
+  }
+  if (window_key_pressed(KEY_LEFT)) {
     tilemap.offset.x -= speed;
   } if (window_key_pressed(KEY_RIGHT)) {
     tilemap.offset.x += speed;

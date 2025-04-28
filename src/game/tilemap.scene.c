@@ -75,10 +75,11 @@ export void tilemap_onkeypress() {
     } else if (window_key_pressed(KEY_DOWN)) {
       tilemap_moveto(tilemap.offset.x, tilemap.offset.y + 1.f);
       tilemap.player_direction = KEY_DOWN;
-    } else if (window_key_pressed(KEY_LEFT)) {
+    }
+    if (window_key_pressed(KEY_LEFT)) {
       tilemap_moveto(tilemap.offset.x - 1.f, tilemap.offset.y);
       tilemap.player_direction = KEY_LEFT;
-    } if (window_key_pressed(KEY_RIGHT)) {
+    } else if (window_key_pressed(KEY_RIGHT)) {
       tilemap_moveto(tilemap.offset.x + 1.f, tilemap.offset.y);
       tilemap.player_direction = KEY_RIGHT;
     }
