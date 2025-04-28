@@ -253,13 +253,13 @@ export void _renderer_thread() {
   d3d_device->lpVtbl->Release(d3d_device);
   d3d_swapchain->lpVtbl->Release(d3d_swapchain);
 }
-export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 size, UINT BindFlags) {
-  D3D11_BUFFER_DESC buffer_desc = {
+export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) {
+  const D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+    .ByteWidth = ByteWidth,
+    .BindFlags = BindFlags
   };
-  buffer_desc.ByteWidth = size;
-  buffer_desc.BindFlags = BindFlags;
   HRESULT result = d3d_device->lpVtbl->CreateBuffer(
     d3d_device, &buffer_desc, 0, ppBuffer
   );

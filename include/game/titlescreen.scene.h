@@ -11,7 +11,7 @@ typedef struct titlescreen_t {
 export void titlescreen_load();
 export void titlescreen_unload();
 
-export void titlescreen_onkeydown(key_code_t key);
+export void titlescreen_onkeydown(key_t key);
 export void titlescreen_render();
 
 extern titlescreen_t titlescreen;

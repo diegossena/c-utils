@@ -8,14 +8,25 @@
 
 tilemap_t tilemap = { .player_direction = KEY_DOWN };
 
-export void tilemap_reserve(u64 capacity) {
-  if (tilemap.capacity != 0) {
-    if (tilemap.capacity != capacity) {
-      tilemap.tiles = memory_realloc(tilemap.tiles, capacity);
+export void tilemap_copy(const tileblock_t* tiles, u8 width, u8 height) {
+  const u16 area = width * height;
+  const u64 capacity = area * sizeof(tileblock_t) * TILEMAP_LAYERS;
+  void* block = 0;
+  if (tilemap.area != 0) {
+    if (tilemap.area != area) {
+      block = memory_realloc(tilemap.tiles, capacity);
     }
   } else {
-    tilemap.tiles = memory_alloc(capacity);
+    block = memory_alloc(capacity);
   }
+  if (!block) {
+    console_log("Error: tilemap_copy memory_alloc ERR_NOT_ENOUGH_MEMORY");
+  }
+  tilemap.tiles = block;
+  memory_copy(tilemap.tiles, tiles, capacity);
+  tilemap.width = width;
+  tilemap.height = height;
+  tilemap.area = area;
 }
 export void tilemap_set_player(f32 x, f32 y) {
   tilemap.offset.x = x - tilemap.visible_tiles[0] / 2 + .5f;
@@ -32,28 +43,36 @@ export void tilemap_load() {
 }
 export void tilemap_unload() {
   tilemap.loaded = false;
-  assert(tilemap.capacity != 0);
-  tilemap.capacity = 0;
-  const u8 rendered_area = tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1];
-  vertices_reserve(vertices_capacity - rendered_area * 4 + TILEMAP_VERTICES_USED);
-  indexes_reserve(indexes_capacity - rendered_area * 6 + TILEMAP_INDEXES_USED);
+  assert(tilemap.area != 0);
+  tilemap.area = 0;
+  const u8 rendered_tiles = (tilemap.rendered_blocks[0] * 4) * (tilemap.rendered_blocks[1] * 4);
+  vertices_reserve(vertices_capacity - rendered_tiles * 4 + TILEMAP_VERTICES_USED);
+  indexes_reserve(indexes_capacity - rendered_tiles * 6 + TILEMAP_INDEXES_USED);
   assert(tilemap.tiles != 0);
   memory_free(tilemap.tiles);
 }
 export void tilemap_onresize() {
   tilemap.visible_tiles[0] = (f32)window_width / TILE_SIZE;
   tilemap.visible_tiles[1] = (f32)window_height / TILE_SIZE;
-  u8 rendered_area = tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1];
-  u64 tilemap_vertices_capacity = vertices_capacity - rendered_area * 4 + TILEMAP_VERTICES_USED;
-  u64 tilemap_indexes_capacity = indexes_capacity - rendered_area * 6 + TILEMAP_INDEXES_USED;
-  tilemap.rendered_tiles[0] = math_ceil(tilemap.visible_tiles[0]) + 1;
-  tilemap.rendered_tiles[1] = math_ceil(tilemap.visible_tiles[1]) + 1;
-  rendered_area = tilemap.rendered_tiles[0] * tilemap.rendered_tiles[1];
-  tilemap_vertices_capacity += rendered_area * 4 + TILEMAP_VERTICES_USED;
-  tilemap_indexes_capacity += rendered_area * 6 + TILEMAP_INDEXES_USED;
-  if (tilemap_vertices_capacity != vertices_capacity) {
-    vertices_reserve(tilemap_vertices_capacity);
-    indexes_reserve(tilemap_indexes_capacity);
+  const f32 rendered_blocks[2] = {
+    math_ceil(tilemap.visible_tiles[0]) + 1,
+    math_ceil(tilemap.visible_tiles[1]) + 1
+  };
+  if (rendered_blocks[0] != tilemap.rendered_blocks[0] || rendered_blocks[1] != tilemap.rendered_blocks[1]) {
+    const u64 previous_rendered_tiles = (tilemap.rendered_blocks[0] * 4) * (tilemap.rendered_blocks[1] * 4);
+    const u64 rendered_tiles = (rendered_blocks[0] * 4) * (rendered_blocks[1] * 4);
+    vertices_reserve(
+      vertices_capacity
+      + rendered_tiles * 4 + TILEMAP_VERTICES_USED
+      - previous_rendered_tiles * 4 + TILEMAP_VERTICES_USED
+    );
+    indexes_reserve(
+      vertices_capacity
+      + rendered_tiles * 6 + TILEMAP_INDEXES_USED
+      - previous_rendered_tiles * 6 + TILEMAP_INDEXES_USED
+    );
+    tilemap.rendered_blocks[0] = rendered_blocks[0];
+    tilemap.rendered_blocks[1] = rendered_blocks[1];
   }
   tilemap.tile_ndc_pixel[0] = TILE_SIZE * window_pixel_ndc[0];
   tilemap.tile_ndc_pixel[1] = TILE_SIZE * window_pixel_ndc[1];
@@ -99,16 +118,16 @@ export void tilemap_draw() {
     window_updated = true;
   }
   // tilemap_draw
-  if (tilemap.tiles) {
+  if (tilemap.area) {
     const i8 start_x = (i8)math_floor(tilemap.offset.x);
     const i8 start_y = (i8)math_floor(tilemap.offset.y);
-    const i8 end_x = start_x + tilemap.rendered_tiles[0];
-    const i8 end_y = start_y + tilemap.rendered_tiles[1];
+    const i8 end_x = start_x + tilemap.rendered_blocks[0];
+    const i8 end_y = start_y + tilemap.rendered_blocks[1];
     const f32 start_x0 = -1.f - (tilemap.offset.x - start_x) * tilemap.tile_ndc_pixel[0];
     const f32 start_y0 = 1.f + (tilemap.offset.y - start_y) * tilemap.tile_ndc_pixel[1];
     for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
       f32 x0, y0, x1, y1;
-      if (layer == 2) {
+      if (!tilemap.player_hidden && layer == 2) {
         // player_draw
         x0 = -tilemap.tile_ndc_pixel[0] / 2;
         y0 = tilemap.tile_ndc_pixel[1] / 2;
@@ -125,13 +144,65 @@ export void tilemap_draw() {
         y0 = start_y0;
         for (i8 y = start_y; y < end_y; y++) {
           y1 = y0 - tilemap.tile_ndc_pixel[1];
-          u8 tile_id = (x >= 0 && x < tilemap.width) && (y >= 0 && y < tilemap.height)
-            ? tilemap_tile_get(layer, x, y)
+          // block draw
+          tileblock_t* block = (x >= 0 && x < tilemap.width) && (y >= 0 && y < tilemap.height)
+            ? &tilemap_tile(layer, x, y)
             : 0;
-          if (tile_id != 0) {
-            u8 tile_x = (tile_id - 1) % 10;
-            u8 tile_y = math_ceil((f32)tile_id / 10.f) - 1.f;
-            tile_draw(x0, y0, x1, y1, tile_x, tile_y, false, false);
+          if (block != 0) {
+            u8 tile_x;
+            u8 tile_y;
+            // top_left
+            if (block->top_left.id) {
+              tile_x = (block->top_left.id - 1) % 10;
+              tile_y = math_ceil((f32)block->top_left.id / 10.f) - 1.f;
+              tile_draw(
+                x0,
+                y0,
+                x1 - tilemap.tile_ndc_pixel[0] / 2,
+                y1 + tilemap.tile_ndc_pixel[1] / 2,
+                tile_x, tile_y,
+                block->top_left.flags
+              );
+            }
+            // top_right
+            if (block->top_right.id) {
+              tile_x = (block->top_right.id - 1) % 10;
+              tile_y = math_ceil((f32)block->top_right.id / 10.f) - 1.f;
+              tile_draw(
+                x0 + tilemap.tile_ndc_pixel[0] / 2,
+                y0,
+                x1,
+                y1 + tilemap.tile_ndc_pixel[1] / 2,
+                tile_x, tile_y,
+                block->top_right.flags
+              );
+            }
+            // bottom_left
+            if (block->bottom_left.id) {
+              tile_x = (block->bottom_left.id - 1) % 10;
+              tile_y = math_ceil((f32)block->bottom_left.id / 10.f) - 1.f;
+              tile_draw(
+                x0,
+                y0 - tilemap.tile_ndc_pixel[1] / 2,
+                x1 - tilemap.tile_ndc_pixel[0] / 2,
+                y1,
+                tile_x, tile_y,
+                block->bottom_left.flags
+              );
+            }
+            // bottom_right
+            if (block->bottom_right.id) {
+              tile_x = (block->bottom_right.id - 1) % 10;
+              tile_y = math_ceil((f32)block->bottom_right.id / 10.f) - 1.f;
+              tile_draw(
+                x0 + tilemap.tile_ndc_pixel[0] / 2,
+                y0 - tilemap.tile_ndc_pixel[1] / 2,
+                x1,
+                y1,
+                tile_x, tile_y,
+                block->bottom_right.flags
+              );
+            }
           }
           y0 = y1;
         }

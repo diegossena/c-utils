@@ -35,6 +35,7 @@
     "variant": "c",
     "any": "c",
     "complex": "c",
-    "scoped_allocator": "c"
+    "scoped_allocator": "c",
+    "string": "c"
   }
 }

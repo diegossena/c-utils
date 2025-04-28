@@ -54,7 +54,7 @@ extern void window_onrender();
  * The `onkeydown` event occurs when the user presses a key on the keyboard.
  * It repeats if the key is kept pressed after a delay.
  */
-extern void window_onkeydown(key_code_t);
+extern void window_onkeydown(key_t);
 /**
  * - Event Listener
  * - Externally-defined function
@@ -67,7 +67,7 @@ extern void window_onkeypress();
  * - Externally-defined function
  */
 extern void window_onkeyup();
-export bool window_key_pressed(key_code_t);
+export bool window_key_pressed(key_t);
 
 export void vertices_reserve(u64 size);
 export void indexes_reserve(u64 size);
@@ -99,7 +99,6 @@ extern u64 vertices_capacity;
 extern u32* indexes_virtual;
 extern u64 indexes_length;
 extern u64 indexes_capacity;
-
 
 extern const u16 atlas_width;
 extern const u16 atlas_height;

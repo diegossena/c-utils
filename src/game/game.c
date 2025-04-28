@@ -1,4 +1,5 @@
 #include <game/game.h>
+#include <game/tilemap.scene.h>
 #include <sdk/window.h>
 
 const u16 atlas_width = 160;
@@ -8,7 +9,7 @@ const u16 atlas_height = 160;
 export void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y,
-  bool x_flip, bool y_flip
+  u8 flags
 ) {
   const f32 atlas_ngc_per_px = (1.f / atlas_width) * ATLAS_TILE_SIZE;
   const f32 u0 = atlas_ngc_per_px * tile_x;
@@ -17,10 +18,10 @@ export void tile_draw(
   const f32 v1 = v0 + atlas_ngc_per_px;
   window_rect_draw(
     x0, y0, x1, y1,
-    x_flip ? u1 : u0,
-    y_flip ? v1 : v0,
-    x_flip ? u0 : u1,
-    y_flip ? v0 : v1
+    flags & TILE_X_FLIP ? u1 : u0,
+    flags & TILE_Y_FLIP ? v1 : v0,
+    flags & TILE_X_FLIP ? u0 : u1,
+    flags & TILE_Y_FLIP ? v0 : v1
   );
 }
 export void text_draw(const char* text, f32 size, f32 x0, f32 y0) {
@@ -55,7 +56,7 @@ export void text_draw(const char* text, f32 size, f32 x0, f32 y0) {
     if (*text != ' ') {
       const f32 x1 = x0 + window_pixel_ndc[0] * size;
       // draw
-      tile_draw(x0, y0, x1, y1, tile_x, tile_y, false, false);
+      tile_draw(x0, y0, x1, y1, tile_x, tile_y, 0);
       // spacing
       x0 += spacing;
     } else {

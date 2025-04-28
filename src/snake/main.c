@@ -15,7 +15,7 @@
 u16 food_location;
 u16 snake[BOARD_AREA];
 u16 snake_length;
-key_code_t snake_direction[2];
+key_t snake_direction[2];
 u8 direction_i = 0;
 u32 updated_at = 0;
 bool game_over = false;
@@ -135,7 +135,7 @@ void window_onupdate(u32 time) {
     }
   }
 }
-void window_onkeydown(key_code_t key) {
+void window_onkeydown(key_t key) {
   switch (snake_direction[0]) {
     // movement
     case KEY_DOWN:

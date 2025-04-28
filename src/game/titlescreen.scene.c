@@ -26,7 +26,7 @@ export void titlescreen_unload() {
   vertices_reserve(vertices_capacity - TITLESCREEN_VERTICES_USED);
   indexes_reserve(indexes_capacity - TITLESCREEN_INDEXES_USED);
 }
-export void titlescreen_onkeydown(key_code_t key) {
+export void titlescreen_onkeydown(key_t key) {
   switch (key) {
     case KEY_SPACE:
       transition_load(titlescreen_unload, hero_home_2f_load);

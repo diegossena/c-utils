@@ -3,7 +3,7 @@
 
 #include <sdk/types.h>
 
-typedef enum key_code_t {
+typedef enum key_t {
   MOUSE_LEFT = 0x01,
   MOUSE_RIGHT = 0x02,
   MOUSE_MIDDLE = 0x04,
@@ -279,8 +279,8 @@ typedef enum key_code_t {
   KEY_RBRACKET = 0xDD,
 
   KEYS_MAX_KEYS = 0xFF
-} key_code_t;
+} key_t;
 
-bool keyboard_pressed(key_code_t key);
+bool keyboard_pressed(key_t key);
 
 #endif

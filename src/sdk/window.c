@@ -21,7 +21,7 @@ u64 indexes_capacity = 0;
 
 f32 window_background[4] = { 0, 0, 0, 1 };
 
-bool window_key_pressed(key_code_t key) {
+bool window_key_pressed(key_t key) {
   u8 byte_index = key / 8;
   u8 bit_index = key % 8;
   return keyboard_state[byte_index] & (1 << bit_index);
