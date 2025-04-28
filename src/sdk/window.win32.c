@@ -169,7 +169,7 @@ export void _renderer_thread() {
   // timer
   HANDLE timer = CreateWaitableTimerA(0, false, 0);
   const LARGE_INTEGER due_time = { 0 };
-  if (!SetWaitableTimer(timer, &due_time, 16, 0, 0, false)) {
+  if (!SetWaitableTimer(timer, &due_time, 15, 0, 0, false)) {
     console_log("Error: _renderer_thread SetWaitableTimer %x", GetLastError());
   }
   timeBeginPeriod(1);
@@ -195,7 +195,7 @@ export void _renderer_thread() {
     window_deltatime = now - time;
     time = now;
 #ifdef DEBUG
-    const f64 frame_time = 1. / 60 + .001;
+    const f64 frame_time = 1. / 60;
     if (window_deltatime > frame_time) {
       console_log("FPS DROP %f %f", frame_time, window_deltatime);
     }
