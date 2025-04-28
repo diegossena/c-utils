@@ -85,33 +85,3 @@
 #ifdef ASYNC_H
 #include <src/sdk/async.win32.c>
 #endif
-
-#ifdef DEBUG
-static inline void debug() {
-  bool success = true;
-  console_color(ANSI_FORE_LIGHTRED);
-#ifdef MEMORY_H
-  if (__memory_count != 0) {
-    console_log("memory_count %lld", __memory_count);
-    success = false;
-  }
-#endif
-#ifdef NET_H
-  if (__net_started == true) {
-    console_log("call net_shutdown");
-    success = false;
-  }
-  if (__socket_count != 0) {
-    console_log("socket_count %lld", __socket_count);
-    success = false;
-  }
-#endif
-  if (success) {
-    console_color(ANSI_FORE_LIGHTGREEN);
-    console_log("SUCCESS");
-  }
-  console_color(ANSI_RESET);
-}
-#else
-#define debug()
-#endif

@@ -5,6 +5,7 @@
 #include <sdk/memory.h>
 
 #include <stdio.h>
+#include <avrt.h>
 
 HWND window_id;
 thread_t* window_thread_id = 0;
@@ -69,15 +70,12 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
         window_onkeyup();
       }
       return 0;
-    case WM_MOUSELEAVE:
-      // this->__mouse_tracking = false;
-      // this->cursor = (vector2d_t) { -1, -1 };
-      // emitter_emit(&this->onmousemove);
-      return 0;
     case WM_MOUSEMOVE:
-      // __window_mouse_tracking(this);
-      // vec2_t position = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-      // emitter_emit(&this->onmousemove);
+      mouse_x = GET_X_LPARAM(lParam);
+      mouse_y = GET_Y_LPARAM(lParam);
+      window_onmousemove();
+      return 0;
+    case WM_MOUSELEAVE:
       return 0;
     case WM_LBUTTONDOWN:
       window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
@@ -402,7 +400,7 @@ export void window_startup(const char* atlas_path) {
   // PSSetShaderResources
   d3d_device_context->lpVtbl->PSSetShaderResources(d3d_device_context, 0, 1, &d3d_shader_resource);
 }
-export void vertices_alloc(u64 size) {
+export void vertices_reserve(u64 size) {
   if (size == 0) {
     return _vertices_free();
   }
@@ -432,7 +430,7 @@ export void vertices_alloc(u64 size) {
     &vertex_offset
   );
 }
-export void indexes_alloc(u64 size) {
+export void indexes_reserve(u64 size) {
   if (size == 0) {
     return _indexes_free();
   }
@@ -463,9 +461,24 @@ export void window_set_title(const char* title) {
 }
 extern void window_run() {
   f64 time = time_now_f64();
-  f64 now;
-  const f64 frame_time = 1. / 60;
+  // set multimedia thread
+  DWORD task_index = 0;
+  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
+  if (!mmtask) {
+    console_log("Error: AvSetMmThreadCharacteristicsA %d", GetLastError());
+  }
+  // timer
+  HANDLE timer = CreateWaitableTimerA(0, false, 0);
+  const LARGE_INTEGER due_time = { 0 };
+  if (!SetWaitableTimer(timer, &due_time, 16, 0, 0, false)) {
+    console_log("Error: SetWaitableTimer %d", GetLastError());
+  }
+  timeBeginPeriod(1);
+  // loop
   while (window_thread_id) {
+    u32 wait = WaitForSingleObject(timer, INFINITE);
+    if (wait != WAIT_OBJECT_0)
+      break;
     if (window_resized) {
       window_resized = false;
       d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
@@ -479,58 +492,56 @@ extern void window_run() {
       _window_onresize();
       window_updated = true;
     }
-    now = time_now_f64();
+    const f64 now = time_now_f64();
     window_deltatime = now - time;
-    if (window_deltatime >= frame_time) {
-      time = now;
-      if (window_updated) {
-        if (window_deltatime > frame_time + .001) {
-          console_log("FPS DROP %f %f", frame_time, window_deltatime);
-        }
-        window_updated = false;
-        vertices_length = 0;
-        indexes_length = 0;
-        window_onrender();
-        assert(vertices_length <= vertices_capacity);
-        assert(indexes_length <= indexes_capacity);
-        D3D11_MAPPED_SUBRESOURCE subresource;
-        // vertices
-        d3d_device_context->lpVtbl->Map(
-          d3d_device_context, (ID3D11Resource*)vertices_buffer, 0,
-          D3D11_MAP_WRITE_DISCARD, 0, &subresource
-        );
-        memory_copy(subresource.pData, vertices_virtual, vertices_length * sizeof(vertex_t));
-        d3d_device_context->lpVtbl->Unmap(
-          d3d_device_context, (ID3D11Resource*)vertices_buffer, 0
-        );
-        // indices
-        d3d_device_context->lpVtbl->Map(
-          d3d_device_context, (ID3D11Resource*)indexes_buffer, 0,
-          D3D11_MAP_WRITE_DISCARD, 0, &subresource
-        );
-        memory_copy(subresource.pData, indexes_virtual, indexes_length * sizeof(u32));
-        d3d_device_context->lpVtbl->Unmap(
-          d3d_device_context, (ID3D11Resource*)indexes_buffer, 0
-        );
-        // draw
-        d3d_device_context->lpVtbl->ClearRenderTargetView(
-          d3d_device_context, d3d_render_target_view, window_background
-        );
-        d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
-        d3d_swapchain->lpVtbl->Present(d3d_swapchain, 1, 0);
-      }
-      Sleep(1);
-    } else {
-      Sleep(0);
+    time = now;
+#ifdef DEBUG
+    const f64 frame_time = 1. / 60 + .001;
+    if (window_deltatime > frame_time) {
+      console_log("FPS DROP %f %f", frame_time, window_deltatime);
+    }
+#endif
+    if (window_updated) {
+      window_updated = false;
+      vertices_length = 0;
+      indexes_length = 0;
+      window_onrender();
+      assert(vertices_length <= vertices_capacity);
+      assert(indexes_length <= indexes_capacity);
+      D3D11_MAPPED_SUBRESOURCE subresource;
+      // vertices
+      d3d_device_context->lpVtbl->Map(
+        d3d_device_context, (ID3D11Resource*)vertices_buffer, 0,
+        D3D11_MAP_WRITE_DISCARD, 0, &subresource
+      );
+      memory_copy(subresource.pData, vertices_virtual, vertices_length * sizeof(vertex_t));
+      d3d_device_context->lpVtbl->Unmap(
+        d3d_device_context, (ID3D11Resource*)vertices_buffer, 0
+      );
+      // indices
+      d3d_device_context->lpVtbl->Map(
+        d3d_device_context, (ID3D11Resource*)indexes_buffer, 0,
+        D3D11_MAP_WRITE_DISCARD, 0, &subresource
+      );
+      memory_copy(subresource.pData, indexes_virtual, indexes_length * sizeof(u32));
+      d3d_device_context->lpVtbl->Unmap(
+        d3d_device_context, (ID3D11Resource*)indexes_buffer, 0
+      );
+      // draw
+      d3d_device_context->lpVtbl->ClearRenderTargetView(
+        d3d_device_context, d3d_render_target_view, window_background
+      );
+      d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
+      d3d_swapchain->lpVtbl->Present(d3d_swapchain, 0, 0);
     }
   }
-  // dx11_cleanup
-  if (indexes_capacity) {
-    _indexes_free();
-  }
-  if (vertices_capacity) {
-    _vertices_free();
-  }
+  // cleanup
+  timeBeginPeriod(0);
+  AvRevertMmThreadCharacteristics(mmtask);
+  assert(indexes_capacity > 0);
+  _indexes_free();
+  assert(vertices_capacity > 0);
+  _vertices_free();
   d3d_blend_state->lpVtbl->Release(d3d_blend_state);
   d3d_sampler_state->lpVtbl->Release(d3d_sampler_state);
   d3d_pixel_shader->lpVtbl->Release(d3d_pixel_shader);

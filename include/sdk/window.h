@@ -37,6 +37,7 @@ extern void window_rect_fill(
   f32 r, f32 g, f32 b, f32 a
 );
 extern void window_dblclick();
+extern void window_onmousemove();
 extern void window_onmouseup(i32 x, i32 y, mouse_btn_t);
 extern void window_onmousedown(i32 x, i32 y, mouse_btn_t);
 extern void window_onscroll(i32 delta);
@@ -68,8 +69,8 @@ extern void window_onkeypress();
 extern void window_onkeyup();
 export bool window_key_pressed(key_code_t);
 
-export void vertices_alloc(u64 size);
-export void indexes_alloc(u64 size);
+export void vertices_reserve(u64 size);
+export void indexes_reserve(u64 size);
 
 extern f32 window_deltatime;
 /**
@@ -81,6 +82,10 @@ extern u16 window_width;
  */
 extern u16 window_height;
 extern bool window_focus;
+extern f32 window_background[4];
+extern bool window_updated;
+extern i32 mouse_x;
+extern i32 mouse_y;
 
 extern f32 window_pixel_ndc[2];
 
@@ -95,11 +100,9 @@ extern u32* indexes_virtual;
 extern u64 indexes_length;
 extern u64 indexes_capacity;
 
-extern f32 window_background[4];
 
 extern const u16 atlas_width;
 extern const u16 atlas_height;
 
-extern bool window_updated;
 
 #endif

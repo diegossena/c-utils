@@ -59,26 +59,6 @@ typedef struct vec2_t {
   f32 x, y;
 } vec2_t;
 
-// inlining
-
-#if defined(__clang__) || defined(__gcc__)
-/** @brief Inline qualifier */
-#define SDK_INLINE __attribute__((always_inline)) inline
-
-/** @brief No-inline qualifier */
-#define SDK_NOINLINE __attribute__((noinline))
-#elif defined(_MSC_VER)
-/** @brief Inline qualifier */
-#define SDK_INLINE __forceinline
-/** @brief No-inline qualifier */
-#define SDK_NOINLINE __declspec(noinline)
-#else
-/** @brief Inline qualifier */
-#define SDK_INLINE static inline
-/** @brief No-inline qualifier */
-#define SDK_NOINLINE
-#endif
-
-#define export SDK_INLINE
+#define export __declspec(dllexport)
 
 #endif

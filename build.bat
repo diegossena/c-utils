@@ -18,7 +18,7 @@ IF "%package_name%" == "game" (
   SET linker_flags=-ld3d11 -ldxguid
 )
 IF "%package_name%" == "tilemap" (
-  SET linker_flags=-ld3d11 -ldxguid
+  SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
 )
 IF "%package_name%" == "image_bin" (
   SET linker_flags=-lole32 -lwindowscodecs

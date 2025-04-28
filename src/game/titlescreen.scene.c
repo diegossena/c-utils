@@ -17,14 +17,14 @@ export void titlescreen_load() {
   window_background[0] = 120.f / 255.f;
   window_background[1] = 168.f / 255.f;
   window_background[2] = 192.f / 255.f;
-  vertices_alloc(vertices_capacity + TITLESCREEN_VERTICES_USED);
-  indexes_alloc(indexes_capacity + TITLESCREEN_INDEXES_USED);
+  vertices_reserve(vertices_capacity + TITLESCREEN_VERTICES_USED);
+  indexes_reserve(indexes_capacity + TITLESCREEN_INDEXES_USED);
   window_updated = true;
 }
 export void titlescreen_unload() {
   titlescreen.loaded = false;
-  vertices_alloc(vertices_capacity - TITLESCREEN_VERTICES_USED);
-  indexes_alloc(indexes_capacity - TITLESCREEN_INDEXES_USED);
+  vertices_reserve(vertices_capacity - TITLESCREEN_VERTICES_USED);
+  indexes_reserve(indexes_capacity - TITLESCREEN_INDEXES_USED);
 }
 export void titlescreen_onkeydown(key_code_t key) {
   switch (key) {

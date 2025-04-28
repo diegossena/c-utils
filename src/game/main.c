@@ -36,8 +36,8 @@ void window_onrender() {
   }
 }
 void window_dblclick() {}
-void window_onmousedown() {}
-void window_onmouseup() {}
+void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {}
+void window_onmouseup(i32 x, i32 y, mouse_btn_t button) {}
 void window_onkeyup() {}
 // 512332 bytes
 i32 main(i32 argc, char** argv) {

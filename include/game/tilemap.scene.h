@@ -4,13 +4,18 @@
 #include <sdk/types.h>
 #include <sdk/keyboard.h>
 
-#define TILEMAP_WIDTH 60
-#define TILEMAP_SIZE (TILEMAP_WIDTH*TILEMAP_WIDTH)
 #define TILEMAP_LAYERS 3
+
+#define tilemap_tile_get(layer, tile_x, tile_y) tilemap.tiles[layer * tilemap.size + tile_y * tilemap.width + tile_x]
 
 typedef struct tilemap_t {
   bool loaded;
-  u8 tiles[3][TILEMAP_SIZE];
+  u8 layers;
+  u8 width;
+  u8 height;
+  u8 size;
+  u8* tiles;
+  u64 capacity;
   // camera_movement
   vec2_t start_offset;
   vec2_t target_offset;
@@ -41,6 +46,8 @@ export void tilemap_onresize();
 export void tilemap_draw();
 export void tilemap_set_player(f32 x, f32 y);
 export void tilemap_moveto(f32 x, f32 y);
+
+export void tilemap_reserve(u64 capacity);
 
 extern tilemap_t tilemap;
 
