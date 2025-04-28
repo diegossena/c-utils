@@ -8,9 +8,9 @@
 #include <avrt.h>
 
 HWND window_id;
-thread_t* window_thread_id = 0;
+thread_t* _renderer_thread_id = 0;
 
-ID3D11Device* d3d_device;
+ID3D11Device* d3d_device = 0;
 IDXGISwapChain* d3d_swapchain;
 ID3D11DeviceContext* d3d_device_context;
 ID3D11RasterizerState* d3d_rasterizer;
@@ -126,75 +126,6 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   }
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
-export void _window_thread(sync_t* onload_sync) {
-  i32 result;
-  const char* title = " ";
-  // window_class_register
-  WNDCLASSEXA wc = {
-    .cbSize = sizeof(WNDCLASSEXA),
-    .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
-    .lpfnWndProc = _window_procedure,
-    .hInstance = GetModuleHandleA(0),
-    .hCursor = LoadCursorA(0, IDC_ARROW),
-    .lpszClassName = title,
-  };
-  result = RegisterClassExA(&wc);
-  if (!result) {
-    error("RegisterClassExA", result);
-  }
-  u32 window_style = WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
-  u32 window_ex_style = WS_EX_APPWINDOW;
-  // CreateWindowExA
-  RECT rect = { 0, 0, window_width, window_height };
-  AdjustWindowRect(&rect, window_style, false);
-  window_id = CreateWindowExA(
-    window_ex_style, wc.lpszClassName, title, window_style,
-    CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
-    0, // handle to parent or owner window
-    0, // handle to menu, or child-window identifier
-    wc.hInstance,
-    0 // pointer to window-creation data
-  );
-  if (!window_id) {
-    error("CreateWindowExA", (error_t)window_id);
-  }
-  sync_signal(onload_sync);
-  SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);
-  MSG msg;
-  do {
-    MsgWaitForMultipleObjectsEx(
-      0,
-      0,
-      INFINITE,
-      QS_ALLINPUT,
-      MWMO_INPUTAVAILABLE
-    );
-    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
-      TranslateMessage(&msg);
-      DispatchMessageA(&msg);
-      if (msg.message == WM_QUIT) {
-        KillTimer(0, 0);
-        thread_free(window_thread_id);
-        window_thread_id = 0;
-        return;
-      }
-    }
-  } while (true);
-}
-export void _d3d_buffer_create(u64 size, UINT BindFlags, ID3D11Buffer** ppBuffer) {
-  D3D11_BUFFER_DESC buffer_desc = {
-    .Usage = D3D11_USAGE_DYNAMIC,
-    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-  };
-  buffer_desc.ByteWidth = size;
-  buffer_desc.BindFlags = BindFlags;
-  HRESULT result = d3d_device->lpVtbl->CreateBuffer(
-    d3d_device, &buffer_desc, 0, ppBuffer
-  );
-  if (FAILED(result)) {
-    error("CreateBuffer", result);
-  }
-}
 export void _window_onresize() {
   window_pixel_ndc[0] = 2.f / (f32)window_width;
   window_pixel_ndc[1] = 2.f / (f32)window_height;
@@ -227,13 +158,147 @@ export void _window_onresize() {
     d3d_device_context, 1, &viewport
   );
 }
+export void _renderer_thread() {
+  f64 time = time_now_f64();
+  // set multimedia thread
+  DWORD task_index = 0;
+  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
+  if (!mmtask) {
+    console_log("Error: AvSetMmThreadCharacteristicsA %d", GetLastError());
+  }
+  // timer
+  HANDLE timer = CreateWaitableTimerA(0, false, 0);
+  const LARGE_INTEGER due_time = { 0 };
+  if (!SetWaitableTimer(timer, &due_time, 16, 0, 0, false)) {
+    console_log("Error: SetWaitableTimer %d", GetLastError());
+  }
+  timeBeginPeriod(1);
+  // loop
+  while (_renderer_thread_id) {
+    u32 wait = WaitForSingleObject(timer, INFINITE);
+    if (wait != WAIT_OBJECT_0)
+      break;
+    if (window_resized) {
+      window_resized = false;
+      d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
+      HRESULT result = d3d_swapchain->lpVtbl->ResizeBuffers(
+        d3d_swapchain, 1, window_width, window_height,
+        DXGI_FORMAT_R8G8B8A8_UNORM, 0
+      );
+      if (FAILED(result)) {
+        error("IDXGISwapChain_ResizeBuffers", result);
+      }
+      _window_onresize();
+      window_updated = true;
+    }
+    const f64 now = time_now_f64();
+    window_deltatime = now - time;
+    time = now;
+#ifdef DEBUG
+    const f64 frame_time = 1. / 60 + .001;
+    if (window_deltatime > frame_time) {
+      console_log("FPS DROP %f %f", frame_time, window_deltatime);
+    }
+#endif
+    if (window_updated) {
+      window_updated = false;
+      vertices_length = 0;
+      indexes_length = 0;
+      window_onrender();
+      assert(vertices_length <= vertices_capacity);
+      assert(indexes_length <= indexes_capacity);
+      D3D11_MAPPED_SUBRESOURCE subresource;
+      // vertices
+      d3d_device_context->lpVtbl->Map(
+        d3d_device_context, (ID3D11Resource*)vertices_buffer, 0,
+        D3D11_MAP_WRITE_DISCARD, 0, &subresource
+      );
+      memory_copy(subresource.pData, vertices_virtual, vertices_length * sizeof(vertex_t));
+      d3d_device_context->lpVtbl->Unmap(
+        d3d_device_context, (ID3D11Resource*)vertices_buffer, 0
+      );
+      // indices
+      d3d_device_context->lpVtbl->Map(
+        d3d_device_context, (ID3D11Resource*)indexes_buffer, 0,
+        D3D11_MAP_WRITE_DISCARD, 0, &subresource
+      );
+      memory_copy(subresource.pData, indexes_virtual, indexes_length * sizeof(u32));
+      d3d_device_context->lpVtbl->Unmap(
+        d3d_device_context, (ID3D11Resource*)indexes_buffer, 0
+      );
+      // draw
+      d3d_device_context->lpVtbl->ClearRenderTargetView(
+        d3d_device_context, d3d_render_target_view, window_background
+      );
+      d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
+      d3d_swapchain->lpVtbl->Present(d3d_swapchain, 0, 0);
+    }
+  }
+  // cleanup
+  timeBeginPeriod(0);
+  AvRevertMmThreadCharacteristics(mmtask);
+  assert(indexes_capacity > 0);
+  _indexes_free();
+  assert(vertices_capacity > 0);
+  _vertices_free();
+  d3d_blend_state->lpVtbl->Release(d3d_blend_state);
+  d3d_sampler_state->lpVtbl->Release(d3d_sampler_state);
+  d3d_pixel_shader->lpVtbl->Release(d3d_pixel_shader);
+  d3d_vertex_shader->lpVtbl->Release(d3d_vertex_shader);
+  d3d_input_layout->lpVtbl->Release(d3d_input_layout);
+  d3d_rasterizer->lpVtbl->Release(d3d_rasterizer);
+  d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
+  d3d_device_context->lpVtbl->Release(d3d_device_context);
+  d3d_device->lpVtbl->Release(d3d_device);
+  d3d_swapchain->lpVtbl->Release(d3d_swapchain);
+}
+export void _d3d_buffer_create(u64 size, UINT BindFlags, ID3D11Buffer** ppBuffer) {
+  D3D11_BUFFER_DESC buffer_desc = {
+    .Usage = D3D11_USAGE_DYNAMIC,
+    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+  };
+  buffer_desc.ByteWidth = size;
+  buffer_desc.BindFlags = BindFlags;
+  HRESULT result = d3d_device->lpVtbl->CreateBuffer(
+    d3d_device, &buffer_desc, 0, ppBuffer
+  );
+  if (FAILED(result)) {
+    error("CreateBuffer", result);
+  }
+}
 export void window_close() { DestroyWindow(window_id); }
 export void window_startup(const char* atlas_path) {
-  assert(window_thread_id == 0);
-  sync_t* onload_sync = sync_new();
-  window_thread_id = thread_new(_window_thread, onload_sync);
-  sync_wait(onload_sync);
   i32 result;
+  const char* title = " ";
+  // window_class_register
+  WNDCLASSEXA wc = {
+    .cbSize = sizeof(WNDCLASSEXA),
+    .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
+    .lpfnWndProc = _window_procedure,
+    .hInstance = GetModuleHandleA(0),
+    .hCursor = LoadCursorA(0, IDC_ARROW),
+    .lpszClassName = title,
+  };
+  result = RegisterClassExA(&wc);
+  if (!result) {
+    error("RegisterClassExA", result);
+  }
+  u32 window_style = WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
+  u32 window_ex_style = WS_EX_APPWINDOW;
+  // CreateWindowExA
+  RECT rect = { 0, 0, window_width, window_height };
+  AdjustWindowRect(&rect, window_style, false);
+  window_id = CreateWindowExA(
+    window_ex_style, wc.lpszClassName, title, window_style,
+    CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
+    0, // handle to parent or owner window
+    0, // handle to menu, or child-window identifier
+    wc.hInstance,
+    0 // pointer to window-creation data
+  );
+  if (!window_id) {
+    error("CreateWindowExA", (error_t)window_id);
+  }
   // global_d3d_device | global_d3d_swapchain | global_d3d_device_context
   DXGI_SWAP_CHAIN_DESC swap_chain_desc = {
     .BufferCount = 1,                                // one back buffer
@@ -459,99 +524,32 @@ export void window_set_title(const char* title) {
   assert(window_id != 0);
   SetWindowTextA(window_id, title);
 }
-extern void window_run() {
-  f64 time = time_now_f64();
-  // set multimedia thread
-  DWORD task_index = 0;
-  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
-  if (!mmtask) {
-    console_log("Error: AvSetMmThreadCharacteristicsA %d", GetLastError());
-  }
-  // timer
-  HANDLE timer = CreateWaitableTimerA(0, false, 0);
-  const LARGE_INTEGER due_time = { 0 };
-  if (!SetWaitableTimer(timer, &due_time, 16, 0, 0, false)) {
-    console_log("Error: SetWaitableTimer %d", GetLastError());
-  }
-  timeBeginPeriod(1);
+export void window_run() {
+  // renderer
+  assert(_renderer_thread_id == 0);
+  _renderer_thread_id = thread_new(_renderer_thread, 0);
   // loop
-  while (window_thread_id) {
-    u32 wait = WaitForSingleObject(timer, INFINITE);
-    if (wait != WAIT_OBJECT_0)
-      break;
-    if (window_resized) {
-      window_resized = false;
-      d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
-      HRESULT result = d3d_swapchain->lpVtbl->ResizeBuffers(
-        d3d_swapchain, 1, window_width, window_height,
-        DXGI_FORMAT_R8G8B8A8_UNORM, 0
-      );
-      if (FAILED(result)) {
-        error("IDXGISwapChain_ResizeBuffers", result);
+  SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);
+  MSG msg;
+  do {
+    MsgWaitForMultipleObjectsEx(
+      0,
+      0,
+      INFINITE,
+      QS_ALLINPUT,
+      MWMO_INPUTAVAILABLE
+    );
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessageA(&msg);
+      if (msg.message == WM_QUIT) {
+        KillTimer(0, 0);
+        thread_free(_renderer_thread_id);
+        _renderer_thread_id = 0;
+        return;
       }
-      _window_onresize();
-      window_updated = true;
     }
-    const f64 now = time_now_f64();
-    window_deltatime = now - time;
-    time = now;
-#ifdef DEBUG
-    const f64 frame_time = 1. / 60 + .001;
-    if (window_deltatime > frame_time) {
-      console_log("FPS DROP %f %f", frame_time, window_deltatime);
-    }
-#endif
-    if (window_updated) {
-      window_updated = false;
-      vertices_length = 0;
-      indexes_length = 0;
-      window_onrender();
-      assert(vertices_length <= vertices_capacity);
-      assert(indexes_length <= indexes_capacity);
-      D3D11_MAPPED_SUBRESOURCE subresource;
-      // vertices
-      d3d_device_context->lpVtbl->Map(
-        d3d_device_context, (ID3D11Resource*)vertices_buffer, 0,
-        D3D11_MAP_WRITE_DISCARD, 0, &subresource
-      );
-      memory_copy(subresource.pData, vertices_virtual, vertices_length * sizeof(vertex_t));
-      d3d_device_context->lpVtbl->Unmap(
-        d3d_device_context, (ID3D11Resource*)vertices_buffer, 0
-      );
-      // indices
-      d3d_device_context->lpVtbl->Map(
-        d3d_device_context, (ID3D11Resource*)indexes_buffer, 0,
-        D3D11_MAP_WRITE_DISCARD, 0, &subresource
-      );
-      memory_copy(subresource.pData, indexes_virtual, indexes_length * sizeof(u32));
-      d3d_device_context->lpVtbl->Unmap(
-        d3d_device_context, (ID3D11Resource*)indexes_buffer, 0
-      );
-      // draw
-      d3d_device_context->lpVtbl->ClearRenderTargetView(
-        d3d_device_context, d3d_render_target_view, window_background
-      );
-      d3d_device_context->lpVtbl->DrawIndexed(d3d_device_context, indexes_length, 0, 0);
-      d3d_swapchain->lpVtbl->Present(d3d_swapchain, 0, 0);
-    }
-  }
-  // cleanup
-  timeBeginPeriod(0);
-  AvRevertMmThreadCharacteristics(mmtask);
-  assert(indexes_capacity > 0);
-  _indexes_free();
-  assert(vertices_capacity > 0);
-  _vertices_free();
-  d3d_blend_state->lpVtbl->Release(d3d_blend_state);
-  d3d_sampler_state->lpVtbl->Release(d3d_sampler_state);
-  d3d_pixel_shader->lpVtbl->Release(d3d_pixel_shader);
-  d3d_vertex_shader->lpVtbl->Release(d3d_vertex_shader);
-  d3d_input_layout->lpVtbl->Release(d3d_input_layout);
-  d3d_rasterizer->lpVtbl->Release(d3d_rasterizer);
-  d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
-  d3d_device_context->lpVtbl->Release(d3d_device_context);
-  d3d_device->lpVtbl->Release(d3d_device);
-  d3d_swapchain->lpVtbl->Release(d3d_swapchain);
+  } while (true);
 }
 
 #endif
