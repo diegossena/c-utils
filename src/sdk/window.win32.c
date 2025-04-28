@@ -235,6 +235,7 @@ export void _renderer_thread() {
     }
   }
   // cleanup
+  CloseHandle(timer);
   timeEndPeriod(1);
   AvRevertMmThreadCharacteristics(mmtask);
   assert(indexes_capacity > 0);
