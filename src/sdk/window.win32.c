@@ -217,7 +217,7 @@ export void _renderer_thread() {
       d3d_device_context->lpVtbl->Unmap(
         d3d_device_context, (ID3D11Resource*)vertices_buffer, 0
       );
-      // indices
+      // indexes
       d3d_device_context->lpVtbl->Map(
         d3d_device_context, (ID3D11Resource*)indexes_buffer, 0,
         D3D11_MAP_WRITE_DISCARD, 0, &subresource
@@ -235,7 +235,7 @@ export void _renderer_thread() {
     }
   }
   // cleanup
-  timeBeginPeriod(0);
+  timeEndPeriod(1);
   AvRevertMmThreadCharacteristics(mmtask);
   assert(indexes_capacity > 0);
   _indexes_free();
@@ -252,7 +252,7 @@ export void _renderer_thread() {
   d3d_device->lpVtbl->Release(d3d_device);
   d3d_swapchain->lpVtbl->Release(d3d_swapchain);
 }
-export void _d3d_buffer_create(u64 size, UINT BindFlags, ID3D11Buffer** ppBuffer) {
+export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 size, UINT BindFlags) {
   D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
@@ -270,7 +270,7 @@ export void window_close() { DestroyWindow(window_id); }
 export void window_startup(const char* title, const char* atlas_path) {
   i32 result;
   // window_class_register
-  WNDCLASSEXA wc = {
+  WNDCLASSEXA window_class = {
     .cbSize = sizeof(WNDCLASSEXA),
     .style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
     .lpfnWndProc = _window_procedure,
@@ -278,7 +278,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     .hCursor = LoadCursorA(0, IDC_ARROW),
     .lpszClassName = title,
   };
-  result = RegisterClassExA(&wc);
+  result = RegisterClassExA(&window_class);
   if (!result) {
     error("RegisterClassExA", result);
   }
@@ -288,18 +288,18 @@ export void window_startup(const char* title, const char* atlas_path) {
   RECT rect = { 0, 0, window_width, window_height };
   AdjustWindowRect(&rect, window_style, false);
   window_id = CreateWindowExA(
-    window_ex_style, wc.lpszClassName, title, window_style,
+    window_ex_style, window_class.lpszClassName, title, window_style,
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
     0, // handle to parent or owner window
     0, // handle to menu, or child-window identifier
-    wc.hInstance,
+    window_class.hInstance,
     0 // pointer to window-creation data
   );
   if (!window_id) {
     error("CreateWindowExA", (error_t)window_id);
   }
   // global_d3d_device | global_d3d_swapchain | global_d3d_device_context
-  DXGI_SWAP_CHAIN_DESC swap_chain_desc = {
+  DXGI_SWAP_CHAIN_DESC swapchain_desc = {
     .BufferCount = 1,                                // one back buffer
     .BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM, // use 32-bit color
     .BufferDesc.Width = window_width,                // set the back buffer width
@@ -315,7 +315,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     D3D_DRIVER_TYPE_HARDWARE,
     0, 0, 0, 0,
     D3D11_SDK_VERSION,
-    &swap_chain_desc,
+    &swapchain_desc,
     &d3d_swapchain,
     &d3d_device,
     0,
@@ -365,7 +365,7 @@ export void window_startup(const char* title, const char* atlas_path) {
   d3d_device_context->lpVtbl->PSSetShader(d3d_device_context, d3d_pixel_shader, NULL, 0);
   // texture_input_layout
   D3D11_INPUT_ELEMENT_DESC texture_layout [] = {
-    { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,                     0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,       0,               0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(f32) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0 }
   };
   const u8 texture_layout_size = sizeof(texture_layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
@@ -485,7 +485,7 @@ export void vertices_reserve(u64 size) {
     }
   }
   vertices_capacity = size;
-  _d3d_buffer_create(buffer_size, D3D11_BIND_VERTEX_BUFFER, &vertices_buffer);
+  _d3d_buffer(&vertices_buffer, buffer_size, D3D11_BIND_VERTEX_BUFFER);
   const u32 vertex_stride = sizeof(vertex_t);
   const u32 vertex_offset = 0;
   d3d_device_context->lpVtbl->IASetVertexBuffers(
@@ -514,7 +514,7 @@ export void indexes_reserve(u64 size) {
     }
   }
   indexes_capacity = size;
-  _d3d_buffer_create(buffer_size, D3D11_BIND_INDEX_BUFFER, &indexes_buffer);
+  _d3d_buffer(&indexes_buffer, buffer_size, D3D11_BIND_INDEX_BUFFER);
   d3d_device_context->lpVtbl->IASetIndexBuffer(d3d_device_context, indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
 }
 export void window_set_title(const char* title) {
