@@ -175,9 +175,7 @@ export void _renderer_thread() {
   timeBeginPeriod(1);
   // loop
   while (_renderer_thread_id) {
-    u32 wait = WaitForSingleObject(timer, INFINITE);
-    if (wait != WAIT_OBJECT_0)
-      break;
+    WaitForSingleObject(timer, INFINITE);
     if (window_resized) {
       window_resized = false;
       d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
