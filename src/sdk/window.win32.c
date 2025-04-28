@@ -176,6 +176,7 @@ export void _renderer_thread() {
   // loop
   while (_renderer_thread_id) {
     WaitForSingleObject(timer, INFINITE);
+    // onresize
     if (window_resized) {
       window_resized = false;
       d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
@@ -189,6 +190,7 @@ export void _renderer_thread() {
       _window_onresize();
       window_updated = true;
     }
+    // frame
     const f64 now = time_now_f64();
     window_deltatime = now - time;
     time = now;
