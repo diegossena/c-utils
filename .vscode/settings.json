@@ -36,6 +36,9 @@
     "any": "c",
     "complex": "c",
     "scoped_allocator": "c",
-    "string": "c"
+    "string": "c",
+    "text_encoding": "c",
+    "typeindex": "c",
+    "typeinfo": "c"
   }
 }

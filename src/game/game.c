@@ -2,9 +2,12 @@
 #include <game/tilemap.scene.h>
 #include <sdk/window.h>
 
+#define ATLAS_TILE_SIZE 8
+
 const u16 atlas_width = 256;
 const u16 atlas_height = 256;
-#define ATLAS_TILE_SIZE 8
+const u16 atlas_tiles_in_x = atlas_width / ATLAS_TILE_SIZE;
+const u16 atlas_tiles_in_y = atlas_height / ATLAS_TILE_SIZE;
 
 export void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
@@ -25,7 +28,7 @@ export void tile_draw(
   );
 }
 export void text_draw(const char* text, f32 size, f32 x0, f32 y0) {
-  const f32 spacing = size * window_pixel_ndc[0] * .31f;
+  const f32 spacing = 8 * window_pixel_ndc[0];
   const f32 y1 = y0 - window_pixel_ndc[1] * size;
   while (*text != '\0') {
     u8 tile_x = 0, tile_y = 0;
@@ -60,7 +63,7 @@ export void text_draw(const char* text, f32 size, f32 x0, f32 y0) {
       // spacing
       x0 += spacing;
     } else {
-      x0 += spacing * .5f;
+      x0 += spacing;
     }
     ++text;
   }

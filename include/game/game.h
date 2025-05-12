@@ -17,4 +17,7 @@ export void tile_draw(
   u8 flags
 );
 
+extern const u16 atlas_tiles_in_x;
+extern const u16 atlas_tiles_in_y;
+
 #endif

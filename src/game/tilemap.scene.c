@@ -8,11 +8,12 @@
 
 tilemap_t tilemap = { .player_direction = KEY_DOWN };
 
-export void tilemap_copy(const tileblock_t* tiles, u8 width, u8 height) {
+export void tilemap_copy(const tile_t* tiles, u8 width, u8 height) {
   const u16 area = width * height;
-  const u64 capacity = area * sizeof(tileblock_t) * TILEMAP_LAYERS;
-  void* block = 0;
+  const u64 capacity = area * sizeof(tile_t) * TILEMAP_LAYERS;
+  void* block = tilemap.tiles;
   if (tilemap.area != 0) {
+    console_log("tilemap.area %d area %d", tilemap.area, area);
     if (tilemap.area != area) {
       block = memory_realloc(tilemap.tiles, capacity);
     }
@@ -145,64 +146,13 @@ export void tilemap_draw() {
         for (i8 y = start_y; y < end_y; y++) {
           y1 = y0 - tilemap.tile_ndc_pixel[1];
           // block draw
-          tileblock_t* block = (x >= 0 && x < tilemap.width) && (y >= 0 && y < tilemap.height)
+          tile_t* tile = (x >= 0 && x < tilemap.width) && (y >= 0 && y < tilemap.height)
             ? &tilemap_tile(layer, x, y)
             : 0;
-          if (block != 0) {
-            u8 tile_x;
-            u8 tile_y;
-            // top_left
-            if (block->top_left.id) {
-              tile_x = (block->top_left.id - 1) % 10;
-              tile_y = math_ceil((f32)block->top_left.id / 10.f) - 1.f;
-              tile_draw(
-                x0,
-                y0,
-                x1 - tilemap.tile_ndc_pixel[0] / 2,
-                y1 + tilemap.tile_ndc_pixel[1] / 2,
-                tile_x, tile_y,
-                block->top_left.flags
-              );
-            }
-            // top_right
-            if (block->top_right.id) {
-              tile_x = (block->top_right.id - 1) % 10;
-              tile_y = math_ceil((f32)block->top_right.id / 10.f) - 1.f;
-              tile_draw(
-                x0 + tilemap.tile_ndc_pixel[0] / 2,
-                y0,
-                x1,
-                y1 + tilemap.tile_ndc_pixel[1] / 2,
-                tile_x, tile_y,
-                block->top_right.flags
-              );
-            }
-            // bottom_left
-            if (block->bottom_left.id) {
-              tile_x = (block->bottom_left.id - 1) % 10;
-              tile_y = math_ceil((f32)block->bottom_left.id / 10.f) - 1.f;
-              tile_draw(
-                x0,
-                y0 - tilemap.tile_ndc_pixel[1] / 2,
-                x1 - tilemap.tile_ndc_pixel[0] / 2,
-                y1,
-                tile_x, tile_y,
-                block->bottom_left.flags
-              );
-            }
-            // bottom_right
-            if (block->bottom_right.id) {
-              tile_x = (block->bottom_right.id - 1) % 10;
-              tile_y = math_ceil((f32)block->bottom_right.id / 10.f) - 1.f;
-              tile_draw(
-                x0 + tilemap.tile_ndc_pixel[0] / 2,
-                y0 - tilemap.tile_ndc_pixel[1] / 2,
-                x1,
-                y1,
-                tile_x, tile_y,
-                block->bottom_right.flags
-              );
-            }
+          if (tile) {
+            u8 tile_x = (tile->id - 1) % atlas_tiles_in_x;
+            u8 tile_y = math_ceil((f32)tile->id / atlas_tiles_in_y) - 1.f;
+            tile_draw(x0, y0, x1, y1, tile_x, tile_y, tile->flags);
           }
           y0 = y1;
         }

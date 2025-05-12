@@ -59,6 +59,6 @@ typedef struct vec2_t {
   f32 x, y;
 } vec2_t;
 
-#define export __declspec(dllexport)
+#define export static inline
 
 #endif

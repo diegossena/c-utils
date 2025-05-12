@@ -35,7 +35,6 @@ export u64 math_next2pow(u64 number);
 export u64 math_hash_jenkins(const char* data, u64 size);
 export f64 math_pow(f64 base, f64 exponent);
 export f64 math_floor(f64 number);
-export i64 int_floor(f64 number);
 export f64 math_round(f64 number);
 export i64 math_roundi(f64 number);
 export f64 math_ceil(f64 number);

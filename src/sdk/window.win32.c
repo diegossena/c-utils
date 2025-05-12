@@ -108,7 +108,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
       return 0;
     case WM_SIZE:
-      if (d3d_device) {
+      if (d3d_device && window_focus) {
         window_width = LOWORD(lParam);
         window_height = HIWORD(lParam);
         window_resized = true;
@@ -176,6 +176,18 @@ export void _renderer_thread() {
   // loop
   while (_renderer_thread_id) {
     WaitForSingleObject(timer, INFINITE);
+    // timer
+    const f64 now = time_now_f64();
+    window_deltatime = now - time;
+    time = now;
+    if (!window_focus)
+      continue;
+#ifdef DEBUG
+    const f64 frame_time = 1. / 60;
+    if (window_deltatime > frame_time) {
+      console_log("FPS DROP %f %f", frame_time, window_deltatime);
+    }
+#endif
     // onresize
     if (window_resized) {
       window_resized = false;
@@ -191,15 +203,6 @@ export void _renderer_thread() {
       window_updated = true;
     }
     // frame
-    const f64 now = time_now_f64();
-    window_deltatime = now - time;
-    time = now;
-#ifdef DEBUG
-    const f64 frame_time = 1. / 60;
-    if (window_deltatime > frame_time) {
-      console_log("FPS DROP %f %f", frame_time, window_deltatime);
-    }
-#endif
     if (window_updated) {
       window_updated = false;
       vertices_length = 0;
