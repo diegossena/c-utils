@@ -7,8 +7,8 @@
 #define TILEMAP_LAYERS 3
 #define TILE_SIZE 30
 
-#define tilemap_index(layer, tile_x, tile_y) (layer * tilemap.area + tile_y * tilemap.width + tile_x)
-#define tilemap_tile(layer, tile_x, tile_y) tilemap.tiles[tilemap_index(layer, tile_x, tile_y)]
+#define tilemap_index(layer, tile_x, tile_y) (layer * tilemap->area + tile_y * tilemap->width + tile_x)
+#define tilemap_tile(layer, tile_x, tile_y) tilemap->tiles[tilemap_index(layer, tile_x, tile_y)]
 
 typedef enum tile_flag_t {
   TILE_X_FLIP = 1 << 0,
@@ -21,7 +21,6 @@ typedef struct tile_t {
 } tile_t;
 
 typedef struct tilemap_t {
-  bool loaded;
   u8 layers;
   u8 width;
   u8 height;
@@ -60,6 +59,6 @@ export void tilemap_set_player(f32 x, f32 y);
 export void tilemap_moveto(f32 x, f32 y);
 export void tilemap_copy(const tile_t* tiles, u8 width, u8 height);
 
-extern tilemap_t tilemap;
+extern tilemap_t* tilemap;
 
 #endif

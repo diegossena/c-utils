@@ -15,7 +15,7 @@ IF "%package_name%" == "http" (
   SET linker_flags=-lws2_32
 )
 IF "%package_name%" == "game" (
-  SET linker_flags=-ld3d11 -ldxguid
+  SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
 )
 IF "%package_name%" == "tilemap" (
   SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm

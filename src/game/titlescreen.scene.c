@@ -5,13 +5,13 @@
 #include <game/transition.scene.h>
 #include <sdk/window.h>
 
-titlescreen_t titlescreen;
 #define TITLESCREEN_VERTICES_USED 84
 #define TITLESCREEN_INDEXES_USED 126
 
+bool titlescreen = false;
 
 export void titlescreen_load() {
-  titlescreen.loaded = true;
+  titlescreen = true;
   window_updated = true;
   // background
   window_background[0] = 120.f / 255.f;
@@ -22,21 +22,26 @@ export void titlescreen_load() {
   window_updated = true;
 }
 export void titlescreen_unload() {
-  titlescreen.loaded = false;
+  titlescreen = false;
   vertices_reserve(vertices_capacity - TITLESCREEN_VERTICES_USED);
   indexes_reserve(indexes_capacity - TITLESCREEN_INDEXES_USED);
 }
 export void titlescreen_onkeydown(key_t key) {
   switch (key) {
     case KEY_SPACE:
-      transition_load(titlescreen_unload, hero_home_2f_load);
+      transition_load(titlescreen_unload, tilemap_load);
       break;
     default:
       return;
   }
 }
 export void titlescreen_render() {
-  text_draw("GAME", 120.f, -.5f, 1.f);
-  text_draw("PRESS SPACE", 90.f, .1f, -.5f);
-  text_draw("TO START", 90.f, .22f, -.66f);
+  text_draw("GAME", -.5f, .9f, 120.f);
+  f32 x0 = 0;
+  f32 y0 = -.25f;
+  f32 size = 50.f;
+  text_draw("PRESS SPACE", x0, y0, size);
+  x0 += .12f;
+  y0 -= size * window_pixel_ndc[1];
+  text_draw("TO START", x0, y0, size);
 }

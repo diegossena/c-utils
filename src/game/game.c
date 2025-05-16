@@ -27,44 +27,18 @@ export void tile_draw(
     flags & TILE_Y_FLIP ? v0 : v1
   );
 }
-export void text_draw(const char* text, f32 size, f32 x0, f32 y0) {
-  const f32 spacing = 8 * window_pixel_ndc[0];
+export void text_draw(const char* text, f32 x0, f32 y0, f32 size) {
+  const f32 tile_pixel = size * 1 / ATLAS_TILE_SIZE;
+  const f32 spacing = (size - tile_pixel * 3) * window_pixel_ndc[0];
   const f32 y1 = y0 - window_pixel_ndc[1] * size;
   while (*text != '\0') {
-    u8 tile_x = 0, tile_y = 0;
-    if (*text >= 'A' && *text <= 'B') {
-      tile_x = *text - 57;
-      tile_y = 4;
-    } else if (*text >= 'C' && *text <= 'L') {
-      tile_x = *text - 'C';
-      tile_y = 5;
-    } else if (*text >= 'M' && *text <= 'V') {
-      tile_x = *text - 'M';
-      tile_y = 6;
-    } else if (*text >= 'W' && *text <= 'Z') {
-      tile_x = *text - 'W';
-      tile_y = 7;
-    } else {
-      switch (*text) {
-        case '.':
-          tile_x = 4;
-          tile_y = 7;
-          break;
-        case ',':
-          tile_x = 5;
-          tile_y = 7;
-          break;
-      }
-    }
-    if (*text != ' ') {
+    if (*text >= 'A' && *text <= 'Z') {
+      u8 tile_x = *text - 'A';
       const f32 x1 = x0 + window_pixel_ndc[0] * size;
       // draw
-      tile_draw(x0, y0, x1, y1, tile_x, tile_y, 0);
-      // spacing
-      x0 += spacing;
-    } else {
-      x0 += spacing;
+      tile_draw(x0, y0, x1, y1, tile_x, 0, 0);
     }
+    x0 += spacing;
     ++text;
   }
 }

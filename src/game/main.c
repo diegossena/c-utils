@@ -7,7 +7,7 @@ u16 window_width = 800;
 u16 window_height = 600;
 
 void window_onresize() {
-  if (tilemap.loaded) {
+  if (tilemap) {
     tilemap_onresize();
   }
 }
@@ -15,20 +15,20 @@ void window_onkeydown(key_t key) {
   if (key == KEY_ESCAPE) {
     return window_close();
   }
-  if (titlescreen.loaded) {
+  if (titlescreen) {
     titlescreen_onkeydown(key);
   }
 }
 void window_onkeypress() {
-  if (tilemap.loaded) {
+  if (tilemap) {
     tilemap_onkeypress();
   }
 }
 void window_onrender() {
-  if (titlescreen.loaded) {
+  if (titlescreen) {
     titlescreen_render();
   }
-  if (tilemap.loaded) {
+  if (tilemap) {
     tilemap_draw();
   }
   if (transition.loading) {
@@ -39,10 +39,11 @@ void window_dblclick() {}
 void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {}
 void window_onmouseup(i32 x, i32 y, mouse_btn_t button) {}
 void window_onkeyup() {}
+void window_onscroll(i32 delta) {}
+void window_onmousemove() {}
 // 512332 bytes
 i32 main(i32 argc, char** argv) {
-  window_startup("assets/atlas.bin");
-  window_set_title("Game");
+  window_startup("Game", "assets/atlas.bin");
   titlescreen_load();
   window_run();
   return 0;

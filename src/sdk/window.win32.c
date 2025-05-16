@@ -190,6 +190,7 @@ export void _renderer_thread() {
 #endif
     // onresize
     if (window_resized) {
+      console_log("window_resized %d", window_resized);
       window_resized = false;
       d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
       HRESULT result = d3d_swapchain->lpVtbl->ResizeBuffers(

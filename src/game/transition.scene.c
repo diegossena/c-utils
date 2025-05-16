@@ -1,8 +1,9 @@
 #include <game/transition.scene.h>
 
-transition_t transition;
 #define TRANSITION_VERTICES_USED 4
 #define TRANSITION_INDEXES_USED 6
+
+transition_t transition;
 
 export void transition_load(function_t unload, function_t load) {
   if (transition.loading)
