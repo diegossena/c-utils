@@ -65,6 +65,10 @@ void window_onkeypress() {
   }
 }
 void window_onmousemove() {
+  // const i32 tile_x = math_floor((mouse_x + tilemap.offset.x * TILE_SIZE) / TILE_SIZE);
+  // const i32 tile_y = math_floor((mouse_y + tilemap.offset.y * TILE_SIZE) / TILE_SIZE);
+  // console_log("x %d y %d tile[%ld %ld] offset[%f, %f]", mouse_x, mouse_y, tile_x, tile_y, tilemap.offset.x, tilemap.offset.y);
+
   pointer_x0 = -1 + mouse_x * window_pixel_ndc[0] - tilemap.tile_ndc_pixel[0] / 2;
   pointer_y0 = 1 - mouse_y * window_pixel_ndc[1];
   pointer_x1 = pointer_x0 + tilemap.tile_ndc_pixel[0];

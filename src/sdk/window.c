@@ -9,7 +9,7 @@ f32 window_deltatime = 0;
 f32 window_pixel_ndc[2];
 bool window_focus = false;
 u8 keyboard_count = 0;
-u8 keyboard_state[32] = {};
+u8 keyboard_state[32] = { 0 };
 
 vertex_t* vertices_virtual;
 u64 vertices_length;
