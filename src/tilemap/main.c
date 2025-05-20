@@ -13,6 +13,16 @@ f32 pointer_x0, pointer_y0, pointer_x1, pointer_y1;
 
 void window_onkeydown(key_t key) {
   switch (key) {
+    case KEY_ADD:
+      ++tilemap->tile_size;
+      console_log("tilemap->tile_size %u", tilemap->tile_size);
+      tilemap_onresize();
+      break;
+    case KEY_SUBTRACT:
+      --tilemap->tile_size;
+      console_log("tilemap->tile_size %u", tilemap->tile_size);
+      tilemap_onresize();
+      break;
     case KEY_ESCAPE:
       return window_close();
     case KEY_F5:

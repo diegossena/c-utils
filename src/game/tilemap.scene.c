@@ -10,6 +10,7 @@ tilemap_t* tilemap = 0;
 
 export void tilemap_load() {
   tilemap = memory_alloc0(sizeof(tilemap_t));
+  tilemap->tile_size = 30;
   tilemap->player_direction = KEY_DOWN;
   window_background[0] = 0.f;
   window_background[1] = 0.f;
@@ -55,34 +56,48 @@ export void tilemap_set_player(f32 x, f32 y) {
   tilemap->offset.y = y - tilemap->visible_tiles[1] / 2 + .5f;
 }
 export void tilemap_onresize() {
-  tilemap->visible_tiles[0] = (f32)window_width / TILE_SIZE;
-  tilemap->visible_tiles[1] = (f32)window_height / TILE_SIZE;
-  const f32 rendered_blocks[2] = {
+  tilemap->visible_tiles[0] = (f32)window_width / tilemap->tile_size;
+  tilemap->visible_tiles[1] = (f32)window_height / tilemap->tile_size;
+  const u8 rendered_blocks[2] = {
     math_ceil(tilemap->visible_tiles[0]) + 2,
     math_ceil(tilemap->visible_tiles[1]) + 2
   };
-  if (rendered_blocks[0] != tilemap->rendered_blocks[0] || rendered_blocks[1] != tilemap->rendered_blocks[1]) {
-    const u64 previous_rendered_tiles = (tilemap->rendered_blocks[0] * 4) * (tilemap->rendered_blocks[1] * 4);
-    const u64 rendered_tiles = (rendered_blocks[0] * 4) * (rendered_blocks[1] * 4);
+  const u64 previous_rendered_tiles = (tilemap->rendered_blocks[0] * tilemap->rendered_blocks[1]) * TILEMAP_LAYERS;
+  const u64 rendered_tiles = (rendered_blocks[0] * rendered_blocks[1]) * TILEMAP_LAYERS;
+  if (previous_rendered_tiles != rendered_tiles) {
+    const u64 previous_vertices = previous_rendered_tiles
+      ? previous_rendered_tiles * 4 + TILEMAP_VERTICES_USED
+      : 0;
+    const u64 previous_indexes = previous_rendered_tiles
+      ? previous_rendered_tiles * 6 + TILEMAP_INDEXES_USED
+      : 0;
+    console_log("vertices_capacity %lld", vertices_capacity);
+    console_log("rendered_tiles %lld indexes %lld previous_indexes %lld",
+      rendered_tiles,
+      rendered_tiles * 6 + TILEMAP_INDEXES_USED,
+      previous_indexes
+    );
     vertices_reserve(
       vertices_capacity
       + rendered_tiles * 4 + TILEMAP_VERTICES_USED
-      - previous_rendered_tiles * 4 + TILEMAP_VERTICES_USED
+      - previous_vertices
     );
     indexes_reserve(
-      vertices_capacity
+      indexes_capacity
       + rendered_tiles * 6 + TILEMAP_INDEXES_USED
-      - previous_rendered_tiles * 6 + TILEMAP_INDEXES_USED
+      - previous_indexes
     );
+    console_log("!indexes_capacity %lld", indexes_capacity);
     tilemap->rendered_blocks[0] = rendered_blocks[0];
     tilemap->rendered_blocks[1] = rendered_blocks[1];
   }
-  tilemap->tile_ndc_pixel[0] = TILE_SIZE * window_pixel_ndc[0];
-  tilemap->tile_ndc_pixel[1] = TILE_SIZE * window_pixel_ndc[1];
+  tilemap->tile_ndc_pixel[0] = tilemap->tile_size * window_pixel_ndc[0];
+  tilemap->tile_ndc_pixel[1] = tilemap->tile_size * window_pixel_ndc[1];
+  window_updated = true;
 }
 export vec2_i32_t tilemap_tile_from_screen() {
-  f32 mouse_offset_x = (f32)mouse_x / (f32)TILE_SIZE + .000001f;
-  f32 mouse_offset_y = (f32)mouse_y / (f32)TILE_SIZE + .000001f;
+  f32 mouse_offset_x = (f32)mouse_x / (f32)tilemap->tile_size + FLOAT_FIXER;
+  f32 mouse_offset_y = (f32)mouse_y / (f32)tilemap->tile_size + FLOAT_FIXER;
 
   f32 tile_x = tilemap->offset.x + mouse_offset_x;
   f32 tile_y = tilemap->offset.y + mouse_offset_y;
@@ -132,12 +147,15 @@ export void tilemap_draw() {
   }
   // tilemap_draw
   if (tilemap->area) {
-    const i8 start_x = (i8)math_floor(tilemap->offset.x);
-    const i8 start_y = (i8)math_floor(tilemap->offset.y);
+    const i8 start_x = (i8)math_floor(tilemap->offset.x + FLOAT_FIXER);
+    const i8 start_y = (i8)math_floor(tilemap->offset.y + FLOAT_FIXER);
     const i8 end_x = start_x + tilemap->rendered_blocks[0];
     const i8 end_y = start_y + tilemap->rendered_blocks[1];
     const f32 start_x0 = -1.f - (tilemap->offset.x - start_x) * tilemap->tile_ndc_pixel[0];
     const f32 start_y0 = 1.f + (tilemap->offset.y - start_y) * tilemap->tile_ndc_pixel[1];
+
+
+    u64 tiles_count = 0;
     for (u8 layer = 0; layer < TILEMAP_LAYERS; layer++) {
       f32 x0, y0, x1, y1;
       if (!tilemap->player_hidden && layer == 2) {
@@ -161,6 +179,7 @@ export void tilemap_draw() {
           tile_t* tile = (x >= 0 && x < tilemap->width) && (y >= 0 && y < tilemap->height)
             ? &tilemap_tile(layer, x, y)
             : 0;
+          ++tiles_count;
           if (tile) {
             u8 tile_x = (tile->id - 1) % atlas_tiles_in_x;
             u8 tile_y = math_ceil((f32)tile->id / atlas_tiles_in_y) - 1.f;
@@ -171,5 +190,6 @@ export void tilemap_draw() {
         x0 = x1;
       }
     }
+    console_log("tiles_count %llu", tiles_count);
   }
 }

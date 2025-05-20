@@ -481,7 +481,7 @@ export void vertices_reserve(u64 size) {
   if (vertices_capacity != 0) {
     void* buffer = memory_realloc(vertices_virtual, buffer_size);
     if (!buffer) {
-      console_log("Error: ERR_NOT_ENOUGH_MEMORY vertices_alloc memory_realloc(%llu)", buffer_size);
+      error("vertices_alloc memory_realloc", ERR_NOT_ENOUGH_MEMORY);
       return;
     }
     vertices_virtual = buffer;
@@ -489,7 +489,7 @@ export void vertices_reserve(u64 size) {
   } else {
     vertices_virtual = memory_alloc(buffer_size);
     if (!vertices_virtual) {
-      console_log("Error: ERR_NOT_ENOUGH_MEMORY vertices_alloc memory_alloc(%llu)", buffer_size);
+      error("vertices_alloc memory_alloc", ERR_NOT_ENOUGH_MEMORY);
       return;
     }
   }
@@ -510,7 +510,7 @@ export void indexes_reserve(u64 size) {
   if (indexes_capacity != 0) {
     void* buffer = memory_realloc(indexes_virtual, buffer_size);
     if (!buffer) {
-      console_log("Error: ERR_NOT_ENOUGH_MEMORY indexes_alloc memory_realloc(%llu)", buffer_size);
+      error("indexes_alloc memory_realloc", ERR_NOT_ENOUGH_MEMORY);
       return;
     }
     indexes_virtual = buffer;
@@ -518,7 +518,7 @@ export void indexes_reserve(u64 size) {
   } else {
     indexes_virtual = memory_alloc(buffer_size);
     if (!indexes_virtual) {
-      console_log("Error: ERR_NOT_ENOUGH_MEMORY indexes_alloc memory_alloc(%llu)", buffer_size);
+      error("indexes_alloc memory_alloc", ERR_NOT_ENOUGH_MEMORY);
       return;
     }
   }

@@ -5,7 +5,6 @@
 #include <sdk/keyboard.h>
 
 #define TILEMAP_LAYERS 3
-#define TILE_SIZE 30
 
 #define tilemap_index(layer, tile_x, tile_y) (layer * tilemap->area + tile_y * tilemap->width + tile_x)
 #define tilemap_tile(layer, tile_x, tile_y) tilemap->tiles[tilemap_index(layer, tile_x, tile_y)]
@@ -21,6 +20,7 @@ typedef struct tile_t {
 } tile_t;
 
 typedef struct tilemap_t {
+  u8 tile_size;
   u8 layers;
   u8 width;
   u8 height;

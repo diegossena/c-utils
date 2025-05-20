@@ -12,6 +12,8 @@
  */
 #define MATH_PI 3.14159265358979323846
 
+#define FLOAT_FIXER .000001f
+
 #define math_min(a, b) (b < a ? b : a)
 #define math_max(a, b) (a < b ? b : a)
 #define math_clamp(value, min, max) math_min(math_max(value, min), max)
