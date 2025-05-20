@@ -55,9 +55,12 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef void (*function_t)();
 
-typedef struct vec2_t {
+typedef struct vec2_f32_t {
   f32 x, y;
-} vec2_t;
+} vec2_f32_t;
+typedef struct vec2_i32_t {
+  i32 x, y;
+} vec2_i32_t;
 
 #define export static inline
 

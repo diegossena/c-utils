@@ -65,34 +65,32 @@ void window_onkeypress() {
   }
 }
 void window_onmousemove() {
-  // const i32 tile_x = math_floor((mouse_x + tilemap->offset.x * TILE_SIZE) / TILE_SIZE);
-  // const i32 tile_y = math_floor((mouse_y + tilemap->offset.y * TILE_SIZE) / TILE_SIZE);
-  // console_log("x %d y %d tile[%ld %ld] offset[%f, %f]", mouse_x, mouse_y, tile_x, tile_y, tilemap->offset.x, tilemap->offset.y);
-
-  pointer_x0 = -1 + mouse_x * window_pixel_ndc[0] - tilemap->tile_ndc_pixel[0] / 2;
-  pointer_y0 = 1 - mouse_y * window_pixel_ndc[1];
-  pointer_x1 = pointer_x0 + tilemap->tile_ndc_pixel[0];
-  pointer_y1 = pointer_y0 - tilemap->tile_ndc_pixel[1];
-  window_updated = true;
+  vec2_i32_t tile = tilemap_tile_from_screen();
+  if (pointer_tile_id) {
+    pointer_x0 = -1 + mouse_x * window_pixel_ndc[0] - tilemap->tile_ndc_pixel[0] / 2;
+    pointer_y0 = 1 - mouse_y * window_pixel_ndc[1];
+    pointer_x1 = pointer_x0 + tilemap->tile_ndc_pixel[0];
+    pointer_y1 = pointer_y0 - tilemap->tile_ndc_pixel[1];
+    window_updated = true;
+  }
 }
 extern void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {
-  const i32 tile_x = math_floor((x + tilemap->offset.x * TILE_SIZE) / TILE_SIZE);
-  const i32 tile_y = math_floor((y + tilemap->offset.y * TILE_SIZE) / (TILE_SIZE - 1));
-  console_log("x %d y %d tile[%ld %ld] offset[%f, %f]", x, y, tile_x, tile_y, tilemap->offset.x, tilemap->offset.y);
+  vec2_i32_t tile = tilemap_tile_from_screen();
+  console_log("x %d y %d tile[%ld %ld] offset[%f, %f]", x, y, tile.x, tile.y, tilemap->offset.x, tilemap->offset.y);
   if (
-    tile_x < 0
-    || tile_x >= tilemap->width
-    || tile_y < 0
-    || tile_y >= tilemap->height
+    tile.x < 0
+    || tile.x >= tilemap->width
+    || tile.y < 0
+    || tile.y >= tilemap->height
     ) return;
   switch (button) {
     case MOUSE_BUTTON_LEFT:
-      tilemap_tile(pointer_layer, tile_x, tile_y).id = pointer_tile_id;
-      tilemap_tile(pointer_layer, tile_x, tile_y).flags = pointer_flags;
+      tilemap_tile(pointer_layer, tile.x, tile.y).id = pointer_tile_id;
+      tilemap_tile(pointer_layer, tile.x, tile.y).flags = pointer_flags;
       break;
     case MOUSE_BUTTON_RIGHT:
-      pointer_tile_id = tilemap_tile(pointer_layer, tile_x, tile_y).id;
-      pointer_flags = tilemap_tile(pointer_layer, tile_x, tile_y).flags;
+      pointer_tile_id = tilemap_tile(pointer_layer, tile.x, tile.y).id;
+      pointer_flags = tilemap_tile(pointer_layer, tile.x, tile.y).flags;
       break;
     default:
       return;
@@ -120,7 +118,11 @@ void window_onrender() {
 void window_onmouseup(i32 x, i32 y, mouse_btn_t button) {}
 void window_dblclick() {}
 void window_onkeyup() {}
-void window_onresize() {}
+void window_onresize() {
+  if (tilemap) {
+    tilemap_onresize();
+  }
+}
 // 508855 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Tilemap", "assets/atlas.bin");

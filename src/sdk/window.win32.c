@@ -129,7 +129,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
 export void _window_onresize() {
   window_pixel_ndc[0] = 2.f / (f32)window_width;
   window_pixel_ndc[1] = 2.f / (f32)window_height;
-  // global_d3d_render_target_view
+  // d3d_render_target_view
   ID3D11Texture2D* back_buffer;
   HRESULT result = d3d_swapchain->lpVtbl->GetBuffer(
     d3d_swapchain, 0, &IID_ID3D11Texture2D,
@@ -142,6 +142,9 @@ export void _window_onresize() {
     d3d_device, (ID3D11Resource*)back_buffer, 0, &d3d_render_target_view
   );
   back_buffer->lpVtbl->Release(back_buffer);
+  if (FAILED(result)) {
+    error("CreateRenderTargetView", result);
+  }
   d3d_device_context->lpVtbl->OMSetRenderTargets(
     d3d_device_context, 1, &d3d_render_target_view, 0
   );
@@ -190,7 +193,6 @@ export void _renderer_thread() {
 #endif
     // onresize
     if (window_resized) {
-      console_log("window_resized %d", window_resized);
       window_resized = false;
       d3d_render_target_view->lpVtbl->Release(d3d_render_target_view);
       HRESULT result = d3d_swapchain->lpVtbl->ResizeBuffers(
@@ -201,6 +203,7 @@ export void _renderer_thread() {
         error("IDXGISwapChain_ResizeBuffers", result);
       }
       _window_onresize();
+      window_onresize();
       window_updated = true;
     }
     // frame
@@ -273,6 +276,7 @@ export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) 
 }
 export void window_close() { DestroyWindow(window_id); }
 export void window_startup(const char* title, const char* atlas_path) {
+  SetProcessDPIAware();
   i32 result;
   // window_class_register
   WNDCLASSEXA window_class = {
@@ -287,11 +291,11 @@ export void window_startup(const char* title, const char* atlas_path) {
   if (!result) {
     error("RegisterClassExA", result);
   }
-  u32 window_style = WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
+  u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME;
   u32 window_ex_style = WS_EX_APPWINDOW;
   // CreateWindowExA
   RECT rect = { 0, 0, window_width, window_height };
-  AdjustWindowRect(&rect, window_style, false);
+  AdjustWindowRectEx(&rect, window_style, false, window_ex_style);
   window_id = CreateWindowExA(
     window_ex_style, window_class.lpszClassName, title, window_style,
     CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,

@@ -27,8 +27,8 @@ typedef struct tilemap_t {
   u16 area;
   tile_t* tiles;
   // camera_movement
-  vec2_t start_offset;
-  vec2_t target_offset;
+  vec2_f32_t start_offset;
+  vec2_f32_t target_offset;
   f32 move_timer;
   f32 move_duration;
   bool moving;
@@ -45,7 +45,7 @@ typedef struct tilemap_t {
   // rendering
   f32 tile_ndc_pixel[2];
   // camera
-  vec2_t offset;
+  vec2_f32_t offset;
   f32 visible_tiles[2];
   u8 rendered_blocks[2];
 } tilemap_t;
@@ -58,6 +58,8 @@ export void tilemap_draw();
 export void tilemap_set_player(f32 x, f32 y);
 export void tilemap_moveto(f32 x, f32 y);
 export void tilemap_copy(const tile_t* tiles, u8 width, u8 height);
+
+export vec2_i32_t tilemap_tile_from_screen();
 
 extern tilemap_t* tilemap;
 

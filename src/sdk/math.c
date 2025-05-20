@@ -105,16 +105,11 @@ export f64 math_ceil(f64 number) {
 export f64 math_round(f64 number) {
   return round(number);
 }
+export f32 math_floorf(f32 number) {
+  return floorf(number);
+}
 export f64 math_floor(f64 number) {
   return floor(number);
-}
-export i64 math_roundi(f64 number) {
-  i64 integer = number;
-  f64 decimals = number - integer;
-  if (decimals <= .5) {
-    return integer;
-  }
-  return integer + 1;
 }
 export i32 math_random() {
   return rand();

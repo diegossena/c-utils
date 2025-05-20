@@ -9,7 +9,6 @@
 tilemap_t* tilemap = 0;
 
 export void tilemap_load() {
-  console_log("tilemap_load");
   tilemap = memory_alloc0(sizeof(tilemap_t));
   tilemap->player_direction = KEY_DOWN;
   window_background[0] = 0.f;
@@ -36,7 +35,6 @@ export void tilemap_copy(const tile_t* tiles, u8 width, u8 height) {
   const u64 capacity = area * sizeof(tile_t) * TILEMAP_LAYERS;
   void* block = tilemap->tiles;
   if (tilemap->area != 0) {
-    console_log("tilemap->area %d area %d", tilemap->area, area);
     if (tilemap->area != area) {
       block = memory_realloc(tilemap->tiles, capacity);
     }
@@ -44,7 +42,7 @@ export void tilemap_copy(const tile_t* tiles, u8 width, u8 height) {
     block = memory_alloc(capacity);
   }
   if (!block) {
-    console_log("Error: tilemap_copy memory_alloc ERR_NOT_ENOUGH_MEMORY");
+    error("tilemap_copy memory_alloc", ERR_NOT_ENOUGH_MEMORY);
   }
   tilemap->tiles = block;
   memory_copy(tilemap->tiles, tiles, capacity);
@@ -60,8 +58,8 @@ export void tilemap_onresize() {
   tilemap->visible_tiles[0] = (f32)window_width / TILE_SIZE;
   tilemap->visible_tiles[1] = (f32)window_height / TILE_SIZE;
   const f32 rendered_blocks[2] = {
-    math_ceil(tilemap->visible_tiles[0]) + 1,
-    math_ceil(tilemap->visible_tiles[1]) + 1
+    math_ceil(tilemap->visible_tiles[0]) + 2,
+    math_ceil(tilemap->visible_tiles[1]) + 2
   };
   if (rendered_blocks[0] != tilemap->rendered_blocks[0] || rendered_blocks[1] != tilemap->rendered_blocks[1]) {
     const u64 previous_rendered_tiles = (tilemap->rendered_blocks[0] * 4) * (tilemap->rendered_blocks[1] * 4);
@@ -81,6 +79,16 @@ export void tilemap_onresize() {
   }
   tilemap->tile_ndc_pixel[0] = TILE_SIZE * window_pixel_ndc[0];
   tilemap->tile_ndc_pixel[1] = TILE_SIZE * window_pixel_ndc[1];
+}
+export vec2_i32_t tilemap_tile_from_screen() {
+  f32 mouse_offset_x = (f32)mouse_x / (f32)TILE_SIZE + .000001f;
+  f32 mouse_offset_y = (f32)mouse_y / (f32)TILE_SIZE + .000001f;
+
+  f32 tile_x = tilemap->offset.x + mouse_offset_x;
+  f32 tile_y = tilemap->offset.y + mouse_offset_y;
+
+  vec2_i32_t tile = { math_floorf(tile_x), math_floorf(tile_y) };
+  return tile;
 }
 export void tilemap_moveto(f32 x, f32 y) {
   tilemap->move_timer = 0;
