@@ -39,7 +39,6 @@ export f64 math_pow(f64 base, f64 exponent);
 export f64 math_floor(f64 number);
 export f32 math_floorf(f32 number);
 export f64 math_round(f64 number);
-export i64 math_roundi(f64 number);
 export f64 math_ceil(f64 number);
 export i32 math_random();
 export i32 math_random_in_range(i32 min, i32 max);

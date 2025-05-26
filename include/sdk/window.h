@@ -72,14 +72,14 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup();
 
-// Externally-defined function
-extern u16 window_width;
-// Externally-defined function
-extern u16 window_height;
-// Externally-defined function
-extern const u16 atlas_width;
-// Externally-defined function
-extern const u16 atlas_height;
+extern u16 window_width; // externally-defined function
+extern u16 window_height; // externally-defined function
+
+extern const u16 atlas_width; // externally-defined function
+extern const u16 atlas_height; // externally-defined function
+extern const u16 atlas_tile_size; // externally-defined function
+extern const u16 atlas_tiles_width;
+extern const u16 atlas_tiles_height;
 
 extern f32 window_deltatime;
 

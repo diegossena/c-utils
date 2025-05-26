@@ -1,6 +1,5 @@
 #include <game/titlescreen.scene.h>
-#include <game/tilemap.scene.h>
-#include <game/hero_home_2f.map.h>
+#include <game/tilemap.h>
 #include <game/game.h>
 #include <game/transition.scene.h>
 #include <sdk/window.h>

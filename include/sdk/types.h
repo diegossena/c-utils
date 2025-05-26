@@ -55,6 +55,9 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef void (*function_t)();
 
+typedef struct vec3_u8_t {
+  u8 x, y, z;
+} vec3_u8_t;
 typedef struct vec2_f32_t {
   f32 x, y;
 } vec2_f32_t;

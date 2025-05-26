@@ -1,0 +1,114 @@
+#ifndef TILEMAP_H
+#define TILEMAP_H
+
+#include <sdk/types.h>
+#include <sdk/keyboard.h>
+
+#define CHUNK_SIZE 256
+
+#define tilemap_index(x, y, layer) layer * global_tilemap->rendered_area + y * global_tilemap->rendered_tiles[1] + x
+#define tilemap_tile(x, y, layer) global_tilemap->screen_tiles[tilemap_index(x, y, layer)]
+
+typedef enum tile_flag_t {
+  TILE_X_FLIP = 1 << 0,
+  TILE_Y_FLIP = 1 << 1,
+  TILE_SOLID = 1 << 2
+} tile_flag_t;
+
+typedef struct tile_t {
+  u16 id;
+  u8 flags; // tile_flag_t
+} tile_t;
+
+typedef struct warp_t {
+  u8 x, y;
+  u8 chunk_x, chunk_y, chunk_z;
+  u8 pos_x, pos_y, pos_z;
+} warp_t;
+
+typedef enum chunk_position_t {
+  // X Y
+  CHUNK_TOP_LEFT,
+  CHUNK_TOP,
+  CHUNK_TOP_RIGHT,
+  CHUNK_LEFT,
+  CHUNK_CENTER,
+  CHUNK_RIGHT,
+  CHUNK_BOTTOM_LEFT,
+  CHUNK_BOTTOM,
+  CHUNK_BOTTOM_RIGHT,
+  // Z
+  CHUNK_UP,
+  CHUNK_DOWN,
+  // MAX
+  CHUNK_MAX
+} chunk_position_t;
+
+typedef enum layer_t {
+  LAYER_0,
+  LAYER_1,
+  LAYER_2,
+  LAYER_MAX
+} layer_t;
+
+typedef struct chunk_t {
+  u16 x, y;
+  u8 z;
+  u16 x_end, y_end;
+  tile_t tiles[CHUNK_SIZE][CHUNK_SIZE][LAYER_MAX]; // [x][y][layer]
+  u8 warps_count;
+  warp_t* warps;
+} chunk_t;
+
+typedef struct tilemap_t {
+  // world
+  f32 x, y;
+  u8 z;
+  // camera_movement
+  vec2_f32_t start_offset;
+  vec2_f32_t target_offset;
+  f32 move_timer;
+  f32 move_duration;
+  bool moving;
+  // player
+  bool player_hidden;
+  u8 player_direction; // key_t
+  enum {
+    PLAYER_STATE_STANDING_1,
+    PLAYER_STATE_WALKING_1,
+    PLAYER_STATE_STANDING_2,
+    PLAYER_STATE_WALKING_2,
+    PLAYER_STATE_MAX
+  } moving_state;
+  // render
+  f32 visible_tiles[2];
+  u8 rendered_tiles[2];
+  u16 rendered_area;
+  u16 rendered_total;
+  u8 tile_size;
+  /**
+   * [10] Z+1
+   * [1][2][3]
+   * [4][0][6]
+   * [7][8][9]
+   * [11] Z-1
+   */
+  chunk_t chunks[CHUNK_MAX];
+  tile_t** screen_tiles; // [z][y][x]
+  f32 tile_ndc_pixel[2];
+} tilemap_t;
+
+export void tilemap_load();
+export void tilemap_unload();
+export void tilemap_onkeypress();
+export void tilemap_onresize();
+export void tilemap_draw();
+export void tilemap_camera_center(f32 x, f32 y);
+export void tilemap_moveto(f32 x, f32 y, f32 duration);
+export void tilemap_chunk_load();
+
+export tile_t* tile_from_screen();
+
+extern tilemap_t* global_tilemap;
+
+#endif

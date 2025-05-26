@@ -1,6 +1,7 @@
 {
   "files.associations": {
     ".htaccess": "ruby",
+    "*.ejs": "html",
     "*.h": "c",
     "*.tcc": "c",
     "format": "c",
@@ -39,6 +40,8 @@
     "string": "c",
     "text_encoding": "c",
     "typeindex": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "unordered_map": "c",
+    "unordered_set": "c"
   }
 }
