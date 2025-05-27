@@ -96,13 +96,17 @@ export const char* error_cstr(error_t code) {
       return "ERR_UNKNOWN";
   }
 }
-void error(const char* message, error_t code) {
+void error(error_t code, const char* message, ...) {
+  char buffer[TEXT_SIZE + 1];
   const char* error_str = error_cstr(code);
-  console_color(ANSI_FORE_RED);
-  console_write_cstr("Error:");
-  console_color(ANSI_RESET);
-  console_log(
-    " %s %x %s",
-    error_str, code, message
-  );
+  console_write("Error: %s %x\n", error_str, code);
+  va_list args;
+  va_start(args, message);
+  i32 length = string_format_va(buffer, sizeof(buffer), message, args);
+  va_end(args);
+  if (length < 0)
+    return;
+  buffer[length++] = '\n';
+  buffer[length++] = '\0';
+  console_write_str(buffer, length);
 }

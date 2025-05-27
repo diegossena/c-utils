@@ -231,6 +231,7 @@ export tile_t* tile_from_screen() {
   f32 mouse_offset_y = (f32)mouse_y / (f32)global_tilemap->tile_size + FLOAT_FIXER;
   u8 tile_x = math_floorf(global_tilemap->x + mouse_offset_x);
   u8 tile_y = math_floorf(global_tilemap->y + mouse_offset_y);
+  console_log("tile_x %d tile_y %d", tile_x, tile_y);
   return tilemap_tile(tile_x, tile_y, global_tilemap->z);
 }
 export void tilemap_moveto(f32 x, f32 y, f32 duration) {
@@ -264,34 +265,23 @@ export void tilemap_onkeypress() {
 }
 export void tilemap_draw() {
   // chunks->screen_tiles
-  chunk_t* chunk = &global_tilemap->chunks[CHUNK_CENTER];
+  const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
   for (i8 y = 0; y < global_tilemap->rendered_tiles[1]; y++) {
     for (i8 x = 0; x < global_tilemap->rendered_tiles[0]; x++) {
       u16 world_x = global_tilemap->x + x;
       u16 world_y = global_tilemap->y + y;
       // chunk_find
-      u16 chunk_x = world_x / CHUNK_SIZE;
-      u16 chunk_y = world_y / CHUNK_SIZE;
-      if (
-        chunk->x != chunk_x
-        || chunk->y != chunk_y
-        || chunk->z != global_tilemap->z
-        ) {
-        for (u8 i = 0; i < CHUNK_MAX; i++) {
-          chunk_t* find = &global_tilemap->chunks[i];
-          if (
-            find->x == chunk_x
-            && find->y == chunk_y
-            && find->z == global_tilemap->z
-            ) {
-            chunk = find;
-            break;
-          }
-        }
-      }
+      const i8 chunk_offset_x = (world_x - chunk_center->x) / CHUNK_SIZE;
+      const i8 chunk_offset_y = (world_y - chunk_center->y) / CHUNK_SIZE;
+      const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
+      assert(chunk_index < CHUNK_MAX);
+      chunk_t* chunk = &global_tilemap->chunks[chunk_index];
+      assert(chunk != null);
+      // chunk_tile
       u16 chunk_tile_x = world_x % CHUNK_SIZE;
       u16 chunk_tile_y = world_y % CHUNK_SIZE;
       tile_t* chunk_tile = chunk->tiles[chunk_tile_x][chunk_tile_y];
+      assert(chunk_tile != null);
       for (u8 layer = 0; layer < LAYER_MAX; layer++) {
         tilemap_tile(x, y, layer) = &chunk_tile[layer];
       }
@@ -321,9 +311,9 @@ export void tilemap_draw() {
   f32 y0 = start_y0;
   f32 x1 = 0;
   f32 y1 = 0;
-  for (u8 z = 0; z < LAYER_MAX; z++) {
+  for (u8 layer = 0; layer < LAYER_MAX; layer++) {
     // player_draw
-    if (global_tilemap->player_hidden == false && z == 2) {
+    if (global_tilemap->player_hidden == false && layer == 2) {
       x0 = -global_tilemap->tile_ndc_pixel[0] / 2;
       y0 = global_tilemap->tile_ndc_pixel[1] / 2;
       x1 = -x0;

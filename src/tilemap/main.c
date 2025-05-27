@@ -14,7 +14,6 @@ u16 window_height = 600;
 u8 pointer_layer = 0;
 u8 pointer_tile_id = 0;
 u8 pointer_flags = 0;
-f32 pointer_x0, pointer_y0, pointer_x1, pointer_y1;
 
 void window_onkeydown(key_t key) {
   switch (key) {
@@ -93,10 +92,6 @@ void window_onkeypress() {
 }
 void window_onmousemove() {
   if (pointer_tile_id) {
-    pointer_x0 = -1 + mouse_x * window_pixel_ndc[0] - global_tilemap->tile_ndc_pixel[0] / 2;
-    pointer_y0 = 1 - mouse_y * window_pixel_ndc[1];
-    pointer_x1 = pointer_x0 + global_tilemap->tile_ndc_pixel[0];
-    pointer_y1 = pointer_y0 - global_tilemap->tile_ndc_pixel[1];
     window_updated = true;
   }
 }
@@ -105,7 +100,6 @@ extern void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {
   if (tile) {
     switch (button) {
       case MOUSE_BUTTON_LEFT: {
-        console_log("tile %p tile_id=%d", tile, tile->id);
         tile->id = pointer_tile_id;
         tile->flags = pointer_flags;
         // chunk_t* chunk = tilemap_chunk_from_tile(tile);
@@ -131,7 +125,6 @@ void window_onscroll(i32 delta) {
   } else if (delta > 0) {
     ++pointer_tile_id;
   }
-  console_log("tile_id %u", pointer_tile_id);
   window_updated = true;
 }
 void window_onrender() {
@@ -140,6 +133,10 @@ void window_onrender() {
   if (pointer_tile_id > 0) {
     u8 tile_x = (pointer_tile_id - 1) % atlas_tiles_width;
     u8 tile_y = math_ceil((f32)pointer_tile_id / atlas_tiles_height) - 1.f;
+    f32 pointer_x0 = -1 + mouse_x * window_pixel_ndc[0] - global_tilemap->tile_ndc_pixel[0] / 2;
+    f32 pointer_y0 = 1 - mouse_y * window_pixel_ndc[1];
+    f32 pointer_x1 = pointer_x0 + global_tilemap->tile_ndc_pixel[0];
+    f32 pointer_y1 = pointer_y0 - global_tilemap->tile_ndc_pixel[1];
     tile_draw(pointer_x0, pointer_y0, pointer_x1, pointer_y1, tile_x, tile_y, pointer_flags);
   }
 }

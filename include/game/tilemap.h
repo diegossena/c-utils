@@ -6,7 +6,7 @@
 
 #define CHUNK_SIZE 256
 
-#define tilemap_index(x, y, layer) layer * global_tilemap->rendered_area + y * global_tilemap->rendered_tiles[1] + x
+#define tilemap_index(x, y, layer) layer * global_tilemap->rendered_area + y * global_tilemap->rendered_tiles[0] + x
 #define tilemap_tile(x, y, layer) global_tilemap->screen_tiles[tilemap_index(x, y, layer)]
 
 typedef enum tile_flag_t {
