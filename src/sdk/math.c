@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-export f64 math_log10(f64 x) {
+f64 math_log10(f64 x) {
   static const f64
     ivln10hi = 4.34294481878168880939e-01, /* 0x3fdbcb7b, 0x15200000 */
     ivln10lo = 2.50829467116452752298e-11, /* 0x3dbb9438, 0xca9aadd5 */
@@ -72,7 +72,7 @@ export f64 math_log10(f64 x) {
   return val_lo + val_hi;
 }
 
-export u64 math_next2pow(u64 number) {
+u64 math_next2pow(u64 number) {
   if (!number)
     return 1;
   --number;
@@ -82,7 +82,7 @@ export u64 math_next2pow(u64 number) {
   return ++number;
 }
 
-export u64 math_hash_jenkins(const char* data, u64 size) {
+u64 math_hash_jenkins(const char* data, u64 size) {
   u64 hash = 0;
   const char* end = data + size;
   while (data != end) {
@@ -96,24 +96,35 @@ export u64 math_hash_jenkins(const char* data, u64 size) {
   hash += hash << 15;
   return hash;
 }
-export f64 math_pow(f64 base, f64 exponent) {
+f64 math_pow(f64 base, f64 exponent) {
   return pow(base, exponent);
 }
-export f64 math_ceil(f64 number) {
+f64 math_ceil(f64 number) {
   return ceil(number);
 }
-export f64 math_round(f64 number) {
+f64 math_round(f64 number) {
   return round(number);
 }
-export f32 math_floorf(f32 number) {
+f32 math_roundf(f32 number) {
+  return roundf(number);
+}
+f32 math_floorf(f32 number) {
   return floorf(number);
 }
-export f64 math_floor(f64 number) {
+f64 math_floor(f64 number) {
   return floor(number);
 }
-export i32 math_random() {
+i32 math_random() {
   return rand();
 }
-export i32 math_random_in_range(i32 min, i32 max) {
+i32 math_random_in_range(i32 min, i32 max) {
   return (rand() % (max - min + 1)) + min;
+}
+f32 math_float_tolerance(f32 number) {
+  i32 round = math_roundf(number);
+  f32 difference = math_abs(number - round);
+  if (difference < EPSILON) {
+    return round;
+  }
+  return number;
 }

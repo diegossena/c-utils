@@ -2,7 +2,8 @@
 // window
 bool window_updated = true;
 f32 window_deltatime = 0;
-f32 window_pixel_ndc[2];
+f32 window_pixel_ndc_x;
+f32 window_pixel_ndc_y;
 bool window_focus = false;
 f32 window_background[4] = { 0, 0, 0, 1 };
 // window_mouse

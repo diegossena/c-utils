@@ -30,17 +30,17 @@ ID3D11Buffer* indexes_buffer;
 
 bool window_resized = true;
 
-export void _indexes_free() {
+void _indexes_free() {
   indexes_capacity = 0;
   vertices_buffer->lpVtbl->Release(vertices_buffer);
   memory_free(indexes_virtual);
 }
-export void _vertices_free() {
+void _vertices_free() {
   vertices_capacity = 0;
   vertices_buffer->lpVtbl->Release(vertices_buffer);
   memory_free(vertices_virtual);
 }
-export void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
+void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (window_focus && keyboard_count) {
     window_onkeypress();
   }
@@ -126,9 +126,9 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   }
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
-export void _window_onresize() {
-  window_pixel_ndc[0] = 2.f / (f32)window_width;
-  window_pixel_ndc[1] = 2.f / (f32)window_height;
+void _window_onresize() {
+  window_pixel_ndc_x = 2.f / (f32)window_width;
+  window_pixel_ndc_y = 2.f / (f32)window_height;
   // d3d_render_target_view
   ID3D11Texture2D* back_buffer;
   HRESULT result = d3d_swapchain->lpVtbl->GetBuffer(
@@ -161,7 +161,7 @@ export void _window_onresize() {
     d3d_device_context, 1, &viewport
   );
 }
-export void _renderer_thread() {
+void _renderer_thread() {
   f64 time = time_now_f64();
   // set multimedia thread
   DWORD task_index = 0;
@@ -260,7 +260,7 @@ export void _renderer_thread() {
   d3d_device->lpVtbl->Release(d3d_device);
   d3d_swapchain->lpVtbl->Release(d3d_swapchain);
 }
-export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) {
+void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) {
   const D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
@@ -274,8 +274,8 @@ export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) 
     error(result, "CreateBuffer");
   }
 }
-export void window_close() { DestroyWindow(window_id); }
-export void window_startup(const char* title, const char* atlas_path) {
+void window_close() { DestroyWindow(window_id); }
+void window_startup(const char* title, const char* atlas_path) {
   SetProcessDPIAware();
   i32 result;
   // window_class_register
@@ -473,7 +473,7 @@ export void window_startup(const char* title, const char* atlas_path) {
   // PSSetShaderResources
   d3d_device_context->lpVtbl->PSSetShaderResources(d3d_device_context, 0, 1, &d3d_shader_resource);
 }
-export void vertices_reserve(u64 size) {
+void vertices_reserve(u64 size) {
   if (size == 0) {
     return _vertices_free();
   }
@@ -502,7 +502,7 @@ export void vertices_reserve(u64 size) {
     &vertex_offset
   );
 }
-export void indexes_reserve(u64 size) {
+void indexes_reserve(u64 size) {
   if (size == 0) {
     return _indexes_free();
   }
@@ -526,11 +526,11 @@ export void indexes_reserve(u64 size) {
   _d3d_buffer(&indexes_buffer, buffer_size, D3D11_BIND_INDEX_BUFFER);
   d3d_device_context->lpVtbl->IASetIndexBuffer(d3d_device_context, indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
 }
-export void window_set_title(const char* title) {
+void window_set_title(const char* title) {
   assert(window_id != 0);
   SetWindowTextA(window_id, title);
 }
-export void window_run() {
+void window_run() {
   // renderer
   assert(_renderer_thread_id == 0);
   _renderer_thread_id = thread_new(_renderer_thread, 0);

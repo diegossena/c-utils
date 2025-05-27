@@ -5,7 +5,7 @@
 
 transition_t transition;
 
-export void transition_load(function_t unload, function_t load) {
+void transition_load(function_t unload, function_t load) {
   if (transition.loading)
     return;
   vertices_reserve(vertices_capacity + TRANSITION_VERTICES_USED);
@@ -17,7 +17,7 @@ export void transition_load(function_t unload, function_t load) {
   transition.state = TRANSITION_ENTERING;
   window_updated = true;
 }
-export void transition_render() {
+void transition_render() {
   const f32 duration = .85f;
   transition.timer += window_deltatime;
   f32 progress = transition.timer / duration;

@@ -1,6 +1,6 @@
 #include <sdk/error.h>
 
-export const char* error_cstr(error_t code) {
+const char* error_cstr(error_t code) {
   switch (code) {
     case ERR_OUT_OF_RANGE:
       return "ERR_OUT_OF_RANGE";

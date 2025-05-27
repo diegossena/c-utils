@@ -42,6 +42,9 @@
     "typeindex": "c",
     "typeinfo": "c",
     "unordered_map": "c",
-    "unordered_set": "c"
+    "unordered_set": "c",
+    "barrier": "c",
+    "latch": "c",
+    "semaphore": "c"
   }
 }

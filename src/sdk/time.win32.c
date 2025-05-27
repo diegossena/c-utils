@@ -5,7 +5,7 @@
 
 f64 __time_clock_frequency = 0;
 
-export f64 time_now_f64() {
+f64 time_now_f64() {
   if (!__time_clock_frequency) {
     LARGE_INTEGER frequency;
     QueryPerformanceFrequency(&frequency);

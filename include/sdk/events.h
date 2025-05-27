@@ -14,13 +14,13 @@ typedef struct listener_t {
   function_t callback;
 } listener_t;
 
-export void callback_emit(queue_t* this);
-export void callback_on(queue_t* this, callback_t* callback);
+void callback_emit(queue_t* this);
+void callback_on(queue_t* this, callback_t* callback);
 
-export void listener_on(queue_t* this, listener_t* listener);
-export void listener_prepend(queue_t* this, listener_t* listener);
-export void listener_forward(listener_t* listener);
-export void listener_off(listener_t* listener);
-export void listener_emit(queue_t* this, void* argument);
+void listener_on(queue_t* this, listener_t* listener);
+void listener_prepend(queue_t* this, listener_t* listener);
+void listener_forward(listener_t* listener);
+void listener_off(listener_t* listener);
+void listener_emit(queue_t* this, void* argument);
 
 #endif

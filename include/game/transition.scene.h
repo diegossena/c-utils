@@ -13,8 +13,8 @@ typedef struct transition_t {
   f32 timer;
 } transition_t;
 
-export void transition_load(function_t unload, function_t load);
-export void transition_render();
+void transition_load(function_t unload, function_t load);
+void transition_render();
 
 extern transition_t transition;
 

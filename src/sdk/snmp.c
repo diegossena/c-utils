@@ -1,6 +1,6 @@
 #include <sdk/snmp.h>
 
-export error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
+error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
   error_t error;
   u8 buffer[TEXT_SIZE] = { '\0' };
   u8* stream;

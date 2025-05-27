@@ -65,6 +65,4 @@ typedef struct vec2_i32_t {
   i32 x, y;
 } vec2_i32_t;
 
-#define export static inline
-
 #endif

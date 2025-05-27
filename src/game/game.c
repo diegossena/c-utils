@@ -4,7 +4,7 @@
 #include <game/tilemap.h>
 #include <sdk/window.h>
 
-export void tile_draw(
+void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y,
   u8 flags
@@ -22,14 +22,14 @@ export void tile_draw(
     flags & TILE_Y_FLIP ? v0 : v1
   );
 }
-export void text_draw(const char* text, f32 x0, f32 y0, f32 size) {
+void text_draw(const char* text, f32 x0, f32 y0, f32 size) {
   const f32 tile_pixel = size * 1 / atlas_tile_size;
-  const f32 spacing = (size - tile_pixel * 3) * window_pixel_ndc[0];
-  const f32 y1 = y0 - window_pixel_ndc[1] * size;
+  const f32 spacing = (size - tile_pixel * 3) * window_pixel_ndc_x;
+  const f32 y1 = y0 - window_pixel_ndc_y * size;
   while (*text != '\0') {
     if (*text >= 'A' && *text <= 'Z') {
       u8 tile_x = *text - 'A';
-      const f32 x1 = x0 + window_pixel_ndc[0] * size;
+      const f32 x1 = x0 + window_pixel_ndc_x * size;
       // draw
       tile_draw(x0, y0, x1, y1, tile_x, 0, 0);
     }

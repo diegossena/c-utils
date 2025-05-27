@@ -68,6 +68,6 @@ typedef enum error_t {
 } error_t;
 
 void error(error_t code, const char* message, ...);
-export const char* error_cstr(error_t code);
+const char* error_cstr(error_t code);
 
 #endif

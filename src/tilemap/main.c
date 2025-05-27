@@ -50,45 +50,20 @@ void window_onkeydown(key_t key) {
   }
 }
 void window_onkeypress() {
-  if (false) {
-    const f32 speed = .1f;
-    if (window_key_pressed(KEY_UP)) {
-      global_tilemap->y -= speed;
-      if (global_tilemap->y < 0)
-        global_tilemap->y = 0;
-      window_updated = true;
-    } else if (window_key_pressed(KEY_DOWN)) {
-      global_tilemap->y += speed;
-      window_updated = true;
-    }
-    if (window_key_pressed(KEY_LEFT)) {
-      global_tilemap->x -= speed;
-      if (global_tilemap->x < 0)
-        global_tilemap->x = 0;
-      window_updated = true;
-    } if (window_key_pressed(KEY_RIGHT)) {
-      global_tilemap->x += speed;
-      window_updated = true;
-    }
-    if (window_updated) {
-      console_log("offset %f %f", global_tilemap->x, global_tilemap->y);
-    }
-  } else {
-    f32 distance = 1.f;
-    f32 distance_x = 0;
-    f32 distance_y = 0;
-    if (window_key_pressed(KEY_UP)) {
-      distance_y -= distance;
-    } else if (window_key_pressed(KEY_DOWN)) {
-      distance_y += distance;
-    }
-    if (window_key_pressed(KEY_LEFT)) {
-      distance_x -= distance;
-    } if (window_key_pressed(KEY_RIGHT)) {
-      distance_x += distance;
-    }
-    tilemap_moveto(global_tilemap->x + distance_x, global_tilemap->y + distance_y, .1f);
+  f32 distance = .1f;
+  f32 distance_x = 0;
+  f32 distance_y = 0;
+  if (window_key_pressed(KEY_UP)) {
+    distance_y -= distance;
+  } else if (window_key_pressed(KEY_DOWN)) {
+    distance_y += distance;
   }
+  if (window_key_pressed(KEY_LEFT)) {
+    distance_x -= distance;
+  } if (window_key_pressed(KEY_RIGHT)) {
+    distance_x += distance;
+  }
+  tilemap_move(global_tilemap->x + distance_x, global_tilemap->y + distance_y);
 }
 void window_onmousemove() {
   if (pointer_tile_id) {
@@ -133,10 +108,10 @@ void window_onrender() {
   if (pointer_tile_id > 0) {
     u8 tile_x = (pointer_tile_id - 1) % atlas_tiles_width;
     u8 tile_y = math_ceil((f32)pointer_tile_id / atlas_tiles_height) - 1.f;
-    f32 pointer_x0 = -1 + mouse_x * window_pixel_ndc[0] - global_tilemap->tile_ndc_pixel[0] / 2;
-    f32 pointer_y0 = 1 - mouse_y * window_pixel_ndc[1];
-    f32 pointer_x1 = pointer_x0 + global_tilemap->tile_ndc_pixel[0];
-    f32 pointer_y1 = pointer_y0 - global_tilemap->tile_ndc_pixel[1];
+    f32 pointer_x0 = -1 + mouse_x * window_pixel_ndc_x - global_tilemap->tile_ndc_pixel_x / 2;
+    f32 pointer_y0 = 1 - mouse_y * window_pixel_ndc_y;
+    f32 pointer_x1 = pointer_x0 + global_tilemap->tile_ndc_pixel_x;
+    f32 pointer_y1 = pointer_y0 - global_tilemap->tile_ndc_pixel_y;
     tile_draw(pointer_x0, pointer_y0, pointer_x1, pointer_y1, tile_x, tile_y, pointer_flags);
   }
 }
@@ -148,7 +123,6 @@ void window_onresize() {
     tilemap_onresize();
   }
 }
-// 508855 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Tilemap", "assets/atlas.bin");
   tilemap_load();

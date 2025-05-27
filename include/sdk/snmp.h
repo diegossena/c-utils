@@ -60,6 +60,6 @@ typedef enum snmp_error_t {
   SNMP_ERR_INCONSISTENTNAME,
 } snmp_error_t;
 
-export error_t snmp_request(udp_t, pdu_t*, ip4_t host);
+error_t snmp_request(udp_t, pdu_t*, ip4_t host);
 
 #endif

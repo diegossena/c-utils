@@ -56,10 +56,10 @@ typedef enum ansi_t {
   ANSI_BACK_LIGHTWHITE = 107,
 } ansi_t;
 
-export void console_color(ansi_t ansi);
-export void console_write(const char* message, ...);
-export void console_write_bin(u64);
-export void console_write_buffer(const u8* buffer, u64 size);
-export void console_write_str(const char* message, u64 length);
+void console_color(ansi_t ansi);
+void console_write(const char* message, ...);
+void console_write_bin(u64);
+void console_write_buffer(const u8* buffer, u64 size);
+void console_write_str(const char* message, u64 length);
 
 #endif

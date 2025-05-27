@@ -26,11 +26,11 @@ typedef struct hashset_t {
   // ...data
 } hashset_t;
 
-export hashset_t* hashset_new();
-export void hashset_free(hashset_t* this);
-export bool hashset_contains(const hashset_t* this, u64 hash);
-export bool hashset_add(hashset_t** this, u64 hash);
-export bool hashset_remove(hashset_t* this, const u64 hash);
-export u64* hashset_entries(const hashset_t* this);
+hashset_t* hashset_new();
+void hashset_free(hashset_t* this);
+bool hashset_contains(const hashset_t* this, u64 hash);
+bool hashset_add(hashset_t** this, u64 hash);
+bool hashset_remove(hashset_t* this, const u64 hash);
+u64* hashset_entries(const hashset_t* this);
 
 #endif

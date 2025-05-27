@@ -6,7 +6,7 @@
 
 #define CHUNK_SIZE 256
 
-#define tilemap_index(x, y, layer) layer * global_tilemap->rendered_area + y * global_tilemap->rendered_tiles[0] + x
+#define tilemap_index(x, y, layer) layer * global_tilemap->rendered_area + y * global_tilemap->rendered_tiles_x + x
 #define tilemap_tile(x, y, layer) global_tilemap->screen_tiles[tilemap_index(x, y, layer)]
 
 typedef enum tile_flag_t {
@@ -81,8 +81,10 @@ typedef struct tilemap_t {
     PLAYER_STATE_MAX
   } moving_state;
   // render
-  f32 visible_tiles[2];
-  u8 rendered_tiles[2];
+  f32 visible_tiles_x;
+  f32 visible_tiles_y;
+  u8 rendered_tiles_x;
+  u8 rendered_tiles_y;
   u16 rendered_area;
   u16 rendered_total;
   u8 tile_size;
@@ -95,19 +97,22 @@ typedef struct tilemap_t {
    */
   chunk_t chunks[CHUNK_MAX];
   tile_t** screen_tiles; // [z][y][x]
-  f32 tile_ndc_pixel[2];
+  f32 tile_ndc_pixel_x;
+  f32 tile_ndc_pixel_y;
 } tilemap_t;
 
-export void tilemap_load();
-export void tilemap_unload();
-export void tilemap_onkeypress();
-export void tilemap_onresize();
-export void tilemap_draw();
-export void tilemap_camera_center(f32 x, f32 y);
-export void tilemap_moveto(f32 x, f32 y, f32 duration);
-export void tilemap_chunk_load();
+void tilemap_load();
+void tilemap_unload();
+void tilemap_onkeypress();
+void tilemap_onresize();
+void tilemap_draw();
+void tilemap_set_center(f32 x, f32 y);
+void tilemap_chunk_load();
 
-export tile_t* tile_from_screen();
+inline void tilemap_moveto(f32 x, f32 y, f32 duration);
+inline void tilemap_move(f32 x, f32 y);
+
+inline tile_t* tile_from_screen();
 
 extern tilemap_t* global_tilemap;
 

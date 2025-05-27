@@ -8,8 +8,8 @@
 extern void* __async;
 extern thread_t* __async_thread;
 
-export void async_startup();
-export void async_shutdown();
+void async_startup();
+void async_shutdown();
 
 void __async_worker();
 
