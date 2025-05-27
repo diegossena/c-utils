@@ -229,10 +229,13 @@ void tilemap_onresize() {
   window_updated = true;
 }
 tile_t* tile_from_screen() {
-  f32 mouse_offset_x = (f32)mouse_x / (f32)global_tilemap->tile_size + EPSILON;
-  f32 mouse_offset_y = (f32)mouse_y / (f32)global_tilemap->tile_size + EPSILON;
-  u8 tile_x = math_floorf(global_tilemap->x + mouse_offset_x);
-  u8 tile_y = math_floorf(global_tilemap->y + mouse_offset_y);
+  f32 mouse_offset_x = math_float_tolerance((f32)mouse_x / (f32)global_tilemap->tile_size);
+  f32 mouse_offset_y = math_float_tolerance((f32)mouse_y / (f32)global_tilemap->tile_size);
+  f32 screen_offset_x = (global_tilemap->x - (u32)global_tilemap->x);
+  f32 screen_offset_y = (global_tilemap->y - (u32)global_tilemap->y);
+  u8 tile_x = math_floorf(screen_offset_x + mouse_offset_x);
+  u8 tile_y = math_floorf(screen_offset_y + mouse_offset_y);
+  console_log("screen_offset %f %f", screen_offset_x, screen_offset_y);
   return tilemap_tile(tile_x, tile_y, global_tilemap->z);
 }
 void tilemap_moveto(f32 x, f32 y, f32 duration) {
@@ -286,7 +289,6 @@ void tilemap_move(f32 x, f32 y) {
       const i8 chunk_offset_x = (world_x - chunk_center->x) / CHUNK_SIZE;
       const i8 chunk_offset_y = (world_y - chunk_center->y) / CHUNK_SIZE;
       const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
-      console_log("chunk_index %d", chunk_index);
       assert(chunk_index < CHUNK_MAX);
       chunk_t* chunk = &global_tilemap->chunks[chunk_index];
       assert(chunk != null);
