@@ -20,12 +20,6 @@ typedef struct tile_t {
   u8 flags; // tile_flag_t
 } tile_t;
 
-typedef struct warp_t {
-  u8 x, y;
-  u8 chunk_x, chunk_y, chunk_z;
-  u8 pos_x, pos_y, pos_z;
-} warp_t;
-
 typedef enum chunk_position_t {
   // X Y
   CHUNK_TOP_LEFT,
@@ -52,21 +46,18 @@ typedef enum layer_t {
 } layer_t;
 
 typedef struct chunk_t {
-  u16 x, y;
-  u8 z;
-  u16 x_end, y_end;
+  i8 x, y;
+  i8 z;
   tile_t tiles[CHUNK_SIZE][CHUNK_SIZE][LAYER_MAX]; // [x][y][layer]
-  u8 warps_count;
-  warp_t* warps;
 } chunk_t;
 
 typedef struct tilemap_t {
   // world
   f32 x, y;
-  u8 z;
+  i8 z;
   // camera_movement
-  vec2_f32_t start_offset;
-  vec2_f32_t target_offset;
+  f32 start_x, start_y;
+  f32 target_x, target_y;
   f32 move_timer;
   f32 move_duration;
   bool moving;
