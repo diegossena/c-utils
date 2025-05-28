@@ -120,7 +120,7 @@ i32 math_random() {
 i32 math_random_in_range(i32 min, i32 max) {
   return (rand() % (max - min + 1)) + min;
 }
-f32 math_float_tolerance(f32 number) {
+f32 math_round_epsilonf(f32 number) {
   i32 round = math_roundf(number);
   f32 difference = math_abs(number - round);
   if (difference < EPSILON) {
