@@ -217,7 +217,7 @@ tile_t* tile_from_screen() {
   f32 screen_offset_y = (global_tilemap->y - (u32)global_tilemap->y);
   u8 tile_x = math_floorf(screen_offset_x + mouse_offset_x);
   u8 tile_y = math_floorf(screen_offset_y + mouse_offset_y);
-  console_log("screen_offset %f %f", screen_offset_x, screen_offset_y);
+  // console_log("screen_offset %f %f", screen_offset_x, screen_offset_y);
   return tilemap_tile(tile_x, tile_y, global_tilemap->z);
 }
 void tilemap_moveto(f32 x, f32 y, f32 duration) {
@@ -253,7 +253,7 @@ void tilemap_move(f32 world_x, f32 world_y) {
   // camera_update
   global_tilemap->x = math_float_tolerance(world_x);
   global_tilemap->y = math_float_tolerance(world_y);
-  console_log("tilemap_move %f %f -> %f %f", world_x, world_y, global_tilemap->x, global_tilemap->y);
+  // console_log("tilemap_move %f %f -> %f %f", world_x, world_y, global_tilemap->x, global_tilemap->y);
   // chunks->screen_tiles
   const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
   for (u8 y = 0; y < global_tilemap->rendered_tiles_y; y++) {
@@ -296,10 +296,10 @@ void tilemap_draw() {
     window_updated = true;
   }
   // draw
-  const f32 start_x0 = -1.f - (global_tilemap->x - (i32)global_tilemap->x) * global_tilemap->tile_ndc_pixel_x;
-  const f32 start_y0 = 1.f + (global_tilemap->y - (i32)global_tilemap->y) * global_tilemap->tile_ndc_pixel_y;
-  f32 x0 = start_x0;
-  f32 y0 = start_y0;
+  const f32 start_x0 = -1.f - (global_tilemap->x - math_floorf(global_tilemap->x)) * global_tilemap->tile_ndc_pixel_x;
+  const f32 start_y0 = 1.f + (global_tilemap->y - math_floorf(global_tilemap->y)) * global_tilemap->tile_ndc_pixel_y;
+  f32 x0 = 0;
+  f32 y0 = 0;
   f32 x1 = 0;
   f32 y1 = 0;
   tile_t** screen_tile = global_tilemap->screen_tiles;
@@ -324,6 +324,7 @@ void tilemap_draw() {
         y1 = y0 - global_tilemap->tile_ndc_pixel_y;
         tile_t tile = **screen_tile++;
         if (tile.id) {
+          // console_log("tile_draw [%d %d] [%f %f]", x, y, x0, x1);
           u8 tile_x = (tile.id - 1) % atlas_tiles_width;
           u8 tile_y = math_ceil((f32)tile.id / atlas_tiles_height) - 1.f;
           tile_draw(x0, y0, x1, y1, tile_x, tile_y, tile.flags);

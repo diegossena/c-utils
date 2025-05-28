@@ -39,7 +39,7 @@ void window_rect_fill(
   f32 x0, f32 y0, f32 x1, f32 y1,
   f32 r, f32 g, f32 b, f32 a
 );
-bool window_key_pressed(key_t);
+inline bool window_key_pressed(key_t);
 void vertices_reserve(u64 size);
 void indexes_reserve(u64 size);
 
