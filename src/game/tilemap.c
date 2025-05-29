@@ -2,6 +2,7 @@
 #include <game/tilemap.h>
 #include <game/transition.scene.h>
 #include <sdk/window.h>
+#include <sdk/time.h>
 
 #include <stdio.h>
 
@@ -252,6 +253,7 @@ void tilemap_move(f32 world_x, f32 world_y) {
   // camera_update
   global_tilemap->x = math_round_epsilonf(world_x);
   global_tilemap->y = math_round_epsilonf(world_y);
+  console_log("%lld tilemap_move %f %f", time_now(), global_tilemap->x, global_tilemap->y);
   // chunks->screen_tiles
   const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
   for (u8 y = 0; y < global_tilemap->rendered_tiles_y; y++) {
@@ -261,13 +263,16 @@ void tilemap_move(f32 world_x, f32 world_y) {
       // chunk_find
       const i8 chunk_offset_x = (world_x - chunk_center->x) / CHUNK_SIZE;
       const i8 chunk_offset_y = (world_y - chunk_center->y) / CHUNK_SIZE;
+      if (y == 0 && x == 0) {
+        console_log("%lld tilemap_move %d %d", time_now(), chunk_offset_x, chunk_offset_y);
+      }
       const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
       assert(chunk_index < CHUNK_MAX);
       chunk_t* chunk = &global_tilemap->chunks[chunk_index];
       assert(chunk != null);
       // chunk_tile
-      u8 chunk_tile_x = world_x % CHUNK_SIZE;
-      u8 chunk_tile_y = world_y % CHUNK_SIZE;
+      u8 chunk_tile_x = world_x & (CHUNK_SIZE - 1);
+      u8 chunk_tile_y = world_y & (CHUNK_SIZE - 1);
       tile_t* chunk_tile = chunk->tiles[chunk_tile_x][chunk_tile_y];
       assert(chunk_tile != null);
       for (u8 layer = 0; layer < LAYER_MAX; layer++) {

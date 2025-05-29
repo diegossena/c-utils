@@ -4,7 +4,8 @@
 #include <sdk/types.h>
 #include <sdk/keyboard.h>
 
-#define CHUNK_SIZE 256
+// #define CHUNK_SIZE 256
+#define CHUNK_SIZE 16
 
 #define tilemap_index(x, y, layer) layer * global_tilemap->rendered_area + y * global_tilemap->rendered_tiles_x + x
 #define tilemap_tile(x, y, layer) global_tilemap->screen_tiles[tilemap_index(x, y, layer)]
@@ -101,7 +102,7 @@ void tilemap_set_center(f32 x, f32 y);
 void tilemap_chunk_load();
 
 inline void tilemap_moveto(f32 x, f32 y, f32 duration);
-inline void tilemap_move(f32 x, f32 y);
+void tilemap_move(f32 x, f32 y);
 
 inline tile_t* tile_from_screen();
 
