@@ -17,8 +17,7 @@ i32 main(i32 argc, char** argv) {
     .port = 80,
     .method = HTTP_GET,
     .headers = &headers,
-    .headers_length = headers_length,
-    .onconnect = onconnect,
+    .headers_length = headers_length
   };
   console_log("test");
   return 0;
