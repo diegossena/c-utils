@@ -8,6 +8,12 @@ export u64 string_length(const char* this) {
   while (*ptr != '\0') ++ptr;
   return ptr - this;
 }
+export char* string_copy(char* this, const char* src) {
+  while (*src != '\0') {
+    *this++ = *src++;
+  }
+  return this;
+}
 export u64 string_nlength(const char* this, u64 count) {
   const char* ptr = this;
   while (count-- && *ptr != '\0') ++ptr;

@@ -21,19 +21,17 @@ typedef enum http_status_t {
   HTTP_NOT_FOUND = 404
 } http_status_t;
 
-typedef struct http_request_t {
-  const char* hostname;
-  u16 port;
+// typedef struct http_request_t {
+//   const char* hostname;
+//   u16 port;
 
-  const char* method;
-  const char* path;
+//   const char* method;
+//   const char* path;
 
-  http_header_t* headers;
-  u8 headers_length;
-} http_request_t;
+//   http_header_t headers[TINY_SIZE];
+//   u8 headers_length;
+// } http_request_t;
 
 const char* HTTP_GET = "GET";
-
-void http_request(const http_request_t* this);
 
 #endif
