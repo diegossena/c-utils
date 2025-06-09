@@ -3,6 +3,7 @@
 
 #include <sdk/types.h>
 #include <sdk/keyboard.h>
+#include <sdk/taskmanager.h>
 
 // #define CHUNK_SIZE 256
 #define CHUNK_SIZE 16
@@ -20,7 +21,13 @@ typedef struct tile_t {
   u16 id;
   u8 flags; // tile_flag_t
 } tile_t;
-
+/**
+ * [9] Z+1
+ * [0][1][2]
+ * [3][4][5]
+ * [6][7][8]
+ * [10] Z-1
+ */
 typedef enum chunk_position_t {
   // X Y
   CHUNK_TOP_LEFT,
@@ -78,15 +85,7 @@ typedef struct tilemap_t {
   u8 rendered_tiles_x;
   u8 rendered_tiles_y;
   u16 rendered_area;
-  u16 rendered_total;
   u8 tile_size;
-  /**
-   * [10] Z+1
-   * [1][2][3]
-   * [4][0][6]
-   * [7][8][9]
-   * [11] Z-1
-   */
   chunk_t chunks[CHUNK_MAX];
   tile_t** screen_tiles; // [z][y][x]
   f32 tile_ndc_pixel_x;
@@ -99,7 +98,9 @@ void tilemap_onkeypress();
 void tilemap_onresize();
 void tilemap_draw();
 void tilemap_set_center(f32 x, f32 y);
-void tilemap_chunk_load();
+
+void tilemap_chunk_inicialize();
+void _tilemap_chunk_update();
 
 inline void tilemap_moveto(f32 x, f32 y, f32 duration);
 void tilemap_move(f32 x, f32 y);

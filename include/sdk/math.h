@@ -36,7 +36,7 @@ inline f32 math_roundf(f32 number);
 inline f64 math_ceil(f64 number);
 inline i32 math_random();
 inline i32 math_random_in_range(i32 min, i32 max);
-inline f32 math_round_epsilonf(f32 number);
+inline f32 math_epsilon_roundf(f32 number);
 
 f64 math_log10(f64);
 u64 math_hash_jenkins(const char* data, u64 size);

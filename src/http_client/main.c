@@ -3,9 +3,7 @@
 #include <sdk/http.h>
 #include <sdk/unity.h>
 
-void onconnect() {
-
-}
+void onconnect() {}
 
 i32 main(i32 argc, char** argv) {
   const http_header_t headers [] = {

@@ -14,7 +14,7 @@
 
 tilemap_t* global_tilemap = 0;
 
-void __tilemap_chunk_load(chunk_t* chunk) {
+void _tilemap_chunk_load(chunk_position_t position) {
   if (chunk->z == MIN_I8)
     goto chunk_empty;
   char file_path [] = CHUNK_FILE_NAME;
@@ -38,7 +38,9 @@ chunk_error:
 chunk_empty:
   memory_fill(chunk->tiles, '\0', sizeof(chunk->tiles));
 }
-void tilemap_chunk_save(chunk_t* chunk) {
+void _tilemap_chunk_update(chunk_position_t position) {
+  chunk_t* chunk = &global_tilemap->chunks[position];
+  // chunk_save
   char file_path [] = CHUNK_FILE_NAME;
   string_format(
     file_path, sizeof(file_path),
@@ -46,14 +48,18 @@ void tilemap_chunk_save(chunk_t* chunk) {
   );
   FILE* file = fopen(file_path, "wb");
   if (!file) {
-    error(ERR_NOT_FOUND, "__tilemap_chunk_save '%s'", file_path);
+    error(ERR_NOT_FOUND, "tilemap_chunk_save '%s'", file_path);
   }
   u64 result;
   result = fwrite(&chunk->tiles, sizeof(chunk->tiles), 1, file);
   assert(result);
   fclose(file);
+  // chunk_update
+  const i8 chunk_x = (position % 3) - 1 + global_tilemap->x / CHUNK_SIZE;
+  const i8 chunk_y = (position / 3) - 1 + global_tilemap->y / CHUNK_SIZE;
+  _tilemap_chunk_load();
 }
-void tilemap_chunk_load() {
+void tilemap_chunk_inicialize() {
   // center
   const i8 chunk_x = global_tilemap->x / CHUNK_SIZE;
   const i8 chunk_y = global_tilemap->y / CHUNK_SIZE;
@@ -61,7 +67,7 @@ void tilemap_chunk_load() {
   chunk->x = chunk_x;
   chunk->y = chunk_y;
   chunk->z = global_tilemap->z;
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // top-left
   chunk = &global_tilemap->chunks[CHUNK_TOP_LEFT];
   if (chunk_x > MIN_I8 && chunk_y > MIN_I8) {
@@ -71,7 +77,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // top
   chunk = &global_tilemap->chunks[CHUNK_TOP];
   if (chunk_y < MAX_I8) {
@@ -81,7 +87,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // top-right
   chunk = &global_tilemap->chunks[CHUNK_TOP_RIGHT];
   if (chunk_y > MIN_I8 && chunk_x < MAX_I8) {
@@ -91,7 +97,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // left
   chunk = &global_tilemap->chunks[CHUNK_LEFT];
   if (chunk_x > MIN_I8) {
@@ -101,7 +107,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // right
   chunk = &global_tilemap->chunks[CHUNK_RIGHT];
   if (chunk_x < MAX_I8) {
@@ -111,7 +117,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // bottom
   chunk = &global_tilemap->chunks[CHUNK_BOTTOM];
   if (chunk_y > MIN_I8) {
@@ -121,7 +127,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // up
   chunk = &global_tilemap->chunks[CHUNK_UP];
   if (global_tilemap->z < MAX_I8) {
@@ -131,7 +137,7 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
   // down
   if (global_tilemap->z < MIN_I8) {
     chunk = &global_tilemap->chunks[CHUNK_DOWN];
@@ -141,12 +147,12 @@ void tilemap_chunk_load() {
   } else {
     chunk->z = MIN_I8;
   }
-  QueueUserWorkItem((LPTHREAD_START_ROUTINE)__tilemap_chunk_load, chunk, 0);
+  tashmanager_push(_tilemap_chunk_load, chunk);
 }
 
 void tilemap_load() {
   global_tilemap = memory_alloc0(sizeof(tilemap_t));
-  tilemap_chunk_load();
+  tilemap_chunk_inicialize();
   // global_tilemap
   global_tilemap->tile_size = 30;
   global_tilemap->player_direction = KEY_DOWN;
@@ -161,8 +167,9 @@ void tilemap_load() {
 void tilemap_unload() {
   assert(global_tilemap != null);
   assert(global_tilemap->screen_tiles != null);
-  vertices_reserve(vertices_capacity - global_tilemap->rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED);
-  indexes_reserve(indexes_capacity - global_tilemap->rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED);
+  const u64 rendered_total = global_tilemap->rendered_area * LAYER_MAX;
+  vertices_reserve(vertices_capacity - rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED);
+  indexes_reserve(indexes_capacity - rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED);
   memory_free(global_tilemap->screen_tiles);
   memory_free(global_tilemap);
   global_tilemap = 0;
@@ -177,8 +184,9 @@ void tilemap_onresize() {
   const u8 rendered_tiles_x = math_ceil(global_tilemap->visible_tiles_x) + 2;
   const u8 rendered_tiles_y = math_ceil(global_tilemap->visible_tiles_y) + 2;
   const u64 rendered_area = rendered_tiles_x * rendered_tiles_y;
-  const u64 rendered_total = rendered_area * LAYER_MAX;
-  if (global_tilemap->rendered_total != rendered_total) {
+  if (global_tilemap->rendered_area != rendered_area) {
+    const u64 previous_rendered_total = global_tilemap->rendered_area * LAYER_MAX;
+    const u64 rendered_total = rendered_area * LAYER_MAX;
     if (global_tilemap->screen_tiles) {
       global_tilemap->screen_tiles = (tile_t**)memory_realloc0(global_tilemap->screen_tiles, rendered_total * sizeof(tile_t*));
       assert(global_tilemap != null);
@@ -186,16 +194,16 @@ void tilemap_onresize() {
       global_tilemap->screen_tiles = (tile_t**)memory_alloc0(rendered_total * sizeof(tile_t*));
     }
     // vertices
-    const u64 previous_vertices = global_tilemap->rendered_total
-      ? global_tilemap->rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED
+    const u64 previous_vertices = previous_rendered_total
+      ? previous_rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED
       : 0;
     vertices_reserve(
       vertices_capacity
       + rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED
       - previous_vertices
     );
-    const u64 previous_indexes = global_tilemap->rendered_total
-      ? global_tilemap->rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED
+    const u64 previous_indexes = previous_rendered_total
+      ? previous_rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED
       : 0;
     indexes_reserve(
       indexes_capacity
@@ -205,15 +213,14 @@ void tilemap_onresize() {
     global_tilemap->rendered_tiles_x = rendered_tiles_x;
     global_tilemap->rendered_tiles_y = rendered_tiles_y;
     global_tilemap->rendered_area = rendered_area;
-    global_tilemap->rendered_total = rendered_total;
   }
   global_tilemap->tile_ndc_pixel_x = global_tilemap->tile_size * window_pixel_ndc_x;
   global_tilemap->tile_ndc_pixel_y = global_tilemap->tile_size * window_pixel_ndc_y;
   window_updated = true;
 }
 tile_t* tile_from_screen() {
-  f32 mouse_offset_x = math_round_epsilonf((f32)mouse_x / (f32)global_tilemap->tile_size);
-  f32 mouse_offset_y = math_round_epsilonf((f32)mouse_y / (f32)global_tilemap->tile_size);
+  f32 mouse_offset_x = math_epsilon_roundf((f32)mouse_x / (f32)global_tilemap->tile_size);
+  f32 mouse_offset_y = math_epsilon_roundf((f32)mouse_y / (f32)global_tilemap->tile_size);
   f32 screen_offset_x = global_tilemap->x - math_floorf(global_tilemap->x);
   f32 screen_offset_y = global_tilemap->y - math_floorf(global_tilemap->y);
   u8 tile_x = math_floorf(screen_offset_x + mouse_offset_x);
@@ -250,12 +257,32 @@ void tilemap_onkeypress() {
   }
 }
 void tilemap_move(f32 world_x, f32 world_y) {
-  // camera_update
-  global_tilemap->x = math_round_epsilonf(world_x);
-  global_tilemap->y = math_round_epsilonf(world_y);
-  console_log("%lld tilemap_move %f %f", time_now(), global_tilemap->x, global_tilemap->y);
-  // chunks->screen_tiles
   const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
+  // camera_update
+  global_tilemap->x = math_epsilon_roundf(world_x);
+  global_tilemap->y = math_epsilon_roundf(world_y);
+  // chunks_update
+  const i8 chunk_offset_x = (global_tilemap->x - chunk_center->x) / CHUNK_SIZE;
+  const i8 chunk_offset_y = (global_tilemap->y - chunk_center->y) / CHUNK_SIZE;
+  if (chunk_offset_x != 0 || chunk_offset_y != 0) {
+    if (chunk_offset_x == -1) {
+      for (u8 x = 2; x > 0; x--) {
+        for (u8 y = 0; y < 3; y++) {
+          chunk_t* chunk = &global_tilemap->chunks[x + y * 3];
+          global_tilemap->chunks[x - 1 + y * 3] = *chunk;
+          chunk->x += chunk_offset_x;
+        }
+      }
+      _tilemap_chunk_save(&global_tilemap->chunks[CHUNK_TOP_RIGHT]);
+      tashmanager_push(_tilemap_chunk_load, &global_tilemap->chunks[CHUNK_TOP_RIGHT]);
+
+      tashmanager_push(_tilemap_chunk_load, &global_tilemap->chunks[CHUNK_RIGHT]);
+      tashmanager_push(_tilemap_chunk_load, &global_tilemap->chunks[CHUNK_BOTTOM_RIGHT]);
+    } else if (chunk_offset_x == 1) {
+
+    }
+  }
+  // chunks->screen_tiles
   for (u8 y = 0; y < global_tilemap->rendered_tiles_y; y++) {
     for (u8 x = 0; x < global_tilemap->rendered_tiles_x; x++) {
       i32 world_x = math_floorf(global_tilemap->x + x);
@@ -263,10 +290,10 @@ void tilemap_move(f32 world_x, f32 world_y) {
       // chunk_find
       const i8 chunk_offset_x = (world_x - chunk_center->x) / CHUNK_SIZE;
       const i8 chunk_offset_y = (world_y - chunk_center->y) / CHUNK_SIZE;
+      const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
       if (y == 0 && x == 0) {
         console_log("%lld tilemap_move %d %d", time_now(), chunk_offset_x, chunk_offset_y);
       }
-      const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
       assert(chunk_index < CHUNK_MAX);
       chunk_t* chunk = &global_tilemap->chunks[chunk_index];
       assert(chunk != null);
@@ -284,7 +311,7 @@ void tilemap_move(f32 world_x, f32 world_y) {
   window_updated = true;
 }
 void tilemap_draw() {
-  // moveto_update
+  // moving_animation
   if (global_tilemap->moving) {
     global_tilemap->move_timer += window_deltatime;
     f32 progress = global_tilemap->move_timer / global_tilemap->move_duration;

@@ -3,7 +3,6 @@
 
 #include <sdk/types.h>
 #include <sdk/memory.h>
-#include <sdk/buffer.h>
 #include <sdk/queue.h>
 #include <sdk/string.h>
 
