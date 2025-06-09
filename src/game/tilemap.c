@@ -9,22 +9,22 @@
 #define TILEMAP_VERTICES_USED QUAD_VERTEX_COUNT
 #define TILEMAP_INDEXES_USED QUAD_INDEX_COUNT
 
-#define CHUNK_FILE_NAME "assets/world/tiles_-xxx_-yyy_-zzz.map"
-#define CHUNK_FILE_FORMAT "assets/world/tiles_%hi_%hi_%hi.map"
+#define CHUNK_FILE_FORMAT "assets/world/tiles_%hi=_%hi_%hi.map"
+#define CHUNK_FILE_NAME_SIZE 38
 
 tilemap_t* global_tilemap = 0;
 
-void _tilemap_chunk_load(chunk_position_t position) {
+void _tilemap_chunk_load(chunk_t* chunk) {
   if (chunk->z == MIN_I8)
     goto chunk_empty;
-  char file_path [] = CHUNK_FILE_NAME;
+  char file_path[CHUNK_FILE_NAME_SIZE];
   string_format(
     file_path, sizeof(file_path),
     CHUNK_FILE_FORMAT, chunk->x, chunk->y, chunk->z
   );
   FILE* file = fopen(file_path, "rb");
   if (!file) {
-    error(ERR_NOT_FOUND, "__tilemap_chunk_load '%s'", file_path);
+    error(ERR_NOT_FOUND, "tilemap_chunk_load '%s'", file_path);
     goto chunk_error;
   }
   u64 result;
@@ -33,6 +33,7 @@ void _tilemap_chunk_load(chunk_position_t position) {
     goto chunk_error;
   fclose(file);
 chunk_error:
+  global_tilemap->screen_tiles_dirty = true;
   window_updated = true;
   return;
 chunk_empty:
@@ -40,119 +41,48 @@ chunk_empty:
 }
 void _tilemap_chunk_update(chunk_position_t position) {
   chunk_t* chunk = &global_tilemap->chunks[position];
-  // chunk_save
-  char file_path [] = CHUNK_FILE_NAME;
-  string_format(
-    file_path, sizeof(file_path),
-    CHUNK_FILE_FORMAT, chunk->x, chunk->y, chunk->z
-  );
-  FILE* file = fopen(file_path, "wb");
-  if (!file) {
-    error(ERR_NOT_FOUND, "tilemap_chunk_save '%s'", file_path);
-  }
-  u64 result;
-  result = fwrite(&chunk->tiles, sizeof(chunk->tiles), 1, file);
-  assert(result);
-  fclose(file);
-  // chunk_update
   const i8 chunk_x = (position % 3) - 1 + global_tilemap->x / CHUNK_SIZE;
-  const i8 chunk_y = (position / 3) - 1 + global_tilemap->y / CHUNK_SIZE;
-  _tilemap_chunk_load();
-}
-void tilemap_chunk_inicialize() {
-  // center
-  const i8 chunk_x = global_tilemap->x / CHUNK_SIZE;
-  const i8 chunk_y = global_tilemap->y / CHUNK_SIZE;
-  chunk_t* chunk = &global_tilemap->chunks[CHUNK_CENTER];
+  const i8 chunk_y = math_floorf(position / 3 - 1) + global_tilemap->y / CHUNK_SIZE;
+  const i8 chunk_z = global_tilemap->z;
+  if (chunk->x == chunk_x && chunk->y == chunk_y && chunk->z == chunk_z)
+    return;
+  i8 save_x = chunk->x;
+  i8 save_y = chunk->y;
+  i8 save_z = chunk->z;
   chunk->x = chunk_x;
   chunk->y = chunk_y;
-  chunk->z = global_tilemap->z;
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // top-left
-  chunk = &global_tilemap->chunks[CHUNK_TOP_LEFT];
-  if (chunk_x > MIN_I8 && chunk_y > MIN_I8) {
-    chunk->x = chunk_x - 1;
-    chunk->y = chunk_y - 1;
+  chunk->z = chunk_z;
+  // chunk_save
+  char file_path[CHUNK_FILE_NAME_SIZE];
+  string_format(
+    file_path, sizeof(file_path),
+    CHUNK_FILE_FORMAT, save_x, save_y, save_z
+  );
+  FILE* file = fopen(file_path, "wb");
+  if (file) {
+    u64 result;
+    result = fwrite(&chunk->tiles, sizeof(chunk->tiles), 1, file);
+    assert(result);
+    fclose(file);
+  } else {
+    error(ERR_NOT_FOUND, "tilemap_chunk_save '%s'", file_path);
+  }
+  // chunk_update
+  _tilemap_chunk_load(chunk);
+}
+void _tilemap_chunk_inicialize() {
+  for (u8 position = 0; position <= CHUNK_BOTTOM_RIGHT; position++) {
+    chunk_t* chunk = &global_tilemap->chunks[position];
+    chunk->x = (position % 3) - 1 + global_tilemap->x / CHUNK_SIZE;
+    chunk->y = math_floorf(position / 3 - 1) + global_tilemap->y / CHUNK_SIZE;
     chunk->z = global_tilemap->z;
-  } else {
-    chunk->z = MIN_I8;
+    tashmanager_push(_tilemap_chunk_load, chunk);
   }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // top
-  chunk = &global_tilemap->chunks[CHUNK_TOP];
-  if (chunk_y < MAX_I8) {
-    chunk->x = chunk_x;
-    chunk->y = chunk_y + 1;
-    chunk->z = global_tilemap->z;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // top-right
-  chunk = &global_tilemap->chunks[CHUNK_TOP_RIGHT];
-  if (chunk_y > MIN_I8 && chunk_x < MAX_I8) {
-    chunk->x = chunk_x + 1;
-    chunk->y = chunk_y + 1;
-    chunk->z = global_tilemap->z;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // left
-  chunk = &global_tilemap->chunks[CHUNK_LEFT];
-  if (chunk_x > MIN_I8) {
-    chunk->x = chunk_x - 1;
-    chunk->y = chunk_y;
-    chunk->z = global_tilemap->z;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // right
-  chunk = &global_tilemap->chunks[CHUNK_RIGHT];
-  if (chunk_x < MAX_I8) {
-    chunk->x = chunk_x + 1;
-    chunk->y = chunk_y;
-    chunk->z = global_tilemap->z;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // bottom
-  chunk = &global_tilemap->chunks[CHUNK_BOTTOM];
-  if (chunk_y > MIN_I8) {
-    chunk->x = chunk_x;
-    chunk->y = chunk_y - 1;
-    chunk->z = global_tilemap->z;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // up
-  chunk = &global_tilemap->chunks[CHUNK_UP];
-  if (global_tilemap->z < MAX_I8) {
-    chunk->x = chunk_x;
-    chunk->y = chunk_y;
-    chunk->z = global_tilemap->z + 1;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
-  // down
-  if (global_tilemap->z < MIN_I8) {
-    chunk = &global_tilemap->chunks[CHUNK_DOWN];
-    chunk->x = chunk_x;
-    chunk->y = chunk_y;
-    chunk->z = global_tilemap->z - 1;
-  } else {
-    chunk->z = MIN_I8;
-  }
-  tashmanager_push(_tilemap_chunk_load, chunk);
 }
 
 void tilemap_load() {
   global_tilemap = memory_alloc0(sizeof(tilemap_t));
-  tilemap_chunk_inicialize();
+  _tilemap_chunk_inicialize();
   // global_tilemap
   global_tilemap->tile_size = 30;
   global_tilemap->player_direction = KEY_DOWN;
@@ -257,54 +187,29 @@ void tilemap_onkeypress() {
   }
 }
 void tilemap_move(f32 world_x, f32 world_y) {
-  const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
   // camera_update
   global_tilemap->x = math_epsilon_roundf(world_x);
   global_tilemap->y = math_epsilon_roundf(world_y);
   // chunks_update
+  const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
   const i8 chunk_offset_x = (global_tilemap->x - chunk_center->x) / CHUNK_SIZE;
   const i8 chunk_offset_y = (global_tilemap->y - chunk_center->y) / CHUNK_SIZE;
   if (chunk_offset_x != 0 || chunk_offset_y != 0) {
     if (chunk_offset_x == -1) {
       for (u8 x = 2; x > 0; x--) {
         for (u8 y = 0; y < 3; y++) {
-          chunk_t* chunk = &global_tilemap->chunks[x + y * 3];
-          global_tilemap->chunks[x - 1 + y * 3] = *chunk;
-          chunk->x += chunk_offset_x;
+          global_tilemap->chunks[x - 1 + y * 3] = global_tilemap->chunks[x + y * 3];
         }
       }
-      _tilemap_chunk_save(&global_tilemap->chunks[CHUNK_TOP_RIGHT]);
-      tashmanager_push(_tilemap_chunk_load, &global_tilemap->chunks[CHUNK_TOP_RIGHT]);
-
-      tashmanager_push(_tilemap_chunk_load, &global_tilemap->chunks[CHUNK_RIGHT]);
-      tashmanager_push(_tilemap_chunk_load, &global_tilemap->chunks[CHUNK_BOTTOM_RIGHT]);
     } else if (chunk_offset_x == 1) {
-
+      for (u8 x = 0; x > 3; x++) {
+        for (u8 y = 0; y < 3; y++) {
+          global_tilemap->chunks[x - 1 + y * 3] = global_tilemap->chunks[x + y * 3];
+        }
+      }
     }
-  }
-  // chunks->screen_tiles
-  for (u8 y = 0; y < global_tilemap->rendered_tiles_y; y++) {
-    for (u8 x = 0; x < global_tilemap->rendered_tiles_x; x++) {
-      i32 world_x = math_floorf(global_tilemap->x + x);
-      i32 world_y = math_floorf(global_tilemap->y + y);
-      // chunk_find
-      const i8 chunk_offset_x = (world_x - chunk_center->x) / CHUNK_SIZE;
-      const i8 chunk_offset_y = (world_y - chunk_center->y) / CHUNK_SIZE;
-      const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
-      if (y == 0 && x == 0) {
-        console_log("%lld tilemap_move %d %d", time_now(), chunk_offset_x, chunk_offset_y);
-      }
-      assert(chunk_index < CHUNK_MAX);
-      chunk_t* chunk = &global_tilemap->chunks[chunk_index];
-      assert(chunk != null);
-      // chunk_tile
-      u8 chunk_tile_x = world_x & (CHUNK_SIZE - 1);
-      u8 chunk_tile_y = world_y & (CHUNK_SIZE - 1);
-      tile_t* chunk_tile = chunk->tiles[chunk_tile_x][chunk_tile_y];
-      assert(chunk_tile != null);
-      for (u8 layer = 0; layer < LAYER_MAX; layer++) {
-        tilemap_tile(x, y, layer) = &chunk_tile[layer];
-      }
+    for (u8 position = 0; position <= CHUNK_BOTTOM_RIGHT; position++) {
+      tashmanager_push(_tilemap_chunk_update, position);
     }
   }
   // render_request
@@ -324,6 +229,32 @@ void tilemap_draw() {
       (global_tilemap->target_y - global_tilemap->start_y) * progress + global_tilemap->start_y
     );
     window_updated = true;
+  }
+  // chunks->screen_tiles
+  const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];
+  if (global_tilemap->screen_tiles_dirty) {
+    global_tilemap->screen_tiles_dirty = false;
+    for (u8 y = 0; y < global_tilemap->rendered_tiles_y; y++) {
+      for (u8 x = 0; x < global_tilemap->rendered_tiles_x; x++) {
+        i32 world_x = math_floorf(global_tilemap->x + x);
+        i32 world_y = math_floorf(global_tilemap->y + y);
+        // chunk_find
+        const i8 chunk_offset_x = (world_x - chunk_center->x) / CHUNK_SIZE;
+        const i8 chunk_offset_y = (world_y - chunk_center->y) / CHUNK_SIZE;
+        const u8 chunk_index = CHUNK_CENTER + chunk_offset_y * 3 + chunk_offset_x;
+        assert(chunk_index < CHUNK_MAX);
+        chunk_t* chunk = &global_tilemap->chunks[chunk_index];
+        assert(chunk != null);
+        // chunk_tile
+        u8 chunk_tile_x = world_x & (CHUNK_SIZE - 1);
+        u8 chunk_tile_y = world_y & (CHUNK_SIZE - 1);
+        tile_t* chunk_tile = chunk->tiles[chunk_tile_x][chunk_tile_y];
+        assert(chunk_tile != null);
+        for (u8 layer = 0; layer < LAYER_MAX; layer++) {
+          tilemap_tile(x, y, layer) = &chunk_tile[layer];
+        }
+      }
+    }
   }
   // draw
   const f32 start_x0 = -1.f - (global_tilemap->x - math_floorf(global_tilemap->x)) * global_tilemap->tile_ndc_pixel_x;

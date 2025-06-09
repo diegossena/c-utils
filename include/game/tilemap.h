@@ -88,6 +88,7 @@ typedef struct tilemap_t {
   u8 tile_size;
   chunk_t chunks[CHUNK_MAX];
   tile_t** screen_tiles; // [z][y][x]
+  bool screen_tiles_dirty;
   f32 tile_ndc_pixel_x;
   f32 tile_ndc_pixel_y;
 } tilemap_t;
@@ -99,7 +100,7 @@ void tilemap_onresize();
 void tilemap_draw();
 void tilemap_set_center(f32 x, f32 y);
 
-void tilemap_chunk_inicialize();
+void _tilemap_chunk_inicialize();
 void _tilemap_chunk_update();
 
 inline void tilemap_moveto(f32 x, f32 y, f32 duration);
