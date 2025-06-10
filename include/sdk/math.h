@@ -2,6 +2,7 @@
 #define MATH_H
 
 #include <sdk/types.h>
+#include <sdk/time.h>
 /**
  * srand
  */
@@ -34,6 +35,7 @@ inline f32 math_floorf(f32 number);
 inline f64 math_round(f64 number);
 inline f32 math_roundf(f32 number);
 inline f64 math_ceil(f64 number);
+inline void math_random_inicialize();
 inline i32 math_random();
 inline i32 math_random_in_range(i32 min, i32 max);
 inline f32 math_epsilon_roundf(f32 number);
