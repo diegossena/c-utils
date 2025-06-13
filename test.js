@@ -11,7 +11,7 @@ const NODE_TYPE_OUTPUT = 2
  * @property {(x: number) => number} activation
  * @property {(x: number[]) => number} aggregation
  * @property {number} value
- * @property {number} prev_value
+ * @property {number} ivalue
  */
 /**
  * @typedef {object} Connection
@@ -69,7 +69,7 @@ const net_outputs = [
   {
     type: NODE_TYPE_OUTPUT,
     bias: 0,
-    activation: x => x > 0.5 ? 1 : 0, // binary step,
+    activation: activation_relu,
     aggregation: aggregation_sum,
   },
 ]
@@ -80,13 +80,13 @@ const net_nodes = [
   {
     type: NODE_TYPE_HIDDEN,
     bias: 0,
-    activation: activation_sigmoid,
+    activation: activation_relu,
     aggregation: aggregation_sum,
   },
 ].map((node, i) => {
   node.id = i
   node.value = 0
-  node.prev_value = 0
+  node.ivalue = 0
   return node
 })
 /** @type {Connection[]} */
@@ -166,13 +166,13 @@ for (const input of input_sequence) {
   net_inputs[0].value = input
   // save_state
   for (const node of net_nodes) {
-    node.prev_value = node.value
+    node.ivalue = node.value
   }
   // activate
   for (const [node, links] of node_links) {
-    const node_inputs = links.map(link => link.in.prev_value * link.weight)
+    const node_inputs = links.map(link => link.in.ivalue * link.weight)
     const aggregation = node.aggregation(node_inputs)
     node.value = node.activation(node.bias + aggregation)
   }
-  console.log('output', input, net_outputs[0].value)
+  console.log('output', net_nodes)
 }
