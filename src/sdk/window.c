@@ -1,16 +1,21 @@
 #include <sdk/window.h>
-
+// window
 bool window_updated = true;
+f32 window_deltatime = 0;
+f32 window_pixel_ndc_x;
+f32 window_pixel_ndc_y;
+bool window_focus = false;
+f32 window_background[4] = { 0, 0, 0, 1 };
+// window_mouse
 i32 mouse_x = 0;
 i32 mouse_y = 0;
-
-f32 window_deltatime = 0;
-
-f32 window_pixel_ndc[2];
-bool window_focus = false;
+// keyboard
 u8 keyboard_count = 0;
 u8 keyboard_state[32] = { 0 };
-
+// atlas
+const u16 atlas_tiles_width = atlas_width / atlas_tile_size;
+const u16 atlas_tiles_height = atlas_height / atlas_tile_size;
+// gfx
 vertex_t* vertices_virtual;
 u64 vertices_length;
 u64 vertices_capacity = 0;
@@ -18,8 +23,6 @@ u64 vertices_capacity = 0;
 u32* indexes_virtual;
 u64 indexes_length;
 u64 indexes_capacity = 0;
-
-f32 window_background[4] = { 0, 0, 0, 1 };
 
 bool window_key_pressed(key_t key) {
   u8 byte_index = key / 8;

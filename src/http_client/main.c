@@ -3,7 +3,6 @@
 #include <sdk/http.h>
 #include <sdk/unity.h>
 
-
 i32 main(i32 argc, char** argv) {
   char request_raw [] =
     "GET / HTTP/1.1\r\n"

@@ -3,11 +3,12 @@
 // vsnprintf
 #include <stdio.h>
 
-export u64 string_length(const char* this) {
+u64 string_length(const char* this) {
   const char* ptr = this;
   while (*ptr != '\0') ++ptr;
   return ptr - this;
 }
+u64 string_nlength(const char* this, u64 count) {
 export char* string_copy(char* this, const char* src) {
   while (*src != '\0') {
     *this++ = *src++;
@@ -19,31 +20,31 @@ export u64 string_nlength(const char* this, u64 count) {
   while (count-- && *ptr != '\0') ++ptr;
   return ptr - this;
 }
-export bool string_equal(const char* this, const char* cstr) {
+bool string_equal(const char* this, const char* cstr) {
   while (*this != '\0') {
     if (*this++ != *cstr++)
       return false;
   }
   return true;
 }
-export bool string_startswith(const char* this, const char* neddle) {
+bool string_startswith(const char* this, const char* neddle) {
   while (*neddle != '\0') {
     if (*this++ != *neddle++)
       return false;
   }
   return true;
 }
-export i32 string_format_va(char* this, u64 size, const char* format, va_list args) {
+i32 string_format_va(char* this, u64 size, const char* format, va_list args) {
   return vsnprintf(this, size, format, args);
 }
-export i32 string_format(char* target, u64 size, const char* format, ...) {
+i32 string_format(char* target, u64 size, const char* format, ...) {
   va_list argv;
   va_start(argv, format);
   i32 length = string_format_va(target, size, format, argv);
   va_end(argv);
   return length;
 }
-export i64 string_i64(const char* this) {
+i64 string_i64(const char* this) {
   if (*this == '\0')
     return 0;
   bool neg = false;
@@ -54,16 +55,16 @@ export i64 string_i64(const char* this) {
   i64 number = string_u64(this);
   return neg ? -number : number;
 }
-export u64 string_skip_u64(const char** this) {
+u64 string_skip_u64(const char** this) {
   i64 number = 0;
   while (IS_DIGIT(**this))
     number = number * 10 + *((*this)++) - '0';
   return number;
 }
-export u64 string_u64(const char* this) {
+u64 string_u64(const char* this) {
   return string_skip_u64(&this);
 }
-export char* string_replace(const char* this, char* target, const char* pattern, const char* replacement) {
+char* string_replace(const char* this, char* target, const char* pattern, const char* replacement) {
   u64 pattern_pass = string_length(pattern);
 
   char copy[TEXT_SIZE + 1] = { '\0' };
@@ -88,7 +89,7 @@ export char* string_replace(const char* this, char* target, const char* pattern,
   }
   return target;
 }
-export char* url_encode(const char* this, char* target) {
+char* url_encode(const char* this, char* target) {
   char copy[URL_SIZE + 1] = {};
   char
     * copy_p = copy,
@@ -114,7 +115,7 @@ export char* url_encode(const char* this, char* target) {
   return target;
 }
 
-export u64 wstring_length(const wchar_t* cstr) {
+u64 wstring_length(const wchar_t* cstr) {
   const wchar_t* begin = cstr;
   while (*cstr != L'\0') ++cstr;
   return cstr - begin;

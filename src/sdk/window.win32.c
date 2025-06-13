@@ -30,17 +30,17 @@ ID3D11Buffer* indexes_buffer;
 
 bool window_resized = true;
 
-export void _indexes_free() {
+void _indexes_free() {
   indexes_capacity = 0;
   vertices_buffer->lpVtbl->Release(vertices_buffer);
   memory_free(indexes_virtual);
 }
-export void _vertices_free() {
+void _vertices_free() {
   vertices_capacity = 0;
   vertices_buffer->lpVtbl->Release(vertices_buffer);
   memory_free(vertices_virtual);
 }
-export void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
+void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (window_focus && keyboard_count) {
     window_onkeypress();
   }
@@ -126,9 +126,9 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   }
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
-export void _window_onresize() {
-  window_pixel_ndc[0] = 2.f / (f32)window_width;
-  window_pixel_ndc[1] = 2.f / (f32)window_height;
+void _window_onresize() {
+  window_pixel_ndc_x = 2.f / (f32)window_width;
+  window_pixel_ndc_y = 2.f / (f32)window_height;
   // d3d_render_target_view
   ID3D11Texture2D* back_buffer;
   HRESULT result = d3d_swapchain->lpVtbl->GetBuffer(
@@ -136,14 +136,14 @@ export void _window_onresize() {
     (void**)&back_buffer
   );
   if (FAILED(result)) {
-    error("IDXGISwapChain_GetBuffer", result);
+    error(result, "IDXGISwapChain_GetBuffer");
   }
   result = d3d_device->lpVtbl->CreateRenderTargetView(
     d3d_device, (ID3D11Resource*)back_buffer, 0, &d3d_render_target_view
   );
   back_buffer->lpVtbl->Release(back_buffer);
   if (FAILED(result)) {
-    error("CreateRenderTargetView", result);
+    error(result, "CreateRenderTargetView");
   }
   d3d_device_context->lpVtbl->OMSetRenderTargets(
     d3d_device_context, 1, &d3d_render_target_view, 0
@@ -161,7 +161,7 @@ export void _window_onresize() {
     d3d_device_context, 1, &viewport
   );
 }
-export void _renderer_thread() {
+void _renderer_thread() {
   f64 time = time_now_f64();
   // set multimedia thread
   DWORD task_index = 0;
@@ -200,7 +200,7 @@ export void _renderer_thread() {
         DXGI_FORMAT_R8G8B8A8_UNORM, 0
       );
       if (FAILED(result)) {
-        error("IDXGISwapChain_ResizeBuffers", result);
+        error(result, "IDXGISwapChain_ResizeBuffers");
       }
       _window_onresize();
       window_onresize();
@@ -260,7 +260,7 @@ export void _renderer_thread() {
   d3d_device->lpVtbl->Release(d3d_device);
   d3d_swapchain->lpVtbl->Release(d3d_swapchain);
 }
-export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) {
+void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) {
   const D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
@@ -271,11 +271,11 @@ export void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) 
     d3d_device, &buffer_desc, 0, ppBuffer
   );
   if (FAILED(result)) {
-    error("CreateBuffer", result);
+    error(result, "CreateBuffer");
   }
 }
-export void window_close() { DestroyWindow(window_id); }
-export void window_startup(const char* title, const char* atlas_path) {
+void window_close() { DestroyWindow(window_id); }
+void window_startup(const char* title, const char* atlas_path) {
   SetProcessDPIAware();
   i32 result;
   // window_class_register
@@ -289,7 +289,7 @@ export void window_startup(const char* title, const char* atlas_path) {
   };
   result = RegisterClassExA(&window_class);
   if (!result) {
-    error("RegisterClassExA", result);
+    error(result, "RegisterClassExA");
   }
   u32 window_style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME;
   u32 window_ex_style = WS_EX_APPWINDOW;
@@ -305,7 +305,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     0 // pointer to window-creation data
   );
   if (!window_id) {
-    error("CreateWindowExA", (error_t)window_id);
+    error((error_t)window_id, "CreateWindowExA");
   }
   // global_d3d_device | global_d3d_swapchain | global_d3d_device_context
   DXGI_SWAP_CHAIN_DESC swapchain_desc = {
@@ -331,7 +331,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     &d3d_device_context
   );
   if (FAILED(result)) {
-    error("D3D11CreateDeviceAndSwapChain", result);
+    error(result, "D3D11CreateDeviceAndSwapChain");
   }
   d3d_device_context->lpVtbl->IASetPrimitiveTopology(d3d_device_context, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   _window_onresize();
@@ -344,7 +344,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     d3d_device, &rasterizer_props, &d3d_rasterizer
   );
   if (FAILED(result)) {
-    error("ID3D11Device_CreateRasterizerState", result);
+    error(result, "ID3D11Device_CreateRasterizerState");
   }
   // vertex_shader
   const u8 vs_cso [] = { 0x44, 0x58, 0x42, 0x43, 0x12, 0x63, 0xab, 0x0a, 0x71, 0x74, 0xd2, 0x4c, 0x65, 0x97, 0xf2, 0x8e, 0x53, 0x53, 0xb4, 0x88, 0x01, 0x00, 0x00, 0x00, 0x88, 0x02, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0xac, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x58, 0x01, 0x00, 0x00, 0xec, 0x01, 0x00, 0x00, 0x52, 0x44, 0x45, 0x46, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x05, 0xfe, 0xff, 0x00, 0x01, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x52, 0x44, 0x31, 0x31, 0x3c, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x73, 0x6f, 0x66, 0x74, 0x20, 0x28, 0x52, 0x29, 0x20, 0x48, 0x4c, 0x53, 0x4c, 0x20, 0x53, 0x68, 0x61, 0x64, 0x65, 0x72, 0x20, 0x43, 0x6f, 0x6d, 0x70, 0x69, 0x6c, 0x65, 0x72, 0x20, 0x39, 0x2e, 0x32, 0x39, 0x2e, 0x39, 0x35, 0x32, 0x2e, 0x33, 0x31, 0x31, 0x31, 0x00, 0xab, 0xab, 0xab, 0x49, 0x53, 0x47, 0x4e, 0x4c, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x03, 0x00, 0x00, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0f, 0x0f, 0x00, 0x00, 0x50, 0x4f, 0x53, 0x49, 0x54, 0x49, 0x4f, 0x4e, 0x00, 0x54, 0x45, 0x58, 0x43, 0x4f, 0x4f, 0x52, 0x44, 0x00, 0xab, 0xab, 0x4f, 0x53, 0x47, 0x4e, 0x50, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x53, 0x56, 0x5f, 0x50, 0x4f, 0x53, 0x49, 0x54, 0x49, 0x4f, 0x4e, 0x00, 0x54, 0x45, 0x58, 0x43, 0x4f, 0x4f, 0x52, 0x44, 0x00, 0xab, 0xab, 0xab, 0x53, 0x48, 0x45, 0x58, 0x8c, 0x00, 0x00, 0x00, 0x50, 0x00, 0x01, 0x00, 0x23, 0x00, 0x00, 0x00, 0x6a, 0x08, 0x00, 0x01, 0x5f, 0x00, 0x00, 0x03, 0x32, 0x10, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5f, 0x00, 0x00, 0x03, 0xf2, 0x10, 0x10, 0x00, 0x01, 0x00, 0x00, 0x00, 0x67, 0x00, 0x00, 0x04, 0xf2, 0x20, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x65, 0x00, 0x00, 0x03, 0xf2, 0x20, 0x10, 0x00, 0x01, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x05, 0x32, 0x20, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46, 0x10, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x08, 0xc2, 0x20, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f, 0x36, 0x00, 0x00, 0x05, 0xf2, 0x20, 0x10, 0x00, 0x01, 0x00, 0x00, 0x00, 0x46, 0x1e, 0x10, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3e, 0x00, 0x00, 0x01, 0x53, 0x54, 0x41, 0x54, 0x94, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -356,7 +356,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     &d3d_vertex_shader
   );
   if (FAILED(result)) {
-    error("CreateVertexShader", result);
+    error(result, "CreateVertexShader");
   }
   d3d_device_context->lpVtbl->VSSetShader(d3d_device_context, d3d_vertex_shader, NULL, 0);
   // texture_pixel_shader
@@ -369,7 +369,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     &d3d_pixel_shader
   );
   if (FAILED(result)) {
-    error("CreatePixelShader", result);
+    error(result, "CreatePixelShader");
   }
   d3d_device_context->lpVtbl->PSSetShader(d3d_device_context, d3d_pixel_shader, NULL, 0);
   // texture_input_layout
@@ -387,7 +387,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     &d3d_input_layout
   );
   if (FAILED(result)) {
-    error("CreateInputLayout", result);
+    error(result, "CreateInputLayout");
   }
   d3d_device_context->lpVtbl->IASetInputLayout(d3d_device_context, d3d_input_layout);
   // sampler_state
@@ -404,7 +404,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     d3d_device, &sampler_desc, &d3d_sampler_state
   );
   if (FAILED(result)) {
-    error("CreateSamplerState", result);
+    error(result, "CreateSamplerState");
   }
   d3d_device_context->lpVtbl->PSSetSamplers(d3d_device_context, 0, 1, &d3d_sampler_state);
   // d3d_blend_state
@@ -456,7 +456,7 @@ export void window_startup(const char* title, const char* atlas_path) {
     d3d_device, &texture_desc, &subresource_data, &texture
   );
   if (FAILED(result)) {
-    error("CreateTexture2D", result);
+    error(result, "CreateTexture2D");
   }
   // CreateShaderResourceView
   D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
@@ -468,12 +468,12 @@ export void window_startup(const char* title, const char* atlas_path) {
     d3d_device, (ID3D11Resource*)texture, &srv_desc, &d3d_shader_resource
   );
   if (FAILED(result)) {
-    error("CreateShaderResourceView", result);
+    error(result, "CreateShaderResourceView");
   }
   // PSSetShaderResources
   d3d_device_context->lpVtbl->PSSetShaderResources(d3d_device_context, 0, 1, &d3d_shader_resource);
 }
-export void vertices_reserve(u64 size) {
+void vertices_reserve(u64 size) {
   if (size == 0) {
     return _vertices_free();
   }
@@ -481,7 +481,7 @@ export void vertices_reserve(u64 size) {
   if (vertices_capacity != 0) {
     void* buffer = memory_realloc(vertices_virtual, buffer_size);
     if (!buffer) {
-      error("vertices_alloc memory_realloc", ERR_NOT_ENOUGH_MEMORY);
+      error(ERR_NOT_ENOUGH_MEMORY, "vertices_alloc memory_realloc");
       return;
     }
     vertices_virtual = buffer;
@@ -489,7 +489,7 @@ export void vertices_reserve(u64 size) {
   } else {
     vertices_virtual = memory_alloc(buffer_size);
     if (!vertices_virtual) {
-      error("vertices_alloc memory_alloc", ERR_NOT_ENOUGH_MEMORY);
+      error(ERR_NOT_ENOUGH_MEMORY, "vertices_alloc memory_alloc");
       return;
     }
   }
@@ -502,7 +502,7 @@ export void vertices_reserve(u64 size) {
     &vertex_offset
   );
 }
-export void indexes_reserve(u64 size) {
+void indexes_reserve(u64 size) {
   if (size == 0) {
     return _indexes_free();
   }
@@ -510,7 +510,7 @@ export void indexes_reserve(u64 size) {
   if (indexes_capacity != 0) {
     void* buffer = memory_realloc(indexes_virtual, buffer_size);
     if (!buffer) {
-      error("indexes_alloc memory_realloc", ERR_NOT_ENOUGH_MEMORY);
+      error(ERR_NOT_ENOUGH_MEMORY, "indexes_alloc memory_realloc");
       return;
     }
     indexes_virtual = buffer;
@@ -518,7 +518,7 @@ export void indexes_reserve(u64 size) {
   } else {
     indexes_virtual = memory_alloc(buffer_size);
     if (!indexes_virtual) {
-      error("indexes_alloc memory_alloc", ERR_NOT_ENOUGH_MEMORY);
+      error(ERR_NOT_ENOUGH_MEMORY, "indexes_alloc memory_alloc");
       return;
     }
   }
@@ -526,11 +526,11 @@ export void indexes_reserve(u64 size) {
   _d3d_buffer(&indexes_buffer, buffer_size, D3D11_BIND_INDEX_BUFFER);
   d3d_device_context->lpVtbl->IASetIndexBuffer(d3d_device_context, indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
 }
-export void window_set_title(const char* title) {
+void window_set_title(const char* title) {
   assert(window_id != 0);
   SetWindowTextA(window_id, title);
 }
-export void window_run() {
+void window_run() {
   // renderer
   assert(_renderer_thread_id == 0);
   _renderer_thread_id = thread_new(_renderer_thread, 0);

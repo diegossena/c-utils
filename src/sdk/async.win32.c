@@ -8,12 +8,12 @@ thread_t* __async_thread = 0;
 HANDLE __iocp = 0;
 u64 __async_count = 0;
 
-export void async_startup() {
+void async_startup() {
   assert(__async_thread == 0);
   __async_thread = thread_new((function_t)__async_worker, null);
   __iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 }
-export void async_shutdown() {
+void async_shutdown() {
   assert(__async_thread != 0);
   PostQueuedCompletionStatus(__iocp, 0, IOCP_SHUTDOWN, 0);
   thread_wait(__async_thread);

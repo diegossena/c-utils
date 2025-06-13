@@ -16,13 +16,13 @@ typedef struct queue_t {
   queue_t* prev;
 } queue_t;
 
-export void queue_constructor(queue_t* this);
-export void queue_push(queue_t* this, queue_t* queue);
-export void queue_unshift(queue_t* head, queue_t* q);
-export void queue_remove(queue_t* this);
-export void queue_forward(queue_t* this);
+void queue_constructor(queue_t* this);
+void queue_push(queue_t* this, queue_t* queue);
+void queue_unshift(queue_t* head, queue_t* q);
+void queue_remove(queue_t* this);
+void queue_forward(queue_t* this);
 
-export bool queue_is_empty(queue_t* this);
-export bool queue_is_not_empty(queue_t* this);
+bool queue_is_empty(queue_t* this);
+bool queue_is_not_empty(queue_t* this);
 
 #endif

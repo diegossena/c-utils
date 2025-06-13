@@ -28,21 +28,21 @@ typedef u32 ip4_t;
 typedef u16 net_port_t;
 typedef char ip4_string_t[16];
 
-export ip4_t ip4_from_bytes(u8, u8, u8, u8);
-export ip4_t ip4_from_str(const char* ip4_cstr);
-export void ip4_to_str(ip4_t ip4, ip4_string_t cstr);
-export ip4_t ip4_increment(ip4_t ip4);
-export bool ip4_lessequal(ip4_t oip4, ip4_t fip4);
+ip4_t ip4_from_bytes(u8, u8, u8, u8);
+ip4_t ip4_from_str(const char* ip4_cstr);
+void ip4_to_str(ip4_t ip4, ip4_string_t cstr);
+ip4_t ip4_increment(ip4_t ip4);
+bool ip4_lessequal(ip4_t oip4, ip4_t fip4);
 
-export net_port_t net_port_from_short(u16 port);
-export u16 net_port_to_short(net_port_t port);
+net_port_t net_port_from_short(u16 port);
+u16 net_port_to_short(net_port_t port);
 
-export error_t net_startup();
-export void net_shutdown();
-export error_t net_error();
+error_t net_startup();
+void net_shutdown();
+error_t net_error();
 
-export u64 _socket_new(socket_type_t);
-export void _socket_free(socket_t fd);
+u64 _socket_new(socket_type_t);
+void _socket_free(socket_t fd);
 
 #ifdef DEBUG
 

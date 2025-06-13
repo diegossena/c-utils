@@ -22,25 +22,25 @@
 
 #define IS_ALPHA(x)  (IS_DIGIT(x) || IS_LOWER(x) || IS_UPPER(x))
 
-export u64 string_length(const char* this);
-export u64 string_nlength(const char* this, u64 count);
+u64 string_length(const char* this);
+u64 string_nlength(const char* this, u64 count);
 
-export bool string_equal(const char* this, const char* cstr);
-export bool string_startswith(const char* this, const char* needle);
+bool string_equal(const char* this, const char* cstr);
+bool string_startswith(const char* this, const char* needle);
+
+i32 string_format_va(char* this, u64 size, const char* format, va_list args);
+i32 string_format(char* stream, u64 size, const char* format, ...);
 
 export char* string_copy(char* this, const char* cstr);
 
-export i32 string_format_va(char* this, u64 size, const char* format, va_list args);
-export i32 string_format(char* stream, u64 size, const char* format, ...);
+char* string_replace(const char* this, char* target, const char* pattern, const char* replacement);
 
-export char* string_replace(const char* this, char* target, const char* pattern, const char* replacement);
+char* url_encode(const char* this, char* target);
 
-export char* url_encode(const char* this, char* target);
-
-export i64 string_i64(const char* this);
-export u64 string_u64(const char* this);
+i64 string_i64(const char* this);
+u64 string_u64(const char* this);
 
 
-export u64 wstring_length(const wchar_t* cstr);
+u64 wstring_length(const wchar_t* cstr);
 
 #endif

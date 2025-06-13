@@ -67,7 +67,7 @@ typedef enum error_t {
   ERR_WIC_FILE_NOT_FOUND = 0x80070002
 } error_t;
 
-void error(const char* message, error_t code);
-export const char* error_cstr(error_t code);
+void error(error_t code, const char* message, ...);
+const char* error_cstr(error_t code);
 
 #endif
