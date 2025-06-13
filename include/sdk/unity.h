@@ -84,4 +84,6 @@
 #endif
 #ifdef TASKMANAGER_H
 #include <src/sdk/taskmanager.win32.c>
+#ifndef HTTP_H
+#include <src/sdk/http.c>
 #endif

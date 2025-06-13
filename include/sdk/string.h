@@ -31,6 +31,8 @@ bool string_startswith(const char* this, const char* needle);
 i32 string_format_va(char* this, u64 size, const char* format, va_list args);
 i32 string_format(char* stream, u64 size, const char* format, ...);
 
+export char* string_copy(char* this, const char* cstr);
+
 char* string_replace(const char* this, char* target, const char* pattern, const char* replacement);
 
 char* url_encode(const char* this, char* target);
