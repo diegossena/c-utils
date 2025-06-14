@@ -1,5 +1,5 @@
 
-#include <sdk/date.h>
+#include <sdk/time.h>
 #include <sdk/window.h>
 #include <sdk/console.h>
 #include <sdk/keyboard.h>
@@ -175,7 +175,7 @@ void window_onkeydown(key_t key) {
 }
 void window_onkeyup() {}
 void window_onkeypress() {}
-// MAIN 309306 bytes
+
 i32 main(i32 argc, char** argv) {
   window_startup("Snake", SCREEN_SIZE, SCREEN_SIZE);
   game_startup();
