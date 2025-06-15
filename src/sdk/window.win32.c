@@ -208,20 +208,20 @@ void _renderer_thread() {
       window_onrender();
       assert(_vertices_length <= vertices_capacity);
       assert(_indexes_length <= indexes_capacity);
-      D3D11_MAPPED_SUBRESOURCE subresource;
-      // vertices
+      static D3D11_MAPPED_SUBRESOURCE subresource = {};
+      // vertices_map
       _d3d_device_context->lpVtbl->Map(
         _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
-        D3D11_MAP_WRITE_DISCARD, 0, &subresource
+        D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
       );
       memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
       _d3d_device_context->lpVtbl->Unmap(
         _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
       );
-      // indexes
+      // indexes_map
       _d3d_device_context->lpVtbl->Map(
         _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
-        D3D11_MAP_WRITE_DISCARD, 0, &subresource
+        D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
       );
       memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
       _d3d_device_context->lpVtbl->Unmap(
@@ -451,7 +451,6 @@ void window_startup(const char* title, const char* atlas_path) {
   _d3d_device_context->lpVtbl->PSSetShaderResources(_d3d_device_context, 0, 1, &_d3d_shader_resource);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
-  console_log("vertices_reserve");
   if (vertices_size == 0) {
     _vertices_free();
     vertices_size = 0;
@@ -496,7 +495,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE
   };
-  u32 stride;
+
   const u32 offset = 0;
   // d3d_vertices_buffer
   buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -507,7 +506,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (FAILED(result)) {
     error(result, "vertices_reserve vertices CreateBuffer");
   }
-  stride = sizeof(vertex_t);
+  const u32 stride = sizeof(vertex_t);
   _d3d_device_context->lpVtbl->IASetVertexBuffers(
     _d3d_device_context, 0, 1, &_d3d_vertices_buffer, &stride,
     &offset
