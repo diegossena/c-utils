@@ -2,6 +2,7 @@
 // window
 bool window_updated = true;
 f32 window_deltatime = 0;
+bool window_resized = true;
 f32 window_ndc_x;
 f32 window_ndc_y;
 bool window_focus = false;
@@ -9,13 +10,13 @@ bool window_focus = false;
 i32 mouse_x = 0;
 i32 mouse_y = 0;
 // keyboard
-u8 keyboard_count = 0;
-u8 keyboard_state[32] = { 0 };
+u8 _keyboard_count = 0;
+u8 _keyboard_state[32] = { 0 };
 // gfx
-u64 _vertices_length;
 u64 vertices_capacity = 0;
-u64 _indexes_length;
 u64 indexes_capacity = 0;
+u64 _vertices_length;
+u64 _indexes_length;
 // atlas
 const f32 atlas_ndc_x = 1.f / atlas_width;
 const f32 atlas_ndc_y = 1.f / atlas_height;
@@ -23,7 +24,7 @@ const f32 atlas_ndc_y = 1.f / atlas_height;
 bool window_key_pressed(key_t key) {
   u8 byte_index = key / 8;
   u8 bit_index = key % 8;
-  return keyboard_state[byte_index] & (1 << bit_index);
+  return _keyboard_state[byte_index] & (1 << bit_index);
 }
 
 void window_rect_draw(

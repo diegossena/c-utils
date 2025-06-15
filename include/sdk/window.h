@@ -86,8 +86,8 @@ extern bool window_updated;
 extern f32 window_ndc_x;
 extern f32 window_ndc_y;
 
-extern u8 keyboard_count;
-extern u8 keyboard_state[32];
+extern u8 _keyboard_count;
+extern u8 _keyboard_state[32];
 
 extern vertex_t* _vertices_virtual;
 extern u64 _vertices_length;

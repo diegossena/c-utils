@@ -8,7 +8,6 @@
 #include <avrt.h>
 
 HWND _window_id = 0;
-bool window_resized = true;
 
 ID3D11Device* _d3d_device = 0;
 IDXGISwapChain* _d3d_swapchain;
@@ -35,7 +34,7 @@ void _vertices_free() {
   memory_free(_indexes_virtual);
 }
 void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
-  if (window_focus && keyboard_count) {
+  if (window_focus && _keyboard_count) {
     window_onkeypress();
   }
 }
@@ -49,8 +48,8 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
         if (wParam != 91 && !window_key_pressed(wParam)) {
           u8 byte_index = wParam / 8;
           u8 bit_index = wParam % 8;
-          keyboard_state[byte_index] |= (1 << bit_index);
-          ++keyboard_count;
+          _keyboard_state[byte_index] |= (1 << bit_index);
+          ++_keyboard_count;
           window_onkeydown(wParam);
         }
       }
@@ -59,8 +58,8 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       if (window_focus) {
         u8 byte_index = wParam / 8;
         u8 bit_index = wParam % 8;
-        keyboard_state[byte_index] &= ~(1 << bit_index);
-        --keyboard_count;
+        _keyboard_state[byte_index] &= ~(1 << bit_index);
+        --_keyboard_count;
         window_onkeyup(wParam);
       }
       return 0;
