@@ -16,14 +16,18 @@ void titlescreen_load() {
   window_background[0] = 120.f / 255.f;
   window_background[1] = 168.f / 255.f;
   window_background[2] = 192.f / 255.f;
-  vertices_reserve(vertices_capacity + TITLESCREEN_VERTICES_USED);
-  indexes_reserve(indexes_capacity + TITLESCREEN_INDEXES_USED);
+  vertices_reserve(
+    vertices_capacity + TITLESCREEN_VERTICES_USED,
+    indexes_capacity + TITLESCREEN_INDEXES_USED
+  );
   window_updated = true;
 }
 void titlescreen_unload() {
   titlescreen = false;
-  vertices_reserve(vertices_capacity - TITLESCREEN_VERTICES_USED);
-  indexes_reserve(indexes_capacity - TITLESCREEN_INDEXES_USED);
+  vertices_reserve(
+    vertices_capacity - TITLESCREEN_VERTICES_USED,
+    indexes_capacity - TITLESCREEN_INDEXES_USED
+  );
 }
 void titlescreen_onkeydown(key_t key) {
   switch (key) {
@@ -41,6 +45,6 @@ void titlescreen_render() {
   f32 size = 50.f;
   text_draw("PRESS SPACE", x0, y0, size);
   x0 += .12f;
-  y0 -= size * window_pixel_ndc_y;
+  y0 -= size * window_ndc_y;
   text_draw("TO START", x0, y0, size);
 }

@@ -82,7 +82,7 @@
 #ifdef ASYNC_H
 #include <src/sdk/async.win32.c>
 #endif
-#ifndef HTTP_H
+#ifdef HTTP_H
 #include <src/sdk/http.c>
 #endif
 #ifdef TASKMANAGER_H

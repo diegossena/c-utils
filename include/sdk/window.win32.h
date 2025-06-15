@@ -11,7 +11,7 @@
 #undef COBJMACROS
 
 // window
-extern HWND window_id;
+extern HWND _window_id;
 // dx11
 extern ID3D11Device* _d3d_device;
 extern IDXGISwapChain* _d3d_swapchain;

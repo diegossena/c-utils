@@ -4,9 +4,8 @@
 #include <sdk/types.h>
 #include <sdk/math.h>
 #include <sdk/memory.h>
-#include <sdk/buffer.h>
 
-#define __HASHSET_BUCKETS_SIZE 512
+#define _HASHSET_BUCKETS_SIZE 512
 
 #define hashset_set_cstr(this, key, value) { \
   const char entry_key[] = key; \

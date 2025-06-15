@@ -7,10 +7,8 @@
 #include <stdio.h>
 #include <avrt.h>
 
-HWND window_id;
+HWND _window_id = 0;
 bool window_resized = true;
-
-thread_t* _renderer_thread_id = 0;
 
 ID3D11Device* _d3d_device = 0;
 IDXGISwapChain* _d3d_swapchain;
@@ -25,16 +23,16 @@ ID3D11BlendState* _d3d_blend_state;
 ID3D11ShaderResourceView* _d3d_shader_resource;
 ID3D11Buffer* _d3d_vertices_buffer;
 ID3D11Buffer* _d3d_indexes_buffer;
+vertex_t* _vertices_virtual;
+u32* _indexes_virtual;
 
-void _indexes_free() {
-  indexes_capacity = 0;
-  _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
-  memory_free(indexes_virtual);
-}
 void _vertices_free() {
-  vertices_capacity = 0;
+  assert(indexes_capacity > 0);
+  assert(vertices_capacity > 0);
   _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
-  memory_free(vertices_virtual);
+  memory_free(_vertices_virtual);
+  _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
+  memory_free(_indexes_virtual);
 }
 void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
   if (window_focus && keyboard_count) {
@@ -63,7 +61,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
         u8 bit_index = wParam % 8;
         keyboard_state[byte_index] &= ~(1 << bit_index);
         --keyboard_count;
-        window_onkeyup();
+        window_onkeyup(wParam);
       }
       return 0;
     case WM_MOUSEMOVE:
@@ -123,8 +121,8 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
 void _window_onresize() {
-  window_pixel_ndc_x = 2.f / (f32)window_width;
-  window_pixel_ndc_y = 2.f / (f32)window_height;
+  window_ndc_x = 2.f / (f32)window_width;
+  window_ndc_y = 2.f / (f32)window_height;
   // d3d_render_target_view
   ID3D11Texture2D* back_buffer;
   HRESULT result = _d3d_swapchain->lpVtbl->GetBuffer(
@@ -163,17 +161,17 @@ void _renderer_thread() {
   DWORD task_index = 0;
   HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
   if (!mmtask) {
-    console_log("Error: _renderer_thread AvSetMmThreadCharacteristicsA %x", GetLastError());
+    error(GetLastError(), "renderer thread AvSetMmThreadCharacteristicsA");
   }
   // timer
   HANDLE timer = CreateWaitableTimerA(0, false, 0);
   const LARGE_INTEGER due_time = { 0 };
   if (!SetWaitableTimer(timer, &due_time, 15, 0, 0, false)) {
-    console_log("Error: _renderer_thread SetWaitableTimer %x", GetLastError());
+    error(GetLastError(), "renderer thread SetWaitableTimer");
   }
   timeBeginPeriod(1);
   // loop
-  while (_renderer_thread_id) {
+  while (_window_id) {
     WaitForSingleObject(timer, INFINITE);
     // timer
     const f64 now = time_now_f64();
@@ -202,21 +200,21 @@ void _renderer_thread() {
       window_onresize();
       window_updated = true;
     }
-    // frame
     if (window_updated) {
+      // render
       window_updated = false;
-      vertices_length = 0;
-      indexes_length = 0;
+      _vertices_length = 0;
+      _indexes_length = 0;
       window_onrender();
-      assert(vertices_length <= vertices_capacity);
-      assert(indexes_length <= indexes_capacity);
+      assert(_vertices_length <= vertices_capacity);
+      assert(_indexes_length <= indexes_capacity);
       D3D11_MAPPED_SUBRESOURCE subresource;
       // vertices
       _d3d_device_context->lpVtbl->Map(
         _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
         D3D11_MAP_WRITE_DISCARD, 0, &subresource
       );
-      memory_copy(subresource.pData, vertices_virtual, vertices_length * sizeof(vertex_t));
+      memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
       _d3d_device_context->lpVtbl->Unmap(
         _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
       );
@@ -225,15 +223,15 @@ void _renderer_thread() {
         _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
         D3D11_MAP_WRITE_DISCARD, 0, &subresource
       );
-      memory_copy(subresource.pData, indexes_virtual, indexes_length * sizeof(u32));
+      memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
       _d3d_device_context->lpVtbl->Unmap(
         _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0
       );
       // draw
       _d3d_device_context->lpVtbl->ClearRenderTargetView(
-        _d3d_device_context, _d3d_render_target_view, window_background
+        _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
       );
-      _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, indexes_length, 0, 0);
+      _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
       _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
     }
   }
@@ -241,9 +239,6 @@ void _renderer_thread() {
   CloseHandle(timer);
   timeEndPeriod(1);
   AvRevertMmThreadCharacteristics(mmtask);
-  assert(indexes_capacity > 0);
-  _indexes_free();
-  assert(vertices_capacity > 0);
   _vertices_free();
   _d3d_blend_state->lpVtbl->Release(_d3d_blend_state);
   _d3d_sampler_state->lpVtbl->Release(_d3d_sampler_state);
@@ -256,21 +251,7 @@ void _renderer_thread() {
   _d3d_device->lpVtbl->Release(_d3d_device);
   _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);
 }
-void _d3d_buffer(ID3D11Buffer** ppBuffer, u64 ByteWidth, UINT BindFlags) {
-  const D3D11_BUFFER_DESC buffer_desc = {
-    .Usage = D3D11_USAGE_DYNAMIC,
-    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-    .ByteWidth = ByteWidth,
-    .BindFlags = BindFlags
-  };
-  HRESULT result = _d3d_device->lpVtbl->CreateBuffer(
-    _d3d_device, &buffer_desc, 0, ppBuffer
-  );
-  if (FAILED(result)) {
-    error(result, "CreateBuffer");
-  }
-}
-void window_close() { DestroyWindow(window_id); }
+void window_close() { DestroyWindow(_window_id); }
 void window_startup(const char* title, const char* atlas_path) {
   SetProcessDPIAware();
   i32 result;
@@ -292,16 +273,16 @@ void window_startup(const char* title, const char* atlas_path) {
   // CreateWindowExA
   RECT rect = { 0, 0, window_width, window_height };
   AdjustWindowRectEx(&rect, window_style, false, window_ex_style);
-  window_id = CreateWindowExA(
+  _window_id = CreateWindowExA(
     window_ex_style, window_class.lpszClassName, title, window_style,
-    CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
+    0, 0, rect.right - rect.left, rect.bottom - rect.top,
     0, // handle to parent or owner window
     0, // handle to menu, or child-window identifier
     window_class.hInstance,
     0 // pointer to window-creation data
   );
-  if (!window_id) {
-    error((error_t)window_id, "CreateWindowExA");
+  if (!_window_id) {
+    error((error_t)_window_id, "CreateWindowExA");
   }
   // global_d3d_device | global_d3d_swapchain | global_d3d_device_context
   DXGI_SWAP_CHAIN_DESC swapchain_desc = {
@@ -310,7 +291,7 @@ void window_startup(const char* title, const char* atlas_path) {
     .BufferDesc.Width = window_width,                // set the back buffer width
     .BufferDesc.Height = window_height,              // set the back buffer height
     .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,  // how swap chain is to be used
-    .OutputWindow = window_id,                       // the window to be used
+    .OutputWindow = _window_id,                       // the window to be used
     .SampleDesc.Count = 4,                           // how many multisamples
     .Windowed = true,                                // windowed/full-screen mode
     .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH  // allow full-screen switching
@@ -469,68 +450,89 @@ void window_startup(const char* title, const char* atlas_path) {
   // PSSetShaderResources
   _d3d_device_context->lpVtbl->PSSetShaderResources(_d3d_device_context, 0, 1, &_d3d_shader_resource);
 }
-void vertices_reserve(u64 size) {
-  console_log("vertices_reserve %llu", size);
-  if (size == 0) {
-    return _vertices_free();
+void vertices_reserve(u64 vertices_size, u64 indexes_size) {
+  console_log("vertices_reserve");
+  if (vertices_size == 0) {
+    _vertices_free();
+    vertices_size = 0;
+    return;
   }
-  const u64 buffer_size = size * sizeof(vertex_t);
+  const u64 vertices_buffer_size = vertices_size * sizeof(vertex_t);
+  const u64 indexes_buffer_size = indexes_size * sizeof(u32);
+  // virtual
   if (vertices_capacity != 0) {
-    void* buffer = memory_realloc(vertices_virtual, buffer_size);
+    // vertices_virtual_realloc
+    void* buffer = memory_realloc(_vertices_virtual, vertices_buffer_size);
     if (!buffer) {
-      error(ERR_NOT_ENOUGH_MEMORY, "vertices_alloc memory_realloc");
+      error(ERR_NOT_ENOUGH_MEMORY, "vertices realloc");
       return;
     }
-    vertices_virtual = buffer;
+    _vertices_virtual = buffer;
+    // indexes_virtual_realloc
+    buffer = memory_realloc(_indexes_virtual, indexes_buffer_size);
+    if (!buffer) {
+      error(ERR_NOT_ENOUGH_MEMORY, "indexes realloc");
+      return;
+    }
+    _vertices_virtual = buffer;
+    // buffers_release
     _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
+    _d3d_indexes_buffer->lpVtbl->Release(_d3d_indexes_buffer);
   } else {
-    vertices_virtual = memory_alloc(buffer_size);
-    if (!vertices_virtual) {
+    _vertices_virtual = memory_alloc(vertices_buffer_size);
+    if (!_vertices_virtual) {
       error(ERR_NOT_ENOUGH_MEMORY, "vertices_alloc memory_alloc");
       return;
     }
-  }
-  vertices_capacity = size;
-  _d3d_buffer(&_d3d_vertices_buffer, buffer_size, D3D11_BIND_VERTEX_BUFFER);
-  const u32 vertex_stride = sizeof(vertex_t);
-  const u32 vertex_offset = 0;
-  _d3d_device_context->lpVtbl->IASetVertexBuffers(
-    _d3d_device_context, 0, 1, &_d3d_vertices_buffer, &vertex_stride,
-    &vertex_offset
-  );
-}
-void indexes_reserve(u64 size) {
-  if (size == 0) {
-    return _indexes_free();
-  }
-  const u64 buffer_size = size * sizeof(u32);
-  if (indexes_capacity != 0) {
-    void* buffer = memory_realloc(indexes_virtual, buffer_size);
-    if (!buffer) {
-      error(ERR_NOT_ENOUGH_MEMORY, "indexes_alloc memory_realloc");
-      return;
-    }
-    indexes_virtual = buffer;
-    _d3d_indexes_buffer->lpVtbl->Release(_d3d_indexes_buffer);
-  } else {
-    indexes_virtual = memory_alloc(buffer_size);
-    if (!indexes_virtual) {
+    _indexes_virtual = memory_alloc(indexes_buffer_size);
+    if (!_indexes_virtual) {
       error(ERR_NOT_ENOUGH_MEMORY, "indexes_alloc memory_alloc");
       return;
     }
   }
-  indexes_capacity = size;
-  _d3d_buffer(&_d3d_indexes_buffer, buffer_size, D3D11_BIND_INDEX_BUFFER);
+  // d3d_buffers
+  HRESULT result;
+  D3D11_BUFFER_DESC buffer_desc = {
+    .Usage = D3D11_USAGE_DYNAMIC,
+    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE
+  };
+  u32 stride;
+  const u32 offset = 0;
+  // d3d_vertices_buffer
+  buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  buffer_desc.ByteWidth = vertices_buffer_size;
+  result = _d3d_device->lpVtbl->CreateBuffer(
+    _d3d_device, &buffer_desc, 0, &_d3d_vertices_buffer
+  );
+  if (FAILED(result)) {
+    error(result, "vertices_reserve vertices CreateBuffer");
+  }
+  stride = sizeof(vertex_t);
+  _d3d_device_context->lpVtbl->IASetVertexBuffers(
+    _d3d_device_context, 0, 1, &_d3d_vertices_buffer, &stride,
+    &offset
+  );
+  // indexes_buffer
+  buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  buffer_desc.ByteWidth = indexes_size * sizeof(u32);
+  result = _d3d_device->lpVtbl->CreateBuffer(
+    _d3d_device, &buffer_desc, 0, &_d3d_indexes_buffer
+  );
+  if (FAILED(result)) {
+    error(result, "vertices_reserve indexes CreateBuffer");
+  }
   _d3d_device_context->lpVtbl->IASetIndexBuffer(_d3d_device_context, _d3d_indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
+  // update
+  vertices_capacity = vertices_size;
+  indexes_capacity = indexes_size;
 }
 void window_set_title(const char* title) {
-  assert(window_id != 0);
-  SetWindowTextA(window_id, title);
+  assert(_window_id != 0);
+  SetWindowTextA(_window_id, title);
 }
 void window_run() {
   // renderer
-  assert(_renderer_thread_id == 0);
-  _renderer_thread_id = thread_new(_renderer_thread, 0);
+  thread_t* renderer_thread_id = thread_new(_renderer_thread, 0);
   // loop
   SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);
   MSG msg;
@@ -547,8 +549,9 @@ void window_run() {
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
         KillTimer(0, 0);
-        thread_free(_renderer_thread_id);
-        _renderer_thread_id = 0;
+        _window_id = 0;
+        thread_wait(renderer_thread_id);
+        thread_free(renderer_thread_id);
         return;
       }
     }

@@ -3,9 +3,6 @@
 #include <sdk/time.h>
 #include <game/unity.h>
 
-u16 window_width = 800;
-u16 window_height = 600;
-
 void window_onresize() {
   if (global_tilemap) {
     tilemap_onresize();

@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-const name = 'texture'
+const name = 'shader'
 
 const vs_cso_path = `assets/${name}.vs.cso`
 const ps_cso_path = `assets/${name}.ps.cso`
@@ -20,6 +20,3 @@ const ps_cso = '{ '
 
 console.log('VS', vs_cso)
 console.log('PS', ps_cso)
-
-fs.rmSync(vs_cso_path)
-fs.rmSync(ps_cso_path)

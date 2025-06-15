@@ -7,8 +7,8 @@
 #include <sdk/unity.h>
 
 // config
-const wchar_t* in_path = L"assets/atlas.png";
-const char* out_path = "assets/atlas.bin";
+const wchar_t* in_path = L"assets/flappy_bird_atlas.png";
+const char* out_path = "assets/flappy_bird_atlas.bin";
 // main
 i32 main(i32 argc, char** argv) {
   i32 result;

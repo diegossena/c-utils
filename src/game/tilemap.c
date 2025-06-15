@@ -109,8 +109,10 @@ void tilemap_unload() {
   assert(global_tilemap != null);
   assert(global_tilemap->screen_tiles != null);
   const u64 rendered_total = global_tilemap->rendered_area * LAYER_MAX;
-  vertices_reserve(vertices_capacity - rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED);
-  indexes_reserve(indexes_capacity - rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED);
+  vertices_reserve(
+    vertices_capacity - rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED,
+    indexes_capacity - rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED
+  );
   memory_free(global_tilemap->screen_tiles);
   memory_free(global_tilemap);
   global_tilemap = 0;
@@ -138,15 +140,13 @@ void tilemap_onresize() {
     const u64 previous_vertices = previous_rendered_total
       ? previous_rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED
       : 0;
-    vertices_reserve(
-      vertices_capacity
-      + rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED
-      - previous_vertices
-    );
     const u64 previous_indexes = previous_rendered_total
       ? previous_rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED
       : 0;
-    indexes_reserve(
+    vertices_reserve(
+      vertices_capacity
+      + rendered_total * QUAD_VERTEX_COUNT + TILEMAP_VERTICES_USED
+      - previous_vertices,
       indexes_capacity
       + rendered_total * QUAD_INDEX_COUNT + TILEMAP_INDEXES_USED
       - previous_indexes
@@ -155,8 +155,8 @@ void tilemap_onresize() {
     global_tilemap->rendered_tiles_y = rendered_tiles_y;
     global_tilemap->rendered_area = rendered_area;
   }
-  global_tilemap->tile_ndc_pixel_x = global_tilemap->tile_size * window_pixel_ndc_x;
-  global_tilemap->tile_ndc_pixel_y = global_tilemap->tile_size * window_pixel_ndc_y;
+  global_tilemap->tile_ndc_pixel_x = global_tilemap->tile_size * window_ndc_x;
+  global_tilemap->tile_ndc_pixel_y = global_tilemap->tile_size * window_ndc_y;
   window_updated = true;
 }
 tile_t* tile_from_screen() {

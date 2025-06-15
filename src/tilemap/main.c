@@ -4,9 +4,6 @@
 
 #include <game/unity.h>
 
-u16 window_width = 800;
-u16 window_height = 600;
-
 u8 pointer_layer = 0;
 u8 pointer_tile_id = 0;
 u8 pointer_flags = 0;
@@ -104,8 +101,8 @@ void window_onrender() {
   if (pointer_tile_id > 0) {
     u8 tile_x = (pointer_tile_id - 1) % atlas_tiles_width;
     u8 tile_y = math_ceil((f32)pointer_tile_id / atlas_tiles_height) - 1.f;
-    f32 pointer_x0 = -1 + mouse_x * window_pixel_ndc_x - global_tilemap->tile_ndc_pixel_x / 2;
-    f32 pointer_y0 = 1 - mouse_y * window_pixel_ndc_y;
+    f32 pointer_x0 = -1 + mouse_x * window_ndc_x - global_tilemap->tile_ndc_pixel_x / 2;
+    f32 pointer_y0 = 1 - mouse_y * window_ndc_y;
     f32 pointer_x1 = pointer_x0 + global_tilemap->tile_ndc_pixel_x;
     f32 pointer_y1 = pointer_y0 - global_tilemap->tile_ndc_pixel_y;
     tile_draw(pointer_x0, pointer_y0, pointer_x1, pointer_y1, tile_x, tile_y, pointer_flags);

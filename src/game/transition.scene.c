@@ -8,8 +8,10 @@ transition_t transition;
 void transition_load(function_t unload, function_t load) {
   if (transition.loading)
     return;
-  vertices_reserve(vertices_capacity + TRANSITION_VERTICES_USED);
-  indexes_reserve(indexes_capacity + TRANSITION_INDEXES_USED);
+  vertices_reserve(
+    vertices_capacity + TRANSITION_VERTICES_USED,
+    indexes_capacity + TRANSITION_INDEXES_USED
+  );
   transition.timer = 0;
   transition.unload = unload;
   transition.load = load;
@@ -41,8 +43,10 @@ void transition_render() {
       break;
     case TRANSITION_EXITED:
     default:
-      vertices_reserve(vertices_capacity - TRANSITION_VERTICES_USED);
-      indexes_reserve(indexes_capacity - TRANSITION_INDEXES_USED);
+      vertices_reserve(
+        vertices_capacity - TRANSITION_VERTICES_USED,
+        indexes_capacity - TRANSITION_INDEXES_USED
+      );
       transition.loading = false;
       window_updated = true;
       return;

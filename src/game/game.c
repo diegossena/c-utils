@@ -4,6 +4,9 @@
 #include <game/tilemap.h>
 #include <sdk/window.h>
 
+u16 window_width = 800;
+u16 window_height = 600;
+
 const u16 atlas_width = 256;
 const u16 atlas_height = 256;
 const u16 atlas_tile_size = 8;
@@ -31,12 +34,12 @@ void tile_draw(
 }
 void text_draw(const char* text, f32 x0, f32 y0, f32 size) {
   const f32 tile_pixel = size * 1 / atlas_tile_size;
-  const f32 spacing = (size - tile_pixel * 3) * window_pixel_ndc_x;
-  const f32 y1 = y0 - window_pixel_ndc_y * size;
+  const f32 spacing = (size - tile_pixel * 3) * window_ndc_x;
+  const f32 y1 = y0 - window_ndc_y * size;
   while (*text != '\0') {
     if (*text >= 'A' && *text <= 'Z') {
       u8 tile_x = *text - 'A';
-      const f32 x1 = x0 + window_pixel_ndc_x * size;
+      const f32 x1 = x0 + window_ndc_x * size;
       // draw
       tile_draw(x0, y0, x1, y1, tile_x, 0, 0);
     }

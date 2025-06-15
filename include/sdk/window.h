@@ -10,8 +10,8 @@
 #define QUAD_VERTEX_COUNT 4
 #define QUAD_INDEX_COUNT 6
 
-#define vertices_push(vertex) vertices_virtual[vertices_length++] = vertex
-#define indexes_push(index) indexes_virtual[indexes_length++] = index
+#define vertices_push(vertex) _vertices_virtual[_vertices_length++] = vertex
+#define indexes_push(index) _indexes_virtual[_indexes_length++] = index
 
 typedef struct vertex_t {
   f32 x, y; // position
@@ -40,13 +40,13 @@ void window_rect_fill(
   f32 r, f32 g, f32 b, f32 a
 );
 inline bool window_key_pressed(key_t);
-void vertices_reserve(u64 size);
-void indexes_reserve(u64 size);
+
+void vertices_reserve(u64 vertices_size, u64 indexes_size);
 
 extern void window_dblclick();
 extern void window_onmousemove();
-extern void window_onmouseup(i32 x, i32 y, mouse_btn_t);
-extern void window_onmousedown(i32 x, i32 y, mouse_btn_t);
+extern void window_onmouseup(i32 x, i32 y, mouse_btn_t button);
+extern void window_onmousedown(i32 x, i32 y, mouse_btn_t button);
 extern void window_onscroll(i32 delta);
 extern void window_onresize();
 /**
@@ -61,7 +61,7 @@ extern void window_onrender();
  * The `onkeydown` event occurs when the user presses a key on the keyboard.
  * It repeats if the key is kept pressed after a delay.
  */
-extern void window_onkeydown(key_t);
+extern void window_onkeydown(key_t key);
 /**
  * - Event Listener
  * - Externally-defined function
@@ -73,33 +73,37 @@ extern void window_onkeypress();
  * - Event Listener
  * - Externally-defined function
  */
-extern void window_onkeyup();
+extern void window_onkeyup(key_t key);
 
 extern u16 window_width; // externally-defined function
 extern u16 window_height; // externally-defined function
 extern f32 window_deltatime;
 
-extern const u16 atlas_width; // externally-defined function
-extern const u16 atlas_height; // externally-defined function
-
 extern bool window_focus;
-extern f32 window_background[4];
+extern rgba_t window_background; // externally-defined function
 extern bool window_updated;
-extern i32 mouse_x;
-extern i32 mouse_y;
 
-extern f32 window_pixel_ndc_x;
-extern f32 window_pixel_ndc_y;
+extern f32 window_ndc_x;
+extern f32 window_ndc_y;
 
 extern u8 keyboard_count;
 extern u8 keyboard_state[32];
 
-extern vertex_t* vertices_virtual;
-extern u64 vertices_length;
+extern vertex_t* _vertices_virtual;
+extern u64 _vertices_length;
 extern u64 vertices_capacity;
 
-extern u32* indexes_virtual;
-extern u64 indexes_length;
+extern u32* _indexes_virtual;
+extern u64 _indexes_length;
 extern u64 indexes_capacity;
+
+extern i32 mouse_x;
+extern i32 mouse_y;
+
+extern const u16 atlas_width; // externally-defined function
+extern const u16 atlas_height; // externally-defined function
+
+extern const f32 atlas_ndc_x;
+extern const f32 atlas_ndc_y;
 
 #endif
