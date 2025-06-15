@@ -1,23 +1,19 @@
 #include <sdk/window.h>
 // window
 bool window_updated = true;
-f32 window_deltatime = 0;
 bool window_resized = true;
+f32 window_deltatime;
 f32 window_ndc_x;
 f32 window_ndc_y;
-bool window_focus = false;
-// window_mouse
-i32 mouse_x = 0;
-i32 mouse_y = 0;
-// keyboard
-u8 _keyboard_count = 0;
-u8 _keyboard_state[32] = { 0 };
-// gfx
-u64 vertices_capacity = 0;
-u64 indexes_capacity = 0;
+bool window_focus;
+i32 mouse_x;
+i32 mouse_y;
+u8 _keyboard_count;
+u8 _keyboard_state[32];
+u64 vertices_capacity;
+u64 indexes_capacity;
 u64 _vertices_length;
 u64 _indexes_length;
-// atlas
 const f32 atlas_ndc_x = 1.f / atlas_width;
 const f32 atlas_ndc_y = 1.f / atlas_height;
 
@@ -36,23 +32,23 @@ void window_rect_draw(
   vertex_t vertex = { 0 };
   vertex.x = x0;
   vertex.y = y0;
-  vertex.textcoord[0] = u0;
-  vertex.textcoord[1] = v0;
+  vertex.texcoord[0] = u0;
+  vertex.texcoord[1] = v0;
   vertices_push(vertex);
   vertex.x = x1;
   vertex.y = y0;
-  vertex.textcoord[0] = u1;
-  vertex.textcoord[1] = v0;
+  vertex.texcoord[0] = u1;
+  vertex.texcoord[1] = v0;
   vertices_push(vertex);
   vertex.x = x1;
   vertex.y = y1;
-  vertex.textcoord[0] = u1;
-  vertex.textcoord[1] = v1;
+  vertex.texcoord[0] = u1;
+  vertex.texcoord[1] = v1;
   vertices_push(vertex);
   vertex.x = x0;
   vertex.y = y1;
-  vertex.textcoord[0] = u0;
-  vertex.textcoord[1] = v1;
+  vertex.texcoord[0] = u0;
+  vertex.texcoord[1] = v1;
   vertices_push(vertex);
   // indexes
   indexes_push(vertex_offset);

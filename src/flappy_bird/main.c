@@ -13,18 +13,20 @@ const u16 atlas_height = 256;
 #include <sdk/unity.h>
 
 typedef enum bird_animate_state_t {
-  BIRD_ANIMATE_UP,
-  BIRD_ANIMATE_DOWN
+  BIRD_ANIMATE_FLYING,
+  BIRD_ANIMATE_FALLING
 } bird_animate_state_t;
 
 typedef enum bird_wing_state_t {
   BIRD_WING_UP,
   BIRD_WING_MIDDLE,
-  BIRD_WING_DOWN
+  BIRD_WING_DOWN,
+  BIRD_WING_MAX
 } bird_wing_state_t;
 
-f32 bird_animate_timer = 0;
-u8 bird_animate_state = BIRD_ANIMATE_DOWN;
+f32 bird_timer = 0;
+u8 bird_state = BIRD_ANIMATE_FALLING;
+f32 bird_wing_timer = 0;
 u8 bird_wing_state = BIRD_WING_MIDDLE;
 
 f32 ground_animate_timer = 0;
@@ -77,24 +79,24 @@ void window_onrender() {
     0.870588235f, 0.843137255f, 0.596078431f, 1
   );
   // bird_animate
-  bird_animate_timer += window_deltatime;
+  bird_timer += window_deltatime;
   const f32 bird_animate_duration = .4f;
-  const f32 bird_animate_progress = math_min(bird_animate_timer / bird_animate_duration, 1);
+  const f32 bird_animate_progress = math_min(bird_timer / bird_animate_duration, 1);
   const f32 bird_animate_offset = .04f;
   const f32 bird_animate_y0 = .4f;
-  switch (bird_animate_state) {
-    case BIRD_ANIMATE_UP:
+  switch (bird_state) {
+    case BIRD_ANIMATE_FLYING:
       y0 = bird_animate_y0 + bird_animate_offset * (1.f - bird_animate_progress);
-      if (bird_animate_timer >= bird_animate_duration) {
-        bird_animate_state = BIRD_ANIMATE_DOWN;
-        bird_animate_timer = 0;
+      if (bird_timer >= bird_animate_duration) {
+        bird_state = BIRD_ANIMATE_FALLING;
+        bird_timer = 0;
       }
       break;
-    case BIRD_ANIMATE_DOWN:
+    case BIRD_ANIMATE_FALLING:
       y0 = bird_animate_y0 + bird_animate_offset * bird_animate_progress;
-      if (bird_animate_timer >= bird_animate_duration) {
-        bird_animate_state = BIRD_ANIMATE_UP;
-        bird_animate_timer = 0;
+      if (bird_timer >= bird_animate_duration) {
+        bird_state = BIRD_ANIMATE_FLYING;
+        bird_timer = 0;
       }
       break;
   }
@@ -105,6 +107,13 @@ void window_onrender() {
   u0 = v0 = 0;
   u1 = v1 = atlas_ndc_x * 16;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
+  // bird_wing_animate
+  bird_wing_timer += window_deltatime;
+  const f32 bird_wing_animate_duration = .1f;
+  if (bird_wing_timer >= bird_wing_animate_duration) {
+    bird_wing_state = (bird_wing_state + 1) % BIRD_WING_MAX;
+    bird_wing_timer = 0;
+  }
   // bird_wing_draw
   x0 = x0 - window_ndc_x;
   x1 = x0 + window_ndc_x * 16 * WINDOW_SCALING;

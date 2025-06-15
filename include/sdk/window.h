@@ -16,7 +16,7 @@
 typedef struct vertex_t {
   f32 x, y; // position
   union {
-    f32 textcoord[2]; // textcoord
+    f32 texcoord[2]; // textcoord
     f32 color[4]; // color
   };
 } vertex_t;

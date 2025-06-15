@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <avrt.h>
 
-HWND _window_id = 0;
+HWND _window_id;
 
-ID3D11Device* _d3d_device = 0;
+ID3D11Device* _d3d_device;
 IDXGISwapChain* _d3d_swapchain;
 ID3D11DeviceContext* _d3d_device_context;
 ID3D11RasterizerState* _d3d_rasterizer;
