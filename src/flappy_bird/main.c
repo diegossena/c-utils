@@ -1,7 +1,7 @@
 #include <sdk/types.h>
 #include <sdk/window.h>
 
-#define WINDOW_SCALING 3.5f
+#define WINDOW_SCALING 3.8f
 
 u16 window_width = 144 * WINDOW_SCALING;
 u16 window_height = 256 * WINDOW_SCALING;
