@@ -78,7 +78,7 @@ void window_onrender() {
   );
   // bird_animate
   bird_animate_timer += window_deltatime;
-  const f32 bird_animate_duration = 1.f;
+  const f32 bird_animate_duration = .4f;
   const f32 bird_animate_progress = math_min(bird_animate_timer / bird_animate_duration, 1);
   const f32 bird_animate_offset = .04f;
   const f32 bird_animate_y0 = .4f;
