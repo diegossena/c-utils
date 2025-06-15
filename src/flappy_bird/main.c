@@ -25,18 +25,17 @@ typedef enum bird_wing_state_t {
 } bird_wing_state_t;
 
 f32 bird_timer = 0;
-u8 bird_state = BIRD_ANIMATE_FALLING;
+u8 bird_state = BIRD_ANIMATE_FLYING;
 f32 bird_wing_timer = 0;
-u8 bird_wing_state = BIRD_WING_MIDDLE;
+u8 bird_wing_state = BIRD_WING_UP;
 
 f32 ground_animate_timer = 0;
 
 void window_dblclick() {}
 void window_onmousemove() {}
-void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {}
-void window_onmouseup(i32 x, i32 y, mouse_btn_t button) {}
+void window_onmousedown(mouse_btn_t button) {}
+void window_onmouseup(mouse_btn_t button) {}
 void window_onscroll(i32 delta) {}
-
 void window_onkeydown(key_t key) {}
 void window_onkeyup(key_t key) {}
 void window_onresize() {}
@@ -109,7 +108,7 @@ void window_onrender() {
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
   // bird_wing_animate
   bird_wing_timer += window_deltatime;
-  const f32 bird_wing_animate_duration = .1f;
+  const f32 bird_wing_animate_duration = bird_animate_duration / 1.5f;
   if (bird_wing_timer >= bird_wing_animate_duration) {
     bird_wing_state = (bird_wing_state + 1) % BIRD_WING_MAX;
     bird_wing_timer = 0;

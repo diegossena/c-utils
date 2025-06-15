@@ -45,8 +45,8 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size);
 
 extern void window_dblclick();
 extern void window_onmousemove();
-extern void window_onmouseup(i32 x, i32 y, mouse_btn_t button);
-extern void window_onmousedown(i32 x, i32 y, mouse_btn_t button);
+extern void window_onmouseup(mouse_btn_t button);
+extern void window_onmousedown(mouse_btn_t button);
 extern void window_onscroll(i32 delta);
 extern void window_onresize();
 /**
@@ -78,6 +78,7 @@ extern void window_onkeyup(key_t key);
 extern u16 window_width; // externally-defined function
 extern u16 window_height; // externally-defined function
 extern f32 window_deltatime;
+extern bool window_resized;
 
 extern bool window_focus;
 extern rgba_t window_background; // externally-defined function
@@ -89,13 +90,13 @@ extern f32 window_ndc_y;
 extern u8 _keyboard_count;
 extern u8 _keyboard_state[32];
 
+extern u64 vertices_capacity;
 extern vertex_t* _vertices_virtual;
 extern u64 _vertices_length;
-extern u64 vertices_capacity;
 
+extern u64 indexes_capacity;
 extern u32* _indexes_virtual;
 extern u64 _indexes_length;
-extern u64 indexes_capacity;
 
 extern i32 mouse_x;
 extern i32 mouse_y;

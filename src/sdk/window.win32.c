@@ -4,11 +4,11 @@
 #include <sdk/time.h>
 #include <sdk/memory.h>
 
-#include <stdio.h>
 #include <avrt.h>
+// fopen, FILE
+#include <stdio.h>
 
 HWND _window_id;
-
 ID3D11Device* _d3d_device;
 IDXGISwapChain* _d3d_swapchain;
 ID3D11DeviceContext* _d3d_device_context;
@@ -71,28 +71,28 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
     case WM_MOUSELEAVE:
       return 0;
     case WM_LBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
+      window_onmousedown(MOUSE_BUTTON_LEFT);
       return 0;
     case WM_RBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
+      window_onmousedown(MOUSE_BUTTON_RIGHT);
       return 0;
     case WM_MBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
+      window_onmousedown(MOUSE_BUTTON_MIDDLE);
       return 0;
     case WM_XBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
+      window_onmousedown(MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONUP:
-      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
+      window_onmouseup(MOUSE_BUTTON_LEFT);
       return 0;
     case WM_RBUTTONUP:
-      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
+      window_onmouseup(MOUSE_BUTTON_RIGHT);
       return 0;
     case WM_MBUTTONUP:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
+      window_onmousedown(MOUSE_BUTTON_MIDDLE);
       return 0;
     case WM_XBUTTONUP:
-      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
+      window_onmouseup(MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONDBLCLK:
       window_dblclick();
@@ -284,7 +284,7 @@ void window_startup(const char* title, const char* atlas_path) {
     error((error_t)_window_id, "CreateWindowExA");
   }
   // global_d3d_device | global_d3d_swapchain | global_d3d_device_context
-  DXGI_SWAP_CHAIN_DESC swapchain_desc = {
+  const DXGI_SWAP_CHAIN_DESC swapchain_desc = {
     .BufferCount = 1,                                // one back buffer
     .BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM, // use 32-bit color
     .BufferDesc.Width = window_width,                // set the back buffer width
@@ -494,7 +494,6 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     .Usage = D3D11_USAGE_DYNAMIC,
     .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE
   };
-
   const u32 offset = 0;
   // d3d_vertices_buffer
   buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;

@@ -109,7 +109,7 @@ void window_onrender() {
   }
 }
 void window_onmouseup(i32 x, i32 y, mouse_btn_t button) {}
-void window_dblclick() {}
+void window_dblclick(i32 x, i32 y) {}
 void window_onkeyup() {}
 void window_onresize() {
   if (global_tilemap) {
