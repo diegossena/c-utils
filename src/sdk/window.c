@@ -12,9 +12,6 @@ i32 mouse_y = 0;
 // keyboard
 u8 keyboard_count = 0;
 u8 keyboard_state[32] = { 0 };
-// atlas
-const u16 atlas_tiles_width = atlas_width / atlas_tile_size;
-const u16 atlas_tiles_height = atlas_height / atlas_tile_size;
 // gfx
 vertex_t* vertices_virtual;
 u64 vertices_length;

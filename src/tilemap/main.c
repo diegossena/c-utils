@@ -2,10 +2,6 @@
 #include <sdk/window.h>
 #include <sdk/time.h>
 
-const u16 atlas_width = 256;
-const u16 atlas_height = 256;
-const u16 atlas_tile_size = 8;
-
 #include <game/unity.h>
 
 u16 window_width = 800;

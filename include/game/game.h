@@ -10,6 +10,9 @@ typedef enum transition_state_t {
   TRANSITION_EXITED
 } transition_state_t;
 
+extern const u16 atlas_tiles_width;
+extern const u16 atlas_tiles_height;
+
 inline void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y,

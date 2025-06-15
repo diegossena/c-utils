@@ -4,6 +4,13 @@
 #include <game/tilemap.h>
 #include <sdk/window.h>
 
+const u16 atlas_width = 256;
+const u16 atlas_height = 256;
+const u16 atlas_tile_size = 8;
+
+const u16 atlas_tiles_width = atlas_width / atlas_tile_size;
+const u16 atlas_tiles_height = atlas_height / atlas_tile_size;
+
 void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y,

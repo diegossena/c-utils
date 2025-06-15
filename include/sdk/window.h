@@ -81,8 +81,6 @@ extern u16 window_height; // externally-defined function
 extern const u16 atlas_width; // externally-defined function
 extern const u16 atlas_height; // externally-defined function
 extern const u16 atlas_tile_size; // externally-defined function
-extern const u16 atlas_tiles_width;
-extern const u16 atlas_tiles_height;
 
 extern f32 window_deltatime;
 
