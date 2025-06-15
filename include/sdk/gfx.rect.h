@@ -7,7 +7,7 @@
 
 #define MAX_RECT 7680.f
 
-export void gfx_fill_rect(const f32 rect[4], gfx_color_t* color);
-export void gfx_draw_rect(const f32 rect[4], gfx_color_t* color, f32 width, gfx_stroke_t* stroke);
+void gfx_fill_rect(const f32 rect[4], gfx_color_t* color);
+void gfx_draw_rect(const f32 rect[4], gfx_color_t* color, f32 width, gfx_stroke_t* stroke);
 
 #endif

@@ -7,6 +7,9 @@
 #include <sdk/console.h>
 #include <sdk/thread.h>
 
+#define QUAD_VERTEX_COUNT 4
+#define QUAD_INDEX_COUNT 6
+
 #define vertices_push(vertex) vertices_virtual[vertices_length++] = vertex
 #define indexes_push(index) indexes_virtual[indexes_length++] = index
 
@@ -24,21 +27,21 @@ typedef enum mouse_btn_t {
   MOUSE_BUTTON_AUX
 } mouse_btn_t;
 
-export void window_startup(const char* title, const char* atlas_path);
-export void window_set_title(const char* title);
-export void window_close();
-export void window_run();
-export void window_rect_draw(
+void window_startup(const char* title, const char* atlas_path);
+void window_set_title(const char* title);
+void window_close();
+void window_run();
+void window_rect_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   f32 u0, f32 v0, f32 u1, f32 v1
 );
-export void window_rect_fill(
+void window_rect_fill(
   f32 x0, f32 y0, f32 x1, f32 y1,
   f32 r, f32 g, f32 b, f32 a
 );
-export bool window_key_pressed(key_t);
-export void vertices_reserve(u64 size);
-export void indexes_reserve(u64 size);
+inline bool window_key_pressed(key_t);
+void vertices_reserve(u64 size);
+void indexes_reserve(u64 size);
 
 extern void window_dblclick();
 extern void window_onmousemove();
@@ -72,16 +75,12 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup();
 
-// Externally-defined function
-extern u16 window_width;
-// Externally-defined function
-extern u16 window_height;
-// Externally-defined function
-extern const u16 atlas_width;
-// Externally-defined function
-extern const u16 atlas_height;
-
+extern u16 window_width; // externally-defined function
+extern u16 window_height; // externally-defined function
 extern f32 window_deltatime;
+
+extern const u16 atlas_width; // externally-defined function
+extern const u16 atlas_height; // externally-defined function
 
 extern bool window_focus;
 extern f32 window_background[4];
@@ -89,7 +88,8 @@ extern bool window_updated;
 extern i32 mouse_x;
 extern i32 mouse_y;
 
-extern f32 window_pixel_ndc[2];
+extern f32 window_pixel_ndc_x;
+extern f32 window_pixel_ndc_y;
 
 extern u8 keyboard_count;
 extern u8 keyboard_state[32];

@@ -6,14 +6,16 @@
 
 #include <sdk/unity.h>
 
+// config
+const wchar_t* in_path = L"assets/atlas.png";
+const char* out_path = "assets/atlas.bin";
+// main
 i32 main(i32 argc, char** argv) {
   i32 result;
-  const wchar_t* in_path = L"assets/atlas.png";
-  const char* out_path = "assets/atlas.bin";
   // CoInitialize
   result = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
   if (FAILED(result)) {
-    error("CoInitializeEx", result);
+    error(result, "CoInitializeEx");
   }
   // wic_factory
   IWICImagingFactory* wic_factory;
@@ -25,7 +27,7 @@ i32 main(i32 argc, char** argv) {
     (void**)&wic_factory
   );
   if (FAILED(result)) {
-    error("CoCreateInstance_IWICImagingFactory", result);
+    error(result, "CoCreateInstance_IWICImagingFactory");
   }
   // decoder
   IWICBitmapDecoder* decoder;
@@ -33,20 +35,20 @@ i32 main(i32 argc, char** argv) {
     wic_factory, in_path, 0, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder
   );
   if (FAILED(result)) {
-    error("CreateDecoderFromFilename", result);
+    error(result, "CreateDecoderFromFilename");
   }
   // frame
   IWICBitmapFrameDecode* frame;
   result = decoder->lpVtbl->GetFrame(decoder, 0, &frame);
   if (FAILED(result)) {
-    error("IWICBitmapDecoder_GetFrame", result);
+    error(result, "IWICBitmapDecoder_GetFrame");
   }
   decoder->lpVtbl->Release(decoder);
   // CreateFormatConverter
   IWICFormatConverter* converter;
   result = wic_factory->lpVtbl->CreateFormatConverter(wic_factory, &converter);
   if (FAILED(result)) {
-    error("IWICImagingFactory_CreateFormatConverter", result);
+    error(result, "IWICImagingFactory_CreateFormatConverter");
   }
   wic_factory->lpVtbl->Release(wic_factory);
   // IWICFormatConverter_Inicialize
@@ -55,13 +57,13 @@ i32 main(i32 argc, char** argv) {
     WICBitmapDitherTypeNone, 0, 0., WICBitmapPaletteTypeCustom
   );
   if (FAILED(result)) {
-    error("IWICFormatConverter_Initialize", result);
+    error(result, "IWICFormatConverter_Initialize");
   }
   // IWICBitmapFrameDecode_GetSize
   u32 image_width, image_height;
   result = frame->lpVtbl->GetSize(frame, &image_width, &image_height);
   if (FAILED(result)) {
-    error("GetSize", result);
+    error(result, "GetSize");
   }
   frame->lpVtbl->Release(frame);
   // image_load
@@ -77,13 +79,13 @@ i32 main(i32 argc, char** argv) {
     image_data
   );
   if (FAILED(result)) {
-    error("IWICFormatConverter_CopyPixels", result);
+    error(result, "IWICFormatConverter_CopyPixels");
   }
   converter->lpVtbl->Release(converter);
   // cache_file
   FILE* file = fopen(out_path, "w");
   if (file == 0) {
-    error("fopen", (error_t)file);
+    error((error_t)file, "fopen");
   }
   fwrite(image_data, 1, image_size, file);
   console_log(

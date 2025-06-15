@@ -7,7 +7,7 @@ u16 window_width = 800;
 u16 window_height = 600;
 
 void window_onresize() {
-  if (tilemap) {
+  if (global_tilemap) {
     tilemap_onresize();
   }
 }
@@ -20,7 +20,7 @@ void window_onkeydown(key_t key) {
   }
 }
 void window_onkeypress() {
-  if (tilemap) {
+  if (global_tilemap) {
     tilemap_onkeypress();
   }
 }
@@ -28,7 +28,7 @@ void window_onrender() {
   if (titlescreen) {
     titlescreen_render();
   }
-  if (tilemap) {
+  if (global_tilemap) {
     tilemap_draw();
   }
   if (transition.loading) {

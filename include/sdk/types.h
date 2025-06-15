@@ -21,10 +21,10 @@
 
 #define null ((void*)0)
 
-#define MAX_U8 255U
-#define MIN_U8 0U
-#define MAX_I8 127U
-#define MIN_I8 -128U
+#define MAX_U8 (u8)255U
+#define MIN_U8 (u8)0U
+#define MAX_I8 (i8)(-127)
+#define MIN_I8 (i8)-128
 #define MAX_I16 32767
 #define MIN_I16 -32768
 #define MAX_U16 65535U
@@ -55,13 +55,14 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef void (*function_t)();
 
+typedef struct vec3_u8_t {
+  u8 x, y, z;
+} vec3_u8_t;
 typedef struct vec2_f32_t {
   f32 x, y;
 } vec2_f32_t;
 typedef struct vec2_i32_t {
   i32 x, y;
 } vec2_i32_t;
-
-#define export static inline
 
 #endif

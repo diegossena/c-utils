@@ -3,6 +3,6 @@
 
 #include <sdk/types.h>
 
-export u64 snowflake_uid();
+u64 snowflake_uid();
 
 #endif

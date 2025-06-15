@@ -10,14 +10,16 @@ typedef enum transition_state_t {
   TRANSITION_EXITED
 } transition_state_t;
 
-export void text_draw(const char* text, f32 size, f32 x, f32 y);
-export void tile_draw(
+extern const u16 atlas_tiles_width;
+extern const u16 atlas_tiles_height;
+extern const u16 atlas_tile_size;
+
+inline void tile_draw(
   f32 x0, f32 y0, f32 x1, f32 y1,
   u8 tile_x, u8 tile_y,
   u8 flags
 );
 
-extern const u16 atlas_tiles_in_x;
-extern const u16 atlas_tiles_in_y;
+void text_draw(const char* text, f32 size, f32 x, f32 y);
 
 #endif

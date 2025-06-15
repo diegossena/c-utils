@@ -1,6 +1,6 @@
 #include <sdk/console.h>
 
-export void console_write(const char* message, ...) {
+void console_write(const char* message, ...) {
   va_list args;
   va_start(args, message);
   char buffer[TEXT_SIZE + 1];
@@ -10,7 +10,7 @@ export void console_write(const char* message, ...) {
     return;
   console_write_str(buffer, length);
 }
-export void console_write_bin(u64 value) {
+void console_write_bin(u64 value) {
   char str[76] = {};
   char* ptr = str;
   if (value) {
@@ -37,7 +37,7 @@ export void console_write_bin(u64 value) {
   }
   console_write_str(str, ptr - str);
 }
-export void console_write_buffer(const u8* data, u64 size) {
+void console_write_buffer(const u8* data, u64 size) {
   bool first = true;
   char buffer[7] = ", 0x";
   char* hex_ptr = buffer + 4;

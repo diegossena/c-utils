@@ -5,10 +5,10 @@ bool __net_started = false;
 i64 __socket_count = 0;
 #endif
 
-export u32 ip4_from_bytes(u8 f1, u8 f2, u8 f3, u8 f4) {
+u32 ip4_from_bytes(u8 f1, u8 f2, u8 f3, u8 f4) {
   return f1 | f2 << 8 | f3 << 16 | f4 << 24;
 }
-export u32 ip4_from_str(const char* ip4_str) {
+u32 ip4_from_str(const char* ip4_str) {
   u32 ip4 = 0;
   u8* ip4_u8 = (u8*)&ip4;
   u8 i = 0;
@@ -25,7 +25,7 @@ export u32 ip4_from_str(const char* ip4_str) {
   }
   return ip4;
 }
-export void ip4_to_str(u32 ip4, ip4_string_t cstr) {
+void ip4_to_str(u32 ip4, ip4_string_t cstr) {
   char* ptr = cstr;
   char int_str[3], * int_str_ptr;
   u8 place = 0, number;
@@ -52,7 +52,7 @@ export void ip4_to_str(u32 ip4, ip4_string_t cstr) {
 /**
  * `ip4++`
  */
-export u32 ip4_increment(u32 ip4) {
+u32 ip4_increment(u32 ip4) {
   u8* ip4_u8 = (u8*)&ip4;
   for (u8 i = 3; i >= 0; i--) {
     ip4_u8[i] += 1;
@@ -64,7 +64,7 @@ export u32 ip4_increment(u32 ip4) {
 /**
  * `ip4_left <= ip4_right`
  */
-export bool ip4_lessequal(u32 ip4_left, u32 ip4_right) {
+bool ip4_lessequal(u32 ip4_left, u32 ip4_right) {
   u8* ip4_left_u8 = (u8*)&ip4_left;
   u8* ip4_right_u8 = (u8*)&ip4_right;
   for (u8 i = 0; i < 4; i++) {
