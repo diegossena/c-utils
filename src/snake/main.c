@@ -177,7 +177,7 @@ void window_onkeyup() {}
 void window_onkeypress() {}
 
 i32 main(i32 argc, char** argv) {
-  window_startup("Snake", SCREEN_SIZE, SCREEN_SIZE);
+  window_startup("Snake", 0);
   game_startup();
   window_run();
   console_color(ANSI_FORE_LIGHTGREEN);

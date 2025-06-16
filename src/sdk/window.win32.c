@@ -313,15 +313,14 @@ pixel_shader_free:
   }
   _d3d_device_context->lpVtbl->VSSetShader(_d3d_device_context, _d3d_vertex_shader, NULL, 0);
   // input_layout
-  D3D11_INPUT_ELEMENT_DESC texture_layout [] = {
+  const D3D11_INPUT_ELEMENT_DESC texture_layout [] = {
     { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,       0,               0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(f32) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0 }
   };
-  const u8 texture_layout_size = sizeof(texture_layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
   result = _d3d_device->lpVtbl->CreateInputLayout(
     _d3d_device,
     texture_layout,
-    texture_layout_size,
+    sizeof(texture_layout) / sizeof(D3D11_INPUT_ELEMENT_DESC),
     file_bytes,
     file_size,
     &_d3d_input_layout
@@ -370,52 +369,57 @@ vertex_shader_free:
   _d3d_device_context->lpVtbl->OMSetBlendState(
     _d3d_device_context, _d3d_blend_state, blend_factor, 0xffffffff
   );
-  // atlas_load
-  file_bytes = fs_readfilen_sync(atlas_path, atlas_width * atlas_height * 4);
-  if (file_bytes == null) {
-    error(ERR_NOT_FOUND, "atlas_load");
-    goto atlas_exit;
+  if (atlas_path) {
+    // atlas_load
+    file_bytes = fs_readfilen_sync(atlas_path, atlas_width * atlas_height * 4);
+    if (file_bytes == null) {
+      error(ERR_NOT_FOUND, "atlas_load");
+      goto atlas_exit;
+    }
+    // CreateTexture2D
+    D3D11_TEXTURE2D_DESC texture_desc = {
+      .Width = atlas_width,
+      .Height = atlas_height,
+      .MipLevels = 1,
+      .ArraySize = 1,
+      .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+      .SampleDesc = {.Count = 1, .Quality = 0 },
+      .Usage = D3D11_USAGE_DEFAULT,
+      .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+      .CPUAccessFlags = 0,
+      .MiscFlags = 0,
+    };
+    const D3D11_SUBRESOURCE_DATA subresource_data = {
+      .pSysMem = file_bytes,
+      .SysMemPitch = atlas_width * 4
+    };
+    ID3D11Texture2D* texture;
+    result = _d3d_device->lpVtbl->CreateTexture2D(
+      _d3d_device, &texture_desc, &subresource_data, &texture
+    );
+    if (FAILED(result)) {
+      error(result, "CreateTexture2D");
+      goto atlas_free;
+    }
+    // CreateShaderResourceView
+    const D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
+      .Format = texture_desc.Format,
+      .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+      .Texture2D.MipLevels = 1
+    };
+    result = _d3d_device->lpVtbl->CreateShaderResourceView(
+      _d3d_device, (ID3D11Resource*)texture, &srv_desc, &_d3d_shader_resource
+    );
+    if (FAILED(result)) {
+      error(result, "CreateShaderResourceView");
+      goto atlas_free;
+    }
+    // PSSetShaderResources
+    _d3d_device_context->lpVtbl->PSSetShaderResources(_d3d_device_context, 0, 1, &_d3d_shader_resource);
+  atlas_free:
+    memory_free(file_bytes);
+  atlas_exit:
   }
-  // CreateTexture2D
-  D3D11_TEXTURE2D_DESC texture_desc = {
-    .Width = atlas_width,
-    .Height = atlas_height,
-    .MipLevels = 1,
-    .ArraySize = 1,
-    .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-    .SampleDesc = {.Count = 1, .Quality = 0 },
-    .Usage = D3D11_USAGE_DEFAULT,
-    .BindFlags = D3D11_BIND_SHADER_RESOURCE,
-    .CPUAccessFlags = 0,
-    .MiscFlags = 0,
-  };
-  const D3D11_SUBRESOURCE_DATA subresource_data = {
-    .pSysMem = file_bytes,
-    .SysMemPitch = atlas_width * 4
-  };
-  ID3D11Texture2D* texture;
-  result = _d3d_device->lpVtbl->CreateTexture2D(
-    _d3d_device, &texture_desc, &subresource_data, &texture
-  );
-  if (FAILED(result)) {
-    error(result, "CreateTexture2D");
-  }
-  memory_free(file_bytes);
-atlas_exit:
-  // CreateShaderResourceView
-  D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
-    .Format = texture_desc.Format,
-    .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-    .Texture2D.MipLevels = 1
-  };
-  result = _d3d_device->lpVtbl->CreateShaderResourceView(
-    _d3d_device, (ID3D11Resource*)texture, &srv_desc, &_d3d_shader_resource
-  );
-  if (FAILED(result)) {
-    error(result, "CreateShaderResourceView");
-  }
-  // PSSetShaderResources
-  _d3d_device_context->lpVtbl->PSSetShaderResources(_d3d_device_context, 0, 1, &_d3d_shader_resource);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (vertices_size == 0) {
