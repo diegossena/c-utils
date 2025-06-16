@@ -97,16 +97,21 @@ const char* error_cstr(error_t code) {
   }
 }
 void error(error_t code, const char* message, ...) {
+  i32 length;
   char buffer[TEXT_SIZE + 1];
-  const char* error_str = error_cstr(code);
-  console_write("Error: %s %x\n", error_str, code);
+  char* buffer_end = buffer + sizeof(buffer);
+  length = string_format(buffer, sizeof(buffer), "Error: %s %x ", error_cstr(code), code);
+  if (length < 0)
+    return;
+  char* ptr = buffer + length;
   va_list args;
   va_start(args, message);
-  i32 length = string_format_va(buffer, sizeof(buffer), message, args);
+  length = string_format_va(ptr, ptr - buffer_end, message, args);
   va_end(args);
   if (length < 0)
     return;
-  buffer[length++] = '\n';
-  buffer[length++] = '\0';
+  ptr += length;
+  *ptr++ = '\n';
+  *ptr = '\0';
   console_write_str(buffer, length);
 }
