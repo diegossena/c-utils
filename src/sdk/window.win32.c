@@ -118,7 +118,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   }
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
-void _window_onresize() {
+void _window_resize() {
   window_ndc_x = 2.f / (f32)window_width;
   window_ndc_y = 2.f / (f32)window_height;
   // d3d_render_target_view
@@ -166,7 +166,7 @@ void _window_render() {
     console_log("FPS DROP %f %f", frame_time, window_deltatime);
   }
 #endif
-    // onresize
+  // onresize
   if (window_resized) {
     window_resized = false;
     _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
@@ -177,7 +177,7 @@ void _window_render() {
     if (FAILED(result)) {
       error(result, "IDXGISwapChain_ResizeBuffers");
     }
-    _window_onresize();
+    _window_resize();
     window_onresize();
     window_updated = true;
   }
@@ -276,7 +276,7 @@ void window_startup(const char* title, const char* atlas_path) {
     error(result, "D3D11CreateDeviceAndSwapChain");
   }
   _d3d_device_context->lpVtbl->IASetPrimitiveTopology(_d3d_device_context, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  _window_onresize();
+  _window_resize();
   // global_d3d_rasterizer
   D3D11_RASTERIZER_DESC rasterizer_props = {
     .FillMode = D3D11_FILL_SOLID,
@@ -496,7 +496,6 @@ void window_set_title(const char* title) {
 void window_run() {
   // renderer
   timeBeginPeriod(1);
-  // set multimedia thread
   DWORD task_index = 0;
   HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
   if (!mmtask) {
