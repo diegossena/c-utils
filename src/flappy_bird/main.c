@@ -31,10 +31,10 @@ u8 bird_wing_state = BIRD_WING_UP;
 
 f32 ground_animate_timer = 0;
 
-void window_dblclick() {}
-void window_onmousemove() {}
-void window_onmousedown(mouse_btn_t button) {}
-void window_onmouseup(mouse_btn_t button) {}
+void window_dblclick(u16 x, u16 y) {}
+void window_onmousemove(u16 x, u16 y) {}
+void window_onmousedown(u16 x, u16 y, mouse_btn_t button) {}
+void window_onmouseup(u16 x, u16 y, mouse_btn_t button) {}
 void window_onscroll(i32 delta) {}
 void window_onkeydown(key_t key) {}
 void window_onkeyup(key_t key) {}

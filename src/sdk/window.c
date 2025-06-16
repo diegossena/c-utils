@@ -6,8 +6,6 @@ f32 window_deltatime;
 f32 window_ndc_x;
 f32 window_ndc_y;
 bool window_focus;
-i32 mouse_x;
-i32 mouse_y;
 u8 _keyboard_count;
 u8 _keyboard_state[32];
 u64 vertices_capacity;

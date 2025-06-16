@@ -43,10 +43,10 @@ inline bool window_key_pressed(key_t);
 
 void vertices_reserve(u64 vertices_size, u64 indexes_size);
 
-extern void window_dblclick();
-extern void window_onmousemove();
-extern void window_onmouseup(mouse_btn_t button);
-extern void window_onmousedown(mouse_btn_t button);
+extern void window_dblclick(u16 x, u16 y);
+extern void window_onmousemove(u16 x, u16 y);
+extern void window_onmouseup(u16 x, u16 y, mouse_btn_t button);
+extern void window_onmousedown(u16 x, u16 y, mouse_btn_t button);
 extern void window_onscroll(i32 delta);
 extern void window_onresize();
 /**
@@ -97,9 +97,6 @@ extern u64 _vertices_length;
 extern u64 indexes_capacity;
 extern u32* _indexes_virtual;
 extern u64 _indexes_length;
-
-extern i32 mouse_x;
-extern i32 mouse_y;
 
 extern const u16 atlas_width; // externally-defined function
 extern const u16 atlas_height; // externally-defined function

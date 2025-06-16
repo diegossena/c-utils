@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 HWND _window_id;
+f64 _window_render_time;
 ID3D11Device* _d3d_device;
 IDXGISwapChain* _d3d_swapchain;
 ID3D11DeviceContext* _d3d_device_context;
@@ -64,38 +65,36 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       }
       return 0;
     case WM_MOUSEMOVE:
-      mouse_x = GET_X_LPARAM(lParam);
-      mouse_y = GET_Y_LPARAM(lParam);
-      window_onmousemove();
+      window_onmousemove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
       return 0;
     case WM_MOUSELEAVE:
       return 0;
     case WM_LBUTTONDOWN:
-      window_onmousedown(MOUSE_BUTTON_LEFT);
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
       return 0;
     case WM_RBUTTONDOWN:
-      window_onmousedown(MOUSE_BUTTON_RIGHT);
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
       return 0;
     case WM_MBUTTONDOWN:
-      window_onmousedown(MOUSE_BUTTON_MIDDLE);
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
       return 0;
     case WM_XBUTTONDOWN:
-      window_onmousedown(MOUSE_BUTTON_AUX);
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONUP:
-      window_onmouseup(MOUSE_BUTTON_LEFT);
+      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
       return 0;
     case WM_RBUTTONUP:
-      window_onmouseup(MOUSE_BUTTON_RIGHT);
+      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
       return 0;
     case WM_MBUTTONUP:
-      window_onmousedown(MOUSE_BUTTON_MIDDLE);
+      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
       return 0;
     case WM_XBUTTONUP:
-      window_onmouseup(MOUSE_BUTTON_AUX);
+      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONDBLCLK:
-      window_dblclick();
+      window_dblclick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
       return 0;
     case WM_MOUSEWHEEL:
       window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
@@ -154,101 +153,68 @@ void _window_onresize() {
     _d3d_device_context, 1, &viewport
   );
 }
-void _renderer_thread() {
-  f64 time = time_now_f64();
-  // set multimedia thread
-  DWORD task_index = 0;
-  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
-  if (!mmtask) {
-    error(GetLastError(), "renderer thread AvSetMmThreadCharacteristicsA");
-  }
-  // timer
-  HANDLE timer = CreateWaitableTimerA(0, false, 0);
-  const LARGE_INTEGER due_time = { 0 };
-  if (!SetWaitableTimer(timer, &due_time, 15, 0, 0, false)) {
-    error(GetLastError(), "renderer thread SetWaitableTimer");
-  }
-  timeBeginPeriod(1);
-  // loop
-  while (_window_id) {
-    WaitForSingleObject(timer, INFINITE);
-    // timer
-    const f64 now = time_now_f64();
-    window_deltatime = now - time;
-    time = now;
-    if (!window_focus)
-      continue;
+void _window_render() {
+  const f64 now = time_now_f64();
+  const f64 delta_time = now - _window_render_time;
+  window_deltatime = delta_time;
+  _window_render_time = now;
+  if (!window_focus)
+    return;
 #ifdef DEBUG
-    const f64 frame_time = 1. / 60;
-    if (window_deltatime > frame_time) {
-      console_log("FPS DROP %f %f", frame_time, window_deltatime);
-    }
+  const f64 frame_time = 1. / 60;
+  if (window_deltatime > frame_time) {
+    console_log("FPS DROP %f %f", frame_time, window_deltatime);
+  }
 #endif
     // onresize
-    if (window_resized) {
-      window_resized = false;
-      _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
-      HRESULT result = _d3d_swapchain->lpVtbl->ResizeBuffers(
-        _d3d_swapchain, 1, window_width, window_height,
-        DXGI_FORMAT_R8G8B8A8_UNORM, 0
-      );
-      if (FAILED(result)) {
-        error(result, "IDXGISwapChain_ResizeBuffers");
-      }
-      _window_onresize();
-      window_onresize();
-      window_updated = true;
+  if (window_resized) {
+    window_resized = false;
+    _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
+    HRESULT result = _d3d_swapchain->lpVtbl->ResizeBuffers(
+      _d3d_swapchain, 1, window_width, window_height,
+      DXGI_FORMAT_R8G8B8A8_UNORM, 0
+    );
+    if (FAILED(result)) {
+      error(result, "IDXGISwapChain_ResizeBuffers");
     }
-    if (window_updated) {
-      // render
-      window_updated = false;
-      _vertices_length = 0;
-      _indexes_length = 0;
-      window_onrender();
-      assert(_vertices_length <= vertices_capacity);
-      assert(_indexes_length <= indexes_capacity);
-      static D3D11_MAPPED_SUBRESOURCE subresource = {};
-      // vertices_map
-      _d3d_device_context->lpVtbl->Map(
-        _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
-        D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-      );
-      memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
-      _d3d_device_context->lpVtbl->Unmap(
-        _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
-      );
-      // indexes_map
-      _d3d_device_context->lpVtbl->Map(
-        _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
-        D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-      );
-      memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
-      _d3d_device_context->lpVtbl->Unmap(
-        _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0
-      );
-      // draw
-      _d3d_device_context->lpVtbl->ClearRenderTargetView(
-        _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
-      );
-      _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
-      _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
-    }
+    _window_onresize();
+    window_onresize();
+    window_updated = true;
   }
-  // cleanup
-  CloseHandle(timer);
-  timeEndPeriod(1);
-  AvRevertMmThreadCharacteristics(mmtask);
-  _vertices_free();
-  _d3d_blend_state->lpVtbl->Release(_d3d_blend_state);
-  _d3d_sampler_state->lpVtbl->Release(_d3d_sampler_state);
-  _d3d_pixel_shader->lpVtbl->Release(_d3d_pixel_shader);
-  _d3d_vertex_shader->lpVtbl->Release(_d3d_vertex_shader);
-  _d3d_input_layout->lpVtbl->Release(_d3d_input_layout);
-  _d3d_rasterizer->lpVtbl->Release(_d3d_rasterizer);
-  _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
-  _d3d_device_context->lpVtbl->Release(_d3d_device_context);
-  _d3d_device->lpVtbl->Release(_d3d_device);
-  _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);
+  if (window_updated) {
+    // render
+    window_updated = false;
+    _vertices_length = 0;
+    _indexes_length = 0;
+    window_onrender();
+    assert(_vertices_length <= vertices_capacity);
+    assert(_indexes_length <= indexes_capacity);
+    static D3D11_MAPPED_SUBRESOURCE subresource = {};
+    // vertices_map
+    _d3d_device_context->lpVtbl->Map(
+      _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
+      D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
+    );
+    memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
+    _d3d_device_context->lpVtbl->Unmap(
+      _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
+    );
+    // indexes_map
+    _d3d_device_context->lpVtbl->Map(
+      _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
+      D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
+    );
+    memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
+    _d3d_device_context->lpVtbl->Unmap(
+      _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0
+    );
+    // draw
+    _d3d_device_context->lpVtbl->ClearRenderTargetView(
+      _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
+    );
+    _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
+    _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
+  }
 }
 void window_close() { DestroyWindow(_window_id); }
 void window_startup(const char* title, const char* atlas_path) {
@@ -529,7 +495,16 @@ void window_set_title(const char* title) {
 }
 void window_run() {
   // renderer
-  thread_t* renderer_thread_id = thread_new(_renderer_thread, 0);
+  timeBeginPeriod(1);
+  // set multimedia thread
+  DWORD task_index = 0;
+  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
+  if (!mmtask) {
+    error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
+  }
+  HANDLE renderer_timer;
+  _window_render_time = time_now_f64();
+  CreateTimerQueueTimer(&renderer_timer, 0, (WAITORTIMERCALLBACK)_window_render, 0, 0, 15, 0);
   // loop
   SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);
   MSG msg;
@@ -545,10 +520,21 @@ void window_run() {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
+        timeEndPeriod(1);
         KillTimer(0, 0);
-        _window_id = 0;
-        thread_wait(renderer_thread_id);
-        thread_free(renderer_thread_id);
+        AvRevertMmThreadCharacteristics(mmtask);
+        DeleteTimerQueueTimer(0, renderer_timer, INVALID_HANDLE_VALUE);
+        _vertices_free();
+        _d3d_blend_state->lpVtbl->Release(_d3d_blend_state);
+        _d3d_sampler_state->lpVtbl->Release(_d3d_sampler_state);
+        _d3d_pixel_shader->lpVtbl->Release(_d3d_pixel_shader);
+        _d3d_vertex_shader->lpVtbl->Release(_d3d_vertex_shader);
+        _d3d_input_layout->lpVtbl->Release(_d3d_input_layout);
+        _d3d_rasterizer->lpVtbl->Release(_d3d_rasterizer);
+        _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
+        _d3d_device_context->lpVtbl->Release(_d3d_device_context);
+        _d3d_device->lpVtbl->Release(_d3d_device);
+        _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);
         return;
       }
     }
