@@ -5,8 +5,6 @@
 #include <sdk/memory.h>
 
 #include <avrt.h>
-// FILE, fopen, fclose, fseek, fclose, ftell
-#include <stdio.h>
 
 HWND _window_id;
 f64 _window_render_time;
@@ -65,42 +63,44 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       }
       return 0;
     case WM_MOUSEMOVE:
-      window_onmousemove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+      mouse_x = GET_X_LPARAM(lParam);
+      mouse_y = GET_Y_LPARAM(lParam);
+      window_onmousemove();
       return 0;
     case WM_MOUSELEAVE:
       return 0;
     case WM_LBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
+      window_onmousedown(MOUSE_BUTTON_LEFT);
       return 0;
     case WM_RBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
+      window_onmousedown(MOUSE_BUTTON_RIGHT);
       return 0;
     case WM_MBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
+      window_onmousedown(MOUSE_BUTTON_MIDDLE);
       return 0;
     case WM_XBUTTONDOWN:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
+      window_onmousedown(MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONUP:
-      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_LEFT);
+      window_onmouseup(MOUSE_BUTTON_LEFT);
       return 0;
     case WM_RBUTTONUP:
-      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_RIGHT);
+      window_onmouseup(MOUSE_BUTTON_RIGHT);
       return 0;
     case WM_MBUTTONUP:
-      window_onmousedown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_MIDDLE);
+      window_onmousedown(MOUSE_BUTTON_MIDDLE);
       return 0;
     case WM_XBUTTONUP:
-      window_onmouseup(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MOUSE_BUTTON_AUX);
+      window_onmouseup(MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONDBLCLK:
-      window_dblclick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+      window_dblclick();
       return 0;
     case WM_MOUSEWHEEL:
       window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
       return 0;
     case WM_SIZE:
-      if (_d3d_device && window_focus) {
+      if (_d3d_device) {
         window_width = LOWORD(lParam);
         window_height = HIWORD(lParam);
         window_resized = true;
@@ -158,8 +158,6 @@ void _window_render() {
   const f64 delta_time = now - _window_render_time;
   window_deltatime = delta_time;
   _window_render_time = now;
-  if (!window_focus)
-    return;
 #ifdef DEBUG
   const f64 frame_time = 1. / 60;
   if (window_deltatime > frame_time) {
@@ -179,48 +177,42 @@ void _window_render() {
     }
     _window_resize();
     window_onresize();
-    window_updated = true;
   }
-  if (window_updated) {
-    // render
-    window_updated = false;
-    _vertices_length = 0;
-    _indexes_length = 0;
-    window_onrender();
-    assert(_vertices_length <= vertices_capacity);
-    assert(_indexes_length <= indexes_capacity);
-    static D3D11_MAPPED_SUBRESOURCE subresource = {};
-    // vertices_map
-    _d3d_device_context->lpVtbl->Map(
-      _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
-      D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-    );
-    memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
-    _d3d_device_context->lpVtbl->Unmap(
-      _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
-    );
-    // indexes_map
-    _d3d_device_context->lpVtbl->Map(
-      _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
-      D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-    );
-    memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
-    _d3d_device_context->lpVtbl->Unmap(
-      _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0
-    );
-    // draw
-    _d3d_device_context->lpVtbl->ClearRenderTargetView(
-      _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
-    );
-    _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
-    _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
-  }
+  // render
+  _vertices_length = 0;
+  _indexes_length = 0;
+  window_onrender();
+  assert(_vertices_length <= vertices_capacity);
+  assert(_indexes_length <= indexes_capacity);
+  static D3D11_MAPPED_SUBRESOURCE subresource = {};
+  // vertices_map
+  _d3d_device_context->lpVtbl->Map(
+    _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
+    D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
+  );
+  memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
+  _d3d_device_context->lpVtbl->Unmap(
+    _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
+  );
+  // indexes_map
+  _d3d_device_context->lpVtbl->Map(
+    _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
+    D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
+  );
+  memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
+  _d3d_device_context->lpVtbl->Unmap(
+    _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0
+  );
+  // draw
+  _d3d_device_context->lpVtbl->ClearRenderTargetView(
+    _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
+  );
+  _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
+  _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
 }
 void window_close() { DestroyWindow(_window_id); }
 void window_startup(const char* title, const char* atlas_path) {
-  i32 result;
-  FILE* file;
-  i32 file_size;
+  i32 result, file_size;
   u8* file_bytes = null;
   SetProcessDPIAware();
   // window_class_register
@@ -259,7 +251,7 @@ void window_startup(const char* title, const char* atlas_path) {
     .BufferDesc.Width = window_width,                // set the back buffer width
     .BufferDesc.Height = window_height,              // set the back buffer height
     .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,  // how swap chain is to be used
-    .OutputWindow = _window_id,                       // the window to be used
+    .OutputWindow = _window_id,                      // the window to be used
     .SampleDesc.Count = 4,                           // how many multisamples
     .Windowed = true,                                // windowed/full-screen mode
     .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH  // allow full-screen switching
@@ -291,36 +283,8 @@ void window_startup(const char* title, const char* atlas_path) {
   if (FAILED(result)) {
     error(result, "ID3D11Device_CreateRasterizerState");
   }
-    // pixel_shader
-  file = fopen("share/ps.cso", "rb");
-  if (file == null) {
-    error(ERR_NOT_FOUND, "pixel_shader fopen");
-    goto pixel_shader_exit;
-  }
-  if (fseek(file, 0, SEEK_END) != 0) {
-    error(ERR_UNKNOWN, "pixel_shader fseek SEEK_END");
-    goto pixel_shader_close;
-  }
-  file_size = ftell(file);
-  if (file_size == -1) {
-    error(ERR_UNKNOWN, "pixel_shader ftell");
-    goto pixel_shader_close;
-  }
-  if (fseek(file, 0, SEEK_SET) != 0) {
-    error(ERR_UNKNOWN, "pixel_shader ftell SEEK_SET");
-    goto pixel_shader_close;
-  }
-  file_bytes = memory_alloc(file_size);
-  if (file_bytes == null) {
-    error(ERROR_NOT_ENOUGH_MEMORY, "pixel_shader memory_alloc");
-    goto pixel_shader_close;
-  }
-  result = fread(file_bytes, sizeof(u8), file_size, file);
-  console_log("pixel_shader file_size %d result %d", file_size, result);
-  if (result != file_size) {
-    error(ERR_UNKNOWN, "pixel_shader fread %d", result);
-    goto pixel_shader_free;
-  }
+  // pixel_shader
+  file_bytes = fs_readfile_sync("share/ps.cso", &file_size);
   result = _d3d_device->lpVtbl->CreatePixelShader(
     _d3d_device,
     file_bytes,
@@ -330,42 +294,13 @@ void window_startup(const char* title, const char* atlas_path) {
   );
   if (FAILED(result)) {
     error(result, "CreatePixelShader");
+    goto pixel_shader_free;
   }
   _d3d_device_context->lpVtbl->PSSetShader(_d3d_device_context, _d3d_pixel_shader, NULL, 0);
 pixel_shader_free:
   memory_free(file_bytes);
-pixel_shader_close:
-  fclose(file);
-pixel_shader_exit:
   // vertex_shader
-  file = fopen("share/vs.cso", "rb");
-  if (file == null) {
-    error(ERR_NOT_FOUND, "vertex_shader fopen");
-    goto vertex_shader_exit;
-  }
-  if (fseek(file, 0, SEEK_END) != 0) {
-    error(ERR_UNKNOWN, "vertex_shader fseek");
-    goto vertex_shader_close;
-  }
-  file_size = ftell(file);
-  if (file_size == -1L) {
-    error(ERR_UNKNOWN, "vertex_shader ftell");
-    goto vertex_shader_close;
-  }
-  if (fseek(file, 0, SEEK_SET) != 0) {
-    error(ERR_UNKNOWN, "vertex_shader ftell SEEK_SET");
-    goto pixel_shader_close;
-  }
-  file_bytes = memory_alloc(file_size);
-  if (file_bytes == null) {
-    error(ERROR_NOT_ENOUGH_MEMORY, "vertex_shader memory_alloc");
-    goto vertex_shader_close;
-  }
-  result = fread(file_bytes, sizeof(u8), file_size, file);
-  if (result != file_size) {
-    error(ERR_UNKNOWN, "vertex_shader fread %d", result);
-    goto vertex_shader_free;
-  }
+  file_bytes = fs_readfile_sync("share/vs.cso", &file_size);
   result = _d3d_device->lpVtbl->CreateVertexShader(
     _d3d_device,
     file_bytes,
@@ -377,7 +312,7 @@ pixel_shader_exit:
     error(result, "CreateVertexShader");
   }
   _d3d_device_context->lpVtbl->VSSetShader(_d3d_device_context, _d3d_vertex_shader, NULL, 0);
-  // texture_input_layout
+  // input_layout
   D3D11_INPUT_ELEMENT_DESC texture_layout [] = {
     { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,       0,               0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(f32) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0 }
@@ -393,13 +328,11 @@ pixel_shader_exit:
   );
   if (FAILED(result)) {
     error(result, "CreateInputLayout");
+    goto vertex_shader_free;
   }
   _d3d_device_context->lpVtbl->IASetInputLayout(_d3d_device_context, _d3d_input_layout);
 vertex_shader_free:
   memory_free(file_bytes);
-vertex_shader_close:
-  fclose(file);
-vertex_shader_exit:
   // sampler_state
   const D3D11_SAMPLER_DESC sampler_desc = {
     .Filter = D3D11_FILTER_MIN_MAG_MIP_POINT,
@@ -437,23 +370,11 @@ vertex_shader_exit:
   _d3d_device_context->lpVtbl->OMSetBlendState(
     _d3d_device_context, _d3d_blend_state, blend_factor, 0xffffffff
   );
-  // load_image
-  const u32 image_stride = atlas_width * 4;
-  const u64 image_size = atlas_width * atlas_height * 4; // RGBA8
-  file = fopen(atlas_path, "r");
-  if (file == null) {
-    error(ERR_NOT_FOUND, "atlas fopen");
-    goto atlas_exit;
-  }
-  file_bytes = memory_alloc(image_size);
+  // atlas_load
+  file_bytes = fs_readfilen_sync(atlas_path, atlas_width * atlas_height * 4);
   if (file_bytes == null) {
-    error(ERROR_NOT_ENOUGH_MEMORY, "atlas memory_alloc");
-    goto atlas_close;
-  }
-  result = fread(file_bytes, sizeof(u8), image_size, file);
-  if (result != image_size) {
-    error(ERR_UNKNOWN, "atlas fread %d", result);
-    goto atlas_free;
+    error(ERR_NOT_FOUND, "atlas_load");
+    goto atlas_exit;
   }
   // CreateTexture2D
   D3D11_TEXTURE2D_DESC texture_desc = {
@@ -468,9 +389,9 @@ vertex_shader_exit:
     .CPUAccessFlags = 0,
     .MiscFlags = 0,
   };
-  D3D11_SUBRESOURCE_DATA subresource_data = {
+  const D3D11_SUBRESOURCE_DATA subresource_data = {
     .pSysMem = file_bytes,
-    .SysMemPitch = image_stride,
+    .SysMemPitch = atlas_width * 4
   };
   ID3D11Texture2D* texture;
   result = _d3d_device->lpVtbl->CreateTexture2D(
@@ -479,10 +400,7 @@ vertex_shader_exit:
   if (FAILED(result)) {
     error(result, "CreateTexture2D");
   }
-atlas_free:
   memory_free(file_bytes);
-atlas_close:
-  fclose(file);
 atlas_exit:
   // CreateShaderResourceView
   D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
@@ -590,7 +508,6 @@ void window_run() {
   CreateTimerQueueTimer(&renderer_timer, 0, (WAITORTIMERCALLBACK)_window_render, 0, 0, 15, 0);
   // loop
   SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);
-  MSG msg;
   do {
     MsgWaitForMultipleObjectsEx(
       0,
@@ -599,13 +516,14 @@ void window_run() {
       QS_ALLINPUT,
       MWMO_INPUTAVAILABLE
     );
+    MSG msg;
     while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
         timeEndPeriod(1);
-        KillTimer(0, 0);
         AvRevertMmThreadCharacteristics(mmtask);
+        KillTimer(0, 0);
         DeleteTimerQueueTimer(0, renderer_timer, INVALID_HANDLE_VALUE);
         _vertices_free();
         _d3d_blend_state->lpVtbl->Release(_d3d_blend_state);

@@ -2,7 +2,7 @@
 #include <sdk/window.h>
 
 #define WINDOW_SCALING 3.8f
-#define OBJECTS_COUNT 5
+#define RECT_COUNT 5
 
 u16 window_width = 144 * WINDOW_SCALING;
 u16 window_height = 256 * WINDOW_SCALING;
@@ -30,10 +30,10 @@ u8 bird_wing_state = BIRD_WING_UP;
 
 f32 ground_animate_timer = 0;
 
-void window_dblclick(u16 x, u16 y) {}
-void window_onmousemove(u16 x, u16 y) {}
-void window_onmousedown(u16 x, u16 y, mouse_btn_t button) {}
-void window_onmouseup(u16 x, u16 y, mouse_btn_t button) {}
+void window_dblclick() {}
+void window_onmousemove() {}
+void window_onmousedown(mouse_btn_t button) {}
+void window_onmouseup(mouse_btn_t button) {}
 void window_onscroll(i32 delta) {}
 void window_onkeydown(key_t key) {}
 void window_onkeyup(key_t key) {}
@@ -87,8 +87,8 @@ void window_onrender() {
       y0 = bird_animate_y0 + bird_animate_offset * bird_animate_progress;
       if (bird_animate_timer >= bird_animate_duration) {
         bird_state = BIRD_ANIMATE_FALLING;
-        bird_animate_timer = 0;
         bird_wing_state = BIRD_WING_UP;
+        bird_animate_timer = 0;
       }
       break;
     case BIRD_ANIMATE_FALLING:
@@ -97,8 +97,8 @@ void window_onrender() {
         bird_wing_state = BIRD_WING_MIDDLE;
         if (bird_animate_timer >= bird_animate_duration) {
           bird_state = BIRD_ANIMATE_FLYING;
-          bird_animate_timer = 0;
           bird_wing_state = BIRD_WING_DOWN;
+          bird_animate_timer = 0;
         }
       }
       break;
@@ -116,13 +116,11 @@ void window_onrender() {
   u0 = 16 * (1 + bird_wing_state) * atlas_ndc_x;
   u1 = u0 + atlas_ndc_x * 16;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
-  // end
-  window_updated = true;
 }
 
 i32 main(i32 argc, char** argv) {
-  window_startup("Flappy Bird", "assets/flappy_bird_atlas.bin");
-  vertices_reserve(QUAD_VERTEX_COUNT * OBJECTS_COUNT, QUAD_INDEX_COUNT * OBJECTS_COUNT);
+  window_startup("Flappy Bird", "share/flappy_bird_atlas.bin");
+  vertices_reserve(QUAD_VERTEX_COUNT * RECT_COUNT, QUAD_INDEX_COUNT * RECT_COUNT);
   window_run();
   return 0;
 }

@@ -2,6 +2,8 @@
 #include <sdk/window.h>
 #include <sdk/time.h>
 
+rgba_t window_background = { 1.f, 1.f ,1.f ,1.f };
+
 #include <game/unity.h>
 
 u8 pointer_layer = 0;
@@ -37,7 +39,6 @@ void window_onkeydown(key_t key) {
     case KEY_R:
       pointer_flags = (pointer_flags + 1) % 4;
       console_log("pointer_flags %u", pointer_flags);
-      window_updated = true;
       break;
     default:
   }
@@ -58,11 +59,7 @@ void window_onkeypress() {
   }
   tilemap_move(global_tilemap->x + distance_x, global_tilemap->y + distance_y);
 }
-void window_onmousemove() {
-  if (pointer_tile_id) {
-    window_updated = true;
-  }
-}
+void window_onmousemove() {}
 extern void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {
   tile_t* tile = tile_from_screen();
   if (tile) {
@@ -74,13 +71,11 @@ extern void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {
         // if (chunk) {
         //   tilemap_chunk_save(chunk);
         // }
-        window_updated = true;
         break;
       }
       case MOUSE_BUTTON_RIGHT:
         pointer_tile_id = tile->id;
         pointer_flags = tile->flags;
-        window_updated = true;
         break;
       default:
         return;
@@ -93,7 +88,6 @@ void window_onscroll(i32 delta) {
   } else if (delta > 0) {
     ++pointer_tile_id;
   }
-  window_updated = true;
 }
 void window_onrender() {
   tilemap_draw();
@@ -117,11 +111,8 @@ void window_onresize() {
   }
 }
 i32 main(i32 argc, char** argv) {
-  window_startup("Tilemap", "assets/atlas.bin");
+  window_startup("Tilemap", "share/atlas.bin");
   tilemap_load();
-  window_background[0] = 1.f;
-  window_background[1] = 1.f;
-  window_background[2] = 1.f;
   global_tilemap->player_hidden = true;
   window_run();
   return 0;

@@ -1,6 +1,5 @@
 #include <sdk/window.h>
 // window
-bool window_updated = true;
 bool window_resized = true;
 f32 window_deltatime;
 f32 window_ndc_x;
@@ -12,6 +11,8 @@ u64 vertices_capacity;
 u64 indexes_capacity;
 u64 _vertices_length;
 u64 _indexes_length;
+u16 mouse_x;
+u16 mouse_y;
 const f32 atlas_ndc_x = 1.f / atlas_width;
 const f32 atlas_ndc_y = 1.f / atlas_height;
 

@@ -18,7 +18,7 @@ IF "%package_name%" == "game" (
   SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
 )
 IF "%package_name%" == "flappy_bird" (
-  SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
+  SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm -mwindows
 )
 IF "%package_name%" == "tilemap" (
   SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm

@@ -40,7 +40,7 @@ void window_onscroll(i32 delta) {}
 void window_onmousemove() {}
 // 512332 bytes
 i32 main(i32 argc, char** argv) {
-  window_startup("Game", "assets/atlas.bin");
+  window_startup("Game", "share/atlas.bin");
   titlescreen_load();
   window_run();
   return 0;

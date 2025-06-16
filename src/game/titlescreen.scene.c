@@ -11,7 +11,6 @@ bool titlescreen = false;
 
 void titlescreen_load() {
   titlescreen = true;
-  window_updated = true;
   // background
   window_background[0] = 120.f / 255.f;
   window_background[1] = 168.f / 255.f;
@@ -20,7 +19,6 @@ void titlescreen_load() {
     vertices_capacity + TITLESCREEN_VERTICES_USED,
     indexes_capacity + TITLESCREEN_INDEXES_USED
   );
-  window_updated = true;
 }
 void titlescreen_unload() {
   titlescreen = false;

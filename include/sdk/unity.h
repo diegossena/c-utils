@@ -88,3 +88,6 @@
 #ifdef TASKMANAGER_H
 #include <src/sdk/taskmanager.win32.c>
 #endif
+#ifdef FS_H
+#include <src/sdk/fs.c>
+#endif

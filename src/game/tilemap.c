@@ -9,7 +9,7 @@
 #define TILEMAP_VERTICES_USED QUAD_VERTEX_COUNT
 #define TILEMAP_INDEXES_USED QUAD_INDEX_COUNT
 
-#define CHUNK_FILE_FORMAT "assets/world/tiles_%hi_%hi_%hi.map"
+#define CHUNK_FILE_FORMAT "share/world/tiles_%hi_%hi_%hi.map"
 #define CHUNK_FILE_NAME_SIZE 38
 
 tilemap_t* global_tilemap = 0;
@@ -35,7 +35,6 @@ void _tilemap_chunk_load(chunk_t* chunk) {
   fclose(file);
 chunk_error:
   global_tilemap->screen_tiles_dirty = true;
-  window_updated = true;
   return;
 chunk_empty:
   memory_fill(chunk->tiles, '\0', sizeof(chunk->tiles));
@@ -103,7 +102,6 @@ void tilemap_load() {
   tilemap_onresize();
   tilemap_move(0, 0);
   // loaded
-  window_updated = true;
 }
 void tilemap_unload() {
   assert(global_tilemap != null);
@@ -157,7 +155,6 @@ void tilemap_onresize() {
   }
   global_tilemap->tile_ndc_pixel_x = global_tilemap->tile_size * window_ndc_x;
   global_tilemap->tile_ndc_pixel_y = global_tilemap->tile_size * window_ndc_y;
-  window_updated = true;
 }
 tile_t* tile_from_screen() {
   f32 mouse_offset_x = math_epsilon_roundf((f32)mouse_x / (f32)global_tilemap->tile_size);
@@ -176,7 +173,6 @@ void tilemap_moveto(f32 x, f32 y, f32 duration) {
   global_tilemap->target_x = x;
   global_tilemap->target_y = y;
   global_tilemap->moving = true;
-  window_updated = true;
 }
 void tilemap_onkeypress() {
   if (global_tilemap->moving == false) {
@@ -232,8 +228,6 @@ void tilemap_move(f32 world_x, f32 world_y) {
     }
   }
   global_tilemap->screen_tiles_dirty = true;
-  // render_request
-  window_updated = true;
 }
 void tilemap_draw() {
   // moving_animation
@@ -248,7 +242,6 @@ void tilemap_draw() {
       (global_tilemap->target_x - global_tilemap->start_x) * progress + global_tilemap->start_x,
       (global_tilemap->target_y - global_tilemap->start_y) * progress + global_tilemap->start_y
     );
-    window_updated = true;
   }
   // chunks->screen_tiles
   const chunk_t* chunk_center = &global_tilemap->chunks[CHUNK_CENTER];

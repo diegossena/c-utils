@@ -17,7 +17,6 @@ void transition_load(function_t unload, function_t load) {
   transition.load = load;
   transition.loading = true;
   transition.state = TRANSITION_ENTERING;
-  window_updated = true;
 }
 void transition_render() {
   const f32 duration = .85f;
@@ -48,12 +47,10 @@ void transition_render() {
         indexes_capacity - TRANSITION_INDEXES_USED
       );
       transition.loading = false;
-      window_updated = true;
       return;
   }
   window_rect_fill(
     -1, 1, 1, -1,
     1, 1, 1, opacity
   );
-  window_updated = true;
 }
