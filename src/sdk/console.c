@@ -3,8 +3,8 @@
 void console_write(const char* message, ...) {
   va_list args;
   va_start(args, message);
-  char buffer[TEXT_SIZE + 1];
-  i32 length = string_format_va(buffer, sizeof(buffer), message, args);
+  char buffer[TEXT_SIZE];
+  i32 length = string_format_va(buffer, sizeof(buffer) + 1, message, args);
   va_end(args);
   if (length < 0)
     return;

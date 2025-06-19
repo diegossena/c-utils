@@ -76,6 +76,12 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup(key_t key);
 
+void _vertices_free();
+void _window_resize();
+void _window_render();
+void _gfx_inicialize(const char* atlas_path);
+void _gfx_destroy();
+
 extern u16 mouse_x;
 extern u16 mouse_y;
 
@@ -106,5 +112,6 @@ extern const u16 atlas_height; // externally-defined function
 
 extern const f32 atlas_ndc_x;
 extern const f32 atlas_ndc_y;
+extern f64 _window_render_time;
 
 #endif

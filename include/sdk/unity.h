@@ -54,6 +54,12 @@
 #ifdef WINDOW_H
 #include <src/sdk/window.c>
 #include <src/sdk/window.win32.c>
+#ifdef D3D11
+#include <src/sdk/dx11.win32.c>
+#endif
+#ifdef D3D12
+#include <src/sdk/dx12.win32.c>
+#endif
 #endif
 #ifdef GFX_TEXT_H
 #include <src/sdk/gfx.text.win32.c>

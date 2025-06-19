@@ -13,8 +13,7 @@ vs_out vs_main(float2 position : POSITION, float4 uv_color : TEXCOORD) {
   return output;
 }
 float4 ps_main(vs_out input) : SV_TARGET {
-  // pixel_color
   return input.uv_color.a > 0
     ? input.uv_color
-    : texture_2d.Sample(sample_state, input.uv_color);
+    : texture_2d.Sample(sample_state, input.uv_color.xy);
 }
