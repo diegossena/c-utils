@@ -151,7 +151,7 @@ void _gfx_inicialize(const char* atlas_path) {
     error(result, "D3D11CreateDeviceAndSwapChain");
   }
   _d3d_device_context->lpVtbl->IASetPrimitiveTopology(_d3d_device_context, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  // global_d3d_rasterizer
+  // ID3D11RasterizerState
   D3D11_RASTERIZER_DESC rasterizer_props = {
     .FillMode = D3D11_FILL_SOLID,
     .CullMode = D3D11_CULL_NONE
@@ -220,7 +220,7 @@ vertex_shader_free:
     .AddressW = D3D11_TEXTURE_ADDRESS_CLAMP,
     .ComparisonFunc = D3D11_COMPARISON_NEVER,
     .MinLOD = 0,
-    .MinLOD = D3D11_FLOAT32_MAX
+    .MaxLOD = D3D11_FLOAT32_MAX
   };
   result = _d3d_device->lpVtbl->CreateSamplerState(
     _d3d_device, &sampler_desc, &_d3d_sampler_state
