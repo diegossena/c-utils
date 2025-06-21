@@ -239,7 +239,7 @@ vertex_shader_free:
       goto atlas_exit;
     }
     // CreateTexture2D
-    D3D11_TEXTURE2D_DESC texture_desc = {
+    const D3D11_TEXTURE2D_DESC texture_desc = {
       .Width = atlas_width,
       .Height = atlas_height,
       .MipLevels = 1,
