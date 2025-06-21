@@ -163,7 +163,6 @@ void window_run() {
         AvRevertMmThreadCharacteristics(mmtask);
         DeleteTimerQueueTimer(0, renderer_timer, INVALID_HANDLE_VALUE);
         KillTimer(0, 0);
-        _vertices_free();
         _gfx_destroy();
         return;
       }

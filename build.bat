@@ -21,8 +21,8 @@ IF "%package_name%" == "flappy_bird" (
   SET defines=-DD3D12
   SET linker_flags=-ld3d12 -ldxgi -ldxguid -lavrt -lwinmm
 
-  @REM SET defines=-DD3D11
-  @REM SET linker_flags=-ld3d11 -ldxgi -ldxguid -lavrt -lwinmm
+  SET defines=-DD3D11
+  SET linker_flags=-ld3d11 -ldxgi -ldxguid -lavrt -lwinmm
 
   @REM -ld3d11 -ld3d12 -mwindows
 )

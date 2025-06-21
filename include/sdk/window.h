@@ -76,7 +76,6 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup(key_t key);
 
-void _vertices_free();
 void _window_resize();
 void _window_render();
 void _gfx_inicialize(const char* atlas_path);

@@ -23,22 +23,23 @@ ID3D12Resource* _d3d_indexes_upload;
 D3D12_CPU_DESCRIPTOR_HANDLE _rtv_handle;
 ID3D12DescriptorHeap* _srv_heap;
 D3D12_GPU_DESCRIPTOR_HANDLE _gpu_srv_handle;
-u8 _d3d_frame_index = 1;
+u8 _d3d_frame_index;
 u8 _d3d_rtv_descriptor_size;
-void* _d3d_indexes_data;
-void* _d3d_vertices_data;
 
 ID3D12Fence* _d3d_fence;
 HANDLE _d3d_fence_event;
-u8 _d3d_fence_value;
+u64 _d3d_fence_value;
+u64 _d3d_fence_signal;
 
 void _window_resize() {}
 void _d3d_debug() {
   ID3D12InfoQueue* infoQueue = NULL;
   if (SUCCEEDED(_d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&infoQueue))) {
+    infoQueue->lpVtbl->SetBreakOnSeverity(infoQueue, D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
     infoQueue->lpVtbl->SetBreakOnSeverity(infoQueue, D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
     infoQueue->lpVtbl->SetBreakOnSeverity(infoQueue, D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
     SIZE_T messageCount = infoQueue->lpVtbl->GetNumStoredMessagesAllowedByRetrievalFilter(infoQueue);
+    console_log("messageCount %d", messageCount);
     for (SIZE_T i = 0; i < messageCount; i++) {
       SIZE_T messageLength = 0;
       infoQueue->lpVtbl->GetMessage(infoQueue, i, NULL, &messageLength); // Get size
@@ -56,36 +57,66 @@ void _d3d_debug() {
   }
 }
 void _d3d_gpu_wait() {
-  _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value, _d3d_fence_event);
-  WaitForSingleObjectEx(_d3d_fence_event, INFINITE, false);
-  _d3d_command_allocator->lpVtbl->Reset(_d3d_command_allocator);
-  _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _d3d_command_allocator, _pipeline_state);
-}
-void _d3d_frame_wait() {
-  // _d3d_frame_index = _d3d_swapchain->lpVtbl->GetCurrentBackBufferIndex(_d3d_swapchain);
-  _d3d_frame_index = (_d3d_frame_index + 1) % D3D_FRAME_COUNT;
-  if (_d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence) < _d3d_fence_value) {
-    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value, _d3d_fence_event);
-    WaitForSingleObjectEx(_d3d_fence_event, INFINITE, false);
+  HRESULT result;
+  u64 completed = _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence);
+  // console_log("_d3d_gpu_wait _d3d_fence_value %d GetCompletedValue %d _d3d_fence_signal %d _d3d_fence_value %d",
+  //   _d3d_fence_value,
+  //   completed, _d3d_fence_signal, _d3d_fence_value
+  // );
+  if (completed == -1) {
+    result = _d3d_device->lpVtbl->GetDeviceRemovedReason(_d3d_device);
+    switch (result) {
+      case DXGI_ERROR_DEVICE_HUNG:
+        error(result, "_d3d_gpu_wait GetCompletedValue DXGI_ERROR_DEVICE_HUNG");
+        break;
+    }
+    exit(result);
+  } else if (completed != _d3d_fence_signal) {
+    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_signal, _d3d_fence_event);
+    WaitForSingleObject(_d3d_fence_event, INFINITE);
   }
-  _d3d_command_allocator->lpVtbl->Reset(_d3d_command_allocator);
-  _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _d3d_command_allocator, _pipeline_state);
+  if (_d3d_fence_value != _d3d_fence_signal) {
+    _d3d_fence_value = _d3d_fence_signal;
+    result = _d3d_command_allocator->lpVtbl->Reset(_d3d_command_allocator);
+    if (FAILED(result)) {
+      _d3d_debug();
+      error(result, "_d3d_command_allocator Reset");
+      exit(result);
+    }
+    result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _d3d_command_allocator, _pipeline_state);
+    if (FAILED(result)) {
+      _d3d_debug();
+      error(result, "_d3d_command_list Reset");
+      exit(result);
+    }
+  }
+  // _d3d_frame_index = _d3d_swapchain->lpVtbl->GetCurrentBackBufferIndex(_d3d_swapchain);
+  // _d3d_frame_index = (_d3d_frame_index + 1) % D3D_FRAME_COUNT;
+  // console_log("!_d3d_gpu_wait _d3d_fence_value %d GetCompletedValue %d _d3d_frame_index %d _d3d_fence_value %d",
+  //   _d3d_fence_value,
+  //   _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence),
+  //   _d3d_frame_index, _d3d_fence_value
+  // );
 }
 void _d3d_command_submit() {
   HRESULT result = _d3d_command_list->lpVtbl->Close(_d3d_command_list);
   if (FAILED(result)) {
-    _d3d_debug();
     error(result, "_d3d_command_submit Close");
+    _d3d_debug();
     exit(result);
   }
   _d3d_command_queue->lpVtbl->ExecuteCommandLists(_d3d_command_queue, 1, (ID3D12CommandList**)&_d3d_command_list);
-  _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_value);
+  _d3d_fence_signal = _d3d_fence_value + 1;
+  result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, _d3d_fence_signal);
+  if (FAILED(result)) {
+    _d3d_debug();
+    error(result, "_d3d_command_submit Signal");
+    exit(result);
+  }
 }
 void _vertices_free() {
   assert(indexes_capacity > 0);
   assert(vertices_capacity > 0);
-  memory_free(_vertices_virtual);
-  memory_free(_indexes_virtual);
   _d3d_vertices->lpVtbl->Release(_d3d_vertices);
   _d3d_indexes->lpVtbl->Release(_d3d_indexes);
   _d3d_vertices_upload->lpVtbl->Release(_d3d_vertices_upload);
@@ -108,21 +139,17 @@ void _window_render() {
     _window_resize();
     window_onresize();
   }
-  // 
   _vertices_length = 0;
   _indexes_length = 0;
+  _d3d_frame_index = _d3d_swapchain->lpVtbl->GetCurrentBackBufferIndex(_d3d_swapchain);
+  console_log("render %d", _d3d_frame_index);
   window_onrender();
   // (_d3d_vertices_data | _d3d_indexes_data) memory_copy
   assert(_vertices_length <= vertices_capacity);
   assert(_indexes_length <= indexes_capacity);
   const u64 vertices_size = _vertices_length * sizeof(vertex_t);
   const u64 indexes_size = _indexes_length * sizeof(u32);
-  memory_copy(_d3d_vertices_data, _vertices_virtual, vertices_size);
-  memory_copy(_d3d_indexes_data, _indexes_virtual, indexes_size);
-  console_log("render");
-  _d3d_frame_wait();
   _d3d_command_list->lpVtbl->SetGraphicsRootSignature(_d3d_command_list, _d3d_root_signature);
-  _d3d_command_list->lpVtbl->SetPipelineState(_d3d_command_list, _pipeline_state);
   _d3d_command_list->lpVtbl->SetDescriptorHeaps(_d3d_command_list, 1, (ID3D12DescriptorHeap**)&_srv_heap);
   _d3d_command_list->lpVtbl->SetGraphicsRootDescriptorTable(_d3d_command_list, 0, _gpu_srv_handle);
   const D3D12_VIEWPORT viewport = {
@@ -149,6 +176,7 @@ void _window_render() {
     .SizeInBytes = indexes_size
   };
   _d3d_command_list->lpVtbl->IASetIndexBuffer(_d3d_command_list, &ib_view);
+  // _d3d_command_list->lpVtbl->SetPipelineState(_d3d_command_list, _pipeline_state);
   // ResourceBarrier
   D3D12_RESOURCE_BARRIER barriers [] = {
     {
@@ -180,7 +208,7 @@ void _window_render() {
     },
   };
   _d3d_command_list->lpVtbl->ResourceBarrier(
-    _d3d_command_list, 3,
+    _d3d_command_list, 2,
     barriers
   );
   // CopyBufferRegion
@@ -205,8 +233,13 @@ void _window_render() {
     _d3d_command_list, 2,
     barriers
   );
+  // D3D12_RESOURCE_STATE_RENDER_TARGET
+  _d3d_command_list->lpVtbl->ResourceBarrier(
+    _d3d_command_list, 1,
+    &barriers[2]
+  );
   // OMSetRenderTargets
-  D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = {
+  const D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = {
     _rtv_handle.ptr + _d3d_frame_index * _d3d_rtv_descriptor_size
   };
   _d3d_command_list->lpVtbl->OMSetRenderTargets(_d3d_command_list, 1, &rtv_handle, false, null);
@@ -223,7 +256,8 @@ void _window_render() {
   );
   // submit
   _d3d_command_submit();
-  _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 1, 0);
+  _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
+  _d3d_gpu_wait();
 }
 void _gfx_inicialize(const char* atlas_path) {
 #ifdef DEBUG
@@ -233,7 +267,7 @@ void _gfx_inicialize(const char* atlas_path) {
     debug_controller->lpVtbl->Release(debug_controller);
   }
 #endif
-// IDXGIFactory1
+  // IDXGIFactory1
   IDXGIFactory4* factory;
   i32 result = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, &IID_IDXGIFactory4, (void**)&factory);
   if (FAILED(result)) {
@@ -252,7 +286,10 @@ void _gfx_inicialize(const char* atlas_path) {
   }
   adapter->lpVtbl->Release(adapter);
   // ID3D12CommandQueue
-  const D3D12_COMMAND_QUEUE_DESC queue_desc = { 0 };
+  const D3D12_COMMAND_QUEUE_DESC queue_desc = {
+    .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
+    .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
+  };
   result = _d3d_device->lpVtbl->CreateCommandQueue(_d3d_device, &queue_desc, &IID_ID3D12CommandQueue, (void**)&_d3d_command_queue);
   if (FAILED(result)) {
     error(result, "CreateCommandQueue");
@@ -309,10 +346,6 @@ void _gfx_inicialize(const char* atlas_path) {
     _d3d_device, &srv_heap_desc, &IID_ID3D12DescriptorHeap, (void**)&_srv_heap
   );
   _srv_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(_srv_heap, &_gpu_srv_handle);
-  // ID3D12CommandAllocator
-  _d3d_device->lpVtbl->CreateCommandAllocator(_d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, (void**)&_d3d_command_allocator);
-  // ID3D12GraphicsCommandList 
-  _d3d_device->lpVtbl->CreateCommandList(_d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _d3d_command_allocator, NULL, &IID_ID3D12GraphicsCommandList, (void**)&_d3d_command_list);
   // ID3D12RootSignature
   const D3D12_STATIC_SAMPLER_DESC sampler_desc = {
     .Filter = D3D12_FILTER_MIN_MAG_MIP_POINT,
@@ -331,7 +364,8 @@ void _gfx_inicialize(const char* atlas_path) {
     .NumDescriptors = 1,
     .BaseShaderRegister = 0, // t0
     .RegisterSpace = 0,
-    .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND
+    .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC,
+    // .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
   };
   const D3D12_ROOT_PARAMETER root_param = {
     .ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
@@ -396,6 +430,10 @@ void _gfx_inicialize(const char* atlas_path) {
   }
   memory_free(vs_bytes);
   memory_free(ps_bytes);
+  // ID3D12CommandAllocator
+  _d3d_device->lpVtbl->CreateCommandAllocator(_d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, (void**)&_d3d_command_allocator);
+  // ID3D12GraphicsCommandList 
+  _d3d_device->lpVtbl->CreateCommandList(_d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _d3d_command_allocator, _pipeline_state, &IID_ID3D12GraphicsCommandList, (void**)&_d3d_command_list);
   // CreateFence
   _d3d_device->lpVtbl->CreateFence(
     _d3d_device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void**)&_d3d_fence
@@ -515,54 +553,23 @@ void _gfx_inicialize(const char* atlas_path) {
     _d3d_device->lpVtbl->CreateShaderResourceView(
       _d3d_device, texture, &srv_desc, srv_handle
     );
-    _d3d_debug();
   }
   _d3d_command_submit();
   _d3d_gpu_wait();
-  if (texture) {
-    texture->lpVtbl->Release(texture);
-    upload_heap->lpVtbl->Release(upload_heap);
-  }
+  texture->lpVtbl->Release(texture);
+  upload_heap->lpVtbl->Release(upload_heap);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (vertices_size == 0) {
     _vertices_free();
-    vertices_size = 0;
+    vertices_capacity = 0;
     return;
+  }
+  if (vertices_capacity != 0) {
+    _vertices_free();
   }
   const u64 vertices_buffer_size = vertices_size * sizeof(vertex_t);
   const u64 indexes_buffer_size = indexes_size * sizeof(u32);
-  // virtual
-  if (vertices_capacity != 0) {
-    // vertices_virtual_realloc
-    void* buffer = memory_realloc(_vertices_virtual, vertices_buffer_size);
-    if (!buffer) {
-      error(ERR_NOT_ENOUGH_MEMORY, "vertices realloc");
-      return;
-    }
-    _vertices_virtual = buffer;
-    // indexes_virtual_realloc
-    buffer = memory_realloc(_indexes_virtual, indexes_buffer_size);
-    if (!buffer) {
-      error(ERR_NOT_ENOUGH_MEMORY, "indexes realloc");
-      return;
-    }
-    _indexes_virtual = buffer;
-    // buffers_release
-    _d3d_vertices->lpVtbl->Release(_d3d_vertices);
-    _d3d_indexes->lpVtbl->Release(_d3d_indexes);
-  } else {
-    _vertices_virtual = memory_alloc(vertices_buffer_size);
-    if (!_vertices_virtual) {
-      error(ERR_NOT_ENOUGH_MEMORY, "vertices_alloc memory_alloc");
-      return;
-    }
-    _indexes_virtual = memory_alloc(indexes_buffer_size);
-    if (!_indexes_virtual) {
-      error(ERR_NOT_ENOUGH_MEMORY, "indexes_alloc memory_alloc");
-      return;
-    }
-  }
   // d3d_buffers
   D3D12_HEAP_PROPERTIES heap_props = { .Type = D3D12_HEAP_TYPE_DEFAULT };
   D3D12_RESOURCE_DESC buffer_desc = {
@@ -633,7 +640,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     error(result, "_d3d_vertices_upload CreateCommittedResource");
     exit(result);
   }
-  result = _d3d_vertices_upload->lpVtbl->Map(_d3d_vertices_upload, 0, 0, &_d3d_vertices_data);
+  result = _d3d_vertices_upload->lpVtbl->Map(_d3d_vertices_upload, 0, 0, (void**)&_vertices_virtual);
   if (FAILED(result)) {
     error(result, "_d3d_vertices_upload Map");
     exit(result);
@@ -648,7 +655,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     error(result, "_d3d_indexes_upload CreateCommittedResource");
     exit(result);
   }
-  result = _d3d_indexes_upload->lpVtbl->Map(_d3d_indexes_upload, 0, 0, &_d3d_indexes_data);
+  result = _d3d_indexes_upload->lpVtbl->Map(_d3d_indexes_upload, 0, 0, (void**)&_indexes_virtual);
   if (FAILED(result)) {
     error(result, "_d3d_indexes_upload Map");
     exit(result);
@@ -658,9 +665,9 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   indexes_capacity = indexes_size;
   _d3d_command_submit();
   _d3d_gpu_wait();
-  console_log("!vertices_reserve");
 }
 void _gfx_destroy() {
+  console_log("_gfx_destroy");
   _d3d_gpu_wait();
   _d3d_device->lpVtbl->Release(_d3d_device);
   _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);

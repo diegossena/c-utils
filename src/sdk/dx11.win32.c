@@ -20,17 +20,8 @@ ID3D11PixelShader* _d3d_pixel_shader;
 ID3D11SamplerState* _d3d_sampler_state;
 ID3D11BlendState* _d3d_blend_state;
 ID3D11ShaderResourceView* _d3d_shader_resource;
-ID3D11Buffer* _d3d_vertices_buffer;
-ID3D11Buffer* _d3d_indexes_buffer;
+ID3D11Buffer* _d3d_buffer;
 
-void _vertices_free() {
-  assert(indexes_capacity > 0);
-  assert(vertices_capacity > 0);
-  _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
-  memory_free(_vertices_virtual);
-  _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
-  memory_free(_indexes_virtual);
-}
 void _window_resize() {
   window_ndc_x = 2.f / (f32)window_width;
   window_ndc_y = 2.f / (f32)window_height;
@@ -91,31 +82,22 @@ void _window_render() {
     _window_resize();
     window_onresize();
   }
-  // render
   _vertices_length = 0;
   _indexes_length = 0;
+  // buffer_map
+  static D3D11_MAPPED_SUBRESOURCE subresource = {};
+  _d3d_device_context->lpVtbl->Map(
+    _d3d_device_context, (ID3D11Resource*)_d3d_buffer, 0,
+    D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
+  );
+  _vertices_virtual = subresource.pData;
+  _indexes_virtual = subresource.pData + vertices_capacity * sizeof(vertex_t);
   window_onrender();
+  _d3d_device_context->lpVtbl->Unmap(
+    _d3d_device_context, (ID3D11Resource*)_d3d_buffer, 0
+  );
   assert(_vertices_length <= vertices_capacity);
   assert(_indexes_length <= indexes_capacity);
-  static D3D11_MAPPED_SUBRESOURCE subresource = {};
-  // vertices_map
-  _d3d_device_context->lpVtbl->Map(
-    _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0,
-    D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-  );
-  memory_copy(subresource.pData, _vertices_virtual, _vertices_length * sizeof(vertex_t));
-  _d3d_device_context->lpVtbl->Unmap(
-    _d3d_device_context, (ID3D11Resource*)_d3d_vertices_buffer, 0
-  );
-  // indexes_map
-  _d3d_device_context->lpVtbl->Map(
-    _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0,
-    D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-  );
-  memory_copy(subresource.pData, _indexes_virtual, _indexes_length * sizeof(u32));
-  _d3d_device_context->lpVtbl->Unmap(
-    _d3d_device_context, (ID3D11Resource*)_d3d_indexes_buffer, 0
-  );
   // draw
   _d3d_device_context->lpVtbl->ClearRenderTargetView(
     _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
@@ -302,6 +284,7 @@ vertex_shader_free:
   }
 }
 void _gfx_destroy() {
+  _d3d_buffer->lpVtbl->Release(_d3d_buffer);
   _d3d_blend_state->lpVtbl->Release(_d3d_blend_state);
   _d3d_sampler_state->lpVtbl->Release(_d3d_sampler_state);
   _d3d_pixel_shader->lpVtbl->Release(_d3d_pixel_shader);
@@ -315,74 +298,40 @@ void _gfx_destroy() {
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (vertices_size == 0) {
-    _vertices_free();
+    _d3d_buffer->lpVtbl->Release(_d3d_buffer);
     vertices_size = 0;
     return;
   }
   const u64 vertices_buffer_size = vertices_size * sizeof(vertex_t);
   const u64 indexes_buffer_size = indexes_size * sizeof(u32);
-  // virtual
   if (vertices_capacity != 0) {
-    // vertices_virtual_realloc
-    void* buffer = memory_realloc(_vertices_virtual, vertices_buffer_size);
-    if (!buffer) {
-      error(ERR_NOT_ENOUGH_MEMORY, "vertices realloc");
-      return;
-    }
-    _vertices_virtual = buffer;
-    // indexes_virtual_realloc
-    buffer = memory_realloc(_indexes_virtual, indexes_buffer_size);
-    if (!buffer) {
-      error(ERR_NOT_ENOUGH_MEMORY, "indexes realloc");
-      return;
-    }
-    _vertices_virtual = buffer;
-    // buffers_release
-    _d3d_vertices_buffer->lpVtbl->Release(_d3d_vertices_buffer);
-    _d3d_indexes_buffer->lpVtbl->Release(_d3d_indexes_buffer);
-  } else {
-    _vertices_virtual = memory_alloc(vertices_buffer_size);
-    if (!_vertices_virtual) {
-      error(ERR_NOT_ENOUGH_MEMORY, "vertices_alloc memory_alloc");
-      return;
-    }
-    _indexes_virtual = memory_alloc(indexes_buffer_size);
-    if (!_indexes_virtual) {
-      error(ERR_NOT_ENOUGH_MEMORY, "indexes_alloc memory_alloc");
-      return;
-    }
+    _d3d_buffer->lpVtbl->Release(_d3d_buffer);
   }
   // d3d_buffers
   HRESULT result;
   D3D11_BUFFER_DESC buffer_desc = {
     .Usage = D3D11_USAGE_DYNAMIC,
-    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE
+    .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+    .BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_INDEX_BUFFER,
+    .ByteWidth = vertices_buffer_size + indexes_buffer_size
   };
   const u32 offset = 0;
   // d3d_vertices_buffer
-  buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  buffer_desc.ByteWidth = vertices_buffer_size;
   result = _d3d_device->lpVtbl->CreateBuffer(
-    _d3d_device, &buffer_desc, 0, &_d3d_vertices_buffer
+    _d3d_device, &buffer_desc, 0, &_d3d_buffer
   );
   if (FAILED(result)) {
     error(result, "vertices_reserve vertices CreateBuffer");
   }
   const u32 stride = sizeof(vertex_t);
   _d3d_device_context->lpVtbl->IASetVertexBuffers(
-    _d3d_device_context, 0, 1, &_d3d_vertices_buffer, &stride,
+    _d3d_device_context, 0, 1, &_d3d_buffer, &stride,
     &offset
   );
-  // indexes_buffer
-  buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  buffer_desc.ByteWidth = indexes_size * sizeof(u32);
-  result = _d3d_device->lpVtbl->CreateBuffer(
-    _d3d_device, &buffer_desc, 0, &_d3d_indexes_buffer
+  _d3d_device_context->lpVtbl->IASetIndexBuffer(
+    _d3d_device_context, _d3d_buffer, DXGI_FORMAT_R32_UINT,
+    vertices_buffer_size
   );
-  if (FAILED(result)) {
-    error(result, "vertices_reserve indexes CreateBuffer");
-  }
-  _d3d_device_context->lpVtbl->IASetIndexBuffer(_d3d_device_context, _d3d_indexes_buffer, DXGI_FORMAT_R32_UINT, 0);
   // update
   vertices_capacity = vertices_size;
   indexes_capacity = indexes_size;
