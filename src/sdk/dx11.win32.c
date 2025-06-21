@@ -330,7 +330,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     _d3d_device, &buffer_desc, 0, &_d3d_buffer
   );
   if (FAILED(result)) {
-    error(result, "vertices_reserve vertices CreateBuffer");
+    error(result, "vertices_reserve CreateBuffer");
   }
   const u32 stride = sizeof(vertex_t);
   _d3d_device_context->lpVtbl->IASetVertexBuffers(

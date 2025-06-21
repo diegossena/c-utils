@@ -16,9 +16,7 @@ ID3D12CommandAllocator* _d3d_command_allocator;
 ID3D12GraphicsCommandList* _d3d_command_list;
 ID3D12PipelineState* _pipeline_state;
 ID3D12RootSignature* _d3d_root_signature;
-ID3D12Resource* _d3d_vertices;
-ID3D12Resource* _d3d_indexes;
-ID3D12Resource* _d3d_vertices_upload;
+ID3D12Resource* _d3d_buffer;
 ID3D12Resource* _d3d_indexes_upload;
 D3D12_CPU_DESCRIPTOR_HANDLE _rtv_handle;
 ID3D12DescriptorHeap* _srv_heap;
@@ -29,6 +27,7 @@ u8 _d3d_rtv_descriptor_size;
 ID3D12Fence* _d3d_fence;
 HANDLE _d3d_fence_event;
 u64 _d3d_fence_value;
+u64 _d3d_fence_signal;
 
 void _window_resize() {}
 void _d3d_debug() {
@@ -51,13 +50,6 @@ void _d3d_debug() {
 }
 void _d3d_gpu_wait() {
   HRESULT result;
-  u64 signal = _d3d_fence_value + 1;
-  result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, signal);
-  if (FAILED(result)) {
-    _d3d_debug();
-    error(result, "_d3d_command_submit Signal");
-    exit(result);
-  }
   u64 completed = _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence);
   if (completed == -1) {
     result = _d3d_device->lpVtbl->GetDeviceRemovedReason(_d3d_device);
@@ -67,12 +59,13 @@ void _d3d_gpu_wait() {
         break;
     }
     exit(result);
-  } else if (completed != signal) {
-    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, signal, _d3d_fence_event);
+  }
+  if (completed < _d3d_fence_signal) {
+    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_signal, _d3d_fence_event);
     WaitForSingleObject(_d3d_fence_event, INFINITE);
   }
-  if (_d3d_fence_value != signal) {
-    _d3d_fence_value = signal;
+  if (_d3d_fence_value < _d3d_fence_signal) {
+    _d3d_fence_value = _d3d_fence_signal;
     result = _d3d_command_allocator->lpVtbl->Reset(_d3d_command_allocator);
     if (FAILED(result)) {
       _d3d_debug();
@@ -95,6 +88,12 @@ void _d3d_command_submit() {
     exit(result);
   }
   _d3d_command_queue->lpVtbl->ExecuteCommandLists(_d3d_command_queue, 1, (ID3D12CommandList**)&_d3d_command_list);
+  result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_signal);
+  if (FAILED(result)) {
+    _d3d_debug();
+    error(result, "_d3d_command_submit Signal");
+    exit(result);
+  }
 }
 
 void _window_render() {
@@ -130,6 +129,17 @@ void _gfx_inicialize(const char* atlas_path) {
     debug_controller->lpVtbl->EnableDebugLayer(debug_controller);
     debug_controller->lpVtbl->Release(debug_controller);
     factory_flags |= DXGI_CREATE_FACTORY_DEBUG;
+    // ID3D12InfoQueue
+    ID3D12InfoQueue* info_queue;
+    result = _d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&info_queue);
+    if (SUCCEEDED(result)) {
+      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+      info_queue->lpVtbl->Release(info_queue);
+    } else {
+      error(result, "IID_ID3D12InfoQueue");
+    }
   }
 #endif
   IDXGIFactory4* factory;
@@ -140,18 +150,18 @@ void _gfx_inicialize(const char* atlas_path) {
   }
   IDXGIAdapter* adapter;
   result = factory->lpVtbl->EnumWarpAdapter(factory, &IID_IDXGIAdapter, (void**)&adapter);
-  D3D12CreateDevice(
-    adapter,
-    D3D_FEATURE_LEVEL_11_0,
-    IID_PPV_ARGS(&m_device)
+  result = D3D12CreateDevice(
+    (IUnknown*)adapter, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, (void**)&_d3d_device
   );
   if (FAILED(result)) {
     error(result, "CreateDXGIFactory2");
     exit(result);
   }
-  console_log("end");
-  exit(0);
   factory->lpVtbl->Release(factory);
+  console_color(ANSI_FORE_LIGHTGREEN);
+  console_log("SUCCESS");
+  console_color(ANSI_RESET);
+  exit(0);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (vertices_size == 0) {
