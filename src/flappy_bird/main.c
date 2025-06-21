@@ -122,5 +122,8 @@ i32 main(i32 argc, char** argv) {
   window_startup("Flappy Bird", "share/flappy_bird_atlas.bin");
   vertices_reserve(QUAD_VERTEX_COUNT * RECT_COUNT, QUAD_INDEX_COUNT * RECT_COUNT);
   window_run();
+  console_color(ANSI_FORE_LIGHTGREEN);
+  console_log("SUCCESS");
+  console_color(ANSI_RESET);
   return 0;
 }
