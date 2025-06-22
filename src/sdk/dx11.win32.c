@@ -99,7 +99,7 @@ void _window_render() {
   _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
   _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
 }
-void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) {
+void _gfx_inicialize(const char* atlas_path) {
   i32 file_size;
   u8* file_bytes;
   i32 result;
@@ -232,15 +232,15 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
     blend_state->lpVtbl->Release(blend_state);
   }
   { // atlas_load
-    file_bytes = fs_readfilen_sync(atlas_path, atlas_width * atlas_height * 4);
+    file_bytes = fs_readfilen_sync(atlas_path, ATLAS_WIDTH * ATLAS_HEIGHT * 4);
     if (file_bytes == null) {
       error(ERR_NOT_FOUND, "atlas_load");
       exit(result);
     }
     // CreateTexture2D
     const D3D11_TEXTURE2D_DESC texture_desc = {
-      .Width = atlas_width,
-      .Height = atlas_height,
+      .Width = ATLAS_WIDTH,
+      .Height = ATLAS_HEIGHT,
       .MipLevels = 1,
       .ArraySize = 1,
       .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -250,7 +250,7 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
     };
     const D3D11_SUBRESOURCE_DATA subresource_data = {
       .pSysMem = file_bytes,
-      .SysMemPitch = atlas_width * 4
+      .SysMemPitch = ATLAS_WIDTH * 4
     };
     ID3D11Texture2D* texture;
     result = _d3d_device->lpVtbl->CreateTexture2D(

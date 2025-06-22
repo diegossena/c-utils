@@ -95,7 +95,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
 void window_close() { DestroyWindow(_window_id); }
-void window_startup(const char* title, const char* atlas_path, u16 atlas_width, u16 atlas_height) {
+void window_startup(const char* title, const char* atlas_path) {
   SetProcessDPIAware();
   // window_class_register
   WNDCLASSEXA window_class = {
@@ -126,7 +126,7 @@ void window_startup(const char* title, const char* atlas_path, u16 atlas_width, 
   if (!_window_id) {
     error((error_t)_window_id, "CreateWindowExA");
   }
-  _gfx_inicialize(atlas_path, atlas_width, atlas_height);
+  _gfx_inicialize(atlas_path);
   _window_resize();
 }
 void window_set_title(const char* title) {

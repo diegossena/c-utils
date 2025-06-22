@@ -38,7 +38,7 @@ typedef enum mouse_btn_t {
   MOUSE_BUTTON_AUX
 } mouse_btn_t;
 
-void window_startup(const char* title, const char* atlas_path, u16 atlas_width, u16 atlas_height);
+void window_startup(const char* title, const char* atlas_path);
 void window_set_title(const char* title);
 void window_close();
 void window_run();
@@ -88,7 +88,7 @@ extern void window_onkeyup(key_t key);
 
 void _window_resize();
 void _window_render();
-void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height);
+void _gfx_inicialize(const char* atlas_path);
 void _gfx_destroy();
 
 extern u16 window_width; // externally-defined function
