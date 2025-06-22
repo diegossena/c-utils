@@ -10,6 +10,7 @@
 ID3D12Device* _d3d_device;
 IDXGISwapChain3* _swapchain;
 ID3D12Resource* _d3d_render_targets[D3D_FRAME_COUNT];
+ID3D12Resource* _d3d_texture;
 ID3D12CommandQueue* _d3d_command_queue;
 ID3D12CommandAllocator* _command_allocator;
 ID3D12GraphicsCommandList* _d3d_command_list;
@@ -140,20 +141,14 @@ void _gfx_inicialize(const char* atlas_path) {
   {
     // IDXGIAdapter
     IDXGIAdapter* adapter;
-    // result = factory->lpVtbl->EnumAdapterByGpuPreference(factory, 0, DXGI_GPU_PREFERENCE_MINIMUM_POWER, &IID_IDXGIAdapter, (void**)&adapter);
-    // if (SUCCEEDED(result))
-    //   goto create_device;
     result = factory->lpVtbl->EnumAdapters(factory, 0, &adapter);
-    if (SUCCEEDED(result))
-      goto create_device;
-    if (FAILED(factory->lpVtbl->EnumWarpAdapter(factory, &IID_IDXGIAdapter, (void**)&adapter))) {
-      error(result, "EnumWarpAdapter");
-      exit(result);
+    if (FAILED(result)) {
+      result = factory->lpVtbl->EnumWarpAdapter(factory, &IID_IDXGIAdapter, (void**)&adapter);
+      if (FAILED(result)) {
+        error(result, "EnumWarpAdapter");
+        exit(result);
+      }
     }
-  create_device:
-    // DXGI_ADAPTER_DESC adapter_desc;
-    // adapter->lpVtbl->GetDesc(adapter, &adapter_desc);
-    // console_log("adapter_desc %ls", adapter_desc.Description);
     // ID3D12Device
     result = D3D12CreateDevice(
       (IUnknown*)adapter, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, (void**)&_d3d_device
@@ -204,6 +199,7 @@ void _gfx_inicialize(const char* atlas_path) {
       factory, (IUnknown*)_d3d_command_queue, _window_id, &swapchain_desc, null,
       null, &swapchain
     );
+    factory->lpVtbl->Release(factory);
     if (FAILED(result)) {
       error(result, "CreateSwapChainForHwnd");
       exit(result);
@@ -264,9 +260,145 @@ void _gfx_inicialize(const char* atlas_path) {
     exit(result);
   }
   {
-    D3D12_FEATURE_DATA_ROOT_SIGNATURE feature_data;
+    const D3D12_DESCRIPTOR_RANGE srv_range = {
+      .RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+      .NumDescriptors = 1,
+      .BaseShaderRegister = 0, // t0
+      .RegisterSpace = 0,
+      .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC,
+    };
+    const D3D12_ROOT_PARAMETER root_param = {
+      .ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
+      .DescriptorTable = {
+        .pDescriptorRanges = &srv_range,
+        .NumDescriptorRanges = 1,
+      },
+      .ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL
+    };
+    const D3D12_STATIC_SAMPLER_DESC sampler = {
+      .Filter = D3D12_FILTER_MIN_MAG_MIP_POINT,
+      .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      .MipLODBias = 0,
+      .MaxAnisotropy = 0,
+      .ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER,
+      .BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK,
+      .MinLOD = 0.0f,
+      .MaxLOD = D3D12_FLOAT32_MAX,
+      .ShaderRegister = 0,
+      .RegisterSpace = 0,
+      .ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL,
+    };
+    const D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {
+      .NumParameters = 1,
+      .pParameters = &root_param,
+      .Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
+      .pStaticSamplers = &sampler,
+      .NumStaticSamplers = 1,
+    };
+    ID3DBlob* signature;
+    ID3DBlob* error_blob;
+    result = D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &error_blob);
+    if (FAILED(result)) {
+      error(result, "D3D12SerializeRootSignature");
+      error_blob->lpVtbl->Release(error_blob);
+    }
+    _d3d_device->lpVtbl->CreateRootSignature(
+      _d3d_device, 0, signature->lpVtbl->GetBufferPointer(signature),
+      signature->lpVtbl->GetBufferSize(signature),
+      &IID_ID3D12RootSignature, (void*)&_d3d_root_signature
+    );
+    signature->lpVtbl->Release(signature);
   }
-  factory->lpVtbl->Release(factory);
+  {
+    const D3D12_INPUT_ELEMENT_DESC input_layout [] = {
+      { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,       0,               0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+      { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(f32) * 2, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+    };
+    i32 vs_size;
+    u8* vs_bytes = fs_readfile_sync("share/vs.cso", &vs_size);
+    i32 ps_size;
+    u8* ps_bytes = fs_readfile_sync("share/ps.cso", &ps_size);
+    const D3D12_RENDER_TARGET_BLEND_DESC render_target_blend = {
+      .BlendEnable = true,
+      .SrcBlend = D3D12_BLEND_SRC_ALPHA,
+      .DestBlend = D3D12_BLEND_INV_SRC_ALPHA,
+      .BlendOp = D3D12_BLEND_OP_ADD,
+      .SrcBlendAlpha = D3D12_BLEND_ONE,
+      .DestBlendAlpha = D3D12_BLEND_ZERO,
+      .BlendOpAlpha = D3D12_BLEND_OP_ADD,
+      .RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL
+    };
+    const D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {
+      .InputLayout = { input_layout, sizeof(input_layout) / sizeof(D3D12_INPUT_ELEMENT_DESC) },
+      .pRootSignature = _d3d_root_signature,
+      .VS = { vs_bytes, vs_size },
+      .PS = { ps_bytes, ps_size },
+      .RasterizerState = {
+        .FillMode = D3D12_FILL_MODE_SOLID,
+        .CullMode = D3D12_CULL_MODE_NONE,
+        .DepthClipEnable = true,
+      },
+      .BlendState.RenderTarget[0] = render_target_blend,
+      .BlendState.RenderTarget[1] = render_target_blend,
+      .SampleMask = UINT_MAX,
+      .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+      .NumRenderTargets = 1,
+      .RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM,
+      .SampleDesc.Count = 1
+    };
+    result = _d3d_device->lpVtbl->CreateGraphicsPipelineState(
+      _d3d_device, &pso_desc, &IID_ID3D12PipelineState, (void**)&_pipeline_state
+    );
+    if (FAILED(result)) {
+      _d3d_debug();
+      error(result, "CreateGraphicsPipelineState");
+      exit(result);
+    }
+    memory_free(vs_bytes);
+    memory_free(ps_bytes);
+  }
+  result = _d3d_device->lpVtbl->CreateCommandList(
+    _d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _command_allocator,
+    _pipeline_state, &IID_ID3D12GraphicsCommandList, (void**)&_d3d_command_list
+  );
+  if (FAILED(result)) {
+    error(result, "CreateCommandList");
+    exit(result);
+  }
+  ID3D12Resource* texture_upload_heap;
+  {
+    const u64 atlas_size = atlas_width * atlas_height * 4;
+    const D3D12_RESOURCE_DESC tex_desc = {
+      .Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+      .Width = atlas_width,
+      .Height = atlas_height,
+      .DepthOrArraySize = 1,
+      .MipLevels = 1,
+      .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+      .SampleDesc = {.Count = 1, .Quality = 0 },
+      .Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+      .Flags = D3D12_RESOURCE_FLAG_NONE,
+    };
+    D3D12_HEAP_PROPERTIES heap_props = {
+      .Type = D3D12_HEAP_TYPE_DEFAULT
+    };
+    result = _d3d_device->lpVtbl->CreateCommittedResource(
+      _d3d_device,
+      &heap_props,
+      D3D12_HEAP_FLAG_NONE,
+      &tex_desc,
+      D3D12_RESOURCE_STATE_COPY_DEST,
+      0,
+      &IID_ID3D12Resource,
+      (void**)&_d3d_texture
+    );
+    if (FAILED(result)) {
+      error(result, "texture CreateCommittedResource");
+      exit(result);
+    }
+  }
   _d3d_debug();
   console_color(ANSI_FORE_LIGHTGREEN);
   console_log("SUCCESS");
