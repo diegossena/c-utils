@@ -111,7 +111,7 @@ void _gfx_inicialize(const char* atlas_path) {
       .BufferDesc.Height = window_height,              // set the back buffer height
       .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,  // how swap chain is to be used
       .OutputWindow = _window_id,                      // the window to be used
-      .SampleDesc.Count = 4,                           // how many multisamples
+      .SampleDesc.Count = 1,                           // how many multisamples
       .Windowed = true,                                // windowed/full-screen mode
       .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH  // allow full-screen switching
     };

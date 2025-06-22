@@ -8,18 +8,18 @@
 #define D3D_FRAME_COUNT 2
 
 ID3D12Device* _d3d_device;
-IDXGISwapChain3* _d3d_swapchain;
-ID3D12DescriptorHeap* _d3d_rtv_heap;
+IDXGISwapChain3* _swapchain;
+ID3D12DescriptorHeap* _rtv_heap;
 ID3D12Resource* _d3d_render_targets[D3D_FRAME_COUNT];
 ID3D12CommandQueue* _d3d_command_queue;
-ID3D12CommandAllocator* _d3d_command_allocator;
+ID3D12CommandAllocator* _command_allocator;
 ID3D12GraphicsCommandList* _d3d_command_list;
 ID3D12PipelineState* _pipeline_state;
 ID3D12RootSignature* _d3d_root_signature;
 ID3D12Resource* _d3d_vertices;
 ID3D12Resource* _d3d_indexes;
 ID3D12Resource* _d3d_vertices_upload;
-ID3D12Resource* _d3d_indexes_upload;
+ID3D12Resource* _d3d_buffer_upload;
 D3D12_CPU_DESCRIPTOR_HANDLE _rtv_handle;
 ID3D12DescriptorHeap* _srv_heap;
 D3D12_GPU_DESCRIPTOR_HANDLE _gpu_srv_handle;
@@ -77,13 +77,13 @@ void _d3d_gpu_wait() {
   }
   if (_d3d_fence_value != _d3d_fence_signal) {
     _d3d_fence_value = _d3d_fence_signal;
-    result = _d3d_command_allocator->lpVtbl->Reset(_d3d_command_allocator);
+    result = _command_allocator->lpVtbl->Reset(_command_allocator);
     if (FAILED(result)) {
       _d3d_debug();
       error(result, "_d3d_command_allocator Reset");
       exit(result);
     }
-    result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _d3d_command_allocator, _pipeline_state);
+    result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _command_allocator, _pipeline_state);
     if (FAILED(result)) {
       _d3d_debug();
       error(result, "_d3d_command_list Reset");
@@ -120,7 +120,7 @@ void _vertices_free() {
   _d3d_vertices->lpVtbl->Release(_d3d_vertices);
   _d3d_indexes->lpVtbl->Release(_d3d_indexes);
   _d3d_vertices_upload->lpVtbl->Release(_d3d_vertices_upload);
-  _d3d_indexes_upload->lpVtbl->Release(_d3d_indexes_upload);
+  _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
 }
 void _window_render() {
   const f64 now = time_now_f64();
@@ -141,7 +141,7 @@ void _window_render() {
   }
   _vertices_length = 0;
   _indexes_length = 0;
-  _d3d_frame_index = _d3d_swapchain->lpVtbl->GetCurrentBackBufferIndex(_d3d_swapchain);
+  _d3d_frame_index = _swapchain->lpVtbl->GetCurrentBackBufferIndex(_swapchain);
   console_log("render %d", _d3d_frame_index);
   window_onrender();
   // (_d3d_vertices_data | _d3d_indexes_data) memory_copy
@@ -221,7 +221,7 @@ void _window_render() {
   _d3d_command_list->lpVtbl->CopyBufferRegion(
     _d3d_command_list,
     _d3d_indexes, 0,
-    _d3d_indexes_upload, 0,
+    _d3d_buffer_upload, 0,
     indexes_size
   );
   // D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER
@@ -256,7 +256,7 @@ void _window_render() {
   );
   // submit
   _d3d_command_submit();
-  _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
+  _swapchain->lpVtbl->Present(_swapchain, 0, 0);
   _d3d_gpu_wait();
 }
 void _gfx_inicialize(const char* atlas_path) {
@@ -315,7 +315,7 @@ void _gfx_inicialize(const char* atlas_path) {
     exit(result);
   }
   factory->lpVtbl->Release(factory);
-  result = swapchain->lpVtbl->QueryInterface(swapchain, &IID_IDXGISwapChain3, (void**)&_d3d_swapchain);
+  result = swapchain->lpVtbl->QueryInterface(swapchain, &IID_IDXGISwapChain3, (void**)&_swapchain);
   swapchain->lpVtbl->Release(swapchain);
   if (FAILED(result)) {
     error(result, "QueryInterface IID_IDXGISwapChain3");
@@ -325,9 +325,9 @@ void _gfx_inicialize(const char* atlas_path) {
     .NumDescriptors = D3D_FRAME_COUNT,
     .Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV
   };
-  _d3d_device->lpVtbl->CreateDescriptorHeap(_d3d_device, &rtv_heap_desc, &IID_ID3D12DescriptorHeap, (void**)&_d3d_rtv_heap);
+  _d3d_device->lpVtbl->CreateDescriptorHeap(_d3d_device, &rtv_heap_desc, &IID_ID3D12DescriptorHeap, (void**)&_rtv_heap);
   _d3d_rtv_descriptor_size = _d3d_device->lpVtbl->GetDescriptorHandleIncrementSize(_d3d_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-  _d3d_rtv_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_d3d_rtv_heap, &_rtv_handle);
+  _rtv_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_rtv_heap, &_rtv_handle);
   D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = _rtv_handle;
   for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
     swapchain->lpVtbl->GetBuffer(swapchain, i, &IID_ID3D12Resource, (void**)&_d3d_render_targets[i]);
@@ -431,9 +431,9 @@ void _gfx_inicialize(const char* atlas_path) {
   memory_free(vs_bytes);
   memory_free(ps_bytes);
   // ID3D12CommandAllocator
-  _d3d_device->lpVtbl->CreateCommandAllocator(_d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, (void**)&_d3d_command_allocator);
+  _d3d_device->lpVtbl->CreateCommandAllocator(_d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, (void**)&_command_allocator);
   // ID3D12GraphicsCommandList 
-  _d3d_device->lpVtbl->CreateCommandList(_d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _d3d_command_allocator, _pipeline_state, &IID_ID3D12GraphicsCommandList, (void**)&_d3d_command_list);
+  _d3d_device->lpVtbl->CreateCommandList(_d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _command_allocator, _pipeline_state, &IID_ID3D12GraphicsCommandList, (void**)&_d3d_command_list);
   // CreateFence
   _d3d_device->lpVtbl->CreateFence(
     _d3d_device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void**)&_d3d_fence
@@ -649,13 +649,13 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   buffer_desc.Width = indexes_buffer_size;
   result = _d3d_device->lpVtbl->CreateCommittedResource(
     _d3d_device, &heap_props, D3D12_HEAP_FLAG_NONE, &buffer_desc,
-    D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, (void**)&_d3d_indexes_upload
+    D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, (void**)&_d3d_buffer_upload
   );
   if (FAILED(result)) {
     error(result, "_d3d_indexes_upload CreateCommittedResource");
     exit(result);
   }
-  result = _d3d_indexes_upload->lpVtbl->Map(_d3d_indexes_upload, 0, 0, (void**)&_indexes_virtual);
+  result = _d3d_buffer_upload->lpVtbl->Map(_d3d_buffer_upload, 0, 0, (void**)&_indexes_virtual);
   if (FAILED(result)) {
     error(result, "_d3d_indexes_upload Map");
     exit(result);
@@ -670,10 +670,10 @@ void _gfx_destroy() {
   console_log("_gfx_destroy");
   _d3d_gpu_wait();
   _d3d_device->lpVtbl->Release(_d3d_device);
-  _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);
-  _d3d_rtv_heap->lpVtbl->Release(_d3d_rtv_heap);
+  _swapchain->lpVtbl->Release(_swapchain);
+  _rtv_heap->lpVtbl->Release(_rtv_heap);
   _d3d_command_queue->lpVtbl->Release(_d3d_command_queue);
-  _d3d_command_allocator->lpVtbl->Release(_d3d_command_allocator);
+  _command_allocator->lpVtbl->Release(_command_allocator);
   _d3d_command_list->lpVtbl->Release(_d3d_command_list);
   _pipeline_state->lpVtbl->Release(_pipeline_state);
   _d3d_root_signature->lpVtbl->Release(_d3d_root_signature);
