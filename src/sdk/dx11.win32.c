@@ -132,21 +132,6 @@ void _gfx_inicialize(const char* atlas_path) {
     }
   }
   _d3d_device_context->lpVtbl->IASetPrimitiveTopology(_d3d_device_context, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  { // ID3D11RasterizerState
-    const D3D11_RASTERIZER_DESC rasterizer_props = {
-      .FillMode = D3D11_FILL_SOLID,
-      .CullMode = D3D11_CULL_NONE
-    };
-    ID3D11RasterizerState* _d3d_rasterizer;
-    result = _d3d_device->lpVtbl->CreateRasterizerState(
-      _d3d_device, &rasterizer_props, &_d3d_rasterizer
-    );
-    if (FAILED(result)) {
-      error(result, "ID3D11Device_CreateRasterizerState");
-      exit(result);
-    }
-    _d3d_rasterizer->lpVtbl->Release(_d3d_rasterizer);
-  }
   { // CreatePixelShader
     file_bytes = fs_readfile_sync("share/ps.cso", &file_size);
     ID3D11PixelShader* pixel_shader;
