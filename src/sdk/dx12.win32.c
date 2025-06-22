@@ -99,9 +99,9 @@ void _d3d_command_submit() {
 
 void _window_render() {
   const f64 now = time_now_f64();
-  const f64 delta_time = now - _window_render_time;
+  const f64 delta_time = now - _render_time;
   window_deltatime = delta_time;
-  _window_render_time = now;
+  _render_time = now;
 #ifdef DEBUG
   const f64 frame_time = 1. / 60;
   if (window_deltatime > frame_time) {
@@ -120,7 +120,7 @@ void _window_render() {
   console_log("render %d", frame_index);
   window_onrender();
 }
-void _gfx_inicialize(const char* atlas_path) {
+void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) {
   i32 result;
   u32 factory_flags = 0;
 #ifdef DEBUG
@@ -377,9 +377,7 @@ void _gfx_inicialize(const char* atlas_path) {
       .DepthOrArraySize = 1,
       .MipLevels = 1,
       .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-      .SampleDesc = {.Count = 1, .Quality = 0 },
-      .Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
-      .Flags = D3D12_RESOURCE_FLAG_NONE,
+      .SampleDesc.Count = 1,
     };
     D3D12_HEAP_PROPERTIES heap_props = {
       .Type = D3D12_HEAP_TYPE_DEFAULT

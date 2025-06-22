@@ -1,5 +1,5 @@
 #include <sdk/window.h>
-// window
+
 bool window_resized;
 f32 window_deltatime;
 f32 window_ndc_x;
@@ -15,9 +15,10 @@ u16 mouse_x;
 u16 mouse_y;
 vertex_t* _vertices_virtual;
 u32* _indexes_virtual;
-const f32 atlas_ndc_x = 1.f / atlas_width;
-const f32 atlas_ndc_y = 1.f / atlas_height;
-f64 _window_render_time;
+f64 _render_time;
+
+const f32 atlas_ndc_x = 1.f / ATLAS_WIDTH;
+const f32 atlas_ndc_y = 1.f / ATLAS_HEIGHT;
 
 bool window_key_pressed(key_t key) {
   u8 byte_index = key / 8;

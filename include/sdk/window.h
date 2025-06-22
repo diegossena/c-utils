@@ -8,6 +8,13 @@
 #include <sdk/thread.h>
 #include <sdk/fs.h>
 
+#ifndef ATLAS_WIDTH
+#define ATLAS_WIDTH 256.f
+#endif
+#ifndef ATLAS_HEIGHT
+#define ATLAS_HEIGHT 256.f
+#endif
+
 #define QUAD_VERTEX_COUNT 4
 #define QUAD_INDEX_COUNT 6
 
@@ -28,7 +35,7 @@ typedef enum mouse_btn_t {
   MOUSE_BUTTON_AUX
 } mouse_btn_t;
 
-void window_startup(const char* title, const char* atlas_path);
+void window_startup(const char* title, const char* atlas_path, u16 atlas_width, u16 atlas_height);
 void window_set_title(const char* title);
 void window_close();
 void window_run();
@@ -78,39 +85,37 @@ extern void window_onkeyup(key_t key);
 
 void _window_resize();
 void _window_render();
-void _gfx_inicialize(const char* atlas_path);
+void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height);
 void _gfx_destroy();
-
-extern u16 mouse_x;
-extern u16 mouse_y;
 
 extern u16 window_width; // externally-defined function
 extern u16 window_height; // externally-defined function
-extern f32 window_deltatime;
-extern bool window_resized;
-
-extern bool window_focus;
-extern rgba_t window_background; // externally-defined function
-
-extern f32 window_ndc_x;
-extern f32 window_ndc_y;
-
-extern u8 _keyboard_count;
-extern u8 _keyboard_state[32];
-
-extern u64 vertices_capacity;
-extern vertex_t* _vertices_virtual;
-extern u64 _vertices_length;
-
-extern u64 indexes_capacity;
-extern u32* _indexes_virtual;
-extern u64 _indexes_length;
-
-extern const u16 atlas_width; // externally-defined function
-extern const u16 atlas_height; // externally-defined function
-
+extern rgba_t window_background;
 extern const f32 atlas_ndc_x;
 extern const f32 atlas_ndc_y;
-extern f64 _window_render_time;
+
+u16 mouse_x;
+u16 mouse_y;
+
+f32 window_deltatime;
+bool window_resized;
+
+bool window_focus;
+
+f32 window_ndc_x;
+f32 window_ndc_y;
+
+u8 _keyboard_count;
+u8 _keyboard_state[32];
+
+u64 vertices_capacity;
+vertex_t* _vertices_virtual;
+u64 _vertices_length;
+
+u64 indexes_capacity;
+u32* _indexes_virtual;
+u64 _indexes_length;
+
+f64 _render_time;
 
 #endif

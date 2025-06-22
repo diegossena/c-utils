@@ -8,7 +8,7 @@
 #include <avrt.h>
 
 HWND _window_id;
-f64 _window_render_time;
+f64 _render_time;
 ID3D11Device* _d3d_device;
 IDXGISwapChain* _d3d_swapchain;
 ID3D11DeviceContext* _d3d_device_context;
@@ -53,9 +53,9 @@ void _window_resize() {
 }
 void _window_render() {
   const f64 now = time_now_f64();
-  const f64 delta_time = now - _window_render_time;
+  const f64 delta_time = now - _render_time;
   window_deltatime = delta_time;
-  _window_render_time = now;
+  _render_time = now;
 #ifdef DEBUG
   const f64 frame_time = 1. / 60;
   if (window_deltatime > frame_time) {
@@ -99,7 +99,7 @@ void _window_render() {
   _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
   _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
 }
-void _gfx_inicialize(const char* atlas_path) {
+void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) {
   i32 file_size;
   u8* file_bytes;
   i32 result;
@@ -231,12 +231,11 @@ void _gfx_inicialize(const char* atlas_path) {
     );
     blend_state->lpVtbl->Release(blend_state);
   }
-  if (atlas_path) {
-    // atlas_load
+  { // atlas_load
     file_bytes = fs_readfilen_sync(atlas_path, atlas_width * atlas_height * 4);
     if (file_bytes == null) {
       error(ERR_NOT_FOUND, "atlas_load");
-      goto atlas_exit;
+      exit(result);
     }
     // CreateTexture2D
     const D3D11_TEXTURE2D_DESC texture_desc = {
@@ -245,11 +244,9 @@ void _gfx_inicialize(const char* atlas_path) {
       .MipLevels = 1,
       .ArraySize = 1,
       .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-      .SampleDesc = {.Count = 1, .Quality = 0 },
+      .SampleDesc.Count = 1,
       .Usage = D3D11_USAGE_IMMUTABLE,
       .BindFlags = D3D11_BIND_SHADER_RESOURCE,
-      .CPUAccessFlags = 0,
-      .MiscFlags = 0,
     };
     const D3D11_SUBRESOURCE_DATA subresource_data = {
       .pSysMem = file_bytes,
@@ -261,7 +258,7 @@ void _gfx_inicialize(const char* atlas_path) {
     );
     if (FAILED(result)) {
       error(result, "CreateTexture2D");
-      goto atlas_free;
+      exit(result);
     }
     // CreateShaderResourceView
     const D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {
@@ -275,14 +272,12 @@ void _gfx_inicialize(const char* atlas_path) {
     );
     if (FAILED(result)) {
       error(result, "CreateShaderResourceView");
-      goto atlas_free;
+      exit(result);
     }
     // PSSetShaderResources
     _d3d_device_context->lpVtbl->PSSetShaderResources(_d3d_device_context, 0, 1, &resource_view);
     resource_view->lpVtbl->Release(resource_view);
-  atlas_free:
     memory_free(file_bytes);
-  atlas_exit:
   }
 }
 void _gfx_destroy() {

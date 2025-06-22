@@ -76,7 +76,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
       return 0;
     case WM_SIZE:
-      if (_window_render_time) {
+      if (_render_time) {
         window_resized = true;
         window_width = LOWORD(lParam);
         window_height = HIWORD(lParam);
@@ -95,7 +95,7 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
   return DefWindowProcA(window_id, message, wParam, lParam);
 }
 void window_close() { DestroyWindow(_window_id); }
-void window_startup(const char* title, const char* atlas_path) {
+void window_startup(const char* title, const char* atlas_path, u16 atlas_width, u16 atlas_height) {
   SetProcessDPIAware();
   // window_class_register
   WNDCLASSEXA window_class = {
@@ -126,7 +126,7 @@ void window_startup(const char* title, const char* atlas_path) {
   if (!_window_id) {
     error((error_t)_window_id, "CreateWindowExA");
   }
-  _gfx_inicialize(atlas_path);
+  _gfx_inicialize(atlas_path, atlas_width, atlas_height);
   _window_resize();
 }
 void window_set_title(const char* title) {
@@ -142,7 +142,7 @@ void window_run() {
     error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
   }
   HANDLE renderer_timer;
-  _window_render_time = time_now_f64();
+  _render_time = time_now_f64();
   CreateTimerQueueTimer(&renderer_timer, 0, (WAITORTIMERCALLBACK)_window_render, 0, 0, 15, 0);
   // loop
   SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);

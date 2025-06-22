@@ -124,9 +124,9 @@ void _vertices_free() {
 }
 void _window_render() {
   const f64 now = time_now_f64();
-  const f64 delta_time = now - _window_render_time;
+  const f64 delta_time = now - _render_time;
   window_deltatime = delta_time;
-  _window_render_time = now;
+  _render_time = now;
 #ifdef DEBUG
   const f64 frame_time = 1. / 60;
   if (window_deltatime > frame_time) {
