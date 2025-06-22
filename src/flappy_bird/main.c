@@ -1,7 +1,7 @@
 #define WINDOW_SCALING 3.8f
 #define RECT_COUNT 5
-#define ATLAS_WIDTH 256.f
 #define ATLAS_HEIGHT 256.f
+#define ATLAS_WIDTH 256.f
 
 #include <sdk/types.h>
 #include <sdk/window.h>
@@ -47,9 +47,9 @@ void window_onrender() {
   y0 = .3f;
   y1 = y0 - window_ndc_y * 64 * WINDOW_SCALING;
   u0 = 0;
-  u1 = u0 + atlas_ndc_x * 144;
-  v0 = atlas_ndc_y * 192;
-  v1 = v0 + atlas_ndc_y * 64;
+  u1 = u0 + ATLAS_NDC_X * 144;
+  v0 = ATLAS_NDC_Y * 192;
+  v1 = v0 + ATLAS_NDC_Y * 64;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
   // ground_animate
   const f32 ground_animate_duration = .2f;
@@ -61,9 +61,9 @@ void window_onrender() {
   y0 = y1;
   y1 = y0 - window_ndc_y * 16 * WINDOW_SCALING;
   u0 = 0;
-  u1 = atlas_ndc_x * 160;
-  v0 = atlas_ndc_y * 160;
-  v1 = v0 + atlas_ndc_y * 16;
+  u1 = ATLAS_NDC_X * 160;
+  v0 = ATLAS_NDC_Y * 160;
+  v1 = v0 + ATLAS_NDC_Y * 16;
   if (ground_animate_timer >= ground_animate_duration) {
     ground_animate_timer = 0;
   }
@@ -107,16 +107,16 @@ void window_onrender() {
   x1 = x0 + window_ndc_x * 16 * WINDOW_SCALING;
   y1 = y0 - window_ndc_y * 16 * WINDOW_SCALING;
   u0 = v0 = 0;
-  u1 = v1 = atlas_ndc_x * 16;
+  u1 = v1 = ATLAS_NDC_X * 16;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
   // bird_wing_draw
   x0 = x0 - window_ndc_x;
   x1 = x0 + window_ndc_x * 16 * WINDOW_SCALING;
-  u0 = 16 * (1 + bird_wing_state) * atlas_ndc_x;
-  u1 = u0 + atlas_ndc_x * 16;
+  u0 = 16 * (1 + bird_wing_state) * ATLAS_NDC_X;
+  u1 = u0 + ATLAS_NDC_X * 16;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
 }
-// 547126 bytes
+// 547066 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Flappy Bird", "share/flappy_bird_atlas.bin", ATLAS_WIDTH, ATLAS_HEIGHT);
   vertices_reserve(QUAD_VERTEX_COUNT * RECT_COUNT, QUAD_INDEX_COUNT * RECT_COUNT);

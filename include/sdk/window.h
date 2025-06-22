@@ -15,6 +15,9 @@
 #define ATLAS_HEIGHT 256.f
 #endif
 
+#define ATLAS_NDC_X (1.f / ATLAS_WIDTH)
+#define ATLAS_NDC_Y (1.f / ATLAS_HEIGHT)
+
 #define QUAD_VERTEX_COUNT 4
 #define QUAD_INDEX_COUNT 6
 
@@ -91,9 +94,6 @@ void _gfx_destroy();
 extern u16 window_width; // externally-defined function
 extern u16 window_height; // externally-defined function
 extern rgba_t window_background;
-
-const f32 atlas_ndc_x;
-const f32 atlas_ndc_y;
 
 u16 mouse_x;
 u16 mouse_y;
