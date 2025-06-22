@@ -1,7 +1,7 @@
 #define WINDOW_SCALING 3.8f
 #define RECT_COUNT 5
-#define ATLAS_HEIGHT 256.f
 #define ATLAS_WIDTH 256.f
+#define ATLAS_HEIGHT 256.f
 
 #include <sdk/types.h>
 #include <sdk/window.h>

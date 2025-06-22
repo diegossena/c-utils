@@ -91,8 +91,9 @@ void _gfx_destroy();
 extern u16 window_width; // externally-defined function
 extern u16 window_height; // externally-defined function
 extern rgba_t window_background;
-extern const f32 atlas_ndc_x;
-extern const f32 atlas_ndc_y;
+
+const f32 atlas_ndc_x;
+const f32 atlas_ndc_y;
 
 u16 mouse_x;
 u16 mouse_y;
