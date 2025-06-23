@@ -16,9 +16,6 @@ u16 mouse_y;
 vertex_t* _vertices_virtual;
 u32* _indexes_virtual;
 
-// const f32 atlas_ndc_x = 1.f / ATLAS_WIDTH;
-// const f32 atlas_ndc_y = 1.f / ATLAS_HEIGHT;
-
 bool window_key_pressed(key_t key) {
   u8 byte_index = key / 8;
   u8 bit_index = key % 8;

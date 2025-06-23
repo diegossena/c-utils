@@ -17,38 +17,35 @@ ID3D11RenderTargetView* _d3d_render_target_view;
 ID3D11Buffer* _d3d_buffer;
 
 void _window_resize() {
-  // d3d_render_target_view
-  ID3D11Texture2D* texture;
+  ID3D11Texture2D* rtv_texture;
   HRESULT result = _d3d_swapchain->lpVtbl->GetBuffer(
     _d3d_swapchain, 0, &IID_ID3D11Texture2D,
-    (void**)&texture
+    (void**)&rtv_texture
   );
   if (FAILED(result)) {
     error(result, "IDXGISwapChain_GetBuffer");
   }
   result = _d3d_device->lpVtbl->CreateRenderTargetView(
-    _d3d_device, (ID3D11Resource*)texture, 0, &_d3d_render_target_view
+    _d3d_device, (ID3D11Resource*)rtv_texture, 0, &_d3d_render_target_view
   );
-  texture->lpVtbl->Release(texture);
+  rtv_texture->lpVtbl->Release(rtv_texture);
   if (FAILED(result)) {
     error(result, "CreateRenderTargetView");
   }
   _d3d_device_context->lpVtbl->OMSetRenderTargets(
     _d3d_device_context, 1, &_d3d_render_target_view, 0
   );
-  { // D3D11_VIEWPORT
-    const D3D11_VIEWPORT viewport = {
-      .TopLeftX = 0.f,
-      .TopLeftY = 0.f,
-      .Width = (f32)window_width,
-      .Height = (f32)window_height,
-      .MinDepth = 0.f,
-      .MaxDepth = 1.f,
-    };
-    _d3d_device_context->lpVtbl->RSSetViewports(
-      _d3d_device_context, 1, &viewport
-    );
-  }
+  const D3D11_VIEWPORT viewport = {
+    .TopLeftX = 0.f,
+    .TopLeftY = 0.f,
+    .Width = (f32)window_width,
+    .Height = (f32)window_height,
+    .MinDepth = 0.f,
+    .MaxDepth = 1.f,
+  };
+  _d3d_device_context->lpVtbl->RSSetViewports(
+    _d3d_device_context, 1, &viewport
+  );
 }
 void _gfx_render() {
   timeBeginPeriod(1);
@@ -70,8 +67,8 @@ void _gfx_render() {
       window_resized = false;
       _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
       HRESULT result = _d3d_swapchain->lpVtbl->ResizeBuffers(
-        _d3d_swapchain, 1, window_width, window_height,
-        DXGI_FORMAT_R8G8B8A8_UNORM, 0
+        _d3d_swapchain, 0, window_width, window_height,
+        DXGI_FORMAT_UNKNOWN, 0
       );
       if (FAILED(result)) {
         error(result, "IDXGISwapChain_ResizeBuffers");
