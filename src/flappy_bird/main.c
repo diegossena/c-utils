@@ -116,7 +116,8 @@ void window_onrender() {
   u1 = u0 + ATLAS_NDC_X * 16;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
 }
-// 546839 bytes
+// DX11 546760 bytes
+// DX12 553361 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Flappy Bird", "share/flappy_bird_atlas.bin");
   vertices_reserve(QUAD_VERTEX_COUNT * RECT_COUNT, QUAD_INDEX_COUNT * RECT_COUNT);
