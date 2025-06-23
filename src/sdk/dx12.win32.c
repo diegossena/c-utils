@@ -7,7 +7,7 @@
 #include <dxgi1_6.h>
 
 #define D3D_FRAME_COUNT 2
-#define D3D_BUFFER_TARGET_STATE (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER)
+#define D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER)
 
 // 553933 bytes
 
@@ -85,129 +85,6 @@ void _d3d_reset() {
     exit(result);
   }
 }
-
-void _window_render() {
-  DWORD task_index = 0;
-  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
-  if (!mmtask) {
-    error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
-  }
-  f64 timer = time_ticks();
-  do {
-    // onresize
-    if (window_resized) {
-      window_resized = false;
-      window_onresize();
-    }
-    const f64 now = time_ticks();
-    window_deltatime = now - timer;
-    timer = now;
-#ifdef DEBUG
-    if (window_deltatime > 1. / 60) {
-      console_log("FPS DROP %f %f", 1. / 60, window_deltatime);
-    }
-#endif
-    D3D12_RESOURCE_BARRIER barrier = {
-      .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-      .Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES
-    };
-    _vertices_length = 0;
-    _indexes_length = 0;
-    window_onrender();
-    // D3D12_RESOURCE_STATE_COPY_DEST
-    barrier.Transition.pResource = _d3d_buffer;
-    barrier.Transition.StateBefore = D3D_BUFFER_TARGET_STATE;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
-    // CopyBufferRegion
-    u64 vertices_size = vertices_capacity * sizeof(vertex_t);
-    _d3d_command_list->lpVtbl->CopyBufferRegion(
-      _d3d_command_list,
-      _d3d_buffer, 0,
-      _d3d_buffer_upload, 0,
-      vertices_size + indexes_capacity * sizeof(u32)
-    );
-    // D3D_BUFFER_TARGET_STATE
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-    barrier.Transition.StateAfter = D3D_BUFFER_TARGET_STATE;
-    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
-    // draw
-    _d3d_command_list->lpVtbl->SetGraphicsRootSignature(_d3d_command_list, _d3d_root_signature);
-    _d3d_command_list->lpVtbl->SetDescriptorHeaps(_d3d_command_list, 1, &_srv_heap);
-    _d3d_command_list->lpVtbl->SetGraphicsRootDescriptorTable(_d3d_command_list, 0, _srv_gpu_handle);
-    const D3D12_VIEWPORT viewport = {
-      .Width = window_width,
-      .Height = window_height,
-      .MaxDepth = 1.f,
-    };
-    _d3d_command_list->lpVtbl->RSSetViewports(_d3d_command_list, 1, &viewport);
-    const D3D12_RECT scissor_rect = { 0, 0, window_width, window_height };
-    _d3d_command_list->lpVtbl->RSSetScissorRects(_d3d_command_list, 1, &scissor_rect);
-    // D3D12_RESOURCE_STATE_RENDER_TARGET
-    barrier.Transition.pResource = _d3d_render_targets[frame_index];
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
-    const D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = {
-      _rtv_handle.ptr + frame_index * _d3d_rtv_descriptor_size
-    };
-    _d3d_command_list->lpVtbl->OMSetRenderTargets(_d3d_command_list, 1, &rtv_handle, false, null);
-    _d3d_command_list->lpVtbl->ClearRenderTargetView(_d3d_command_list, rtv_handle, (FLOAT*)&background_color, 0, 0);
-    _d3d_command_list->lpVtbl->IASetPrimitiveTopology(_d3d_command_list, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    const D3D12_VERTEX_BUFFER_VIEW vb_view = {
-      .BufferLocation = _d3d_buffer->lpVtbl->GetGPUVirtualAddress(_d3d_buffer),
-      .StrideInBytes = sizeof(vertex_t),
-      .SizeInBytes = _vertices_length * sizeof(vertex_t),
-    };
-    _d3d_command_list->lpVtbl->IASetVertexBuffers(_d3d_command_list, 0, 1, &vb_view);
-    const D3D12_INDEX_BUFFER_VIEW ib_view = {
-      .BufferLocation = vb_view.BufferLocation + vertices_size,
-      .Format = DXGI_FORMAT_R32_UINT,
-      .SizeInBytes = _indexes_length * sizeof(u32),
-    };
-    _d3d_command_list->lpVtbl->IASetIndexBuffer(_d3d_command_list, &ib_view);
-    _d3d_command_list->lpVtbl->DrawIndexedInstanced(_d3d_command_list, _indexes_length, 1, 0, 0, 0);
-    // D3D12_RESOURCE_STATE_PRESENT
-    barrier.Transition.pResource = _d3d_render_targets[frame_index];
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
-    // present
-    _d3d_submit();
-    u64 signal = ++_d3d_fence_value[frame_index];
-    _d3d_signal(signal);
-    i32 result = _swapchain->lpVtbl->Present(_swapchain, 1, 0);
-    if (FAILED(result)) {
-      error(result, "_d3d_present Present");
-      exit(result);
-    }
-    frame_index = (frame_index + 1) % D3D_FRAME_COUNT;
-    _d3d_wait();
-    _d3d_fence_value[frame_index] = signal;
-    _d3d_reset();
-  } while (_window_id);
-  _d3d_signal(++_d3d_fence_value[frame_index]);
-  _d3d_wait();
-  // renderer_free
-  AvRevertMmThreadCharacteristics(mmtask);
-  CloseHandle(_d3d_fence_event);
-  for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
-    _d3d_render_targets[i]->lpVtbl->Release(_d3d_render_targets[i]);
-    _command_allocator[i]->lpVtbl->Release(_command_allocator[i]);
-  }
-  _d3d_texture->lpVtbl->Release(_d3d_texture);
-  _d3d_fence->lpVtbl->Release(_d3d_fence);
-  _pipeline_state->lpVtbl->Release(_pipeline_state);
-  _d3d_command_queue->lpVtbl->Release(_d3d_command_queue);
-  _d3d_command_list->lpVtbl->Release(_d3d_command_list);
-  _srv_heap->lpVtbl->Release(_srv_heap);
-  _rtv_heap->lpVtbl->Release(_rtv_heap);
-  _d3d_root_signature->lpVtbl->Release(_d3d_root_signature);
-  _d3d_buffer->lpVtbl->Release(_d3d_buffer);
-  _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
-  _swapchain->lpVtbl->Release(_swapchain);
-  _d3d_device->lpVtbl->Release(_d3d_device);
-}
 void _gfx_startup(const char* atlas_path) {
   i32 result;
   u32 factory_flags = 0;
@@ -247,6 +124,20 @@ void _gfx_startup(const char* atlas_path) {
       exit(result);
     }
   }
+#ifdef DEBUG
+  { // ID3D12InfoQueue
+    ID3D12InfoQueue* info_queue;
+    result = _d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&info_queue);;
+    if (SUCCEEDED(result)) {
+      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+      info_queue->lpVtbl->Release(info_queue);
+    } else {
+      error(result, "IID_ID3D12InfoQueue");
+    }
+  }
+#endif
   { // ID3D12CommandQueue
     const D3D12_COMMAND_QUEUE_DESC queue_desc = {
       .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
@@ -565,14 +456,14 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     _d3d_buffer->lpVtbl->Release(_d3d_buffer);
     _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
   }
-  const u64 vertices_buffer_size = vertices_size * sizeof(vertex_t);
-  const u64 indexes_buffer_size = indexes_size * sizeof(u32);
+  vertices_capacity = vertices_size * sizeof(vertex_t);
+  indexes_capacity = indexes_size * sizeof(u32);
   // d3d_buffers
   D3D12_HEAP_PROPERTIES heap_props = { .Type = D3D12_HEAP_TYPE_DEFAULT };
   const D3D12_RESOURCE_DESC resource_desc = {
     .Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
     .Height = 1,
-    .Width = vertices_buffer_size + indexes_buffer_size,
+    .Width = vertices_capacity + indexes_capacity,
     .DepthOrArraySize = 1,
     .MipLevels = 1,
     .SampleDesc.Count = 1,
@@ -595,7 +486,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
       .Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
       .pResource = _d3d_buffer,
       .StateBefore = D3D12_RESOURCE_STATE_COMMON,
-      .StateAfter = D3D_BUFFER_TARGET_STATE
+      .StateAfter = D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER
     }
   };
   _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
@@ -610,18 +501,142 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     exit(result);
   }
   result = _d3d_buffer_upload->lpVtbl->Map(_d3d_buffer_upload, 0, 0, (void**)&_vertices_virtual);
-  _indexes_virtual = (void*)_vertices_virtual + vertices_buffer_size;
+  _indexes_virtual = (void*)_vertices_virtual + vertices_capacity;
   if (FAILED(result)) {
     error(result, "_d3d_vertices_upload Map");
     exit(result);
   }
   // update
-  vertices_capacity = vertices_size;
-  indexes_capacity = indexes_size;
   _d3d_submit();
   _d3d_signal(++_d3d_fence_value[frame_index]);
   _d3d_wait();
   _d3d_reset();
+}
+void _window_render() {
+  DWORD task_index = 0;
+  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
+  if (!mmtask) {
+    error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
+  }
+  f64 timer = time_ticks();
+  do {
+    // onresize
+    if (window_resized) {
+      window_resized = false;
+      window_onresize();
+    }
+    const f64 now = time_ticks();
+    window_deltatime = now - timer;
+    timer = now;
+#ifdef DEBUG
+    if (window_deltatime > 1. / 60) {
+      console_log("FPS DROP %f %f", 1. / 60, window_deltatime);
+    }
+#endif
+    _vertices_length = 0;
+    _indexes_length = 0;
+    window_onrender();
+    D3D12_RESOURCE_BARRIER barriers [] = {
+      {
+        .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+        .Transition = {
+          .Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+          .pResource = _d3d_buffer,
+          .StateBefore = D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER,
+          .StateAfter = D3D12_RESOURCE_STATE_COPY_DEST
+        }
+      },
+      {
+        .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+        .Transition = {
+          .Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+          .pResource = _d3d_render_targets[frame_index],
+          .StateBefore = D3D12_RESOURCE_STATE_PRESENT,
+          .StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET
+        }
+      },
+    };
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 2, barriers);
+    barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+    barriers[0].Transition.StateAfter = D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER;
+    barriers[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barriers[1].Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    // CopyBufferRegion
+    _d3d_command_list->lpVtbl->CopyBufferRegion(
+      _d3d_command_list,
+      _d3d_buffer, 0,
+      _d3d_buffer_upload, 0,
+      vertices_capacity + indexes_capacity
+    );
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barriers[0]);
+    // draw
+    _d3d_command_list->lpVtbl->SetGraphicsRootSignature(_d3d_command_list, _d3d_root_signature);
+    _d3d_command_list->lpVtbl->SetDescriptorHeaps(_d3d_command_list, 1, &_srv_heap);
+    _d3d_command_list->lpVtbl->SetGraphicsRootDescriptorTable(_d3d_command_list, 0, _srv_gpu_handle);
+    const D3D12_VIEWPORT viewport = {
+      .Width = window_width,
+      .Height = window_height,
+      .MaxDepth = 1.f,
+    };
+    _d3d_command_list->lpVtbl->RSSetViewports(_d3d_command_list, 1, &viewport);
+    const D3D12_RECT scissor_rect = { 0, 0, window_width, window_height };
+    _d3d_command_list->lpVtbl->RSSetScissorRects(_d3d_command_list, 1, &scissor_rect);
+    const D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = {
+      _rtv_handle.ptr + frame_index * _d3d_rtv_descriptor_size
+    };
+    _d3d_command_list->lpVtbl->OMSetRenderTargets(_d3d_command_list, 1, &rtv_handle, false, null);
+    _d3d_command_list->lpVtbl->ClearRenderTargetView(_d3d_command_list, rtv_handle, (FLOAT*)&background_color, 0, 0);
+    _d3d_command_list->lpVtbl->IASetPrimitiveTopology(_d3d_command_list, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    const D3D12_VERTEX_BUFFER_VIEW vb_view = {
+      .BufferLocation = _d3d_buffer->lpVtbl->GetGPUVirtualAddress(_d3d_buffer),
+      .StrideInBytes = sizeof(vertex_t),
+      .SizeInBytes = _vertices_length * sizeof(vertex_t),
+    };
+    _d3d_command_list->lpVtbl->IASetVertexBuffers(_d3d_command_list, 0, 1, &vb_view);
+    const D3D12_INDEX_BUFFER_VIEW ib_view = {
+      .BufferLocation = vb_view.BufferLocation + vertices_capacity,
+      .Format = DXGI_FORMAT_R32_UINT,
+      .SizeInBytes = _indexes_length * sizeof(u32),
+    };
+    _d3d_command_list->lpVtbl->IASetIndexBuffer(_d3d_command_list, &ib_view);
+    _d3d_command_list->lpVtbl->DrawIndexedInstanced(_d3d_command_list, _indexes_length, 1, 0, 0, 0);
+    // D3D12_RESOURCE_STATE_PRESENT
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barriers[1]);
+    // present
+    _d3d_submit();
+    u64 signal = ++_d3d_fence_value[frame_index];
+    _d3d_signal(signal);
+    i32 result = _swapchain->lpVtbl->Present(_swapchain, 1, 0);
+    if (FAILED(result)) {
+      error(result, "_swapchain Present");
+      exit(result);
+    }
+    frame_index = (frame_index + 1) % D3D_FRAME_COUNT;
+    _d3d_wait();
+    _d3d_fence_value[frame_index] = signal;
+    _d3d_reset();
+  } while (_window_id);
+  _d3d_signal(++_d3d_fence_value[frame_index]);
+  _d3d_wait();
+  // renderer_free
+  AvRevertMmThreadCharacteristics(mmtask);
+  CloseHandle(_d3d_fence_event);
+  for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
+    _d3d_render_targets[i]->lpVtbl->Release(_d3d_render_targets[i]);
+    _command_allocator[i]->lpVtbl->Release(_command_allocator[i]);
+  }
+  _d3d_texture->lpVtbl->Release(_d3d_texture);
+  _d3d_fence->lpVtbl->Release(_d3d_fence);
+  _pipeline_state->lpVtbl->Release(_pipeline_state);
+  _d3d_command_queue->lpVtbl->Release(_d3d_command_queue);
+  _d3d_command_list->lpVtbl->Release(_d3d_command_list);
+  _srv_heap->lpVtbl->Release(_srv_heap);
+  _rtv_heap->lpVtbl->Release(_rtv_heap);
+  _d3d_root_signature->lpVtbl->Release(_d3d_root_signature);
+  _d3d_buffer->lpVtbl->Release(_d3d_buffer);
+  _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
+  _swapchain->lpVtbl->Release(_swapchain);
+  _d3d_device->lpVtbl->Release(_d3d_device);
 }
 
 #endif
