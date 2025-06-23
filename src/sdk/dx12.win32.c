@@ -30,26 +30,8 @@ ID3D12Fence* _d3d_fence;
 HANDLE _d3d_fence_event;
 u64 _d3d_fence_value;
 
-void _d3d_debug() {
-  ID3D12InfoQueue* info_queue;
-  if (SUCCEEDED(_d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&info_queue))) {
-    u64 count = info_queue->lpVtbl->GetNumStoredMessagesAllowedByRetrievalFilter(info_queue);
-    for (u64 i = 0; i < count; i++) {
-      u64 length = 0;
-      info_queue->lpVtbl->GetMessageA(info_queue, i, null, &length);
-      D3D12_MESSAGE* message = (D3D12_MESSAGE*)memory_alloc(length);
-      if (message) {
-        info_queue->lpVtbl->GetMessageA(info_queue, i, message, &length);
-        console_log("[D3D12] %s", message->pDescription);
-        memory_free(message);
-      }
-    }
-    info_queue->lpVtbl->ClearStoredMessages(info_queue);
-    info_queue->lpVtbl->Release(info_queue);
-  }
-}
-void _gpu_wait() {
-  HRESULT result;
+void _d3d_wait() {
+  HRESULT result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_value);
   u64 completed = _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence);
   if (completed == -1) {
     result = _d3d_device->lpVtbl->GetDeviceRemovedReason(_d3d_device);
@@ -64,20 +46,20 @@ void _gpu_wait() {
     _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value, _d3d_fence_event);
     WaitForSingleObject(_d3d_fence_event, INFINITE);
   }
-  result = _command_allocator->lpVtbl->Reset(_command_allocator);
+}
+void _d3d_reset() {
+  i32 result = _command_allocator->lpVtbl->Reset(_command_allocator);
   if (FAILED(result)) {
-    _d3d_debug();
     error(result, "_d3d_command_allocator Reset");
     exit(result);
   }
   result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _command_allocator, _pipeline_state);
   if (FAILED(result)) {
-    _d3d_debug();
     error(result, "_d3d_command_list Reset");
     exit(result);
   }
 }
-void _d3d_command_submit() {
+void _d3d_submit() {
   HRESULT result = _d3d_command_list->lpVtbl->Close(_d3d_command_list);
   if (FAILED(result)) {
     error(result, "_d3d_command_submit Close");
@@ -86,9 +68,7 @@ void _d3d_command_submit() {
   _d3d_command_queue->lpVtbl->ExecuteCommandLists(
     _d3d_command_queue, 1, (ID3D12CommandList**)&_d3d_command_list
   );
-  result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_value);
   if (FAILED(result)) {
-    _d3d_debug();
     error(result, "_d3d_command_submit Signal");
     exit(result);
   }
@@ -182,11 +162,30 @@ void _window_render() {
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
     _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
     // present
-    _d3d_command_submit();
+    _d3d_submit();
     _swapchain->lpVtbl->Present(_swapchain, 1, 0);
-    _gpu_wait();
+    _d3d_wait();
+    _d3d_reset();
   } while (_window_id);
   AvRevertMmThreadCharacteristics(mmtask);
+  _d3d_wait();
+  CloseHandle(_d3d_fence_event);
+  for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
+    _d3d_render_targets[i]->lpVtbl->Release(_d3d_render_targets[i]);
+  }
+  _d3d_texture->lpVtbl->Release(_d3d_texture);
+  _d3d_fence->lpVtbl->Release(_d3d_fence);
+  _pipeline_state->lpVtbl->Release(_pipeline_state);
+  _command_allocator->lpVtbl->Release(_command_allocator);
+  _d3d_command_queue->lpVtbl->Release(_d3d_command_queue);
+  _d3d_command_list->lpVtbl->Release(_d3d_command_list);
+  _srv_heap->lpVtbl->Release(_srv_heap);
+  _rtv_heap->lpVtbl->Release(_rtv_heap);
+  _d3d_root_signature->lpVtbl->Release(_d3d_root_signature);
+  _d3d_buffer->lpVtbl->Release(_d3d_buffer);
+  _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
+  _swapchain->lpVtbl->Release(_swapchain);
+  _d3d_device->lpVtbl->Release(_d3d_device);
 }
 void _gfx_startup(const char* atlas_path) {
   i32 result;
@@ -227,20 +226,6 @@ void _gfx_startup(const char* atlas_path) {
       exit(result);
     }
   }
-#ifdef DEBUG
-  { // ID3D12InfoQueue
-    ID3D12InfoQueue* info_queue;
-    result = _d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&info_queue);;
-    if (SUCCEEDED(result)) {
-      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-      info_queue->lpVtbl->Release(info_queue);
-    } else {
-      error(result, "IID_ID3D12InfoQueue");
-    }
-  }
-#endif
   { // ID3D12CommandQueue
     const D3D12_COMMAND_QUEUE_DESC queue_desc = {
       .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
@@ -419,7 +404,6 @@ void _gfx_startup(const char* atlas_path) {
       _d3d_device, &pso_desc, &IID_ID3D12PipelineState, (void**)&_pipeline_state
     );
     if (FAILED(result)) {
-      _d3d_debug();
       error(result, "CreateGraphicsPipelineState");
       exit(result);
     }
@@ -542,9 +526,10 @@ void _gfx_startup(const char* atlas_path) {
   _d3d_device->lpVtbl->CreateFence(
     _d3d_device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void**)&_d3d_fence
   );
-  _d3d_command_submit();
+  _d3d_submit();
   _d3d_fence_event = CreateEventA(0, false, false, 0);
-  _gpu_wait();
+  _d3d_wait();
+  _d3d_reset();
   texture_upload_heap->lpVtbl->Release(texture_upload_heap);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
@@ -611,8 +596,9 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   // update
   vertices_capacity = vertices_size;
   indexes_capacity = indexes_size;
-  _d3d_command_submit();
-  _gpu_wait();
+  _d3d_submit();
+  _d3d_wait();
+  _d3d_reset();
 }
 
 #endif
