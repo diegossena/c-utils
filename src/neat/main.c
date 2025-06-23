@@ -88,7 +88,7 @@ i32 main() {
   if (true) {
 
   } else {
-    math_random_inicialize();
+    math_random_startup();
     const u64 population_size = 150;
     const f32 fitness_threshold = 3.5f;
     const u64 max_epoch = 450;

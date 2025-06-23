@@ -32,7 +32,7 @@ void window_onrender() {
     transition_render();
   }
 }
-void window_dblclick() {}
+void window_ondblclick() {}
 void window_onmousedown(i32 x, i32 y, mouse_btn_t button) {}
 void window_onmouseup(i32 x, i32 y, mouse_btn_t button) {}
 void window_onkeyup() {}

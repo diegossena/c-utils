@@ -12,9 +12,9 @@ bool titlescreen = false;
 void titlescreen_load() {
   titlescreen = true;
   // background
-  window_background[0] = 120.f / 255.f;
-  window_background[1] = 168.f / 255.f;
-  window_background[2] = 192.f / 255.f;
+  background_color[0] = 120.f / 255.f;
+  background_color[1] = 168.f / 255.f;
+  background_color[2] = 192.f / 255.f;
   vertices_reserve(
     vertices_capacity + TITLESCREEN_VERTICES_USED,
     indexes_capacity + TITLESCREEN_INDEXES_USED

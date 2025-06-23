@@ -4,6 +4,7 @@
 #include <sdk/types.h>
 #include <sdk/error.h>
 #include <sdk/assert.h>
+#include <sdk/math.h>
 
 void memory_fill(void* block, u8 value, u64 size);
 void* memory_copy(void* dest, const void* src, u64 size);

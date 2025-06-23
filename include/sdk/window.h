@@ -9,10 +9,10 @@
 #include <sdk/fs.h>
 
 #ifndef ATLAS_WIDTH
-#define ATLAS_WIDTH 256.f
+#define ATLAS_WIDTH 256
 #endif
 #ifndef ATLAS_HEIGHT
-#define ATLAS_HEIGHT 256.f
+#define ATLAS_HEIGHT 256
 #endif
 
 #define ATLAS_NDC_X (1.f / ATLAS_WIDTH)
@@ -54,7 +54,7 @@ inline bool window_key_pressed(key_t);
 
 void vertices_reserve(u64 vertices_size, u64 indexes_size);
 
-extern void window_dblclick();
+extern void window_ondblclick();
 extern void window_onmousemove();
 extern void window_onmouseup(mouse_btn_t button);
 extern void window_onmousedown(mouse_btn_t button);
@@ -86,37 +86,33 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup(key_t key);
 
-void _window_resize();
 void _window_render();
-void _gfx_inicialize(const char* atlas_path);
-void _gfx_destroy();
+void _gfx_startup(const char* atlas_path);
 
-extern u16 window_width; // externally-defined function
-extern u16 window_height; // externally-defined function
-extern rgba_t window_background;
+extern u16 window_width; // externally-defined
+extern u16 window_height; // externally-defined
+extern rgba_t background_color; // externally-defined
 
-u16 mouse_x;
-u16 mouse_y;
+extern u16 mouse_x;
+extern u16 mouse_y;
 
-f32 window_deltatime;
-bool window_resized;
+extern f32 window_deltatime;
+extern bool window_resized;
 
-bool window_focus;
+extern bool window_focus;
 
-f32 window_ndc_x;
-f32 window_ndc_y;
+extern f32 window_ndc_x;
+extern f32 window_ndc_y;
 
-u8 _keyboard_count;
-u8 _keyboard_state[32];
+extern u8 _keyboard_count;
+extern u8 _keyboard_state[32];
 
-u64 vertices_capacity;
-vertex_t* _vertices_virtual;
-u64 _vertices_length;
+extern u64 vertices_capacity;
+extern vertex_t* _vertices_virtual;
+extern u64 _vertices_length;
 
-u64 indexes_capacity;
-u32* _indexes_virtual;
-u64 _indexes_length;
-
-f64 _render_time;
+extern u64 indexes_capacity;
+extern u32* _indexes_virtual;
+extern u64 _indexes_length;
 
 #endif

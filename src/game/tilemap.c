@@ -96,9 +96,9 @@ void tilemap_load() {
   // global_tilemap
   global_tilemap->tile_size = 30;
   global_tilemap->player_direction = KEY_DOWN;
-  window_background[0] = 0.f;
-  window_background[1] = 0.f;
-  window_background[2] = 0.f;
+  background_color[0] = 0.f;
+  background_color[1] = 0.f;
+  background_color[2] = 0.f;
   tilemap_onresize();
   tilemap_move(0, 0);
   // loaded

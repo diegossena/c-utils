@@ -2,7 +2,7 @@
 #include <sdk/window.h>
 #include <sdk/time.h>
 
-rgba_t window_background = { 1.f, 1.f ,1.f ,1.f };
+rgba_t background_color = { 1.f, 1.f ,1.f ,1.f };
 
 #include <game/unity.h>
 

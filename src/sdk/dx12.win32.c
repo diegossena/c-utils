@@ -1,11 +1,13 @@
 #include <sdk/window.h>
 #ifdef PLATFORM_WINDOWS
 #include <sdk/window.win32.h>
+#include <sdk/memory.h>
 
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
 #define D3D_FRAME_COUNT 2
+#define D3D_BUFFER_TARGET_STATE (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER)
 
 ID3D12Device* _d3d_device;
 IDXGISwapChain3* _swapchain;
@@ -22,16 +24,14 @@ ID3D12DescriptorHeap* _rtv_heap;
 u8 _d3d_rtv_descriptor_size;
 D3D12_CPU_DESCRIPTOR_HANDLE _rtv_handle;
 ID3D12DescriptorHeap* _srv_heap;
-D3D12_GPU_DESCRIPTOR_HANDLE _gpu_srv_handle;
+D3D12_GPU_DESCRIPTOR_HANDLE _srv_gpu_handle;
 
 ID3D12Fence* _d3d_fence;
 HANDLE _d3d_fence_event;
 u64 _d3d_fence_value;
-u64 _d3d_fence_signal;
 
-void _window_resize() {}
 void _d3d_debug() {
-  ID3D12InfoQueue* info_queue = NULL;
+  ID3D12InfoQueue* info_queue;
   if (SUCCEEDED(_d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&info_queue))) {
     u64 count = info_queue->lpVtbl->GetNumStoredMessagesAllowedByRetrievalFilter(info_queue);
     for (u64 i = 0; i < count; i++) {
@@ -48,7 +48,7 @@ void _d3d_debug() {
     info_queue->lpVtbl->Release(info_queue);
   }
 }
-void _d3d_gpu_wait() {
+void _gpu_wait() {
   HRESULT result;
   u64 completed = _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence);
   if (completed == -1) {
@@ -60,24 +60,21 @@ void _d3d_gpu_wait() {
     }
     exit(result);
   }
-  if (completed < _d3d_fence_signal) {
-    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_signal, _d3d_fence_event);
+  if (completed < _d3d_fence_value) {
+    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value, _d3d_fence_event);
     WaitForSingleObject(_d3d_fence_event, INFINITE);
   }
-  if (_d3d_fence_value < _d3d_fence_signal) {
-    _d3d_fence_value = _d3d_fence_signal;
-    result = _command_allocator->lpVtbl->Reset(_command_allocator);
-    if (FAILED(result)) {
-      _d3d_debug();
-      error(result, "_d3d_command_allocator Reset");
-      exit(result);
-    }
-    result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _command_allocator, _pipeline_state);
-    if (FAILED(result)) {
-      _d3d_debug();
-      error(result, "_d3d_command_list Reset");
-      exit(result);
-    }
+  result = _command_allocator->lpVtbl->Reset(_command_allocator);
+  if (FAILED(result)) {
+    _d3d_debug();
+    error(result, "_d3d_command_allocator Reset");
+    exit(result);
+  }
+  result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _command_allocator, _pipeline_state);
+  if (FAILED(result)) {
+    _d3d_debug();
+    error(result, "_d3d_command_list Reset");
+    exit(result);
   }
 }
 void _d3d_command_submit() {
@@ -89,7 +86,7 @@ void _d3d_command_submit() {
   _d3d_command_queue->lpVtbl->ExecuteCommandLists(
     _d3d_command_queue, 1, (ID3D12CommandList**)&_d3d_command_list
   );
-  result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_signal);
+  result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_value);
   if (FAILED(result)) {
     _d3d_debug();
     error(result, "_d3d_command_submit Signal");
@@ -98,29 +95,100 @@ void _d3d_command_submit() {
 }
 
 void _window_render() {
-  const f64 now = time_now_f64();
-  const f64 delta_time = now - _render_time;
-  window_deltatime = delta_time;
-  _render_time = now;
+  DWORD task_index = 0;
+  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
+  if (!mmtask) {
+    error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
+  }
+  f64 timer = time_ticks();
+  do {
+    u8 frame_index = _swapchain->lpVtbl->GetCurrentBackBufferIndex(_swapchain);
+    // onresize
+    if (window_resized) {
+      window_resized = false;
+      window_onresize();
+    }
+    const f64 now = time_ticks();
+    window_deltatime = now - timer;
+    timer = now;
 #ifdef DEBUG
-  const f64 frame_time = 1. / 60;
-  if (window_deltatime > frame_time) {
-    console_log("FPS DROP %f %f", frame_time, window_deltatime);
-  }
+    if (window_deltatime > 1. / 60) {
+      console_log("FPS DROP %f %f", 1. / 60, window_deltatime);
+    }
 #endif
-  // onresize
-  if (window_resized) {
-    window_resized = false;
-    _window_resize();
-    window_onresize();
-  }
-  _vertices_length = 0;
-  _indexes_length = 0;
-  u8 frame_index = _swapchain->lpVtbl->GetCurrentBackBufferIndex(_swapchain);
-  console_log("render %d", frame_index);
-  window_onrender();
+    D3D12_RESOURCE_BARRIER barrier = {
+      .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+      .Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES
+    };
+    _vertices_length = 0;
+    _indexes_length = 0;
+    window_onrender();
+    // D3D12_RESOURCE_STATE_COPY_DEST
+    barrier.Transition.pResource = _d3d_buffer;
+    barrier.Transition.StateBefore = D3D_BUFFER_TARGET_STATE;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
+    // CopyBufferRegion
+    u64 vertices_size = vertices_capacity * sizeof(vertex_t);
+    _d3d_command_list->lpVtbl->CopyBufferRegion(
+      _d3d_command_list,
+      _d3d_buffer, 0,
+      _d3d_buffer_upload, 0,
+      vertices_size + indexes_capacity * sizeof(u32)
+    );
+    // D3D_BUFFER_TARGET_STATE
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+    barrier.Transition.StateAfter = D3D_BUFFER_TARGET_STATE;
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
+    // draw
+    _d3d_command_list->lpVtbl->SetGraphicsRootSignature(_d3d_command_list, _d3d_root_signature);
+    _d3d_command_list->lpVtbl->SetDescriptorHeaps(_d3d_command_list, 1, &_srv_heap);
+    _d3d_command_list->lpVtbl->SetGraphicsRootDescriptorTable(_d3d_command_list, 0, _srv_gpu_handle);
+    const D3D12_VIEWPORT viewport = {
+      .Width = window_width,
+      .Height = window_height,
+      .MaxDepth = 1.f,
+    };
+    _d3d_command_list->lpVtbl->RSSetViewports(_d3d_command_list, 1, &viewport);
+    const D3D12_RECT scissor_rect = { 0, 0, window_width, window_height };
+    _d3d_command_list->lpVtbl->RSSetScissorRects(_d3d_command_list, 1, &scissor_rect);
+    // D3D12_RESOURCE_STATE_RENDER_TARGET
+    barrier.Transition.pResource = _d3d_render_targets[frame_index];
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
+    const D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = {
+      _rtv_handle.ptr + frame_index * _d3d_rtv_descriptor_size
+    };
+    _d3d_command_list->lpVtbl->OMSetRenderTargets(_d3d_command_list, 1, &rtv_handle, false, null);
+    _d3d_command_list->lpVtbl->ClearRenderTargetView(_d3d_command_list, rtv_handle, (FLOAT*)&background_color, 0, 0);
+    _d3d_command_list->lpVtbl->IASetPrimitiveTopology(_d3d_command_list, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    const D3D12_VERTEX_BUFFER_VIEW vb_view = {
+      .BufferLocation = _d3d_buffer->lpVtbl->GetGPUVirtualAddress(_d3d_buffer),
+      .StrideInBytes = sizeof(vertex_t),
+      .SizeInBytes = _vertices_length * sizeof(vertex_t),
+    };
+    _d3d_command_list->lpVtbl->IASetVertexBuffers(_d3d_command_list, 0, 1, &vb_view);
+    const D3D12_INDEX_BUFFER_VIEW ib_view = {
+      .BufferLocation = vb_view.BufferLocation + vertices_size,
+      .Format = DXGI_FORMAT_R32_UINT,
+      .SizeInBytes = _indexes_length * sizeof(u32),
+    };
+    _d3d_command_list->lpVtbl->IASetIndexBuffer(_d3d_command_list, &ib_view);
+    _d3d_command_list->lpVtbl->DrawIndexedInstanced(_d3d_command_list, _indexes_length, 1, 0, 0, 0);
+    // D3D12_RESOURCE_STATE_PRESENT
+    barrier.Transition.pResource = _d3d_render_targets[frame_index];
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
+    // present
+    _d3d_command_submit();
+    _swapchain->lpVtbl->Present(_swapchain, 1, 0);
+    _gpu_wait();
+  } while (_window_id);
+  AvRevertMmThreadCharacteristics(mmtask);
 }
-void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) {
+void _gfx_startup(const char* atlas_path) {
   i32 result;
   u32 factory_flags = 0;
 #ifdef DEBUG
@@ -210,12 +278,12 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
     swapchain->lpVtbl->Release(swapchain);
   }
   { // _rtv_heap
-    const D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc = {
+    D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
       .NumDescriptors = D3D_FRAME_COUNT,
       .Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV
     };
     result = _d3d_device->lpVtbl->CreateDescriptorHeap(
-      _d3d_device, &rtv_heap_desc, &IID_ID3D12DescriptorHeap, (void**)&_rtv_heap
+      _d3d_device, &heap_desc, &IID_ID3D12DescriptorHeap, (void**)&_rtv_heap
     );
     if (FAILED(result)) {
       error(result, "_rtv_heap CreateDescriptorHeap");
@@ -227,16 +295,22 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
     _d3d_rtv_descriptor_size = _d3d_device->lpVtbl->GetDescriptorHandleIncrementSize(
       _d3d_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV
     );
-  }
-  { // _srv_heap
-    const D3D12_DESCRIPTOR_HEAP_DESC srv_heap_desc = {
-      .NumDescriptors = 1,
-      .Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-      .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
-    };
-    _d3d_device->lpVtbl->CreateDescriptorHeap(
-      _d3d_device, &srv_heap_desc, &IID_ID3D12DescriptorHeap, (void**)_srv_heap
+    // _srv_heap
+    heap_desc.NumDescriptors = 1;
+    heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    result = _d3d_device->lpVtbl->CreateDescriptorHeap(
+      _d3d_device, &heap_desc, &IID_ID3D12DescriptorHeap, (void**)&_srv_heap
     );
+    if (result != S_OK) {
+      error(result, "_srv_heap CreateDescriptorHeap");
+      exit(result);
+    }
+    _srv_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(_srv_heap, &_srv_gpu_handle);
+    if (_srv_gpu_handle.ptr == 0) {
+      error(result, "_srv_heap GetGPUDescriptorHandleForHeapStart");
+      exit(result);
+    }
   }
   {
     D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = _rtv_handle;
@@ -265,7 +339,7 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
       .NumDescriptors = 1,
       .BaseShaderRegister = 0, // t0
       .RegisterSpace = 0,
-      .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC,
+      .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
     };
     const D3D12_ROOT_PARAMETER root_param = {
       .ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
@@ -273,7 +347,7 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
         .pDescriptorRanges = &srv_range,
         .NumDescriptorRanges = 1,
       },
-      .ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL
+      .ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL,
     };
     const D3D12_STATIC_SAMPLER_DESC sampler = {
       .Filter = D3D12_FILTER_MIN_MAG_MIP_POINT,
@@ -368,12 +442,11 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
     exit(result);
   }
   ID3D12Resource* texture_upload_heap;
-  {
-    const u64 atlas_size = atlas_width * atlas_height * 4;
-    const D3D12_RESOURCE_DESC tex_desc = {
+  { // texture
+    D3D12_RESOURCE_DESC resource_desc = {
       .Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-      .Width = atlas_width,
-      .Height = atlas_height,
+      .Width = ATLAS_WIDTH,
+      .Height = ATLAS_HEIGHT,
       .DepthOrArraySize = 1,
       .MipLevels = 1,
       .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -382,11 +455,12 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
     D3D12_HEAP_PROPERTIES heap_props = {
       .Type = D3D12_HEAP_TYPE_DEFAULT
     };
+    // texture_default
     result = _d3d_device->lpVtbl->CreateCommittedResource(
       _d3d_device,
       &heap_props,
       D3D12_HEAP_FLAG_NONE,
-      &tex_desc,
+      &resource_desc,
       D3D12_RESOURCE_STATE_COPY_DEST,
       0,
       &IID_ID3D12Resource,
@@ -396,12 +470,91 @@ void _gfx_inicialize(const char* atlas_path, u16 atlas_width, u16 atlas_height) 
       error(result, "texture CreateCommittedResource");
       exit(result);
     }
+    // footsprint
+    D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
+    u32 num_rows;
+    u64 row_size, total_size;
+    _d3d_device->lpVtbl->GetCopyableFootprints(
+      _d3d_device, &resource_desc, 0, 1, 0,
+      &footprint, &num_rows, &row_size, &total_size
+    );
+    // texture_upload
+    resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resource_desc.Width = total_size;
+    resource_desc.Height = 1;
+    resource_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    resource_desc.Format = 0;
+    heap_props.Type = D3D12_HEAP_TYPE_UPLOAD;
+    result = _d3d_device->lpVtbl->CreateCommittedResource(
+      _d3d_device, &heap_props, D3D12_HEAP_FLAG_NONE, &resource_desc,
+      D3D12_RESOURCE_STATE_GENERIC_READ, 0, &IID_ID3D12Resource,
+      (void**)&texture_upload_heap
+    );
+    if (FAILED(result)) {
+      error(result, "upload_texture CreateCommittedResource");
+      exit(result);
+    }
+    // image_load
+    u8* image = fs_readfilen_sync(atlas_path, ATLAS_WIDTH * ATLAS_HEIGHT * 4);
+    if (image == null) {
+      error(ERR_NOT_FOUND, "atlas_load");
+      exit(result);
+    }
+    void* upload_data;
+    texture_upload_heap->lpVtbl->Map(texture_upload_heap, 0, 0, (void*)&upload_data);
+    for (u16 y = 0; y < ATLAS_HEIGHT; ++y) {
+      memory_copy(
+        (u8*)upload_data + y * footprint.Footprint.RowPitch,
+        image + y * ATLAS_WIDTH * 4,
+        ATLAS_WIDTH * 4
+      );
+    }
+    texture_upload_heap->lpVtbl->Unmap(texture_upload_heap, 0, null);
+    memory_free(image);
+    // CopyTextureRegion
+    const D3D12_TEXTURE_COPY_LOCATION dst = {
+      .pResource = _d3d_texture,
+      .Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
+      .SubresourceIndex = 0,
+    };
+    const D3D12_TEXTURE_COPY_LOCATION src = {
+      .pResource = texture_upload_heap,
+      .Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
+      .PlacedFootprint = footprint,
+    };
+    _d3d_command_list->lpVtbl->CopyTextureRegion(_d3d_command_list, &dst, 0, 0, 0, &src, null);
+    // D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+    const D3D12_RESOURCE_BARRIER barrier = {
+      .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+      .Transition = {
+        .pResource = _d3d_texture,
+        .Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+        .StateBefore = D3D12_RESOURCE_STATE_COPY_DEST,
+        .StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+      }
+    };
+    _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
+    // srv_handle
+    D3D12_CPU_DESCRIPTOR_HANDLE srv_handle;
+    _srv_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_srv_heap, &srv_handle);
+    // SRV
+    const D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
+      .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+      .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+      .ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
+      .Texture2D.MipLevels = 1,
+    };
+    _d3d_device->lpVtbl->CreateShaderResourceView(
+      _d3d_device, _d3d_texture, &srv_desc, srv_handle
+    );
   }
-  _d3d_debug();
-  console_color(ANSI_FORE_LIGHTGREEN);
-  console_log("SUCCESS");
-  console_color(ANSI_RESET);
-  exit(0);
+  _d3d_device->lpVtbl->CreateFence(
+    _d3d_device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void**)&_d3d_fence
+  );
+  _d3d_command_submit();
+  _d3d_fence_event = CreateEventA(0, false, false, 0);
+  _gpu_wait();
+  texture_upload_heap->lpVtbl->Release(texture_upload_heap);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (vertices_size == 0) {
@@ -418,7 +571,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   const u64 indexes_buffer_size = indexes_size * sizeof(u32);
   // d3d_buffers
   D3D12_HEAP_PROPERTIES heap_props = { .Type = D3D12_HEAP_TYPE_DEFAULT };
-  D3D12_RESOURCE_DESC buffer_desc = {
+  const D3D12_RESOURCE_DESC resource_desc = {
     .Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
     .Height = 1,
     .Width = vertices_buffer_size + indexes_buffer_size,
@@ -426,47 +579,40 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
     .MipLevels = 1,
     .SampleDesc.Count = 1,
     .Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-    .Format = DXGI_FORMAT_UNKNOWN
   };
   HRESULT result;
-  // _d3d_vertices
+  // D3D12_RESOURCE_STATE_COMMON
   result = _d3d_device->lpVtbl->CreateCommittedResource(
-    _d3d_device, &heap_props, D3D12_HEAP_FLAG_NONE, &buffer_desc,
+    _d3d_device, &heap_props, D3D12_HEAP_FLAG_NONE, &resource_desc,
     D3D12_RESOURCE_STATE_COMMON, NULL, &IID_ID3D12Resource, (void**)&_d3d_buffer
   );
   if (FAILED(result)) {
-    error(result, "_d3d_vertices CreateCommittedResource");
+    error(result, "_d3d_buffer CreateCommittedResource");
     exit(result);
   }
-  // ResourceBarrier
-  const D3D12_RESOURCE_BARRIER barriers [] = {
-    {
-      .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-      .Transition = {
-        .Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-        .pResource = _d3d_buffer,
-        .StateBefore = D3D12_RESOURCE_STATE_COMMON,
-        .StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-      }
-    },
+  // D3D_BUFFER_TARGET_STATE
+  const D3D12_RESOURCE_BARRIER barrier = {
+    .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+    .Transition = {
+      .Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+      .pResource = _d3d_buffer,
+      .StateBefore = D3D12_RESOURCE_STATE_COMMON,
+      .StateAfter = D3D_BUFFER_TARGET_STATE
+    }
   };
-  _d3d_command_list->lpVtbl->ResourceBarrier(
-    _d3d_command_list, sizeof(barriers) / sizeof(D3D12_RESOURCE_BARRIER),
-    barriers
-  );
+  _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
   // D3D12_HEAP_TYPE_UPLOAD
   heap_props.Type = D3D12_HEAP_TYPE_UPLOAD;
-  // _d3d_vertices_upload
-  buffer_desc.Width = vertices_buffer_size;
   result = _d3d_device->lpVtbl->CreateCommittedResource(
-    _d3d_device, &heap_props, D3D12_HEAP_FLAG_NONE, &buffer_desc,
+    _d3d_device, &heap_props, D3D12_HEAP_FLAG_NONE, &resource_desc,
     D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, (void**)&_d3d_buffer_upload
   );
   if (FAILED(result)) {
-    error(result, "_d3d_vertices_upload CreateCommittedResource");
+    error(result, "_d3d_buffer_upload CreateCommittedResource");
     exit(result);
   }
   result = _d3d_buffer_upload->lpVtbl->Map(_d3d_buffer_upload, 0, 0, (void**)&_vertices_virtual);
+  _indexes_virtual = (void*)_vertices_virtual + vertices_buffer_size;
   if (FAILED(result)) {
     error(result, "_d3d_vertices_upload Map");
     exit(result);
@@ -475,8 +621,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   vertices_capacity = vertices_size;
   indexes_capacity = indexes_size;
   _d3d_command_submit();
-  _d3d_gpu_wait();
+  _gpu_wait();
 }
-void _gfx_destroy() {}
 
 #endif

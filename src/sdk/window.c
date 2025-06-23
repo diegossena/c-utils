@@ -15,7 +15,6 @@ u16 mouse_x;
 u16 mouse_y;
 vertex_t* _vertices_virtual;
 u32* _indexes_virtual;
-f64 _render_time;
 
 // const f32 atlas_ndc_x = 1.f / ATLAS_WIDTH;
 // const f32 atlas_ndc_y = 1.f / ATLAS_HEIGHT;

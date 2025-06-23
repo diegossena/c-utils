@@ -8,7 +8,6 @@
 #include <avrt.h>
 
 HWND _window_id;
-f64 _render_time;
 ID3D11Device* _d3d_device;
 IDXGISwapChain* _d3d_swapchain;
 ID3D11DeviceContext* _d3d_device_context;
@@ -52,54 +51,74 @@ void _window_resize() {
   }
 }
 void _window_render() {
-  const f64 now = time_now_f64();
-  const f64 delta_time = now - _render_time;
-  window_deltatime = delta_time;
-  _render_time = now;
-#ifdef DEBUG
-  const f64 frame_time = 1. / 60;
-  if (window_deltatime > frame_time) {
-    console_log("FPS DROP %f %f", frame_time, window_deltatime);
+  timeBeginPeriod(1);
+  DWORD task_index = 0;
+  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
+  if (!mmtask) {
+    error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
   }
-#endif
-  // onresize
-  if (window_resized) {
-    window_resized = false;
-    _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
-    HRESULT result = _d3d_swapchain->lpVtbl->ResizeBuffers(
-      _d3d_swapchain, 1, window_width, window_height,
-      DXGI_FORMAT_R8G8B8A8_UNORM, 0
-    );
-    if (FAILED(result)) {
-      error(result, "IDXGISwapChain_ResizeBuffers");
+  HANDLE timer = CreateWaitableTimerA(0, false, 0);
+  const LARGE_INTEGER due_time = { 0 };
+  if (!SetWaitableTimer(timer, &due_time, 15, 0, 0, false)) {
+    error(GetLastError(), "renderer thread SetWaitableTimer");
+  }
+  f64 timer_ticks = time_ticks();
+  do {
+    WaitForSingleObject(timer, INFINITE);
+    // onresize
+    if (window_resized) {
+      window_resized = false;
+      _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
+      HRESULT result = _d3d_swapchain->lpVtbl->ResizeBuffers(
+        _d3d_swapchain, 1, window_width, window_height,
+        DXGI_FORMAT_R8G8B8A8_UNORM, 0
+      );
+      if (FAILED(result)) {
+        error(result, "IDXGISwapChain_ResizeBuffers");
+      }
+      _window_resize();
+      window_onresize();
     }
-    _window_resize();
-    window_onresize();
-  }
-  _vertices_length = 0;
-  _indexes_length = 0;
-  // buffer_map
-  static D3D11_MAPPED_SUBRESOURCE subresource;
-  _d3d_device_context->lpVtbl->Map(
-    _d3d_device_context, (ID3D11Resource*)_d3d_buffer, 0,
-    D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
-  );
-  _vertices_virtual = subresource.pData;
-  _indexes_virtual = subresource.pData + vertices_capacity * sizeof(vertex_t);
-  window_onrender();
-  _d3d_device_context->lpVtbl->Unmap(
-    _d3d_device_context, (ID3D11Resource*)_d3d_buffer, 0
-  );
-  assert(_vertices_length <= vertices_capacity);
-  assert(_indexes_length <= indexes_capacity);
-  // draw
-  _d3d_device_context->lpVtbl->ClearRenderTargetView(
-    _d3d_device_context, _d3d_render_target_view, (FLOAT*)&window_background
-  );
-  _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
-  _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
+    const f64 ticks = time_ticks();
+    window_deltatime = ticks - timer_ticks;
+    timer_ticks = ticks;
+#ifdef DEBUG
+    if (window_deltatime > 1. / 60) {
+      console_log("FPS DROP %f %f", 1. / 60, window_deltatime);
+    }
+#endif
+    _vertices_length = 0;
+    _indexes_length = 0;
+    // buffer_map
+    D3D11_MAPPED_SUBRESOURCE subresource;
+    _d3d_device_context->lpVtbl->Map(
+      _d3d_device_context, (ID3D11Resource*)_d3d_buffer, 0,
+      D3D11_MAP_WRITE_NO_OVERWRITE, 0, &subresource
+    );
+    _vertices_virtual = subresource.pData;
+    _indexes_virtual = subresource.pData + vertices_capacity * sizeof(vertex_t);
+    window_onrender();
+    _d3d_device_context->lpVtbl->Unmap(
+      _d3d_device_context, (ID3D11Resource*)_d3d_buffer, 0
+    );
+    assert(_vertices_length <= vertices_capacity);
+    assert(_indexes_length <= indexes_capacity);
+    // draw
+    _d3d_device_context->lpVtbl->ClearRenderTargetView(
+      _d3d_device_context, _d3d_render_target_view, (FLOAT*)&background_color
+    );
+    _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
+    _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
+  } while (_window_id);
+  timeEndPeriod(1);
+  AvRevertMmThreadCharacteristics(mmtask);
+  _d3d_buffer->lpVtbl->Release(_d3d_buffer);
+  _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
+  _d3d_device_context->lpVtbl->Release(_d3d_device_context);
+  _d3d_device->lpVtbl->Release(_d3d_device);
+  _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);
 }
-void _gfx_inicialize(const char* atlas_path) {
+void _gfx_startup(const char* atlas_path) {
   i32 file_size;
   u8* file_bytes;
   i32 result;
@@ -133,11 +152,11 @@ void _gfx_inicialize(const char* atlas_path) {
   }
   _d3d_device_context->lpVtbl->IASetPrimitiveTopology(_d3d_device_context, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   { // CreatePixelShader
-    file_bytes = fs_readfile_sync("share/ps.cso", &file_size);
+    u8* ps_data = fs_readfile_sync("share/ps.cso", &file_size);
     ID3D11PixelShader* pixel_shader;
     result = _d3d_device->lpVtbl->CreatePixelShader(
       _d3d_device,
-      file_bytes,
+      ps_data,
       file_size,
       0,
       &pixel_shader
@@ -148,7 +167,7 @@ void _gfx_inicialize(const char* atlas_path) {
     }
     _d3d_device_context->lpVtbl->PSSetShader(_d3d_device_context, pixel_shader, null, 0);
     pixel_shader->lpVtbl->Release(pixel_shader);
-    memory_free(file_bytes);
+    memory_free(ps_data);
   }
   { // ID3D11VertexShader
     ID3D11VertexShader* vertex_shader;
@@ -165,8 +184,7 @@ void _gfx_inicialize(const char* atlas_path) {
     }
     _d3d_device_context->lpVtbl->VSSetShader(_d3d_device_context, vertex_shader, NULL, 0);
     vertex_shader->lpVtbl->Release(vertex_shader);
-  }
-  { // ID3D11InputLayout
+    // ID3D11InputLayout
     const D3D11_INPUT_ELEMENT_DESC texture_layout [] = {
       { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,       0,               0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
       { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(f32) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0 }
@@ -180,6 +198,7 @@ void _gfx_inicialize(const char* atlas_path) {
       file_size,
       &_d3d_input_layout
     );
+    memory_free(file_bytes);
     if (FAILED(result)) {
       error(result, "CreateInputLayout");
       exit(result);
@@ -187,7 +206,6 @@ void _gfx_inicialize(const char* atlas_path) {
     _d3d_device_context->lpVtbl->IASetInputLayout(_d3d_device_context, _d3d_input_layout);
     _d3d_input_layout->lpVtbl->Release(_d3d_input_layout);
   }
-  memory_free(file_bytes);
   { // ID3D11SamplerState
     const D3D11_SAMPLER_DESC sampler_desc = {
       .Filter = D3D11_FILTER_MIN_MAG_MIP_POINT,
@@ -279,13 +297,7 @@ void _gfx_inicialize(const char* atlas_path) {
     resource_view->lpVtbl->Release(resource_view);
     memory_free(file_bytes);
   }
-}
-void _gfx_destroy() {
-  _d3d_buffer->lpVtbl->Release(_d3d_buffer);
-  _d3d_render_target_view->lpVtbl->Release(_d3d_render_target_view);
-  _d3d_device_context->lpVtbl->Release(_d3d_device_context);
-  _d3d_device->lpVtbl->Release(_d3d_device);
-  _d3d_swapchain->lpVtbl->Release(_d3d_swapchain);
+  _window_resize();
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   if (vertices_size == 0) {

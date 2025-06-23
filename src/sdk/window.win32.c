@@ -3,38 +3,36 @@
 #include <sdk/window.win32.h>
 #include <sdk/time.h>
 #include <sdk/memory.h>
-
+// AvSetMmThreadCharacteristicsA
 #include <avrt.h>
 
 HWND _window_id;
 
-void _window_onupdate(void* _1, void* _2, void* _3, u32 time) {
-  if (window_focus && _keyboard_count) {
-    window_onkeypress();
-  }
-}
 LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_PAINT:
-      ValidateRect(window_id, 0);
       break;
     case WM_KEYDOWN:
       if (window_focus) {
         if (wParam != 91 && !window_key_pressed(wParam)) {
-          u8 byte_index = wParam / 8;
-          u8 bit_index = wParam % 8;
+          const u8 byte_index = wParam / 8;
+          const u8 bit_index = wParam % 8;
           _keyboard_state[byte_index] |= (1 << bit_index);
-          ++_keyboard_count;
+          if (!_keyboard_count++) {
+            SetTimer(window_id, 0, USER_TIMER_MINIMUM, (TIMERPROC)window_onkeypress);
+          }
           window_onkeydown(wParam);
         }
       }
       return 0;
     case WM_KEYUP:
       if (window_focus) {
-        u8 byte_index = wParam / 8;
-        u8 bit_index = wParam % 8;
+        const u8 byte_index = wParam / 8;
+        const u8 bit_index = wParam % 8;
         _keyboard_state[byte_index] &= ~(1 << bit_index);
-        --_keyboard_count;
+        if (!--_keyboard_count) {
+          KillTimer(window_id, 0);
+        }
         window_onkeyup(wParam);
       }
       return 0;
@@ -70,13 +68,13 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       window_onmouseup(MOUSE_BUTTON_AUX);
       return 0;
     case WM_LBUTTONDBLCLK:
-      window_dblclick();
+      window_ondblclick();
       return 0;
     case WM_MOUSEWHEEL:
       window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
       return 0;
     case WM_SIZE:
-      if (_render_time) {
+      if (window_deltatime) {
         window_resized = true;
         window_width = LOWORD(lParam);
         window_height = HIWORD(lParam);
@@ -87,6 +85,10 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       return 0;
     case WM_KILLFOCUS:
       window_focus = false;
+      if (_keyboard_count > 0) {
+        _keyboard_count = 0;
+        KillTimer(0, 0);
+      }
       return 0;
     case WM_DESTROY:
       PostQuitMessage(0);
@@ -126,26 +128,15 @@ void window_startup(const char* title, const char* atlas_path) {
   if (!_window_id) {
     error((error_t)_window_id, "CreateWindowExA");
   }
-  _gfx_inicialize(atlas_path);
-  _window_resize();
+  _gfx_startup(atlas_path);
+  time_ticks_startup();
 }
 void window_set_title(const char* title) {
   assert(_window_id != 0);
   SetWindowTextA(_window_id, title);
 }
 void window_run() {
-  // renderer
-  timeBeginPeriod(1);
-  DWORD task_index = 0;
-  HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
-  if (!mmtask) {
-    error(GetLastError(), "window_run AvSetMmThreadCharacteristicsA");
-  }
-  HANDLE renderer_timer;
-  _render_time = time_now_f64();
-  CreateTimerQueueTimer(&renderer_timer, 0, (WAITORTIMERCALLBACK)_window_render, 0, 0, 15, 0);
-  // loop
-  SetTimer(0, 0, 0, (TIMERPROC)_window_onupdate);
+  thread_t* render_thread_id = thread_new(_window_render, 0);
   do {
     MsgWaitForMultipleObjectsEx(
       0,
@@ -159,11 +150,9 @@ void window_run() {
       TranslateMessage(&msg);
       DispatchMessageA(&msg);
       if (msg.message == WM_QUIT) {
-        timeEndPeriod(1);
-        AvRevertMmThreadCharacteristics(mmtask);
-        DeleteTimerQueueTimer(0, renderer_timer, INVALID_HANDLE_VALUE);
-        KillTimer(0, 0);
-        _gfx_destroy();
+        _window_id = 0;
+        thread_wait(render_thread_id);
+        thread_free(render_thread_id);
         return;
       }
     }

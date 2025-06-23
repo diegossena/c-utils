@@ -3,17 +3,18 @@
 
 #include <windows.h>
 
-f64 __time_clock_frequency = 0;
+f64 _time_clock_frequency;
 
-f64 time_now_f64() {
-  if (!__time_clock_frequency) {
-    LARGE_INTEGER frequency;
-    QueryPerformanceFrequency(&frequency);
-    __time_clock_frequency = frequency.QuadPart;
-  }
-  LARGE_INTEGER now_time;
-  QueryPerformanceCounter(&now_time);
-  return (f64)now_time.QuadPart / __time_clock_frequency;
+void time_ticks_startup() {
+  LARGE_INTEGER frequency;
+  QueryPerformanceFrequency(&frequency);
+  _time_clock_frequency = frequency.QuadPart;
+}
+
+f64 time_ticks() {
+  LARGE_INTEGER count;
+  QueryPerformanceCounter(&count);
+  return (f64)count.QuadPart / _time_clock_frequency;
 }
 
 #endif

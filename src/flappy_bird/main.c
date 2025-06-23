@@ -1,7 +1,7 @@
 #define WINDOW_SCALING 3.8f
 #define RECT_COUNT 5
-#define ATLAS_HEIGHT 256.f
-#define ATLAS_WIDTH 256.f
+#define ATLAS_HEIGHT 256
+#define ATLAS_WIDTH 256
 
 #include <sdk/types.h>
 #include <sdk/window.h>
@@ -21,15 +21,15 @@ typedef enum bird_wing_state_t {
 
 u16 window_width = 144 * WINDOW_SCALING;
 u16 window_height = 256 * WINDOW_SCALING;
-rgba_t window_background = { 0.329411765f, 0.752941176f, 0.788235294f, 1 };
+rgba_t background_color = { 0.329411765f, 0.752941176f, 0.788235294f, 1 };
 
-f32 bird_animate_timer = 0;
-u8 bird_state = BIRD_ANIMATE_FALLING;
-u8 bird_wing_state = BIRD_WING_UP;
+f32 bird_animate_timer;
+u8 bird_state;
+u8 bird_wing_state;
 
-f32 ground_animate_timer = 0;
+f32 ground_animate_timer;
 
-void window_dblclick() {}
+void window_ondblclick() {}
 void window_onmousemove() {}
 void window_onmousedown(mouse_btn_t button) {}
 void window_onmouseup(mouse_btn_t button) {}
@@ -116,7 +116,7 @@ void window_onrender() {
   u1 = u0 + ATLAS_NDC_X * 16;
   window_rect_draw(x0, y0, x1, y1, u0, v0, u1, v1);
 }
-// 547066 bytes
+// 546839 bytes
 i32 main(i32 argc, char** argv) {
   window_startup("Flappy Bird", "share/flappy_bird_atlas.bin");
   vertices_reserve(QUAD_VERTEX_COUNT * RECT_COUNT, QUAD_INDEX_COUNT * RECT_COUNT);

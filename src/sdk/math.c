@@ -114,7 +114,7 @@ f32 math_floorf(f32 number) {
 f64 math_floor(f64 number) {
   return floor(number);
 }
-void math_random_inicialize() {
+void math_random_startup() {
   srand(time_now());
 }
 i32 math_random() {

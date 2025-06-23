@@ -3,18 +3,15 @@
 
 #include <heapapi.h>
 
-#define ALIGNED_SIZE(size) \
-  ((size + MEMORY_ALLOCATION_ALIGNMENT - 1) & ~(MEMORY_ALLOCATION_ALIGNMENT - 1))
-
 void* memory_alloc(u64 size) {
   assert(size > 0);
-  void* block = HeapAlloc(GetProcessHeap(), 0, ALIGNED_SIZE(size));
+  void* block = HeapAlloc(GetProcessHeap(), 0, align(size, MEMORY_ALLOCATION_ALIGNMENT));
   __memory_count_increment(block);
   return block;
 }
 void* memory_alloc0(u64 size) {
   assert(size > 0);
-  void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, ALIGNED_SIZE(size));
+  void* block = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, align(size, MEMORY_ALLOCATION_ALIGNMENT));
   __memory_count_increment(block);
   return block;
 }
@@ -26,14 +23,12 @@ void memory_free(void* this) {
 void* memory_realloc(void* this, u64 size) {
   assert(size > 0);
   assert(this != null);
-  return HeapReAlloc(GetProcessHeap(), 0, this, ALIGNED_SIZE(size));
+  return HeapReAlloc(GetProcessHeap(), 0, this, align(size, MEMORY_ALLOCATION_ALIGNMENT));
 }
 void* memory_realloc0(void* this, u64 size) {
   assert(size > 0);
   assert(this != null);
-  return HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, this, ALIGNED_SIZE(size));
+  return HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, this, align(size, MEMORY_ALLOCATION_ALIGNMENT));
 }
-
-#undef ALIGNED_SIZE
 
 #endif

@@ -3,7 +3,9 @@
 
 #include <sdk/types.h>
 
+void time_ticks_startup();
+
 u64 time_now();
-f64 time_now_f64();
+f64 time_ticks();
 
 #endif
