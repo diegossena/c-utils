@@ -138,7 +138,7 @@ void window_set_title(const char* title) {
   SetWindowTextA(_window_id, title);
 }
 void window_run() {
-  thread_t* render_thread_id = thread_new(_window_render, 0);
+  thread_t* render_thread_id = thread_new(_gfx_render, 0);
   do {
     MsgWaitForMultipleObjectsEx(
       0,

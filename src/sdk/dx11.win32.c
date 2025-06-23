@@ -50,7 +50,7 @@ void _window_resize() {
     );
   }
 }
-void _window_render() {
+void _gfx_render() {
   timeBeginPeriod(1);
   DWORD task_index = 0;
   HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
@@ -60,7 +60,7 @@ void _window_render() {
   HANDLE timer = CreateWaitableTimerA(0, false, 0);
   const LARGE_INTEGER due_time = { 0 };
   if (!SetWaitableTimer(timer, &due_time, 15, 0, 0, false)) {
-    error(GetLastError(), "renderer thread SetWaitableTimer");
+    error(GetLastError(), "_gfx_render SetWaitableTimer");
   }
   f64 timer_ticks = time_ticks();
   do {
@@ -108,7 +108,7 @@ void _window_render() {
       _d3d_device_context, _d3d_render_target_view, (FLOAT*)&background_color
     );
     _d3d_device_context->lpVtbl->DrawIndexed(_d3d_device_context, _indexes_length, 0, 0);
-    _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 0, 0);
+    _d3d_swapchain->lpVtbl->Present(_d3d_swapchain, 1, 0);
   } while (_window_id);
   timeEndPeriod(1);
   AvRevertMmThreadCharacteristics(mmtask);

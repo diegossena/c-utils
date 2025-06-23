@@ -86,7 +86,7 @@ extern void window_onkeypress();
  */
 extern void window_onkeyup(key_t key);
 
-void _window_render();
+void _gfx_render();
 void _gfx_startup(const char* atlas_path);
 
 extern u16 window_width; // externally-defined

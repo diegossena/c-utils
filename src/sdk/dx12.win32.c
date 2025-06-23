@@ -6,17 +6,17 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
-#define D3D_FRAME_COUNT 2
+#define D3D_DOUBLE_BUFFERING 2
 #define D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER)
 
-// 553933 bytes
+// 553930 bytes
 
 ID3D12Device* _d3d_device;
 IDXGISwapChain3* _swapchain;
-ID3D12Resource* _d3d_render_targets[D3D_FRAME_COUNT];
+ID3D12Resource* _d3d_render_targets[D3D_DOUBLE_BUFFERING];
 ID3D12Resource* _d3d_texture;
 ID3D12CommandQueue* _d3d_command_queue;
-ID3D12CommandAllocator* _command_allocator[D3D_FRAME_COUNT];
+ID3D12CommandAllocator* _command_allocator[D3D_DOUBLE_BUFFERING];
 ID3D12GraphicsCommandList* _d3d_command_list;
 ID3D12PipelineState* _pipeline_state;
 ID3D12RootSignature* _d3d_root_signature;
@@ -30,7 +30,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE _srv_gpu_handle;
 
 ID3D12Fence* _d3d_fence;
 HANDLE _d3d_fence_event;
-u64 _d3d_fence_value[D3D_FRAME_COUNT];
+u64 _d3d_fence_value[D3D_DOUBLE_BUFFERING];
 u8 frame_index;
 
 void _d3d_signal(u64 signal) {
@@ -66,12 +66,6 @@ void _d3d_wait() {
     _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value[frame_index], _d3d_fence_event);
     WaitForSingleObject(_d3d_fence_event, INFINITE);
   }
-  result = _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value[frame_index], _d3d_fence_event);
-  if (FAILED(result)) {
-    error(result, "SetEventOnCompletion");
-    exit(result);
-  }
-  WaitForSingleObject(_d3d_fence_event, INFINITE);
 }
 void _d3d_reset() {
   i32 result = _command_allocator[frame_index]->lpVtbl->Reset(_command_allocator[frame_index]);
@@ -151,7 +145,7 @@ void _gfx_startup(const char* atlas_path) {
   }
   { // IDXGISwapChain3
     const DXGI_SWAP_CHAIN_DESC1 swapchain_desc = {
-      .BufferCount = D3D_FRAME_COUNT,
+      .BufferCount = D3D_DOUBLE_BUFFERING,
       .Width = window_width,
       .Height = window_height,
       .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -176,7 +170,7 @@ void _gfx_startup(const char* atlas_path) {
   }
   { // _rtv_heap
     D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
-      .NumDescriptors = D3D_FRAME_COUNT,
+      .NumDescriptors = D3D_DOUBLE_BUFFERING,
       .Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV
     };
     result = _d3d_device->lpVtbl->CreateDescriptorHeap(
@@ -211,8 +205,8 @@ void _gfx_startup(const char* atlas_path) {
   }
   {
     D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = _rtv_handle;
-    // Create a RTV for each frame.
-    for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
+    for (u8 i = 0; i < D3D_DOUBLE_BUFFERING; i++) {
+      // Create a RTV for each frame.
       result = _swapchain->lpVtbl->GetBuffer(
         _swapchain, i, &IID_ID3D12Resource, (void**)&_d3d_render_targets[i]
       );
@@ -220,6 +214,7 @@ void _gfx_startup(const char* atlas_path) {
         _d3d_device, _d3d_render_targets[i], null, rtv_handle
       );
       rtv_handle.ptr += _d3d_rtv_descriptor_size;
+      // CreateCommandAllocator
       result = _d3d_device->lpVtbl->CreateCommandAllocator(
         _d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator,
         (void**)&_command_allocator[i]
@@ -512,7 +507,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   _d3d_wait();
   _d3d_reset();
 }
-void _window_render() {
+void _gfx_render() {
   DWORD task_index = 0;
   HANDLE mmtask = AvSetMmThreadCharacteristicsA("Games", &task_index);
   if (!mmtask) {
@@ -606,12 +601,11 @@ void _window_render() {
     _d3d_submit();
     u64 signal = ++_d3d_fence_value[frame_index];
     _d3d_signal(signal);
-    i32 result = _swapchain->lpVtbl->Present(_swapchain, 1, 0);
+    i32 result = _swapchain->lpVtbl->Present(_swapchain, 0, 0);
     if (FAILED(result)) {
       error(result, "_swapchain Present");
-      exit(result);
     }
-    frame_index = (frame_index + 1) % D3D_FRAME_COUNT;
+    frame_index = (frame_index + 1) % D3D_DOUBLE_BUFFERING;
     _d3d_wait();
     _d3d_fence_value[frame_index] = signal;
     _d3d_reset();
@@ -621,7 +615,7 @@ void _window_render() {
   // renderer_free
   AvRevertMmThreadCharacteristics(mmtask);
   CloseHandle(_d3d_fence_event);
-  for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
+  for (u8 i = 0; i < D3D_DOUBLE_BUFFERING; i++) {
     _d3d_render_targets[i]->lpVtbl->Release(_d3d_render_targets[i]);
     _command_allocator[i]->lpVtbl->Release(_command_allocator[i]);
   }
