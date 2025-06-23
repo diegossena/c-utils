@@ -15,8 +15,6 @@ ID3D11RenderTargetView* _d3d_render_target_view;
 ID3D11Buffer* _d3d_buffer;
 
 void _window_resize() {
-  window_ndc_x = 2.f / (f32)window_width;
-  window_ndc_y = 2.f / (f32)window_height;
   // d3d_render_target_view
   ID3D11Texture2D* texture;
   HRESULT result = _d3d_swapchain->lpVtbl->GetBuffer(
@@ -213,7 +211,6 @@ void _gfx_startup(const char* atlas_path) {
       .AddressV = D3D11_TEXTURE_ADDRESS_CLAMP,
       .AddressW = D3D11_TEXTURE_ADDRESS_CLAMP,
       .ComparisonFunc = D3D11_COMPARISON_NEVER,
-      .MinLOD = 0,
       .MaxLOD = D3D11_FLOAT32_MAX
     };
     ID3D11SamplerState* sampler;

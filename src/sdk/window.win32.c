@@ -74,6 +74,8 @@ LRESULT _window_procedure(HWND window_id, UINT message, WPARAM wParam, LPARAM lP
       window_onscroll(GET_WHEEL_DELTA_WPARAM(wParam));
       return 0;
     case WM_SIZE:
+      window_ndc_x = 2.f / (f32)window_width;
+      window_ndc_y = 2.f / (f32)window_height;
       if (window_deltatime) {
         window_resized = true;
         window_width = LOWORD(lParam);

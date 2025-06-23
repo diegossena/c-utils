@@ -354,14 +354,8 @@ void _gfx_startup(const char* atlas_path) {
       .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
       .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
       .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-      .MipLODBias = 0,
-      .MaxAnisotropy = 0,
       .ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER,
-      .BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK,
-      .MinLOD = 0.0f,
       .MaxLOD = D3D12_FLOAT32_MAX,
-      .ShaderRegister = 0,
-      .RegisterSpace = 0,
       .ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL,
     };
     const D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {
@@ -415,7 +409,6 @@ void _gfx_startup(const char* atlas_path) {
         .DepthClipEnable = true,
       },
       .BlendState.RenderTarget[0] = render_target_blend,
-      .BlendState.RenderTarget[1] = render_target_blend,
       .SampleMask = UINT_MAX,
       .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
       .NumRenderTargets = 1,
@@ -500,18 +493,16 @@ void _gfx_startup(const char* atlas_path) {
       error(ERR_NOT_FOUND, "atlas_load");
       exit(result);
     }
-    void* upload_data;
-    texture_upload_heap->lpVtbl->Map(texture_upload_heap, 0, 0, (void*)&upload_data);
-    for (u16 y = 0; y < ATLAS_HEIGHT; ++y) {
-      memory_copy(
-        (u8*)upload_data + y * footprint.Footprint.RowPitch,
-        image + y * ATLAS_WIDTH * 4,
-        ATLAS_WIDTH * 4
-      );
+    u8* dst_data;
+    u8* src_data = image;
+    texture_upload_heap->lpVtbl->Map(texture_upload_heap, 0, 0, (void**)&dst_data);
+    for (u32 row = 0; row < num_rows; row++) {
+      memory_copy(dst_data, src_data, row_size);
+      dst_data += footprint.Footprint.RowPitch;
+      src_data += row_size;
     }
     texture_upload_heap->lpVtbl->Unmap(texture_upload_heap, 0, null);
     memory_free(image);
-    // CopyTextureRegion
     const D3D12_TEXTURE_COPY_LOCATION dst = {
       .pResource = _d3d_texture,
       .Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,

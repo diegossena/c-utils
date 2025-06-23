@@ -16,4 +16,5 @@ float4 ps_main(vs_out input) : SV_TARGET {
   return input.uv_color.a > 0
     ? input.uv_color
     : texture_2d.Sample(sample_state, input.uv_color.xy);
+    // : float4(1, 0, 0, 1);
 }
