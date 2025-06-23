@@ -9,7 +9,7 @@
 #define D3D_DOUBLE_BUFFERING 2
 #define D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER)
 
-// 553989 bytes
+// 553549 bytes
 
 ID3D12Device* _d3d_device;
 IDXGISwapChain3* _swapchain;
@@ -95,15 +95,6 @@ void _d3d_reset() {
 void _gfx_startup(const char* atlas_path) {
   i32 result;
   u32 factory_flags = 0;
-#ifdef DEBUG
-  ID3D12Debug* debug_controller;
-  D3D12GetDebugInterface(&IID_ID3D12Debug, (void**)&debug_controller);
-  if (debug_controller) {
-    debug_controller->lpVtbl->EnableDebugLayer(debug_controller);
-    debug_controller->lpVtbl->Release(debug_controller);
-    factory_flags |= DXGI_CREATE_FACTORY_DEBUG;
-  }
-#endif
   IDXGIFactory6* factory;
   result = CreateDXGIFactory2(factory_flags, &IID_IDXGIFactory6, (void**)&factory);
   if (FAILED(result)) {
@@ -131,20 +122,6 @@ void _gfx_startup(const char* atlas_path) {
       exit(result);
     }
   }
-#ifdef DEBUG
-  { // ID3D12InfoQueue
-    ID3D12InfoQueue* info_queue;
-    result = _d3d_device->lpVtbl->QueryInterface(_d3d_device, &IID_ID3D12InfoQueue, (void**)&info_queue);;
-    if (SUCCEEDED(result)) {
-      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-      info_queue->lpVtbl->SetBreakOnSeverity(info_queue, D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-      info_queue->lpVtbl->Release(info_queue);
-    } else {
-      error(result, "IID_ID3D12InfoQueue");
-    }
-  }
-#endif
   { // ID3D12CommandQueue
     const D3D12_COMMAND_QUEUE_DESC queue_desc = {
       .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
@@ -542,11 +519,9 @@ void _gfx_render() {
     const f64 now = time_ticks();
     window_deltatime = now - timer;
     timer = now;
-#ifdef DEBUG
-    if (window_deltatime > 1. / 60) {
-      console_log("FPS DROP %f %f", 1. / 60, window_deltatime);
-    }
-#endif
+    // if (window_deltatime > 1. / 60) {
+    //   console_log("FPS DROP %f %f", 1. / 60, window_deltatime);
+    // }
     _vertices_length = 0;
     _indexes_length = 0;
     window_onrender();
@@ -598,8 +573,8 @@ void _gfx_render() {
     // present
     _d3d_submit();
     _d3d_signal();
+    _swapchain->lpVtbl->Present(_swapchain, 1, 0);
     signal = _d3d_fence_signal[frame_index];
-    _swapchain->lpVtbl->Present(_swapchain, 0, 0);
     frame_index = frame_index ? 0 : 1;
     _d3d_wait();
     _d3d_fence_signal[frame_index] = signal;
