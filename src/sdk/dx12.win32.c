@@ -14,7 +14,7 @@ IDXGISwapChain3* _swapchain;
 ID3D12Resource* _d3d_render_targets[D3D_FRAME_COUNT];
 ID3D12Resource* _d3d_texture;
 ID3D12CommandQueue* _d3d_command_queue;
-ID3D12CommandAllocator* _command_allocator;
+ID3D12CommandAllocator* _command_allocator[D3D_FRAME_COUNT];
 ID3D12GraphicsCommandList* _d3d_command_list;
 ID3D12PipelineState* _pipeline_state;
 ID3D12RootSignature* _d3d_root_signature;
@@ -28,34 +28,13 @@ D3D12_GPU_DESCRIPTOR_HANDLE _srv_gpu_handle;
 
 ID3D12Fence* _d3d_fence;
 HANDLE _d3d_fence_event;
-u64 _d3d_fence_value;
+u64 _d3d_fence_value[D3D_FRAME_COUNT];
+u8 frame_index;
 
-void _d3d_wait() {
-  HRESULT result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, ++_d3d_fence_value);
-  u64 completed = _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence);
-  if (completed == -1) {
-    result = _d3d_device->lpVtbl->GetDeviceRemovedReason(_d3d_device);
-    switch (result) {
-      case DXGI_ERROR_DEVICE_HUNG:
-        error(result, "_d3d_gpu_wait GetCompletedValue DXGI_ERROR_DEVICE_HUNG");
-        break;
-    }
-    exit(result);
-  }
-  if (completed < _d3d_fence_value) {
-    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value, _d3d_fence_event);
-    WaitForSingleObject(_d3d_fence_event, INFINITE);
-  }
-}
-void _d3d_reset() {
-  i32 result = _command_allocator->lpVtbl->Reset(_command_allocator);
+void _d3d_signal(u64 signal) {
+  HRESULT result = _d3d_command_queue->lpVtbl->Signal(_d3d_command_queue, _d3d_fence, signal);
   if (FAILED(result)) {
-    error(result, "_d3d_command_allocator Reset");
-    exit(result);
-  }
-  result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _command_allocator, _pipeline_state);
-  if (FAILED(result)) {
-    error(result, "_d3d_command_list Reset");
+    error(result, "_d3d_present Signal");
     exit(result);
   }
 }
@@ -68,8 +47,39 @@ void _d3d_submit() {
   _d3d_command_queue->lpVtbl->ExecuteCommandLists(
     _d3d_command_queue, 1, (ID3D12CommandList**)&_d3d_command_list
   );
+}
+void _d3d_wait() {
+  i32 result;
+  u64 completed = _d3d_fence->lpVtbl->GetCompletedValue(_d3d_fence);
+  if (completed == -1) {
+    result = _d3d_device->lpVtbl->GetDeviceRemovedReason(_d3d_device);
+    switch (result) {
+      case DXGI_ERROR_DEVICE_HUNG:
+        error(result, "_d3d_gpu_wait GetCompletedValue DXGI_ERROR_DEVICE_HUNG");
+        break;
+    }
+    exit(result);
+  }
+  if (completed < _d3d_fence_value[frame_index]) {
+    _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value[frame_index], _d3d_fence_event);
+    WaitForSingleObject(_d3d_fence_event, INFINITE);
+  }
+  result = _d3d_fence->lpVtbl->SetEventOnCompletion(_d3d_fence, _d3d_fence_value[frame_index], _d3d_fence_event);
   if (FAILED(result)) {
-    error(result, "_d3d_command_submit Signal");
+    error(result, "SetEventOnCompletion");
+    exit(result);
+  }
+  WaitForSingleObject(_d3d_fence_event, INFINITE);
+}
+void _d3d_reset() {
+  i32 result = _command_allocator[frame_index]->lpVtbl->Reset(_command_allocator[frame_index]);
+  if (FAILED(result)) {
+    error(result, "_d3d_command_allocator Reset");
+    exit(result);
+  }
+  result = _d3d_command_list->lpVtbl->Reset(_d3d_command_list, _command_allocator[frame_index], _pipeline_state);
+  if (FAILED(result)) {
+    error(result, "_d3d_command_list Reset");
     exit(result);
   }
 }
@@ -82,7 +92,6 @@ void _window_render() {
   }
   f64 timer = time_ticks();
   do {
-    u8 frame_index = _swapchain->lpVtbl->GetCurrentBackBufferIndex(_swapchain);
     // onresize
     if (window_resized) {
       window_resized = false;
@@ -163,20 +172,30 @@ void _window_render() {
     _d3d_command_list->lpVtbl->ResourceBarrier(_d3d_command_list, 1, &barrier);
     // present
     _d3d_submit();
-    _swapchain->lpVtbl->Present(_swapchain, 1, 0);
+    u64 signal = ++_d3d_fence_value[frame_index];
+    _d3d_signal(signal);
+    i32 result = _swapchain->lpVtbl->Present(_swapchain, 1, 0);
+    if (FAILED(result)) {
+      error(result, "_d3d_present Present");
+      exit(result);
+    }
+    frame_index = (frame_index + 1) % D3D_FRAME_COUNT;
     _d3d_wait();
+    _d3d_fence_value[frame_index] = signal;
     _d3d_reset();
   } while (_window_id);
-  AvRevertMmThreadCharacteristics(mmtask);
+  _d3d_signal(++_d3d_fence_value[frame_index]);
   _d3d_wait();
+  // renderer_free
+  AvRevertMmThreadCharacteristics(mmtask);
   CloseHandle(_d3d_fence_event);
   for (u8 i = 0; i < D3D_FRAME_COUNT; i++) {
     _d3d_render_targets[i]->lpVtbl->Release(_d3d_render_targets[i]);
+    _command_allocator[i]->lpVtbl->Release(_command_allocator[i]);
   }
   _d3d_texture->lpVtbl->Release(_d3d_texture);
   _d3d_fence->lpVtbl->Release(_d3d_fence);
   _pipeline_state->lpVtbl->Release(_pipeline_state);
-  _command_allocator->lpVtbl->Release(_command_allocator);
   _d3d_command_queue->lpVtbl->Release(_d3d_command_queue);
   _d3d_command_list->lpVtbl->Release(_d3d_command_list);
   _srv_heap->lpVtbl->Release(_srv_heap);
@@ -308,15 +327,15 @@ void _gfx_startup(const char* atlas_path) {
         _d3d_device, _d3d_render_targets[i], null, rtv_handle
       );
       rtv_handle.ptr += _d3d_rtv_descriptor_size;
+      result = _d3d_device->lpVtbl->CreateCommandAllocator(
+        _d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator,
+        (void**)&_command_allocator[i]
+      );
+      if (FAILED(result)) {
+        error(result, "CreateCommandAllocator");
+        exit(result);
+      }
     }
-  }
-  result = _d3d_device->lpVtbl->CreateCommandAllocator(
-    _d3d_device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator,
-    (void**)&_command_allocator
-  );
-  if (FAILED(result)) {
-    error(result, "CreateCommandAllocator");
-    exit(result);
   }
   {
     const D3D12_DESCRIPTOR_RANGE srv_range = {
@@ -411,7 +430,7 @@ void _gfx_startup(const char* atlas_path) {
     memory_free(ps_bytes);
   }
   result = _d3d_device->lpVtbl->CreateCommandList(
-    _d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _command_allocator,
+    _d3d_device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _command_allocator[frame_index],
     _pipeline_state, &IID_ID3D12GraphicsCommandList, (void**)&_d3d_command_list
   );
   if (FAILED(result)) {
@@ -527,6 +546,7 @@ void _gfx_startup(const char* atlas_path) {
     _d3d_device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void**)&_d3d_fence
   );
   _d3d_submit();
+  _d3d_signal(++_d3d_fence_value[frame_index]);
   _d3d_fence_event = CreateEventA(0, false, false, 0);
   _d3d_wait();
   _d3d_reset();
@@ -597,6 +617,7 @@ void vertices_reserve(u64 vertices_size, u64 indexes_size) {
   vertices_capacity = vertices_size;
   indexes_capacity = indexes_size;
   _d3d_submit();
+  _d3d_signal(++_d3d_fence_value[frame_index]);
   _d3d_wait();
   _d3d_reset();
 }

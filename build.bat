@@ -1,5 +1,5 @@
 @ECHO OFF
-CLS
+CLS 
 SET package_name=%1
 SET defines=-DDEBUG
 SET compiler_flags=-O2 -Wall
