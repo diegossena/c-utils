@@ -7,6 +7,8 @@
 #include <d3d11.h>
 #include <avrt.h>
 
+// 546760 bytes
+
 HWND _window_id;
 ID3D11Device* _d3d_device;
 IDXGISwapChain* _d3d_swapchain;

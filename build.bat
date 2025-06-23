@@ -19,7 +19,7 @@ IF "%package_name%" == "game" (
 )
 IF "%package_name%" == "flappy_bird" (
   SET defines=%defines% -DD3D12
-  SET linker_flags=-ld3d12 -ldxgi -ldxguid -lavrt -lwinmm
+  SET linker_flags=-ld3d12 -ldxgi -ldxguid -lavrt
 
   @REM SET defines=-DD3D11
   @REM SET linker_flags=-ld3d11 -ldxgi -ldxguid -lavrt -lwinmm
