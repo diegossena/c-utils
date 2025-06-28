@@ -3,7 +3,7 @@ struct vs_out {
   float4 uv_color : TEXCOORD;
 };
 
-Texture2D texture_2d : register(t0);
+Texture2D texture : register(t0);
 SamplerState sample_state : register(s0);
 
 vs_out vs_main(float2 position : POSITION, float4 uv_color : TEXCOORD) {
@@ -15,5 +15,5 @@ vs_out vs_main(float2 position : POSITION, float4 uv_color : TEXCOORD) {
 float4 ps_main(vs_out input) : SV_TARGET {
   return input.uv_color.a > 0
     ? input.uv_color
-    : texture_2d.Sample(sample_state, input.uv_color.xy);
+    : texture.Sample(sample_state, input.uv_color.xy);
 }

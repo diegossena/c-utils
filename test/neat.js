@@ -1,7 +1,6 @@
 const NODE_TYPE_INPUT = 0
 const NODE_TYPE_HIDDEN = 1
 const NODE_TYPE_OUTPUT = 2
-
 /** 
  * @typedef {object} NeatNode
  * @property {number} id
@@ -36,9 +35,8 @@ const NODE_TYPE_OUTPUT = 2
  * @property {NeatNode[]} inputs
  * @property {NeatNode[]} outputs
  * @property {NeatNode[]} nodes
- * @property {NodeLink[]} node_links
+ * @property {Map<NeatNode, NodeLink[][]} links
  */
-
 /**
  * @typedef {object} NodeLink
  * @property {NeatNode} in
@@ -88,22 +86,30 @@ function network_activate(network, inputs) {
     node.ivalue = node.value
   }
   // activate
-  for (const [node, links] of network.node_links) {
+  for (const [node, links] of network.links) {
     const node_inputs = links.map(link => link.in.ivalue * link.weight)
     const aggregation = node.aggregation(node_inputs)
     node.value = node.activation(node.bias + aggregation)
   }
-  console.log('output', net_nodes)
+  return network.outputs.map(nodes => nodes.value)
 }
 /**
  * @param {Genome} genome
  * @returns {Network}
  */
 function network_create(genome) {
-  const inputs = genome.inputs.map(node => ({ ...node }))
-  const outputs = [...genome.outputs].map(node => ({ ...node }))
+  const nodes_index = genome.nodes.map((_, i) => i)
+  const connections_index = genome.connections.map((connection, i) => ({
+    in: genome.nodes.indexOf(connection.in),
+    out: genome.nodes.indexOf(connection.out),
+    weight: connection.weight
+  }))
+  console.log({
+    nodes_index,
+    connections_index
+  })
   // required_for_output
-  const required_nodes = outputs
+  const required_nodes = [...genome.outputs]
   while (true) {
     const layer_nodes = genome.connections
       .filter(connection => (
@@ -112,29 +118,33 @@ function network_create(genome) {
         && !genome.inputs.includes(connection.in)
       ))
       .map(connection => connection.in)
-      .map(node => ({ ...node }))
-    if (!layer_nodes.length) {
+    if (!layer_nodes.length)
       break
-    }
     required_nodes.push(...layer_nodes)
   }
   required_nodes.reverse()
-  // node_links
   /** @type {Map<NeatNode, NodeLink[]>} */
-  const node_links = new Map([])
+  const links = new Map([])
   for (const connection of genome.connections) {
     if (!required_nodes.includes(connection.in) && !required_nodes.includes(connection.out))
       continue
-    if (!node_links.has(connection.out)) {
-      node_links.set(connection.out, [])
+    if (!links.has(connection.out)) {
+      links.set(connection.out, [])
     }
-    node_links.get(connection.out).push({ in: connection.in, weight: connection.weight })
+    links.get(connection.out).push({ in: connection.in, weight: connection.weight })
   }
+  const nodes = [...genome.inputs, ...required_nodes]
+  console.log({
+    inputs: genome.inputs,
+    outputs: genome.outputs,
+    nodes: [...genome.inputs, ...required_nodes],
+    links
+  })
   return {
-    inputs,
-    outputs: outputs,
+    inputs: genome.inputs,
+    outputs: genome.outputs,
     nodes: required_nodes,
-    node_links: [...node_links.values()]
+    links
   }
 }
 /**
@@ -164,7 +174,10 @@ function genome_create(config) {
     inputs: input_nodes,
     outputs: output_nodes,
     nodes: [...input_nodes, ...output_nodes, ...hidden_nodes],
-    connections: [],
+    connections: [
+      { in: input_nodes[0], out: hidden_nodes[0], weight: 1 },
+      { in: hidden_nodes[0], out: output_nodes[0], weight: 1 }
+    ],
   }
 }
 
@@ -174,10 +187,10 @@ const genome = genome_create({
   outputs_count: 1
 })
 const network = network_create(genome)
-const input_sequence = [
-  0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1
-]
-for (const input of input_sequence) {
-  const output = network_activate(network, [input])
-  console.log('output', output)
-}
+
+const input_sequence = [0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1]
+const outputs = input_sequence.map(value => [
+  value,
+  network_activate(network, [value])[0]
+])
+console.log('outputs', outputs)

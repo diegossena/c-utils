@@ -9,7 +9,7 @@
 #define D3D_DOUBLE_BUFFERING 2
 #define D3D_RESOURCE_STATE_VERTEX_INDEX_BUFFER (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER)
 
-// 553549 bytes
+// 553037 bytes
 
 ID3D12Device* _d3d_device;
 IDXGISwapChain3* _swapchain;
@@ -420,18 +420,14 @@ void _gfx_startup(const char* atlas_path) {
   texture_upload_heap->lpVtbl->Release(texture_upload_heap);
 }
 void vertices_reserve(u64 vertices_size, u64 indexes_size) {
-  if (vertices_size == 0) {
-    _d3d_buffer->lpVtbl->Release(_d3d_buffer);
-    _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
-    vertices_capacity = 0;
-    return;
-  }
   if (vertices_capacity != 0) {
     _d3d_buffer->lpVtbl->Release(_d3d_buffer);
     _d3d_buffer_upload->lpVtbl->Release(_d3d_buffer_upload);
   }
   vertices_capacity = vertices_size * sizeof(vertex_t);
   indexes_capacity = indexes_size * sizeof(u32);
+  if (vertices_size == 0)
+    return;
   // d3d_buffers
   D3D12_HEAP_PROPERTIES heap_props = { .Type = D3D12_HEAP_TYPE_DEFAULT };
   const D3D12_RESOURCE_DESC resource_desc = {
