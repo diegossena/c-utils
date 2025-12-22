@@ -96,21 +96,3 @@ const char* error_cstr(error_t code) {
       return "ERR_UNKNOWN";
   }
 }
-void error(error_t code, const char* message, ...) {
-  i32 length;
-  char buffer[TEXT_SIZE];
-  char* buffer_end = buffer + sizeof(buffer) - 1;
-  length = string_format(buffer, sizeof(buffer), "Error: %s %x ", error_cstr(code), code);
-  if (length < 0)
-    return;
-  char* ptr = buffer + length;
-  va_list args;
-  va_start(args, message);
-  length = string_format_va(ptr, buffer_end - ptr, message, args);
-  va_end(args);
-  if (length < 0)
-    return;
-  ptr += length;
-  *ptr++ = '\n';
-  console_write_str(buffer, ptr - buffer);
-}

@@ -29,7 +29,7 @@ error_t snmp_request(udp_t udp, pdu_t* pdu, ip4_t host) {
   net_address_t address = {
     .family = NET_FAMILY_IPV4,
     .ip4 = host,
-    .net_port = net_port_from_short(SNMP_PORT)
+    .net_port = net_port_short(SNMP_PORT)
   };
   error = udp_send(udp, buffer, buffer_size, &address);
   if (error)

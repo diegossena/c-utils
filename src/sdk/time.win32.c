@@ -3,7 +3,7 @@
 
 #include <windows.h>
 
-f64 _time_clock_frequency;
+f32 _time_clock_frequency;
 
 void time_ticks_startup() {
   LARGE_INTEGER frequency;
@@ -11,10 +11,10 @@ void time_ticks_startup() {
   _time_clock_frequency = frequency.QuadPart;
 }
 
-f64 time_ticks() {
+f32 time_ticks() {
   LARGE_INTEGER count;
   QueryPerformanceCounter(&count);
-  return (f64)count.QuadPart / _time_clock_frequency;
+  return (f32)count.QuadPart / _time_clock_frequency;
 }
 
 #endif

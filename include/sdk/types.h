@@ -13,8 +13,8 @@
 #define PLATFORM_X32 1
 #endif
 
-#define STRINGIZE_KEY(x) #x
-#define STRINGIZE(x) STRINGIZE_KEY(x)
+#define STRINGIFY_KEY(x) #x
+#define STRINGIFY(x) STRINGIFY_KEY(x)
 
 #define true 1
 #define false 0
@@ -37,7 +37,9 @@
 #define MAX_F32 3.40282e+38F
 #define MIN_F32 -MAX_F32
 
+#ifdef _Bool
 typedef _Bool bool;
+#endif
 typedef short unsigned int wchar_t;
 
 typedef signed char i8; // -128 ~ 127
@@ -55,8 +57,6 @@ typedef double f64; // -1.79769e+308 ~ 1.79769e+308
 
 typedef void (*function_t)();
 
-typedef struct rgba_t {
-  f32 r, g, b, a;
-} rgba_t;
+typedef struct rgba_t { f32 r, g, b, a; } rgba_t;
 
 #endif

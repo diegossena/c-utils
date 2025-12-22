@@ -37,7 +37,4 @@ char* url_encode(const char* this, char* target);
 i64 string_i64(const char* this);
 u64 string_u64(const char* this);
 
-
-u64 wstring_length(const wchar_t* cstr);
-
 #endif

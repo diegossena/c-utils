@@ -6,7 +6,7 @@
 #define assert(value) { \
   if(value) { \
   } else { \
-    console_log("AssertionError: " #value  " ("__FILE__ ":" STRINGIZE(__LINE__)")"); \
+    console_write("AssertionError: " #value  " ("__FILE__ ":" STRINGIFY(__LINE__)")\n"); \
   } \
 }
 

@@ -17,9 +17,8 @@
 #include <src/sdk/net.c>
 #include <src/sdk/net.win32.c>
 #endif
-#ifdef TCP_H
-#include <src/sdk/tcp.c>
-#include <src/sdk/tcp.win32.c>
+#ifdef TCP_SERVER_H
+#include <src/sdk/tcp_server.win32.c>
 #endif
 #ifdef UDP_H
 #include <src/sdk/udp.c>
@@ -96,4 +95,7 @@
 #endif
 #ifdef FS_H
 #include <src/sdk/fs.c>
+#endif
+#ifdef MACRO_H
+#include <src/sdk/macro.win32.c>
 #endif

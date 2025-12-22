@@ -4,33 +4,11 @@ SET package_name=%1
 SET defines=-DDEBUG
 SET compiler_flags=-O2 -Wall
 SET include_flags=-Iinclude -I.
-SET linker_flags=
+SET linker_flags=-lws2_32 -ld3d11 -lDwrite -ld2d1 -ld3dcompiler -lole32 -ldxguid -lgdi32
 SET params=192.168.0.18 192.168.0.18
-:: -lws2_32 -ld3d11 -lDwrite -ld2d1 -ld3dcompiler -lole32 -ldxguid -lgdi32
 :: packages
-IF "%package_name%" == "test" (
+IF "%package_name%" == "jrb-monitor" (
   SET linker_flags=-lws2_32
-)
-IF "%package_name%" == "http" (
-  SET linker_flags=-lws2_32
-)
-IF "%package_name%" == "game" (
-  SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
-)
-IF "%package_name%" == "flappy_bird" (
-  SET defines=%defines% -DD3D12
-  SET linker_flags=-ld3d12 -ldxgi -ldxguid -lavrt
-
-  @REM SET defines=-DD3D11
-  @REM SET linker_flags=-ld3d11 -ldxgi -ldxguid -lavrt -lwinmm
-
-  @REM -ld3d11 -ld3d12 -mwindows
-)
-IF "%package_name%" == "tilemap" (
-  SET linker_flags=-ld3d11 -ldxguid -lavrt -lwinmm
-)
-IF "%package_name%" == "atlas_decode" (
-  SET linker_flags=-lole32 -lwindowscodecs
 )
 :: clear exe
 if EXIST .\bin\%package_name%.exe DEL .\bin\%package_name%.exe

@@ -4,7 +4,10 @@
 #include <sdk/types.h>
 #include <sdk/error.h>
 
-u8* fs_readfile_sync(const char* path, i32* size);
-u8* fs_readfilen_sync(const char* path, u32 size);
+inline FILE* fs_open(const char* path, const char* mode);
+inline void fs_close(FILE* this);
+inline i32 fs_read(FILE* this, u8* buffer, u64 size);
+
+i32 fs_size(FILE* this);
 
 #endif

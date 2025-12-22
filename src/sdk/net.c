@@ -1,12 +1,10 @@
 #include <sdk/net.h>
 
-#ifdef DEBUG
-bool __net_started = false;
-i64 __socket_count = 0;
-#endif
-
-u32 ip4_from_bytes(u8 f1, u8 f2, u8 f3, u8 f4) {
-  return f1 | f2 << 8 | f3 << 16 | f4 << 24;
+inline u16 net_port_short(u16 port) {
+  return (port << 8) | (port >> 8);
+}
+inline ip4_t ip4_from_bytes(u8 oct1, u8 oct2, u8 oct3, u8 oct4) {
+  return oct1 | oct2 << 8 | oct3 << 16 | oct4 << 24;
 }
 u32 ip4_from_str(const char* ip4_str) {
   u32 ip4 = 0;
@@ -25,8 +23,10 @@ u32 ip4_from_str(const char* ip4_str) {
   }
   return ip4;
 }
-void ip4_to_str(u32 ip4, ip4_string_t cstr) {
-  char* ptr = cstr;
+/**
+ * @return out[16]
+ */
+void ip4_to_str(u32 ip4, char* out) {
   char int_str[3], * int_str_ptr;
   u8 place = 0, number;
   while (true) {
@@ -39,14 +39,14 @@ void ip4_to_str(u32 ip4, ip4_string_t cstr) {
     } while (number != 0);
     // copy number
     do {
-      *ptr++ = *--int_str_ptr;
+      *out++ = *--int_str_ptr;
     } while (int_str_ptr != int_str);
     // iterate
     if (++place == 4) {
-      *ptr = '\0';
+      *out = '\0';
       break;
     }
-    *ptr++ = '.';
+    *out++ = '.';
   }
 }
 /**
